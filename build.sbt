@@ -1,4 +1,5 @@
 import de.johoop.testngplugin.TestNGPlugin
+import de.johoop.jacoco4sbt.JacocoPlugin.jacoco
 
 name := """iatoki-play-template"""
 
@@ -20,3 +21,7 @@ TestNGPlugin.testNGSettings
 TestNGPlugin.testNGSuites := Seq("testng.xml")
 
 TestNGPlugin.testNGOutputDirectory := "target/testng"
+
+jacoco.settings
+
+parallelExecution in jacoco.Config := false
