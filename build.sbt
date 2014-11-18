@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   javaJdbc,
   javaEbean,
   cache,
-  javaWs
+  javaWs,
+  "com.puppycrawl.tools" % "checkstyle" % "6.1"
 )
 
 TestNGPlugin.testNGSettings
