@@ -13,3 +13,6 @@ dist
 /.project
 /RUNNING_PID
 /.settings
+projectFilesBackup/
+conf/*.conf
+!conf/*_default.conf

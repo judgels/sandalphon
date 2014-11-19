@@ -2,8 +2,15 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+# Imports
+->         /                      commons.Routes
+
 # Home page
-GET     /                           controllers.Application.index()
+GET        /                      org.iatoki.judgels.sandalphon.controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET        /assets/*file          controllers.Assets.at(path="/public", file)
+GET        /vassets/*file         controllers.Assets.versioned(path="/public", file: Asset)
+
+GET        /problem               @org.iatoki.judgels.sandalphon.controllers.ProblemController.add()
+PUT        /problem/create        @org.iatoki.judgels.sandalphon.controllers.ProblemController.doAdd()
