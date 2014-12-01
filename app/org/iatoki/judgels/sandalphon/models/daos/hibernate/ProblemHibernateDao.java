@@ -1,10 +1,10 @@
-package org.iatoki.judgels.sandalphon.models.dao.hibernate;
+package org.iatoki.judgels.sandalphon.models.daos.hibernate;
 
 import org.iatoki.judgels.commons.helpers.Page;
-import org.iatoki.judgels.commons.models.dao.hibernate.AbstractHibernateDao;
-import org.iatoki.judgels.sandalphon.models.dao.interfaces.ProblemDao;
-import org.iatoki.judgels.sandalphon.models.meta.MetaProblem;
-import org.iatoki.judgels.sandalphon.models.schema.Problem;
+import org.iatoki.judgels.commons.models.daos.hibernate.AbstractHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemDao;
+import org.iatoki.judgels.sandalphon.models.metas.MetaProblem;
+import org.iatoki.judgels.sandalphon.models.domains.Problem;
 import play.db.jpa.JPA;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -18,7 +18,7 @@ public final class ProblemHibernateDao extends AbstractHibernateDao<String, Prob
         implements ProblemDao {
 
     @Override
-    public List<String> findProblemIdByTitle(String title) {
+    public List<Long> findProblemIdByTitle(String title) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<Problem> query = cb.createQuery(getEntityClass());
 
@@ -30,9 +30,9 @@ public final class ProblemHibernateDao extends AbstractHibernateDao<String, Prob
 
         List<Problem> problemsList = JPA.em().createQuery(query).getResultList();
 
-        List<String> result = new ArrayList<String>();
+        List<Long> result = new ArrayList<>();
         for (Problem p : problemsList) {
-            result.add(p.getProblemId());
+            result.add(p.id);
         }
 
         return result;

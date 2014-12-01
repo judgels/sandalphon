@@ -1,7 +1,7 @@
-package org.iatoki.judgels.sandalphon.models.meta;
+package org.iatoki.judgels.sandalphon.models.metas;
 
-import org.iatoki.judgels.commons.models.meta.MetaModel;
-import org.iatoki.judgels.sandalphon.models.schema.Problem;
+import org.iatoki.judgels.commons.models.metas.MetaModel;
+import org.iatoki.judgels.sandalphon.models.domains.Problem;
 
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

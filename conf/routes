@@ -3,14 +3,19 @@
 # ~~~~
 
 # Imports
-->         /                      commons.Routes
+->                                                                  /                                 commons.Routes
 
 # Home page
-GET        /                      org.iatoki.judgels.sandalphon.controllers.Application.index()
+GET                                                                 /                                 org.iatoki.judgels.sandalphon.controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file          controllers.Assets.at(path="/public", file)
-GET        /vassets/*file         controllers.Assets.versioned(path="/public", file: Asset)
+GET                                                                 /assets/*file                     controllers.Assets.at(path="/public", file)
+GET                                                                 /vassets/*file                    controllers.Assets.versioned(path="/public", file: Asset)
 
-GET        /problem               @org.iatoki.judgels.sandalphon.controllers.ProblemController.add()
-PUT        /problem/create        @org.iatoki.judgels.sandalphon.controllers.ProblemController.doAdd()
+GET                                                                 /problem                          @org.iatoki.judgels.sandalphon.controllers.ProblemController.list(page: Long ?= 0, sortBy ?= "id", orderBy ?= "asc", filter ?= "")
+GET                                                                 /problem/create                   @org.iatoki.judgels.sandalphon.controllers.ProblemController.create()
+POST                                                                /problem/create                   @org.iatoki.judgels.sandalphon.controllers.ProblemController.doCreate()
+GET                                                                 /problem/:problemId/view          @org.iatoki.judgels.sandalphon.controllers.ProblemController.view(problemId: Long)
+GET                                                                 /problem/:problemId/update        @org.iatoki.judgels.sandalphon.controllers.ProblemController.update(problemId: Long)
+POST                                                                /problem/:problemId/update        @org.iatoki.judgels.sandalphon.controllers.ProblemController.doUpdate(problemId: Long)
+GET                                                                 /problem/:problemId/delete        @org.iatoki.judgels.sandalphon.controllers.ProblemController.delete(problemId: Long)
