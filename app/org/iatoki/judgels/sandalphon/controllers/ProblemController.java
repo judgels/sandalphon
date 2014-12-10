@@ -1,23 +1,20 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
-import org.iatoki.judgels.commons.controllers.CrudController;
+import org.iatoki.judgels.commons.helpers.WrappedContents;
+import org.iatoki.judgels.commons.controllers.crud.BasicCrudController;
+import org.iatoki.judgels.commons.views.html.layouts.standardView;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.domains.Problem;
-import play.data.DynamicForm;
-import play.mvc.Result;
-import play.twirl.api.Html;
 
-import org.iatoki.judgels.commons.views.html.layouts.main;
-
-public final class ProblemController extends CrudController<Problem, ProblemDao> {
+public final class ProblemController extends BasicCrudController<Problem, ProblemDao> {
 
     @Override
-    protected Object getReverseClass() {
-        return routes.ProblemController;
+    protected WrappedContents wrapWithTemplate(WrappedContents content) {
+        return content.wrapWithTransformation(c -> standardView.render(getPageTitle(), c));
     }
 
     @Override
-    protected Result renderInsideLayout(int statusCode, String title, DynamicForm data, Html html) {
-        return ok(main.render(title, html));
+    protected Object getReverseController() {
+        return routes.ProblemController;
     }
 }

@@ -14,7 +14,7 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ProblemHibernateDao extends AbstractHibernateDao<String, Problem>
+public final class ProblemHibernateDao extends AbstractHibernateDao<Problem>
         implements ProblemDao {
 
     @Override

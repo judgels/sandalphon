@@ -24,7 +24,7 @@ public final class ProblemCheckAction extends Action<ProblemCheck> {
                 String problemId = path.substring(problemPos, problemPos + ((Math.min(startId.indexOf('/'), startId.length()) <= 0) ? startId.length() : Math.min(startId.indexOf('/'), startId
                         .length())));
                 if (problemId != null) {
-                    Problem problem = DaoFactory.getInstance().getDao(ProblemDao.class).findById(problemId);
+                    Problem problem = DaoFactory.getInstance().getDao(ProblemDao.class).findById(Long.valueOf(problemId));
                     if (problem != null) {
                         context.args.put("problem", problem);
                         return delegate.call(context);
