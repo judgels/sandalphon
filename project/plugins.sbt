@@ -1,3 +1,5 @@
+resolvers += Resolver.url("IA TOKI Artifactory", url("http://artifactory.ia-toki.org/artifactory/repo"))(Resolver.ivyStylePatterns)
+
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 // The Play plugin

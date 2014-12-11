@@ -5,12 +5,12 @@ name := """sandalphon"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val main = (project in file("."))
+lazy val main = (project.in(file(".")))
                   .enablePlugins(PlayJava)
-                  .disablePlugins(plugins.JUnitXmlReportPlugin)
+                  .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
                   .dependsOn(commons)
 
-lazy val commons = RootProject(file("../judgels-play-commons"))
+lazy val commons = (RootProject(file("../judgels-play-commons")))
 
 scalaVersion := "2.11.1"
 
@@ -57,6 +57,12 @@ TestNGPlugin.testNGOutputDirectory := "target/testng"
 jacoco.settings
 
 parallelExecution in jacoco.Config := false
+
+LessKeys.compress := true
+
+LessKeys.optimization := 3
+
+LessKeys.verbose := true
 
 javaOptions in Test ++= Seq(
   "-Dconfig.resource=test.conf"
