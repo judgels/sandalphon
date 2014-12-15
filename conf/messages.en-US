@@ -1,3 +1,21 @@
 about_us=About Us
 news=News
 contact=Contact
+
+general.id=Id
+general.create=Add
+general.view=View
+general.update=Update
+general.search=Search
+
+programmingProblem=Problem
+programmingProblem.create=Add Problem
+programmingProblem.view=View Problem
+programmingProblem.list=Problems
+programmingProblem.update=Update Problem
+
+programmingProblem.general=General
+programmingProblem.statement=Statement
+
+programmingProblem.field.name=Name
+programmingProblem.field.note=Note
