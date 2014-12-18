@@ -3,19 +3,20 @@ news=News
 contact=Contact
 
 general.id=Id
-general.create=Add
+general.create=Create
 general.view=View
 general.update=Update
 general.search=Search
 
-programmingProblem=Problem
-programmingProblem.create=Add Problem
-programmingProblem.view=View Problem
-programmingProblem.list=Problems
-programmingProblem.update=Update Problem
+problem=Problem
+problem.create=Create Problem
+problem.view=View Problem
+problem.list=Problems
+problem.update=Update Problem
+
+problem.field.name=Name
+problem.field.note=Note
 
 programmingProblem.general=General
 programmingProblem.statement=Statement
-
-programmingProblem.field.name=Name
-programmingProblem.field.note=Note
+programmingProblem.grading=Grading

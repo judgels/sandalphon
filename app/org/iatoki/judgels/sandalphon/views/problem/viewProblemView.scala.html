@@ -1,0 +1,11 @@
+@(problem: org.iatoki.judgels.sandalphon.Problem)
+
+@import play.i18n.Messages
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
+
+@b3.form(play.api.mvc.Call("GET", "#")) {
+    @b3.static(Messages.get("general.field.id")) { @problem.getId }
+    @b3.static(Messages.get("problem.field.name")) { @problem.getName }
+    @b3.static(Messages.get("problem.field.note")) { @problem.getNote }
+}

@@ -6,18 +6,23 @@
 ->                                                                  /                                 commons.Routes
 
 # Home page
-GET                                                                 /                                 org.iatoki.judgels.sandalphon.controllers.Application.index()
+GET                                                                 /                                 @org.iatoki.judgels.sandalphon.controllers.ProblemController.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET                                                                 /assets/*file                     controllers.Assets.at(path="/public", file)
 GET                                                                 /vassets/*file                    controllers.Assets.versioned(path="/public", file: Asset)
 
-GET                                                                 /programmingProblem                          @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.list(page: Long ?= 0, sortBy ?= "id", orderBy ?= "asc", filterString ?= "")
-GET                                                                 /programmingProblem/create                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.create()
-POST                                                                /programmingProblem/create                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.doCreate()
-GET                                                                 /programmingProblem/:modelId/view          @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.view(modelId: Long)
-GET                                                                 /programmingProblem/:modelId/update        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.update(modelId: Long)
-GET                                                                 /programmingProblem/:modelId/updateStatement        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateStatement(modelId: Long)
-POST                                                                 /programmingProblem/:modelId/doUpdateStatement        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.doUpdateStatement(modelId: Long)
-POST                                                                /programmingProblem/:modelId/doUpdate        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.doUpdate(modelId: Long)
-GET                                                                 /programmingProblem/:modelId/delete        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.delete(modelId: Long)
+GET     /problem/create     @org.iatoki.judgels.sandalphon.controllers.ProblemController.create()
+POST     /problem/create     @org.iatoki.judgels.sandalphon.controllers.ProblemController.postCreate()
+GET     /problem/:id/view     @org.iatoki.judgels.sandalphon.controllers.ProblemController.view(id: Long)
+
+#GET                                                                 /problem                          @org.iatoki.judgels.sandalphon.controllers.ProblemController.list(page: Long ?= 0, sortBy ?= "id", orderBy ?= "asc", filterString ?= "")
+#GET                                                                 /programmingProblem/create                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.create()
+#POST                                                                /programmingProblem/create                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.doCreate()
+#GET                                                                 /programmingProblem/:modelId/view          @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.view(modelId: Long)
+#GET                                                                 /programmingProblem/:modelId/update        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.update(modelId: Long)
+#GET                                                                 /programmingProblem/:modelId/updateStatement        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateStatement(modelId: Long)
+#GET                                                                 /programmingProblem/:modelId/updateGrading        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGrading(modelId: Long)
+#POST                                                                 /programmingProblem/:modelId/doUpdateStatement        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.doUpdateStatement(modelId: Long)
+#POST                                                                /programmingProblem/:modelId/doUpdate        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.doUpdate(modelId: Long)
+#GET                                                                 /programmingProblem/:modelId/delete        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.delete(modelId: Long)

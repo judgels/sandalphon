@@ -6,7 +6,7 @@ import play.mvc.Result;
 public final class Application extends Controller {
 
     public static Result index() {
-        return ok();
+        return null;
     }
 
 }
