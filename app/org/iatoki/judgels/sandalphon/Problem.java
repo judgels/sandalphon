@@ -1,26 +1,10 @@
 package org.iatoki.judgels.sandalphon;
 
-public final class Problem {
+import org.iatoki.judgels.commons.JudgelsObject;
 
-    private long id;
-    private String name;
-    private String note;
+public interface Problem extends JudgelsObject {
 
-    protected Problem(long id, String name, String note) {
-        this.id = id;
-        this.name = name;
-        this.note = note;
-    }
+    String getName();
 
-    public long getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getNote() {
-        return this.note;
-    }
+    String getNote();
 }
