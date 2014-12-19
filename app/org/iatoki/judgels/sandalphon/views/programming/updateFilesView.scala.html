@@ -1,0 +1,31 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm], id: Long, filenames: List[String])
+
+@import play.i18n.Messages
+@import b3.vertical.fieldConstructor
+@import org.iatoki.judgels.sandalphon.controllers.routes.ProgrammingProblemController
+
+@b3.form(ProgrammingProblemController.postUpdateFiles(id), 'enctype->"multipart/form-data") {
+  @helper.CSRF.formField
+
+  @b3.file(form("file"), '_label -> "File")
+
+  @b3.submit('class -> "btn btn-primary") { @Messages.get("Upload") }
+}
+
+<h3>Files</h3>
+
+<table class="table">
+    <thead>
+      <tr>
+        <th>File</th></tr>
+    </thead>
+
+    <tbody>
+      @for(name <- filenames) {
+        <tr>
+
+        <td>@name</td>
+          </tr>
+      }
+    </tbody>
+</table>

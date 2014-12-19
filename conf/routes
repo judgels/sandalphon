@@ -14,7 +14,13 @@ GET                                                                 /vassets/*fi
 
 GET     /problem/create     @org.iatoki.judgels.sandalphon.controllers.ProblemController.create()
 POST     /problem/create     @org.iatoki.judgels.sandalphon.controllers.ProblemController.postCreate()
-GET     /problem/:id/view     @org.iatoki.judgels.sandalphon.controllers.ProblemController.view(id: Long)
+GET     /programmingProblem/:id/update     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.update(id: Long)
+GET     /programmingProblem/:id/updateStatement     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateStatement(id: Long)
+POST     /programmingProblem/:id/postUpdateStatement     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateStatement(id: Long)
+GET     /programmingProblem/:id/updateFiles     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateFiles(id: Long)
+POST     /programmingProblem/:id/postUpdateFiles     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateFiles(id: Long)
+GET     /programmingProblem/:id/updateGrading   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGrading(id: Long)
+POST     /programmingProblem/:id/postUpdateGrading     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateGrading(id: Long)
 
 #GET                                                                 /problem                          @org.iatoki.judgels.sandalphon.controllers.ProblemController.list(page: Long ?= 0, sortBy ?= "id", orderBy ?= "asc", filterString ?= "")
 #GET                                                                 /programmingProblem/create                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.create()

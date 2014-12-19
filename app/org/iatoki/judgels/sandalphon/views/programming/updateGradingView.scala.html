@@ -1,0 +1,149 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.UpdateGradingForm], id: Long, filenames: List[String])
+
+@import play.i18n.Messages
+@import org.iatoki.judgels.sandalphon.controllers.routes.ProgrammingProblemController
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-xs-2", "col-xs-10") }
+
+<script type="text/javascript" src="@controllers.routes.Assets.at("lib/jquery/jquery.min.js")"></script>
+
+<script type="text/javascript">
+
+var that;
+
+
+var addBatch = function(batchNo) {
+
+var batch = $("#batch-template").clone();
+batch.removeAttr('id');
+batch.find('tr' ).remove();
+batch.find("h3").html("Batch " + batchNo);
+
+var addTestCase = function(tcNo) {
+
+var generateData = function(type) {
+var td = $('#tc-template' ).find('td').clone();
+td.find('select').attr('name', type + '[' + batchNo + '][' + tcNo + ']');
+return td;
+};
+
+var fin = generateData('tcIn');
+var fout = generateData('tcOut');
+
+var tr = $('<tr>');
+tr.append(fin, fout);
+
+batch.find('tbody' ).append(tr);
+
+batch.find('button' ).unbind('click' ).click(function() {
+addTestCase(tcNo + 1);
+});
+
+};
+
+batch.find('button').click(function() {
+addTestCase(0);
+});
+
+that.unbind();
+that.click(function() {
+addBatch(batchNo+1);
+});
+
+
+console.dir(batch);
+$("#batches").append(batch);
+batch.show();
+};
+
+$(document).ready(function() {
+that = $("#batch-add" );
+that.click(function() {
+addBatch(0);
+});
+});
+
+</script>
+
+@b3.form(ProgrammingProblemController.postUpdateGrading(id)) {
+    @helper.CSRF.formField
+
+    @b3.text(form("timeLimit"), '_label -> "Time Limit")
+    @b3.text(form("memoryLimit"), '_label -> "Memory Limit")
+
+    Batches:
+
+    <div id="batches">
+
+    </div>
+
+
+    <button id="batch-add" class="btn btn-primary" type="button">Add Batch</button>
+
+    Subtasks:
+
+
+    <div id="subtasks">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Subtasks</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Batches</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="subtask-template">
+                            <td>
+                                #1
+                            </td>
+                            <td>
+                                <input type="checkbox" name="subtaskBatches[0][0]" value="0" /> 0
+                                <input type="checkbox" name="subtaskBatches[0][1]" value="1"/> 1
+                                <input type="checkbox" name="subtaskBatches[0][2]" value="2"/> 2
+                            </td>
+                            <td>
+                                <input type="text" name="subtaskPoints[0]"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <button class="btn btn-primary" type="button">Add Subtask</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("general.update") }
+}
+
+<div id="batch-template" class="panel panel-default" style="display: none">
+    <div class="panel-heading">
+        <h3 class="panel-title"></h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-bordered">
+            <tbody>
+                <tr id="tc-template">
+                    <td>
+                        <select>
+                            @for(filename <- filenames) {
+                                <option value="@filename">@filename</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button class="btn btn-primary" type="button">Add Test Case</button>
+    </div>
+</div>

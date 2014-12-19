@@ -13,18 +13,20 @@ public final class ProblemModel extends AbstractJudgelsModel {
 
     public String note;
 
+    public String type;
+
     public ProblemModel() {
         // nothing
     }
 
-    public ProblemModel(String name, String note) {
+    public ProblemModel(String name, String note, String type) {
         this.name = name;
         this.note = note;
+        this.type = type;
     }
 
-    public ProblemModel(long id, String name, String note) {
+    public ProblemModel(long id, String name, String note, String type) {
+        this(name, note, type);
         this.id = id;
-        this.name = name;
-        this.note = note;
     }
 }
