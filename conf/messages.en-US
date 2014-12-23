@@ -17,6 +17,6 @@ problem.update=Update Problem
 problem.field.name=Name
 problem.field.note=Note
 
-programmingProblem.general=General
-programmingProblem.statement=Statement
-programmingProblem.grading=Grading
+programmingProblem.tab.general=General
+programmingProblem.tab.files=Files
+programmingProblem.tab.grading=Grading
