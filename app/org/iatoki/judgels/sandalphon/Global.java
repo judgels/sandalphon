@@ -15,12 +15,14 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private final ProblemDao problemDao;
     private final ProgrammingProblemDao programmingProblemDao;
 
+    private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
 
     public Global() {
         this.problemDao = new ProblemHibernateDao();
         this.programmingProblemDao = new ProgrammingProblemHibernateDao();
 
+        this.problemService = new ProblemServiceImpl(problemDao);
         this.programmingProblemService = new ProgrammingProblemServiceImpl(problemDao, programmingProblemDao, new File("/Users/fushar/jagoparah"));
     }
 
@@ -33,10 +35,11 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     @SuppressWarnings("unchecked")
     public <A> A getControllerInstance(Class<A> controllerClass) throws Exception {
         if (controllerClass.equals(ProblemController.class)) {
-            return (A) new ProblemController(new ProblemServiceProviderImpl(programmingProblemService));
+            return (A) new ProblemController(problemService, programmingProblemService);
         } else if (controllerClass.equals(ProgrammingProblemController.class)) {
-            return (A) new ProgrammingProblemController(programmingProblemService);
+            return (A) new ProgrammingProblemController(problemService, programmingProblemService);
+        } else {
+            return controllerClass.newInstance();
         }
-        return null;
     }
 }

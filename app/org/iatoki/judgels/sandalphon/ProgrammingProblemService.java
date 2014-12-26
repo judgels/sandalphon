@@ -3,9 +3,11 @@ package org.iatoki.judgels.sandalphon;
 import java.io.File;
 import java.util.List;
 
-public interface ProgrammingProblemService extends ProblemService {
+public interface ProgrammingProblemService {
 
-    ProgrammingProblemStatement getProblemStatement(long id);
+    Problem createProblem(String name, String note);
+
+    String getProblemStatement(long id);
 
     void updateProblemStatement(long id, String statement);
 

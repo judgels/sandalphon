@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
+import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProgrammingProblemDao;
 import org.iatoki.judgels.sandalphon.models.domains.ProblemModel;
@@ -13,54 +14,52 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class ProgrammingProblemServiceImpl extends ProblemServiceImpl implements ProgrammingProblemService {
+public final class ProgrammingProblemServiceImpl implements ProgrammingProblemService {
 
+    private final ProblemDao problemDao;
     private final ProgrammingProblemDao programmingProblemDao;  /* currently unused now */
     private final File baseDir;
 
     public ProgrammingProblemServiceImpl(ProblemDao problemDao, ProgrammingProblemDao programmingProblemDao, File baseDir) {
-        super(problemDao);
+        this.problemDao = problemDao;
         this.programmingProblemDao = programmingProblemDao;
         this.baseDir = baseDir;
     }
 
     @Override
-    public Problem getProblem(long id) {
-        ProblemModel baseProblemModel = super.getBaseProblem(id);
-        return new ProgrammingProblemImpl(baseProblemModel);
-    }
-
-    @Override
     public Problem createProblem(String name, String note) {
-        ProblemModel baseProblemModel = super.createBaseProblem(name, note, "programming");
+        ProblemModel problemRecord = new ProblemModel(name, note, "PROGRAMMING");
+        problemDao.persist(problemRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+
         try {
-            FileUtils.forceMkdir(new File(baseDir, baseProblemModel.jid));
-            FileUtils.writeStringToFile(new File(new File(baseDir, baseProblemModel.jid), "statement.html"), "Keren parah");
+            FileUtils.forceMkdir(new File(baseDir, problemRecord.jid));
+            FileUtils.forceMkdir(new File(new File(baseDir, problemRecord.jid), "testcases"));
+            FileUtils.writeStringToFile(new File(new File(baseDir, problemRecord.jid), "statement.html"), "Keren parah");
         } catch (IOException e) {
             throw new RuntimeException("Cannot create directory for problem!");
         }
 
-        return new ProgrammingProblemImpl(baseProblemModel);
+        return new ProblemImpl(problemRecord);
     }
 
     @Override
-    public ProgrammingProblemStatement getProblemStatement(long id) {
-        ProblemModel baseProblemModel = super.getBaseProblem(id);
+    public String getProblemStatement(long id) {
+        ProblemModel problemRecord = problemDao.findById(id);
         String statement;
         try {
-            statement = FileUtils.readFileToString(new File(new File(baseDir, baseProblemModel.jid), "statement.html"));
+            statement = FileUtils.readFileToString(new File(new File(baseDir, problemRecord.jid), "statement.html"));
         } catch (IOException e) {
             throw new RuntimeException("Cannot read statement!");
         }
 
-        return new ProgrammingProblemStatementImpl(baseProblemModel, statement);
+        return statement;
     }
 
     @Override
     public void updateProblemStatement(long id, String statement) {
-        ProblemModel baseProblemModel = super.getBaseProblem(id);
+        ProblemModel problemRecord = problemDao.findById(id);
         try {
-            FileUtils.writeStringToFile(new File(new File(baseDir, baseProblemModel.jid), "statement.html"), statement);
+            FileUtils.writeStringToFile(new File(new File(baseDir, problemRecord.jid), "statement.html"), statement);
         } catch (IOException e) {
             throw new RuntimeException("Cannot write statement!");
         }
@@ -68,9 +67,9 @@ final class ProgrammingProblemServiceImpl extends ProblemServiceImpl implements 
 
     @Override
     public void uploadGradingFile(long id, File file, String filename) {
-        ProblemModel baseProblemModel = super.getBaseProblem(id);
+        ProblemModel problemRecord = problemDao.findById(id);
         try {
-            FileUtils.copyFile(file, new File(new File(new File(baseDir, baseProblemModel.jid), "testdata"), filename));
+            FileUtils.copyFile(file, new File(new File(new File(baseDir, problemRecord.jid), "testcases"), filename));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -105,9 +104,9 @@ final class ProgrammingProblemServiceImpl extends ProblemServiceImpl implements 
         ProblemGrading data = new ProblemGrading(timeLimit, memoryLimit, cases, subtasks);
         String json = new Gson().toJson(data);
 
-        ProblemModel baseProblemModel = super.getBaseProblem(id);
+        ProblemModel problemRecord = problemDao.findById(id);
         try {
-            FileUtils.writeStringToFile(new File(new File(baseDir, baseProblemModel.jid), "grading.json"), json);
+            FileUtils.writeStringToFile(new File(new File(baseDir, problemRecord.jid), "grading.json"), json);
         } catch (IOException e) {
             throw new RuntimeException("Cannot write json!");
         }
@@ -115,10 +114,48 @@ final class ProgrammingProblemServiceImpl extends ProblemServiceImpl implements 
 
     @Override
     public List<String> getGradingFilenames(long id) {
-        ProblemModel baseProblemModel = super.getBaseProblem(id);
+        ProblemModel problemRecord = problemDao.findById(id);
 
-        File testdataDir  = new File(new File(baseDir, baseProblemModel.jid), "testdata");
+        File testcasesDir  = new File(new File(baseDir, problemRecord.jid), "testcases");
 
-        return Lists.transform(Arrays.asList(testdataDir.listFiles()), f -> f.getName());
+        return Lists.transform(Arrays.asList(testcasesDir.listFiles()), f -> f.getName());
+    }
+
+    private static class ProblemImpl implements Problem {
+
+        private final ProblemModel problemModel;
+
+        ProblemImpl(ProblemModel problemModel) {
+            this.problemModel = problemModel;
+        }
+
+        @Override
+        public long getId() {
+            return problemModel.id;
+        }
+
+        @Override
+        public String getJid() {
+            return problemModel.jid;
+        }
+
+        @Override
+        public String getName() {
+            return problemModel.name;
+        }
+
+        @Override
+        public String getNote() {
+            return problemModel.note;
+        }
+
+        @Override
+        public ProblemType getType() {
+            if (problemModel.type.equals("PROGRAMMING")) {
+                return ProblemType.PROGRAMMING;
+            } else {
+                return ProblemType.MULTIPLE_CHOICE;
+            }
+        }
     }
 }

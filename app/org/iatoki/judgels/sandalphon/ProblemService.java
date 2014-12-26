@@ -1,10 +1,12 @@
 package org.iatoki.judgels.sandalphon;
 
+import org.iatoki.judgels.commons.Page;
+
 public interface ProblemService {
 
-    Problem getProblem(long id);
+    Problem findProblemById(long id);
 
     void updateProblem(long id, String name, String note);
 
-    Problem createProblem(String name, String note);
+    Page<Problem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString);
 }

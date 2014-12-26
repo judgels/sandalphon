@@ -1,22 +1,26 @@
-about_us=About Us
-news=News
-contact=Contact
-
-general.id=Id
-general.create=Create
-general.view=View
-general.update=Update
-general.search=Search
-
-problem=Problem
-problem.create=Create Problem
-problem.view=View Problem
-problem.list=Problems
-problem.update=Update Problem
+problem.heading.problems=Problems
+problem.heading.create=Create Problem
+problem.heading.view=View Problem
+problem.heading.update=Update Problem
+problem.heading.list=Problems
 
 problem.field.name=Name
 problem.field.note=Note
+problem.field.type=Type
 
-programmingProblem.tab.general=General
-programmingProblem.tab.files=Files
-programmingProblem.tab.grading=Grading
+problem.problem=Problem
+problem.problems=Problems
+
+programmingProblem.heading.view.general=View General
+
+programmingProblem.heading.update.general=Update General
+programmingProblem.heading.update.statement=Update Statement
+programmingProblem.heading.update.files=Update Files
+programmingProblem.heading.update.grading=Update Grading
+
+programmingProblem.tab.view.general=General
+
+programmingProblem.tab.update.general=General
+programmingProblem.tab.update.statement=Statement
+programmingProblem.tab.update.files=Files
+programmingProblem.tab.update.grading=Grading

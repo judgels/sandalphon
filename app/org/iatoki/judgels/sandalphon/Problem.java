@@ -1,10 +1,14 @@
 package org.iatoki.judgels.sandalphon;
 
-import org.iatoki.judgels.commons.JudgelsObject;
+public interface Problem {
 
-public interface Problem extends JudgelsObject {
+    long getId();
+
+    String getJid();
 
     String getName();
 
     String getNote();
+
+    ProblemType getType();
 }
