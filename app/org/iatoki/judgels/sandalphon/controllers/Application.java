@@ -3,17 +3,12 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.LazyHtml;
-import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
-import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
-import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.auth.authView;
+import org.iatoki.judgels.commons.views.html.layouts.*;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.twirl.api.Html;
 
 public final class Application extends Controller {
 
@@ -24,7 +19,7 @@ public final class Application extends Controller {
 
     public Result auth(String returnUri) {
         LazyHtml content = new LazyHtml(authView.render(org.iatoki.judgels.commons.controllers.routes.JophielClientController.login(returnUri)));
-        content.appendLayout(c -> headingLayout.render(Messages.get("commons.login.heading.login"), c));
+        content.appendLayout(c -> headingLayout.render(Messages.get("commons.auth.login"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);

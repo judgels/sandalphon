@@ -14,6 +14,7 @@ import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.ProgrammingProblemService;
+import org.iatoki.judgels.sandalphon.controllers.authenticators.Secured;
 import org.iatoki.judgels.sandalphon.forms.UpsertProblemForm;
 import org.iatoki.judgels.sandalphon.views.html.problem.createView;
 import org.iatoki.judgels.sandalphon.views.html.problem.listView;
@@ -25,8 +26,9 @@ import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.Security;
 
-
+@Security.Authenticated(Secured.class)
 public final class ProblemController extends Controller {
 
     private final ProblemService problemService;
@@ -59,9 +61,9 @@ public final class ProblemController extends Controller {
         Page<Problem> currentPage = problemService.pageProblem(page, 20, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.heading.list"), new InternalLink(Messages.get("problem.heading.create"), routes.ProblemController.create()), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.list"), new InternalLink(Messages.get("problem.create"), routes.ProblemController.create()), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.heading.problems"), routes.ProblemController.index())
+                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
         ), c));
         appendTemplateLayout(content);
 
@@ -91,10 +93,10 @@ public final class ProblemController extends Controller {
 
     private Result showCreate(Form<UpsertProblemForm> form) {
         LazyHtml content = new LazyHtml(createView.render(form));
-        content.appendLayout(c -> headingLayout.render(Messages.get("problem.heading.create"), c));
+        content.appendLayout(c -> headingLayout.render(Messages.get("problem.create"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.heading.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("problem.heading.create"), routes.ProblemController.create())
+                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
+                new InternalLink(Messages.get("problem.create"), routes.ProblemController.create())
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
