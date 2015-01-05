@@ -1,7 +1,7 @@
 @(form: Form[org.iatoki.judgels.sandalphon.forms.UpdateGradingForm], id: Long, filenames: List[String])
 
 @import play.i18n.Messages
-@import org.iatoki.judgels.sandalphon.controllers.routes.ProgrammingProblemController
+@import org.iatoki.judgels.sandalphon.controllers.routes
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-xs-2", "col-xs-10") }
 
@@ -65,7 +65,7 @@ addBatch(0);
 
 </script>
 
-@b3.form(ProgrammingProblemController.postUpdateGrading(id)) {
+@b3.form(routes.ProgrammingProblemController.postUpdateGrading(id)) {
     @helper.CSRF.formField
 
     @b3.text(form("timeLimit"), '_label -> "Time Limit")
