@@ -39,7 +39,7 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
             throw new RuntimeException("Cannot create directory for problem!");
         }
 
-        return new ProblemImpl(problemRecord);
+        return new Problem(problemRecord.id, problemRecord.jid, problemRecord.name, problemRecord.note, ProblemType.valueOf(problemRecord.type));
     }
 
     @Override
@@ -119,43 +119,5 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
         File testcasesDir  = new File(new File(baseDir, problemRecord.jid), "testcases");
 
         return Lists.transform(Arrays.asList(testcasesDir.listFiles()), f -> f.getName());
-    }
-
-    private static class ProblemImpl implements Problem {
-
-        private final ProblemModel problemModel;
-
-        ProblemImpl(ProblemModel problemModel) {
-            this.problemModel = problemModel;
-        }
-
-        @Override
-        public long getId() {
-            return problemModel.id;
-        }
-
-        @Override
-        public String getJid() {
-            return problemModel.jid;
-        }
-
-        @Override
-        public String getName() {
-            return problemModel.name;
-        }
-
-        @Override
-        public String getNote() {
-            return problemModel.note;
-        }
-
-        @Override
-        public ProblemType getType() {
-            if (problemModel.type.equals("PROGRAMMING")) {
-                return ProblemType.PROGRAMMING;
-            } else {
-                return ProblemType.MULTIPLE_CHOICE;
-            }
-        }
     }
 }

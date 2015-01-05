@@ -18,8 +18,8 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public final Problem findProblemById(long id) {
-        ProblemModel model = dao.findById(id);
-        return new ProblemImpl(model);
+        ProblemModel problemRecord = dao.findById(id);
+        return new Problem(problemRecord.id, problemRecord.jid, problemRecord.name, problemRecord.note, ProblemType.valueOf(problemRecord.type));
     }
 
     @Override
@@ -31,54 +31,16 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public
-    Page<Problem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString) {
+    public Page<Problem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString) {
         long totalPage = dao.countByFilter(filterString);
         List<ProblemModel> problemRecords = dao.findByFilterAndSort(filterString, sortBy, order, page * pageSize, pageSize);
 
         List<Problem> problems = problemRecords
                 .stream()
-                .map(problemRecord -> new ProblemImpl(problemRecord))
+                .map(problemRecord -> new Problem(problemRecord.id, problemRecord.jid, problemRecord.name, problemRecord.note, ProblemType.valueOf(problemRecord.type)))
                 .collect(Collectors.toList());
 
         return new Page<>(problems, totalPage, page, pageSize);
     }
 
-    private static class ProblemImpl implements Problem {
-
-        private final ProblemModel problemModel;
-
-        ProblemImpl(ProblemModel problemModel) {
-            this.problemModel = problemModel;
-        }
-
-        @Override
-        public long getId() {
-            return problemModel.id;
-        }
-
-        @Override
-        public String getJid() {
-            return problemModel.jid;
-        }
-
-        @Override
-        public String getName() {
-            return problemModel.name;
-        }
-
-        @Override
-        public String getNote() {
-            return problemModel.note;
-        }
-
-        @Override
-        public ProblemType getType() {
-            if (problemModel.type.equals("PROGRAMMING")) {
-                return ProblemType.PROGRAMMING;
-            } else {
-                return ProblemType.MULTIPLE_CHOICE;
-            }
-        }
-    }
 }

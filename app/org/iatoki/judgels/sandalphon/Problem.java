@@ -1,14 +1,38 @@
 package org.iatoki.judgels.sandalphon;
 
-public interface Problem {
+public class Problem {
 
-    long getId();
+    private final long id;
+    private final String jid;
+    private final String name;
+    private final String note;
+    private final ProblemType type;
 
-    String getJid();
+    public Problem(long id, String jid, String name, String note, ProblemType type) {
+        this.id = id;
+        this.jid = jid;
+        this.name = name;
+        this.note = note;
+        this.type = type;
+    }
 
-    String getName();
+    public long getId() {
+        return id;
+    }
 
-    String getNote();
+    public String getJid() {
+        return jid;
+    }
 
-    ProblemType getType();
+    public String getName() {
+        return name;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public ProblemType getType() {
+        return type;
+    }
 }
