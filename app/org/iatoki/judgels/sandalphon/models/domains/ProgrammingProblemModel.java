@@ -1,28 +1,30 @@
 package org.iatoki.judgels.sandalphon.models.domains;
 
-import org.iatoki.judgels.commons.models.domains.AbstractModel;
+import org.iatoki.judgels.commons.models.domains.AbstractJudgelsModel;
 
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "sandalphon_problem_programming")
-public final class ProgrammingProblemModel extends AbstractModel {
-    @Id
-    public long id;
+public final class ProgrammingProblemModel extends AbstractJudgelsModel {
 
-    public String problemJid;
+    public String name;
 
-    public String difficulty;
+    public String note;
 
-    public ProgrammingProblemModel(String problemJid, String difficulty) {
-        this.problemJid = problemJid;
-        this.difficulty = difficulty;
+    public ProgrammingProblemModel() {
+
     }
 
-    public ProgrammingProblemModel(long id, String problemJid, String difficulty) {
-        this(problemJid, difficulty);
+    public ProgrammingProblemModel(String name, String note) {
+        this.name = name;
+        this.note = note;
+    }
+
+    public ProgrammingProblemModel(long id, String jid, String name, String note) {
+        this(name, note);
         this.id = id;
+        this.jid = jid;
     }
 }

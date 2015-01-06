@@ -1,25 +1,26 @@
-problem.problem=Problem
 problem.problems=Problems
 
-problem.create=Create Problem
-problem.view=View Problem
-problem.update=Update Problem
-problem.list=Problems
+problem.programming.problems=Programming Problems
 
-problem.field.name=Name
-problem.field.note=Note
-problem.field.type=Type
+problem.programming.create=Create Programming Problem
+problem.programming.view=View Programming Problem
+problem.programming.update=Update Programming Problem
+problem.programming.list=Programming Problems
 
-programmingProblem.view.general=View General
+problem.programming.field.name=Name
+problem.programming.field.note=Note
+problem.programming.field.type=Type
 
-programmingProblem.view.tab.general=General
+problem.programming.view.general=View General
 
-programmingProblem.update.general=Update General
-programmingProblem.update.statement=Update Statement
-programmingProblem.update.files=Update Files
-programmingProblem.update.grading=Update Grading
+problem.programming.view.tab.general=General
 
-programmingProblem.update.tab.general=General
-programmingProblem.update.tab.statement=Statement
-programmingProblem.update.tab.files=Files
-programmingProblem.update.tab.grading=Grading
+problem.programming.update.general=Update General
+problem.programming.update.statement=Update Statement
+problem.programming.update.files=Update Files
+problem.programming.update.grading=Update Grading
+
+problem.programming.update.tab.general=General
+problem.programming.update.tab.statement=Statement
+problem.programming.update.tab.files=Files
+problem.programming.update.tab.grading=Grading

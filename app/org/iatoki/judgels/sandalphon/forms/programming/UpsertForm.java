@@ -1,8 +1,8 @@
-package org.iatoki.judgels.sandalphon.forms;
+package org.iatoki.judgels.sandalphon.forms.programming;
 
 import play.data.validation.Constraints;
 
-public final class UpsertProblemForm {
+public final class UpsertForm {
 
     @Constraints.Required
     public String name;

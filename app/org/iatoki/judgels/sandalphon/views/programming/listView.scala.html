@@ -1,0 +1,44 @@
+@(currentPage: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.ProgrammingProblem], currentSortBy: String, currentOrder: String, currentFilter: String)
+
+@import play.i18n.Messages
+@import org.iatoki.judgels.commons.views.html.pagination.tablePagination
+@import org.iatoki.judgels.commons.views.html.pagination.tableHeader
+@import org.iatoki.judgels.commons.views.html.pagination.link
+
+@import org.iatoki.judgels.sandalphon.controllers.routes
+
+@shortLink(newPage: scala.Long, newSortBy: String) = {@link(currentSortBy, true, currentOrder, currentFilter, newPage, newSortBy, routes.ProgrammingProblemController.list)}
+
+<form class="form form-inline pull-right" action='@routes.ProgrammingProblemController.list(currentPage.getPageIndex, "../../../../../../../../judgels-play-commons/public", "../../../../../../../../judgels-play-commons/public", "../../../../../../../../judgels-play-commons/public")' method="GET">
+  <input type="hidden" name="orderBy" value="@currentOrder"/>
+  <input type="hidden" name="sortBy" value="@currentSortBy"/>
+  <div class="form-group">
+    <input type="search" class="form-control" name="filterString" value="@currentFilter">
+  </div>
+  <button type="submit" class="btn btn-primary">@Messages.get("commons.search")</button>
+</form>
+
+<div class="clearfix"></div>
+
+<div class="table-responsive">
+  <table class="table table-hover table-condensed table-bordered">
+    <tr>
+      @tableHeader("id", Messages.get("commons.field.id"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "id"))
+      @tableHeader("name", Messages.get("problem.programming.field.name"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "name"))
+      <th></th>
+    </tr>
+    @for(page <- currentPage.getList()) {
+      <tr>
+        <td>@page.getId</td>
+        <td>@page.getName</td>
+        <td class="text-center">
+          <a href="@routes.ProgrammingProblemController.view(page.getId)"><span class="glyphicon glyphicon-search"></span></a>
+          <a href="@routes.ProgrammingProblemController.update(page.getId)"><span class="glyphicon glyphicon-edit"></span></a>
+          <a href="@routes.ProgrammingProblemController.delete(page.getId)" onclick="confirmLink ( event, this.href )"><span class="glyphicon glyphicon-remove"></span></a>
+        </td>
+      </tr>
+    }
+  </table>
+</div>
+
+@tablePagination(currentPage, currentSortBy, currentOrder, currentFilter, routes.ProgrammingProblemController.list)

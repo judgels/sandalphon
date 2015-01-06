@@ -1,11 +1,19 @@
 package org.iatoki.judgels.sandalphon;
 
+import org.iatoki.judgels.commons.Page;
+
 import java.io.File;
 import java.util.List;
 
 public interface ProgrammingProblemService {
 
-    Problem createProblem(String name, String note);
+    ProgrammingProblem findProblemById(long id);
+
+    void updateProblem(long id, String name, String note);
+
+    Page<ProgrammingProblem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString);
+
+    ProgrammingProblem createProblem(String name, String note);
 
     String getProblemStatement(long id);
 

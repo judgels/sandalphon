@@ -5,16 +5,28 @@ import com.google.common.collect.ImmutableMap;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
-import org.iatoki.judgels.commons.views.html.layouts.*;
-import org.iatoki.judgels.sandalphon.Problem;
-import org.iatoki.judgels.sandalphon.ProblemService;
+import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
+import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
+import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
+import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
+import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
+import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
+import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
+import org.iatoki.judgels.sandalphon.ProgrammingProblem;
 import org.iatoki.judgels.sandalphon.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.controllers.authenticators.Secured;
-import org.iatoki.judgels.sandalphon.forms.UpdateGradingForm;
-import org.iatoki.judgels.sandalphon.forms.UpsertProblemForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm;
+import org.iatoki.judgels.sandalphon.forms.programming.UpdateGradingForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
-import org.iatoki.judgels.sandalphon.views.html.programming.*;
+import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
+import org.iatoki.judgels.sandalphon.views.html.programming.createView;
+import org.iatoki.judgels.sandalphon.views.html.programming.listView;
+import org.iatoki.judgels.sandalphon.views.html.programming.updateFilesView;
+import org.iatoki.judgels.sandalphon.views.html.programming.updateGeneralView;
+import org.iatoki.judgels.sandalphon.views.html.programming.updateGradingView;
+import org.iatoki.judgels.sandalphon.views.html.programming.updateStatementView;
+import org.iatoki.judgels.sandalphon.views.html.programming.viewGeneralView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -31,12 +43,61 @@ import java.util.List;
 @Security.Authenticated(Secured.class)
 public final class ProgrammingProblemController extends Controller {
 
-    private final ProblemService problemService;
-    private final ProgrammingProblemService programmingProblemService;
+    private final ProgrammingProblemService service;
 
-    public ProgrammingProblemController(ProblemService problemService, ProgrammingProblemService programmingProblemService) {
-        this.problemService = problemService;
-        this.programmingProblemService = programmingProblemService;
+    public ProgrammingProblemController(ProgrammingProblemService service) {
+        this.service = service;
+    }
+
+    @Transactional
+    public Result index() {
+        return list(0, "id", "asc", "");
+    }
+
+    @Transactional
+    public Result list(long page, String sortBy, String orderBy, String filterString) {
+        Page<ProgrammingProblem> currentPage = service.pageProblem(page, 20, sortBy, orderBy, filterString);
+
+        LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.programming.list"), new InternalLink(Messages.get("problem.programming.create"), routes.ProgrammingProblemController.create()), c));
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index())
+        ), c));
+        appendTemplateLayout(content);
+
+        return lazyOk(content);
+    }
+
+    @AddCSRFToken
+    public Result create() {
+        Form<UpsertForm> form = Form.form(UpsertForm.class);
+        return showCreate(form);
+    }
+
+    @RequireCSRFCheck
+    @Transactional
+    public Result postCreate() {
+        Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
+
+        if (form.hasErrors()) {
+            return showCreate(form);
+        } else {
+            UpsertForm data = form.get();
+            ProgrammingProblem problem = service.createProblem(data.name, data.note);
+
+            return redirect(routes.ProgrammingProblemController.update(problem.getId()));
+        }
+    }
+
+    private Result showCreate(Form<UpsertForm> form) {
+        LazyHtml content = new LazyHtml(createView.render(form));
+        content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.create"), routes.ProgrammingProblemController.create())
+        ), c));
+        appendTemplateLayout(content);
+        return getResult(content, Http.Status.OK);
     }
 
     public Result view(long id) {
@@ -45,12 +106,12 @@ public final class ProgrammingProblemController extends Controller {
 
     @Transactional
     public Result viewGeneral(long id) {
-        Problem problem = problemService.findProblemById(id);
+        ProgrammingProblem problem = service.findProblemById(id);
         LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
         appendViewTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("programmingProblem.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -63,11 +124,11 @@ public final class ProgrammingProblemController extends Controller {
     @AddCSRFToken
     @Transactional
     public Result updateGeneral(long id) {
-        Problem problem = problemService.findProblemById(id);
-        UpsertProblemForm content = new UpsertProblemForm();
+        ProgrammingProblem problem = service.findProblemById(id);
+        UpsertForm content = new UpsertForm();
         content.name = problem.getName();
         content.note = problem.getNote();
-        Form<UpsertProblemForm> form = Form.form(UpsertProblemForm.class).fill(content);
+        Form<UpsertForm> form = Form.form(UpsertForm.class).fill(content);
 
         return showUpdateGeneral(form, id);
     }
@@ -75,16 +136,16 @@ public final class ProgrammingProblemController extends Controller {
     @RequireCSRFCheck
     @Transactional
     public Result postUpdateGeneral(long id) {
-        Form<UpsertProblemForm> form = Form.form(UpsertProblemForm.class).bindFromRequest();
-        problemService.updateProblem(id, form.get().name, form.get().note);
+        Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
+        service.updateProblem(id, form.get().name, form.get().note);
         return redirect(routes.ProgrammingProblemController.updateGeneral(id));
     }
 
     @AddCSRFToken
     @Transactional
     public Result updateStatement(long id) {
-        Problem problem = problemService.findProblemById(id);
-        String statement = programmingProblemService.getProblemStatement(id);
+        ProgrammingProblem problem = service.findProblemById(id);
+        String statement = service.getProblemStatement(id);
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
         form = form.bind(ImmutableMap.of("statement", statement));
         return showUpdateStatement(form, id, problem.getName());
@@ -94,16 +155,16 @@ public final class ProgrammingProblemController extends Controller {
     @Transactional
     public Result postUpdateStatement(long id) {
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
-        programmingProblemService.updateProblemStatement(id, form.get().statement);
+        service.updateProblemStatement(id, form.get().statement);
         return redirect(routes.ProgrammingProblemController.updateStatement(id));
     }
 
     @AddCSRFToken
     @Transactional
     public Result updateFiles(long id) {
-        Problem problem = problemService.findProblemById(id);
+        ProgrammingProblem problem = service.findProblemById(id);
         Form<UpdateFilesForm> form = Form.form(UpdateFilesForm.class);
-        List<String> filenames = programmingProblemService.getGradingFilenames(id);
+        List<String> filenames = service.getGradingFilenames(id);
         return showUpdateFiles(form, id, problem.getName(), filenames);
     }
 
@@ -116,7 +177,7 @@ public final class ProgrammingProblemController extends Controller {
         if (file != null) {
             File evaluatorFile = file.getFile();
 
-            programmingProblemService.uploadGradingFile(id, evaluatorFile, file.getFilename());
+            service.uploadGradingFile(id, evaluatorFile, file.getFilename());
         }
 
         return redirect(routes.ProgrammingProblemController.updateFiles(id));
@@ -125,9 +186,9 @@ public final class ProgrammingProblemController extends Controller {
     @AddCSRFToken
     @Transactional
     public Result updateGrading(long id) {
-        Problem problem = problemService.findProblemById(id);
+        ProgrammingProblem problem = service.findProblemById(id);
         Form<UpdateGradingForm> form = Form.form(UpdateGradingForm.class);
-        List<String> filenames = programmingProblemService.getGradingFilenames(id);
+        List<String> filenames = service.getGradingFilenames(id);
 
         return showUpdateGrading(form, id, problem.getName(), filenames);
     }
@@ -138,7 +199,7 @@ public final class ProgrammingProblemController extends Controller {
         Form<UpdateGradingForm> form = Form.form(UpdateGradingForm.class).bindFromRequest();
         UpdateGradingForm data = form.get();
 
-        programmingProblemService.updateProblemGrading(id, data.timeLimit, data.memoryLimit, data.tcIn, data.tcOut, data.subtaskBatches, data.subtaskPoints);
+        service.updateProblemGrading(id, data.timeLimit, data.memoryLimit, data.tcIn, data.tcOut, data.subtaskBatches, data.subtaskPoints);
 
         return redirect(routes.ProgrammingProblemController.updateGrading(id));
     }
@@ -147,12 +208,12 @@ public final class ProgrammingProblemController extends Controller {
         return TODO;
     }
 
-    private Result showUpdateGeneral(Form<UpsertProblemForm> form, long id) {
+    private Result showUpdateGeneral(Form<UpsertForm> form, long id) {
         LazyHtml content = new LazyHtml(updateGeneralView.render(form, id));
         appendUpdateTabsLayout(content, id, form.get().name);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("programmingProblem.update.general"), routes.ProgrammingProblemController.updateGeneral(id))
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.update.general"), routes.ProgrammingProblemController.updateGeneral(id))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -162,8 +223,8 @@ public final class ProgrammingProblemController extends Controller {
         LazyHtml content = new LazyHtml(updateStatementView.render(form, id));
         appendUpdateTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("programmingProblem.update.statement"), routes.ProgrammingProblemController.updateStatement(id))
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.update.statement"), routes.ProgrammingProblemController.updateStatement(id))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -173,8 +234,8 @@ public final class ProgrammingProblemController extends Controller {
         LazyHtml content = new LazyHtml(updateGradingView.render(form, id, gradingFilenames));
         appendUpdateTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("programmingProblem.update.grading"), routes.ProgrammingProblemController.updateGrading(id))
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.update.grading"), routes.ProgrammingProblemController.updateGrading(id))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -184,8 +245,8 @@ public final class ProgrammingProblemController extends Controller {
         LazyHtml content = new LazyHtml(updateFilesView.render(form, id, filenames));
         appendUpdateTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("programmingProblem.update.files"), routes.ProgrammingProblemController.updateFiles(id))
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.update.files"), routes.ProgrammingProblemController.updateFiles(id))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
@@ -193,31 +254,31 @@ public final class ProgrammingProblemController extends Controller {
 
     private void appendViewTabsLayout(LazyHtml content, long id, String problemName) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programmingProblem.view.tab.general"), routes.ProgrammingProblemController.viewGeneral(id))
+                new InternalLink(Messages.get("problem.programming.view.tab.general"), routes.ProgrammingProblemController.viewGeneral(id))
         ), c));
 
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.problem") + " #" + id + ": " + problemName, new InternalLink(Messages.get("problem.update"), routes.ProgrammingProblemController.update(id)), c));
+        content.appendLayout(c -> headingWithActionLayout.render("#" + id + ": " + problemName, new InternalLink(Messages.get("problem.programming.update"), routes.ProgrammingProblemController.update(id)), c));
     }
 
     private void appendUpdateTabsLayout(LazyHtml content, long id, String problemName) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programmingProblem.update.tab.general"), routes.ProgrammingProblemController.updateGeneral(id)),
-                new InternalLink(Messages.get("programmingProblem.update.tab.statement"), routes.ProgrammingProblemController.updateStatement(id)),
-                new InternalLink(Messages.get("programmingProblem.update.tab.grading"), routes.ProgrammingProblemController.updateGrading(id)),
-                new InternalLink(Messages.get("programmingProblem.update.tab.files"), routes.ProgrammingProblemController.updateFiles(id))
+                new InternalLink(Messages.get("problem.programming.update.tab.general"), routes.ProgrammingProblemController.updateGeneral(id)),
+                new InternalLink(Messages.get("problem.programming.update.tab.statement"), routes.ProgrammingProblemController.updateStatement(id)),
+                new InternalLink(Messages.get("problem.programming.update.tab.grading"), routes.ProgrammingProblemController.updateGrading(id)),
+                new InternalLink(Messages.get("problem.programming.update.tab.files"), routes.ProgrammingProblemController.updateFiles(id))
         ), c));
 
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.problem") + " #" + id + ": " + problemName, new InternalLink(Messages.get("problem.view"), routes.ProgrammingProblemController.view(id)), c));
+        content.appendLayout(c -> headingWithActionLayout.render("#" + id + ": " + problemName, new InternalLink(Messages.get("problem.programming.view"), routes.ProgrammingProblemController.view(id)), c));
     }
 
     private void appendTemplateLayout(LazyHtml content) {
         content.appendLayout(c -> leftSidebarLayout.render(
-                IdentityUtils.getUsername(),
-                IdentityUtils.getUserRealName(),
-                "#",
-                org.iatoki.judgels.commons.controllers.routes.JophielClientController.logout(routes.Application.index().absoluteURL(request())).absoluteURL(request()),
-                ImmutableList.of(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())),
-                c)
+                        IdentityUtils.getUsername(),
+                        IdentityUtils.getUserRealName(),
+                        "#",
+                        org.iatoki.judgels.commons.controllers.routes.JophielClientController.logout(routes.Application.index().absoluteURL(request())).absoluteURL(request()),
+                        ImmutableList.of(new InternalLink(Messages.get("problem.problems"), routes.ProgrammingProblemController.index())),
+                        c)
         );
         content.appendLayout(c -> headerFooterLayout.render(c));
         content.appendLayout(c -> baseLayout.render("TODO", c));

@@ -13,7 +13,7 @@ import play.mvc.Result;
 public final class Application extends Controller {
 
     public Result index() {
-        String returnUri = routes.ProblemController.index().absoluteURL(request());
+        String returnUri = routes.ProgrammingProblemController.index().absoluteURL(request());
         return redirect(routes.Application.auth(returnUri));
     }
 
