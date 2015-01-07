@@ -7,5 +7,7 @@ public final class UpsertForm {
     @Constraints.Required
     public String name;
 
+    public String gradingMethod;
+
     public String note;
 }

@@ -13,15 +13,17 @@ public interface ProgrammingProblemService {
 
     Page<ProgrammingProblem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString);
 
-    ProgrammingProblem createProblem(String name, String note);
+    ProgrammingProblem createProblem(String name, String gradingMethod, String note);
 
     String getProblemStatement(long id);
+
+    String getProblemGrading(long id);
 
     void updateProblemStatement(long id, String statement);
 
     void uploadGradingFile(long id, File file, String filename);
 
-    void updateProblemGrading(long id, int timeLimit, int memoryLimit, List<List<String>> tcIn, List<List<String>> tcOut, List<List<Integer>> subtaskBatches, List<Integer> subtaskPoints);
+    void updateProblemGrading(long id, String json);
 
     List<String> getGradingFilenames(long id);
 }

@@ -3,147 +3,172 @@
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
 
-@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-xs-2", "col-xs-10") }
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
 
 <script type="text/javascript" src="@controllers.routes.Assets.at("lib/jquery/jquery.min.js")"></script>
-
-<script type="text/javascript">
-
-var that;
-
-
-var addBatch = function(batchNo) {
-
-var batch = $("#batch-template").clone();
-batch.removeAttr('id');
-batch.find('tr' ).remove();
-batch.find("h3").html("Batch " + batchNo);
-
-var addTestCase = function(tcNo) {
-
-var generateData = function(type) {
-var td = $('#tc-template' ).find('td').clone();
-td.find('select').attr('name', type + '[' + batchNo + '][' + tcNo + ']');
-return td;
-};
-
-var fin = generateData('tcIn');
-var fout = generateData('tcOut');
-
-var tr = $('<tr>');
-tr.append(fin, fout);
-
-batch.find('tbody' ).append(tr);
-
-batch.find('button' ).unbind('click' ).click(function() {
-addTestCase(tcNo + 1);
-});
-
-};
-
-batch.find('button').click(function() {
-addTestCase(0);
-});
-
-that.unbind();
-that.click(function() {
-addBatch(batchNo+1);
-});
-
-
-console.dir(batch);
-$("#batches").append(batch);
-batch.show();
-};
-
-$(document).ready(function() {
-that = $("#batch-add" );
-that.click(function() {
-addBatch(0);
-});
-});
-
-</script>
 
 @b3.form(routes.ProgrammingProblemController.postUpdateGrading(id)) {
     @helper.CSRF.formField
 
-    @b3.text(form("timeLimit"), '_label -> "Time Limit")
-    @b3.text(form("memoryLimit"), '_label -> "Memory Limit")
+    @b3.inputWrapped("timeLimit", form("timeLimit"), '_label -> "Time Limit") { input =>
+        <div class="input-group">
+            @input
+            <div class="input-group-addon">milliseconds</div>
+        </div>
+    }
+    @b3.inputWrapped("memoryLimit", form("memoryLimit"), '_label -> "Memory Limit") { input =>
+        <div class="input-group">
+            @input
+            <div class="input-group-addon">kilobytes</div>
+        </div>
+    }
 
-    Batches:
+    <div class="row">
 
-    <div id="batches">
+        <div class="col-md-3">
+            <label class="control-label">Test Data</label>
+        </div>
 
+        <div class="col-md-9">
+            @for(i <- 1 to 2) {
+                <div id="test-set-template" class="panel panel-default">
+                    <div class="panel-heading">
+                    Test Set 0 <a href="#"><span class="glyphicon glyphicon-remove"></span></a>
+                </div>
+                    <div class="panel-body">
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <td>Input</td>
+                                    <td>Output</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for(j <- 1 to 10) {
+                                    <tr id="tc-template">
+                                        <td>
+                                            <input class="form-control input-sm" type="text" name="sdf" readonly="readonly" value="jagoparah_1_1.in" />
+                                        </td>
+                                        <td>
+                                            <input class="form-control input-sm" type="text" name="sdf" readonly="readonly" value="jagoparah_1_1.in" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="#"><span class="glyphicon glyphicon-remove"></span></a>
+                                        </td>
+                                    </tr>
+                                }
+
+                            <tr class="active">
+                                <td>
+                                    <select>
+                                        <option value="1.in">jagoparah_1_1.in</option>
+                                        <option value="1.in">jagoparah_1_2.in</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select>
+                                        <option value="1.in">jagoparah_1_1.in</option>
+                                        <option value="1.in">jagoparah_1_2.in</option>
+                                    </select>
+                                </td>
+                                <td class="text-center">
+                                    <a href="#"><span class="glyphicon glyphicon-plus"></span></a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <hr />
+
+
+                        <p>Assign to subtasks:</p>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 1
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 2
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 3
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 1
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 2
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 3
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 1
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 2
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="inlineCheckbox1" value="option1"> 3
+                        </label>
+                    </div>
+                </div>
+
+
+            }
+
+            <button id="set-add" class="btn btn-primary btn-xs" type="button">Add Test Set</button>
+        </div>
     </div>
 
 
-    <button id="batch-add" class="btn btn-primary" type="button">Add Batch</button>
+    <div class="row">
+        <div class="col-md-3">
+            <label class="control-label">Subtask Values</label>
+        </div>
 
-    Subtasks:
+        <div class="col-md-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Subtask</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    Sample
+                                </td>
+                                <td>
+                                    <input class="form-control input-sm" type="text" name="subtaskPoints[0]"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    1
+                                </td>
+                                <td>
+                                    <input class="form-control input-sm" type="text" name="subtaskPoints[0]"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    2
+                                </td>
+                                <td>
+                                    <input class="form-control input-sm" type="text" name="subtaskPoints[0]"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-
-    <div id="subtasks">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Subtasks</h3>
-            </div>
-            <div class="panel-body">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Batches</th>
-                            <th>Points</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr id="subtask-template">
-                            <td>
-                                #1
-                            </td>
-                            <td>
-                                <input type="checkbox" name="subtaskBatches[0][0]" value="0" /> 0
-                                <input type="checkbox" name="subtaskBatches[0][1]" value="1"/> 1
-                                <input type="checkbox" name="subtaskBatches[0][2]" value="2"/> 2
-                            </td>
-                            <td>
-                                <input type="text" name="subtaskPoints[0]"/>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <button class="btn btn-primary" type="button">Add Subtask</button>
+                </div>
             </div>
         </div>
     </div>
 
 
-
-
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
 }
-
-<div id="batch-template" class="panel panel-default" style="display: none">
-    <div class="panel-heading">
-        <h3 class="panel-title"></h3>
-    </div>
-    <div class="panel-body">
-        <table class="table table-bordered">
-            <tbody>
-                <tr id="tc-template">
-                    <td>
-                        <select>
-                            @for(filename <- filenames) {
-                                <option value="@filename">@filename</option>
-                            }
-                        </select>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <button class="btn btn-primary" type="button">Add Test Case</button>
-    </div>
-</div>

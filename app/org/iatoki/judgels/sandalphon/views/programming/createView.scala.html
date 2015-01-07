@@ -1,4 +1,4 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.UpsertForm])
+@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.UpsertForm], gradingMethods: Map[String, String])
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
@@ -9,6 +9,9 @@
     @helper.CSRF.formField
 
     @b3.text(form("name"), '_label -> Messages.get("problem.programming.field.name"))
+
+    @b3.select(form("gradingMethod"), gradingMethods.toSeq)
+
     @b3.textarea(form("note"), '_label -> Messages.get("problem.programming.field.note"))
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.create") }

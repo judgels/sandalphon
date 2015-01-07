@@ -38,6 +38,7 @@ public final class ProgrammingProblemHibernateDao extends AbstractJudgelsHiberna
         selection.add(root.get("id"));
         selection.add(root.get("jid"));
         selection.add(root.get("name"));
+        selection.add(root.get("gradingMethod"));
         selection.add(root.get("note"));
 
         List<Predicate> predicates = new ArrayList<>();

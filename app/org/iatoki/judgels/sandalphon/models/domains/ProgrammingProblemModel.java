@@ -11,19 +11,22 @@ public final class ProgrammingProblemModel extends AbstractJudgelsModel {
 
     public String name;
 
+    public String gradingMethod;
+
     public String note;
 
     public ProgrammingProblemModel() {
 
     }
 
-    public ProgrammingProblemModel(String name, String note) {
+    public ProgrammingProblemModel(String name, String gradingMethod, String note) {
         this.name = name;
+        this.gradingMethod = gradingMethod;
         this.note = note;
     }
 
-    public ProgrammingProblemModel(long id, String jid, String name, String note) {
-        this(name, note);
+    public ProgrammingProblemModel(long id, String jid, String name, String gradingMethod, String note) {
+        this(name, gradingMethod, note);
         this.id = id;
         this.jid = jid;
     }

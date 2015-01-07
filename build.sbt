@@ -8,9 +8,11 @@ version := "1.0-SNAPSHOT"
 lazy val main = (project.in(file(".")))
                   .enablePlugins(PlayJava)
                   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
-                  .dependsOn(commons)
+                  .dependsOn(commons, gabrielcommons)
 
 lazy val commons = (RootProject(file("../judgels-play-commons")))
+
+lazy val gabrielcommons = (RootProject(file("../gabriel-commons")))
 
 scalaVersion := "2.11.1"
 
