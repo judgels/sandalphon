@@ -14,6 +14,7 @@ problem.programming.field.type=Type
 problem.programming.view.general=View General
 
 problem.programming.view.tab.general=General
+problem.programming.view.tab.statement=Statement
 
 problem.programming.update.general=Update General
 problem.programming.update.statement=Update Statement

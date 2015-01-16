@@ -2,7 +2,9 @@ package org.iatoki.judgels.sandalphon;
 
 import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ProgrammingProblemHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.hibernate.ProgrammingSubmissionHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProgrammingProblemDao;
+import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProgrammingSubmissionDao;
 import play.Application;
 
 import java.io.File;
@@ -10,13 +12,14 @@ import java.io.File;
 public final class Global extends org.iatoki.judgels.commons.Global {
 
     private final ProgrammingProblemDao programmingProblemDao;
+    private final ProgrammingSubmissionDao programmingSubmissionDao;
 
     private final ProgrammingProblemService programmingProblemService;
 
     public Global() {
         this.programmingProblemDao = new ProgrammingProblemHibernateDao();
-
-        this.programmingProblemService = new ProgrammingProblemServiceImpl(programmingProblemDao, new File("/Users/fushar/jagoparah"));
+        this.programmingSubmissionDao = new ProgrammingSubmissionHibernateDao();
+        this.programmingProblemService = new ProgrammingProblemServiceImpl(programmingProblemDao, programmingSubmissionDao);
     }
 
     @Override

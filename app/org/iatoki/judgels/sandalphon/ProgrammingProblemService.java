@@ -4,6 +4,7 @@ import org.iatoki.judgels.commons.Page;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 public interface ProgrammingProblemService {
 
@@ -26,4 +27,6 @@ public interface ProgrammingProblemService {
     void updateProblemGrading(long id, String json);
 
     List<String> getGradingFilenames(long id);
+
+    void submit(String problemJid, Map<String, byte[]> sourceFiles);
 }

@@ -1,0 +1,20 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.SubmitForm], statement: String, id: Long)
+
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import play.i18n.Messages
+
+@statement
+
+<hr />
+<p>
+Submit Solution:
+</p>
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
+
+@b3.form(routes.ProgrammingProblemController.postSubmit(id), 'enctype->"multipart/form-data") {
+    @helper.CSRF.formField
+
+    @b3.file(form("file"), '_label -> "File")
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("Upload") }
+}

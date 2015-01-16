@@ -19,6 +19,7 @@ POST        /problem/programming/create                     @org.iatoki.judgels.
 GET         /problem/programming/:id/delete                 @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.delete(id: Long)
 GET         /problem/programming/:id/view                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.view(id: Long)
 GET         /problem/programming/:id/view/general           @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewGeneral(id: Long)
+GET         /problem/programming/:id/view/statement         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewStatement(id: Long)
 GET         /problem/programming/:id/update                 @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.update(id: Long)
 GET         /problem/programming/:id/update/general         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGeneral(id: Long)
 POST        /problem/programming/:id/update/general         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateGeneral(id: Long)
@@ -28,4 +29,5 @@ GET         /problem/programming/:id/update/files           @org.iatoki.judgels.
 POST        /problem/programming/:id/update/files           @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateFiles(id: Long)
 GET         /problem/programming/:id/update/grading         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGrading(id: Long)
 POST        /problem/programming/:id/update/grading         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateGrading(id: Long)
+POST        /problem/programming/:id/submit                 @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postSubmit(id: Long)
 

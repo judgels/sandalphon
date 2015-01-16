@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
@@ -14,14 +15,16 @@ import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
-import org.iatoki.judgels.gabriel.GradingMethod;
-import org.iatoki.judgels.gabriel.GradingMethodRegistry;
-import org.iatoki.judgels.gabriel.grading.batch.SubtaskBatchGradingConf;
+import org.iatoki.judgels.gabriel.GradingExecutor;
+import org.iatoki.judgels.gabriel.GradingRegistry;
+import org.iatoki.judgels.gabriel.blackbox.BlackBoxGradingRequest;
+import org.iatoki.judgels.gabriel.grading.batch.BatchGradingConfig;
 import org.iatoki.judgels.sandalphon.ProgrammingProblem;
 import org.iatoki.judgels.sandalphon.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.ProgrammingProblemUtils;
 import org.iatoki.judgels.sandalphon.controllers.authenticators.Secured;
-import org.iatoki.judgels.sandalphon.forms.grading.SubtaskBatchGradingForm;
+import org.iatoki.judgels.sandalphon.forms.grading.BatchGradingConfigForm;
+import org.iatoki.judgels.sandalphon.forms.programming.SubmitForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
@@ -32,6 +35,7 @@ import org.iatoki.judgels.sandalphon.views.html.programming.updateFilesView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateGeneralView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateStatementView;
 import org.iatoki.judgels.sandalphon.views.html.programming.viewGeneralView;
+import org.iatoki.judgels.sandalphon.views.html.programming.viewStatementView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -44,6 +48,7 @@ import play.mvc.Security;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 @Security.Authenticated(Secured.class)
 public final class ProgrammingProblemController extends Controller {
@@ -95,7 +100,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     private Result showCreate(Form<UpsertForm> form) {
-        LazyHtml content = new LazyHtml(createView.render(form, GradingMethodRegistry.getInstance().getGradingMethods()));
+        LazyHtml content = new LazyHtml(createView.render(form, GradingRegistry.getInstance().getGradingTypes()));
         content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
@@ -113,6 +118,22 @@ public final class ProgrammingProblemController extends Controller {
     public Result viewGeneral(long id) {
         ProgrammingProblem problem = service.findProblemById(id);
         LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
+        appendViewTabsLayout(content, id, problem.getName());
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
+        ), c));
+        appendTemplateLayout(content);
+        return getResult(content, Http.Status.OK);
+    }
+
+    @Transactional
+    public Result viewStatement(long id) {
+        String statement = service.getProblemStatement(id);
+        ProgrammingProblem problem = service.findProblemById(id);
+
+        Form<SubmitForm> form = Form.form(SubmitForm.class);
+        LazyHtml content = new LazyHtml(viewStatementView.render(form, statement, id));
         appendViewTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
@@ -195,13 +216,9 @@ public final class ProgrammingProblemController extends Controller {
         String json = service.getProblemGrading(id);
 
         Gson gson = new Gson();
-        SubtaskBatchGradingConf conf = gson.fromJson(json, SubtaskBatchGradingConf.class);
+        BatchGradingConfig config = gson.fromJson(json, BatchGradingConfig.class);
 
-        System.out.println("aslinya " + json);
-        System.out.println("WUW " + gson.toJson(conf));
-        System.out.println("YEY " + gson.toJson(ProgrammingProblemUtils.toGradingForm(conf)));
-
-        Form<SubtaskBatchGradingForm> form = Form.form(SubtaskBatchGradingForm.class).fill(ProgrammingProblemUtils.toGradingForm(conf));
+        Form<BatchGradingConfigForm> form = Form.form(BatchGradingConfigForm.class).fill(ProgrammingProblemUtils.toGradingForm(config));
 
         List<String> filenames = service.getGradingFilenames(id);
 
@@ -211,22 +228,42 @@ public final class ProgrammingProblemController extends Controller {
     @RequireCSRFCheck
     @Transactional
     public Result postUpdateGrading(long id) {
-        Form<SubtaskBatchGradingForm> form = Form.form(SubtaskBatchGradingForm.class).bindFromRequest();
-        SubtaskBatchGradingForm data = form.get();
+        Form<BatchGradingConfigForm> form = Form.form(BatchGradingConfigForm.class).bindFromRequest();
+        BatchGradingConfigForm data = form.get();
 
-        System.out.println("NUL GAK SICH " + data.testSetsSubtasks);
 
         Gson gson = new Gson();
+        BatchGradingConfig config = ProgrammingProblemUtils.toGradingConfig(data);
 
-        System.out.println("?SDFSD ? " + gson.toJson(data));
-
-        SubtaskBatchGradingConf conf = ProgrammingProblemUtils.toGradingConf(data);
-
-        System.out.println("JADINYA = " + gson.toJson(conf));
-
-        service.updateProblemGrading(id, gson.toJson(conf));
+        service.updateProblemGrading(id, gson.toJson(config));
 
         return redirect(routes.ProgrammingProblemController.updateGrading(id));
+    }
+
+    @RequireCSRFCheck
+    @Transactional
+    public Result postSubmit(long id) {
+
+        ProgrammingProblem problem = service.findProblemById(id);
+
+        Http.MultipartFormData body = request().body().asMultipartFormData();
+        Http.MultipartFormData.FilePart file = body.getFile("file");
+
+        if (file != null) {
+            try {
+                File sourceFile = file.getFile();
+
+                byte[] sourceFileData = FileUtils.readFileToByteArray(sourceFile);
+                Map<String, byte[]> sourceFiles = ImmutableMap.of(file.getFilename(), sourceFileData);
+
+                service.submit(problem.getJid(), sourceFiles);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return redirect(routes.ProgrammingProblemController.viewStatement(id));
     }
 
     public Result delete(long id) {
@@ -255,9 +292,9 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
-    private Result showUpdateGrading(Form<SubtaskBatchGradingForm> form, ProgrammingProblem problem, List<String> gradingFilenames) {
+    private Result showUpdateGrading(Form<BatchGradingConfigForm> form, ProgrammingProblem problem, List<String> gradingFilenames) {
 
-        GradingMethod gradingMethod = problem.getGradingMethod();
+        GradingExecutor gradingMethod = problem.getGradingMethod();
 
         LazyHtml content = new LazyHtml(batchGradingView.render(form, problem, gradingFilenames));
         appendUpdateTabsLayout(content, problem.getId(), problem.getName());
@@ -282,7 +319,8 @@ public final class ProgrammingProblemController extends Controller {
 
     private void appendViewTabsLayout(LazyHtml content, long id, String problemName) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.view.tab.general"), routes.ProgrammingProblemController.viewGeneral(id))
+                new InternalLink(Messages.get("problem.programming.view.tab.general"), routes.ProgrammingProblemController.viewGeneral(id)),
+                new InternalLink(Messages.get("problem.programming.view.tab.statement"), routes.ProgrammingProblemController.viewStatement(id))
         ), c));
 
         content.appendLayout(c -> headingWithActionLayout.render("#" + id + ": " + problemName, new InternalLink(Messages.get("problem.programming.update"), routes.ProgrammingProblemController.update(id)), c));
