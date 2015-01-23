@@ -1,4 +1,4 @@
-@(currentPage: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.programming.Problem], currentSortBy: String, currentOrder: String, currentFilter: String)
+@(currentPage: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.programming.Submission], currentSortBy: String, currentOrder: String, currentFilter: String)
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.commons.views.html.pagination.tablePagination
@@ -12,10 +12,7 @@
 <form class="form form-inline pull-right" action='@routes.ProgrammingProblemController.list(currentPage.getPageIndex, "../../../../../../../../judgels-play-commons/public", "../../../../../../../../judgels-play-commons/public", "../../../../../../../../judgels-play-commons/public")' method="GET">
   <input type="hidden" name="orderBy" value="@currentOrder"/>
   <input type="hidden" name="sortBy" value="@currentSortBy"/>
-  <div class="form-group">
-    <input type="search" class="form-control" name="filterString" value="@currentFilter">
-  </div>
-  <button type="submit" class="btn btn-primary">@Messages.get("commons.search")</button>
+
 </form>
 
 <div class="clearfix"></div>
@@ -24,13 +21,15 @@
   <table class="table table-hover table-condensed table-bordered">
     <tr>
       @tableHeader("id", Messages.get("commons.field.id"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "id"))
-      @tableHeader("name", Messages.get("problem.programming.field.name"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "name"))
+      @tableHeader("verdict", Messages.get("problem.programming.field.verdict"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "verdict"))
+      @tableHeader("score", Messages.get("problem.programming.field.score"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "score"))
       <th></th>
     </tr>
     @for(page <- currentPage.getList()) {
       <tr>
         <td>@page.getId</td>
-        <td>@page.getName</td>
+        <td>@page.getVerdict</td>
+        <td>@page.getScore</td>
         <td class="text-center">
           <a href="@routes.ProgrammingProblemController.view(page.getId)"><span class="glyphicon glyphicon-search"></span></a>
           <a href="@routes.ProgrammingProblemController.update(page.getId)"><span class="glyphicon glyphicon-edit"></span></a>

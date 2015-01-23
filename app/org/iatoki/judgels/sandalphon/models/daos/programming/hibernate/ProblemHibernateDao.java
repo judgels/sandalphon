@@ -1,20 +1,20 @@
-package org.iatoki.judgels.sandalphon.models.daos.hibernate;
+package org.iatoki.judgels.sandalphon.models.daos.programming.hibernate;
 
 import org.iatoki.judgels.commons.models.daos.hibernate.AbstractJudgelsHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProgrammingProblemDao;
-import org.iatoki.judgels.sandalphon.models.domains.ProgrammingProblemModel;
+import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
+import org.iatoki.judgels.sandalphon.models.domains.programming.ProblemModel;
 import play.db.jpa.JPA;
 
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ProgrammingProblemHibernateDao extends AbstractJudgelsHibernateDao<ProgrammingProblemModel> implements ProgrammingProblemDao {
+public final class ProblemHibernateDao extends AbstractJudgelsHibernateDao<ProblemModel> implements ProblemDao {
     @Override
     public long countByFilter(String filterString) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
-        Root<ProgrammingProblemModel> root = query.from(ProgrammingProblemModel.class);
+        Root<ProblemModel> root = query.from(ProblemModel.class);
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.like(root.get("name"), "%" + filterString + "%"));
@@ -29,17 +29,17 @@ public final class ProgrammingProblemHibernateDao extends AbstractJudgelsHiberna
     }
 
     @Override
-    public List<ProgrammingProblemModel> findByFilterAndSort(String filterString, String sortBy, String order, long first, long max) {
+    public List<ProblemModel> findByFilterAndSort(String filterString, String sortBy, String order, long first, long max) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
-        CriteriaQuery<ProgrammingProblemModel> query = cb.createQuery(ProgrammingProblemModel.class);
-        Root<ProgrammingProblemModel> root = query.from(ProgrammingProblemModel.class);
+        CriteriaQuery<ProblemModel> query = cb.createQuery(ProblemModel.class);
+        Root<ProblemModel> root = query.from(ProblemModel.class);
 
         List<Selection<?>> selection = new ArrayList<>();
         selection.add(root.get("id"));
         selection.add(root.get("jid"));
         selection.add(root.get("name"));
-        selection.add(root.get("gradingMethod"));
-        selection.add(root.get("note"));
+        selection.add(root.get("gradingType"));
+        selection.add(root.get("additionalNote"));
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.like(root.get("name"), "%" + filterString + "%"));

@@ -15,19 +15,20 @@ import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
-import org.iatoki.judgels.gabriel.GradingExecutor;
-import org.iatoki.judgels.gabriel.GradingRegistry;
-import org.iatoki.judgels.gabriel.blackbox.BlackBoxGradingRequest;
-import org.iatoki.judgels.gabriel.grading.batch.BatchGradingConfig;
-import org.iatoki.judgels.sandalphon.ProgrammingProblem;
-import org.iatoki.judgels.sandalphon.ProgrammingProblemService;
-import org.iatoki.judgels.sandalphon.ProgrammingProblemUtils;
+import org.iatoki.judgels.gabriel.Grader;
+import org.iatoki.judgels.gabriel.GraderRegistry;
+import org.iatoki.judgels.gabriel.GradingType;
+import org.iatoki.judgels.gabriel.graders.BatchGradingConfig;
+import org.iatoki.judgels.sandalphon.programming.Problem;
+import org.iatoki.judgels.sandalphon.programming.ProblemService;
+import org.iatoki.judgels.sandalphon.programming.ProblemUtils;
 import org.iatoki.judgels.sandalphon.controllers.authenticators.Secured;
 import org.iatoki.judgels.sandalphon.forms.grading.BatchGradingConfigForm;
 import org.iatoki.judgels.sandalphon.forms.programming.SubmitForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
+import org.iatoki.judgels.sandalphon.programming.Submission;
 import org.iatoki.judgels.sandalphon.views.html.grading.batch.batchGradingView;
 import org.iatoki.judgels.sandalphon.views.html.programming.createView;
 import org.iatoki.judgels.sandalphon.views.html.programming.listView;
@@ -36,6 +37,7 @@ import org.iatoki.judgels.sandalphon.views.html.programming.updateGeneralView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateStatementView;
 import org.iatoki.judgels.sandalphon.views.html.programming.viewGeneralView;
 import org.iatoki.judgels.sandalphon.views.html.programming.viewStatementView;
+import org.iatoki.judgels.sandalphon.views.html.programming.viewSubmissionsView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -53,9 +55,9 @@ import java.util.Map;
 @Security.Authenticated(Secured.class)
 public final class ProgrammingProblemController extends Controller {
 
-    private final ProgrammingProblemService service;
+    private final ProblemService service;
 
-    public ProgrammingProblemController(ProgrammingProblemService service) {
+    public ProgrammingProblemController(ProblemService service) {
         this.service = service;
     }
 
@@ -66,7 +68,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @Transactional
     public Result list(long page, String sortBy, String orderBy, String filterString) {
-        Page<ProgrammingProblem> currentPage = service.pageProblem(page, 20, sortBy, orderBy, filterString);
+        Page<Problem> currentPage = service.pageProblem(page, 20, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.programming.list"), new InternalLink(Messages.get("problem.programming.create"), routes.ProgrammingProblemController.create()), c));
@@ -93,14 +95,14 @@ public final class ProgrammingProblemController extends Controller {
             return showCreate(form);
         } else {
             UpsertForm data = form.get();
-            ProgrammingProblem problem = service.createProblem(data.name, data.gradingMethod, data.note);
+            Problem problem = service.createProblem(data.name, data.gradingType, data.additionalNote);
 
             return redirect(routes.ProgrammingProblemController.update(problem.getId()));
         }
     }
 
     private Result showCreate(Form<UpsertForm> form) {
-        LazyHtml content = new LazyHtml(createView.render(form, GradingRegistry.getInstance().getGradingTypes()));
+        LazyHtml content = new LazyHtml(createView.render(form));
         content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
@@ -116,7 +118,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @Transactional
     public Result viewGeneral(long id) {
-        ProgrammingProblem problem = service.findProblemById(id);
+        Problem problem = service.findProblemById(id);
         LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
         appendViewTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -129,11 +131,25 @@ public final class ProgrammingProblemController extends Controller {
 
     @Transactional
     public Result viewStatement(long id) {
-        String statement = service.getProblemStatement(id);
-        ProgrammingProblem problem = service.findProblemById(id);
+        String statement = service.getStatement(id);
+        Problem problem = service.findProblemById(id);
 
         Form<SubmitForm> form = Form.form(SubmitForm.class);
         LazyHtml content = new LazyHtml(viewStatementView.render(form, statement, id));
+        appendViewTabsLayout(content, id, problem.getName());
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
+        ), c));
+        appendTemplateLayout(content);
+        return getResult(content, Http.Status.OK);
+    }
+
+    @Transactional
+    public Result viewSubmissions(long id) {
+        Problem problem = service.findProblemById(id);
+        Page<Submission> submissions = service.pageSubmission(0, 20, "id", "asc", problem.getJid());
+        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, "id", "asc", problem.getJid()));
         appendViewTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
@@ -150,10 +166,10 @@ public final class ProgrammingProblemController extends Controller {
     @AddCSRFToken
     @Transactional
     public Result updateGeneral(long id) {
-        ProgrammingProblem problem = service.findProblemById(id);
+        Problem problem = service.findProblemById(id);
         UpsertForm content = new UpsertForm();
         content.name = problem.getName();
-        content.note = problem.getNote();
+        content.additionalNote = problem.getAdditionalNote();
         Form<UpsertForm> form = Form.form(UpsertForm.class).fill(content);
 
         return showUpdateGeneral(form, id);
@@ -163,15 +179,15 @@ public final class ProgrammingProblemController extends Controller {
     @Transactional
     public Result postUpdateGeneral(long id) {
         Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
-        service.updateProblem(id, form.get().name, form.get().note);
+        service.updateProblem(id, form.get().name, form.get().additionalNote);
         return redirect(routes.ProgrammingProblemController.updateGeneral(id));
     }
 
     @AddCSRFToken
     @Transactional
     public Result updateStatement(long id) {
-        ProgrammingProblem problem = service.findProblemById(id);
-        String statement = service.getProblemStatement(id);
+        Problem problem = service.findProblemById(id);
+        String statement = service.getStatement(id);
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
         form = form.bind(ImmutableMap.of("statement", statement));
         return showUpdateStatement(form, id, problem.getName());
@@ -181,16 +197,16 @@ public final class ProgrammingProblemController extends Controller {
     @Transactional
     public Result postUpdateStatement(long id) {
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
-        service.updateProblemStatement(id, form.get().statement);
+        service.updateStatement(id, form.get().statement);
         return redirect(routes.ProgrammingProblemController.updateStatement(id));
     }
 
     @AddCSRFToken
     @Transactional
     public Result updateFiles(long id) {
-        ProgrammingProblem problem = service.findProblemById(id);
+        Problem problem = service.findProblemById(id);
         Form<UpdateFilesForm> form = Form.form(UpdateFilesForm.class);
-        List<String> filenames = service.getGradingFilenames(id);
+        List<String> filenames = service.getTestDataFilenames(id);
         return showUpdateFiles(form, id, problem.getName(), filenames);
     }
 
@@ -203,7 +219,7 @@ public final class ProgrammingProblemController extends Controller {
         if (file != null) {
             File evaluatorFile = file.getFile();
 
-            service.uploadGradingFile(id, evaluatorFile, file.getFilename());
+            service.uploadTestDataFile(id, evaluatorFile, file.getFilename());
         }
 
         return redirect(routes.ProgrammingProblemController.updateFiles(id));
@@ -212,15 +228,15 @@ public final class ProgrammingProblemController extends Controller {
     @AddCSRFToken
     @Transactional
     public Result updateGrading(long id) {
-        ProgrammingProblem problem = service.findProblemById(id);
-        String json = service.getProblemGrading(id);
+        Problem problem = service.findProblemById(id);
+        String json = service.getGradingConfig(id);
 
         Gson gson = new Gson();
         BatchGradingConfig config = gson.fromJson(json, BatchGradingConfig.class);
 
-        Form<BatchGradingConfigForm> form = Form.form(BatchGradingConfigForm.class).fill(ProgrammingProblemUtils.toGradingForm(config));
+        Form<BatchGradingConfigForm> form = Form.form(BatchGradingConfigForm.class).fill(ProblemUtils.toGradingForm(config));
 
-        List<String> filenames = service.getGradingFilenames(id);
+        List<String> filenames = service.getTestDataFilenames(id);
 
         return showUpdateGrading(form, problem, filenames);
     }
@@ -233,9 +249,9 @@ public final class ProgrammingProblemController extends Controller {
 
 
         Gson gson = new Gson();
-        BatchGradingConfig config = ProgrammingProblemUtils.toGradingConfig(data);
+        BatchGradingConfig config = ProblemUtils.toGradingConfig(data);
 
-        service.updateProblemGrading(id, gson.toJson(config));
+        service.updateGradingConfig(id, gson.toJson(config));
 
         return redirect(routes.ProgrammingProblemController.updateGrading(id));
     }
@@ -243,9 +259,6 @@ public final class ProgrammingProblemController extends Controller {
     @RequireCSRFCheck
     @Transactional
     public Result postSubmit(long id) {
-
-        ProgrammingProblem problem = service.findProblemById(id);
-
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart file = body.getFile("file");
 
@@ -256,8 +269,8 @@ public final class ProgrammingProblemController extends Controller {
                 byte[] sourceFileData = FileUtils.readFileToByteArray(sourceFile);
                 Map<String, byte[]> sourceFiles = ImmutableMap.of(file.getFilename(), sourceFileData);
 
-                service.submit(problem.getJid(), sourceFiles);
-
+                service.submit(id, sourceFiles);
+                return ok("dah disubmit");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -292,10 +305,7 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
-    private Result showUpdateGrading(Form<BatchGradingConfigForm> form, ProgrammingProblem problem, List<String> gradingFilenames) {
-
-        GradingExecutor gradingMethod = problem.getGradingMethod();
-
+    private Result showUpdateGrading(Form<BatchGradingConfigForm> form, Problem problem, List<String> gradingFilenames) {
         LazyHtml content = new LazyHtml(batchGradingView.render(form, problem, gradingFilenames));
         appendUpdateTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -320,7 +330,8 @@ public final class ProgrammingProblemController extends Controller {
     private void appendViewTabsLayout(LazyHtml content, long id, String problemName) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.view.tab.general"), routes.ProgrammingProblemController.viewGeneral(id)),
-                new InternalLink(Messages.get("problem.programming.view.tab.statement"), routes.ProgrammingProblemController.viewStatement(id))
+                new InternalLink(Messages.get("problem.programming.view.tab.statement"), routes.ProgrammingProblemController.viewStatement(id)),
+                new InternalLink(Messages.get("problem.programming.view.tab.submission"), routes.ProgrammingProblemController.viewSubmissions(id))
         ), c));
 
         content.appendLayout(c -> headingWithActionLayout.render("#" + id + ": " + problemName, new InternalLink(Messages.get("problem.programming.update"), routes.ProgrammingProblemController.update(id)), c));

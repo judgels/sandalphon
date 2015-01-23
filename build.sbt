@@ -5,16 +5,17 @@ name := """sandalphon"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val main = (project.in(file(".")))
+lazy val sandalphon = (project.in(file(".")))
                   .enablePlugins(PlayJava)
                   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
-                  .dependsOn(commons, gabrielcommons)
+                  .dependsOn(frontendcommons)
 
-lazy val commons = (RootProject(file("../judgels-play-commons")))
 
-lazy val gabrielcommons = (RootProject(file("../gabriel-commons")))
+lazy val frontendcommons = (RootProject(file("../judgels-frontend-commons")))
 
 scalaVersion := "2.11.1"
+
+resolvers += "IA TOKI Artifactory" at "http://artifactory.ia-toki.org/artifactory/repo"
 
 libraryDependencies ++= Seq(
   javaJdbc,
@@ -49,8 +50,7 @@ libraryDependencies ++= Seq(
   "com.puppycrawl.tools" % "checkstyle" % "6.1",
   "com.adrianhurt" % "play-bootstrap3_2.11" % "0.3",
   "com.google.code.gson" % "gson" % "2.3.1",
-  "com.nimbusds" % "c2id-server-sdk" % "2.0",
-  "org.iatoki.judgels.sealtiel" % "sealtielMessage" % "1.0.0"
+  "com.nimbusds" % "c2id-server-sdk" % "2.0"
 )
 
 TestNGPlugin.testNGSettings

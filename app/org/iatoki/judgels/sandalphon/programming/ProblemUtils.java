@@ -1,18 +1,18 @@
-package org.iatoki.judgels.sandalphon;
+package org.iatoki.judgels.sandalphon.programming;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.iatoki.judgels.gabriel.blackbox.Subtask;
 import org.iatoki.judgels.gabriel.blackbox.TestCase;
 import org.iatoki.judgels.gabriel.blackbox.TestSet;
-import org.iatoki.judgels.gabriel.grading.batch.BatchGradingConfig;
+import org.iatoki.judgels.gabriel.graders.BatchGradingConfig;
 import org.iatoki.judgels.sandalphon.forms.grading.BatchGradingConfigForm;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class ProgrammingProblemUtils {
+public final class ProblemUtils {
 
     public static BatchGradingConfig toGradingConfig(BatchGradingConfigForm form) {
         int testSetsCount = form.testCaseInputs.size();
@@ -36,7 +36,7 @@ public final class ProgrammingProblemUtils {
             subtasks.add(new Subtask(form.subtaskPoints.get(i), form.subtaskParams.get(i)));
         }
 
-        return new BatchGradingConfig(form.timeLimit, form.memoryLimit, testSets.build(), subtasks.build());
+        return new BatchGradingConfig(form.timeLimit, form.memoryLimit, testSets.build(), subtasks.build(), form.scoringExecutorFilename);
     }
 
     public static BatchGradingConfigForm toGradingForm(BatchGradingConfig config) {
@@ -55,7 +55,7 @@ public final class ProgrammingProblemUtils {
 
             List<Integer> subtasks = Lists.newArrayList();
             for (int j = 0; j < 10; j++) {
-                if (testSet.getSubtasks().contains(j)) {
+                if (testSet.getSubtaskNumbers().contains(j)) {
                     subtasks.add(j);
                 } else {
                     subtasks.add(null);
@@ -64,7 +64,7 @@ public final class ProgrammingProblemUtils {
             testSetsSubtasks.add(subtasks);
         }
 
-        ImmutableList.Builder<Double> subtaskPoints = ImmutableList.builder();
+        ImmutableList.Builder<Integer> subtaskPoints = ImmutableList.builder();
         ImmutableList.Builder<String> subtaskParams = ImmutableList.builder();
 
         for (Subtask subtask : config.getSubtasks()) {
@@ -77,6 +77,7 @@ public final class ProgrammingProblemUtils {
         form.testSetSubtasks = testSetsSubtasks.build();
         form.subtaskPoints = subtaskPoints.build();
         form.subtaskParams = subtaskParams.build();
+        form.scoringExecutorFilename = config.getScoringExecutorFilename();
 
         return form;
     }
