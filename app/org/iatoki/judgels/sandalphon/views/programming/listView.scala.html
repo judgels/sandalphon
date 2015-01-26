@@ -13,31 +13,33 @@
   <input type="hidden" name="orderBy" value="@currentOrder"/>
   <input type="hidden" name="sortBy" value="@currentSortBy"/>
   <div class="form-group">
-    <input type="search" class="form-control" name="filterString" value="@currentFilter">
+    <input type="search" class="form-control input-sm" name="filterString" value="@currentFilter">
   </div>
-  <button type="submit" class="btn btn-primary">@Messages.get("commons.search")</button>
+  <button type="submit" class="btn btn-primary btn-sm">@Messages.get("commons.search")</button>
 </form>
 
 <div class="clearfix"></div>
 
 <div class="table-responsive">
-  <table class="table table-hover table-condensed table-bordered">
+  <table class="table table-hover table-condensed">
+    <thead>
     <tr>
       @tableHeader("id", Messages.get("commons.field.id"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "id"))
       @tableHeader("name", Messages.get("problem.programming.field.name"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "name"))
       <th></th>
     </tr>
+    </thead>
+    <tbody>
     @for(page <- currentPage.getList()) {
       <tr>
         <td>@page.getId</td>
         <td>@page.getName</td>
         <td class="text-center">
-          <a href="@routes.ProgrammingProblemController.view(page.getId)"><span class="glyphicon glyphicon-search"></span></a>
-          <a href="@routes.ProgrammingProblemController.update(page.getId)"><span class="glyphicon glyphicon-edit"></span></a>
-          <a href="@routes.ProgrammingProblemController.delete(page.getId)" onclick="confirmLink ( event, this.href )"><span class="glyphicon glyphicon-remove"></span></a>
+          <a href="@routes.ProgrammingProblemController.view(page.getId)"><span class="glyphicon glyphicon-log-in"></span></a>
         </td>
       </tr>
     }
+    </tbody>
   </table>
 </div>
 

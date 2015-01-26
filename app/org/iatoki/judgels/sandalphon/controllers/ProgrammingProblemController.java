@@ -14,11 +14,9 @@ import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
+import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
-import org.iatoki.judgels.gabriel.Grader;
-import org.iatoki.judgels.gabriel.GraderRegistry;
-import org.iatoki.judgels.gabriel.GradingType;
 import org.iatoki.judgels.gabriel.graders.BatchGradingConfig;
 import org.iatoki.judgels.sandalphon.programming.Problem;
 import org.iatoki.judgels.sandalphon.programming.ProblemService;
@@ -121,7 +119,8 @@ public final class ProgrammingProblemController extends Controller {
     public Result viewGeneral(long id) {
         Problem problem = service.findProblemById(id);
         LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
-        appendViewTabsLayout(content, id, problem.getName());
+        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewGeneral(id), routes.ProgrammingProblemController.updateGeneral(id), c));
+        appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
@@ -138,7 +137,8 @@ public final class ProgrammingProblemController extends Controller {
 
         Form<SubmitForm> form = Form.form(SubmitForm.class);
         LazyHtml content = new LazyHtml(viewStatementView.render(form, statement, id));
-        appendViewTabsLayout(content, id, problem.getName());
+        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
+        appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
@@ -152,7 +152,7 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = service.findProblemById(id);
         Page<Submission> submissions = service.pageSubmission(0, 20, "id", "asc", problem.getJid());
         LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, "id", "asc", problem.getJid()));
-        appendViewTabsLayout(content, id, problem.getName());
+        appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
@@ -298,7 +298,8 @@ public final class ProgrammingProblemController extends Controller {
 
     private Result showUpdateGeneral(Form<UpsertForm> form, long id) {
         LazyHtml content = new LazyHtml(updateGeneralView.render(form, id));
-        appendUpdateTabsLayout(content, id, form.get().name);
+        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewGeneral(id), routes.ProgrammingProblemController.updateGeneral(id), c));
+        appendTabsLayout(content, id, form.get().name);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.update.general"), routes.ProgrammingProblemController.updateGeneral(id))
@@ -309,7 +310,8 @@ public final class ProgrammingProblemController extends Controller {
 
     private Result showUpdateStatement(Form<UpdateStatementForm> form, long id, String problemName) {
         LazyHtml content = new LazyHtml(updateStatementView.render(form, id));
-        appendUpdateTabsLayout(content, id, problemName);
+        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
+        appendTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.update.statement"), routes.ProgrammingProblemController.updateStatement(id))
@@ -320,7 +322,7 @@ public final class ProgrammingProblemController extends Controller {
 
     private Result showUpdateGrading(Form<BatchGradingConfigForm> form, Problem problem, List<String> gradingFilenames) {
         LazyHtml content = new LazyHtml(batchGradingView.render(form, problem, gradingFilenames));
-        appendUpdateTabsLayout(content, problem.getId(), problem.getName());
+        appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.update.grading"), routes.ProgrammingProblemController.updateGrading(problem.getId()))
@@ -331,7 +333,7 @@ public final class ProgrammingProblemController extends Controller {
 
     private Result showUpdateFiles(Form<UpdateFilesForm> form, long id, String problemName, List<File> testDataFiles) {
         LazyHtml content = new LazyHtml(updateFilesView.render(form, id, testDataFiles));
-        appendUpdateTabsLayout(content, id, problemName);
+        appendTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.update.files"), routes.ProgrammingProblemController.updateFiles(id))
@@ -340,17 +342,7 @@ public final class ProgrammingProblemController extends Controller {
         return lazyOk(content);
     }
 
-    private void appendViewTabsLayout(LazyHtml content, long id, String problemName) {
-        content.appendLayout(c -> tabLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.view.tab.general"), routes.ProgrammingProblemController.viewGeneral(id)),
-                new InternalLink(Messages.get("problem.programming.view.tab.statement"), routes.ProgrammingProblemController.viewStatement(id)),
-                new InternalLink(Messages.get("problem.programming.view.tab.submission"), routes.ProgrammingProblemController.viewSubmissions(id))
-        ), c));
-
-        content.appendLayout(c -> headingWithActionLayout.render("#" + id + ": " + problemName, new InternalLink(Messages.get("problem.programming.update"), routes.ProgrammingProblemController.update(id)), c));
-    }
-
-    private void appendUpdateTabsLayout(LazyHtml content, long id, String problemName) {
+    private void appendTabsLayout(LazyHtml content, long id, String problemName) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.update.tab.general"), routes.ProgrammingProblemController.updateGeneral(id)),
                 new InternalLink(Messages.get("problem.programming.update.tab.statement"), routes.ProgrammingProblemController.updateStatement(id)),
@@ -358,7 +350,7 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.update.tab.files"), routes.ProgrammingProblemController.updateFiles(id))
         ), c));
 
-        content.appendLayout(c -> headingWithActionLayout.render("#" + id + ": " + problemName, new InternalLink(Messages.get("problem.programming.view"), routes.ProgrammingProblemController.view(id)), c));
+        content.appendLayout(c -> headingLayout.render("#" + id + ": " + problemName, c));
     }
 
     private void appendTemplateLayout(LazyHtml content) {
