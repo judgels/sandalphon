@@ -1,7 +1,6 @@
 package org.iatoki.judgels.sandalphon.programming;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
@@ -83,32 +82,7 @@ public final class ProblemServiceImpl implements ProblemService {
         ProblemModel problemRecord = new ProblemModel(name, gradingType, additionalNote);
         dao.persist(problemRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
-        File problemDir = new File(problemsDir, problemRecord.jid);
-        File statementDir = new File(problemDir, "statement");
-        File gradingDir = new File(problemDir, "grading");
-
-        try {
-            FileUtils.forceMkdir(problemDir);
-            FileUtils.forceMkdir(gradingDir);
-            FileUtils.forceMkdir(new File(problemDir, "statement"));
-            FileUtils.forceMkdir(new File(gradingDir, "testdata"));
-            FileUtils.writeStringToFile(new File(statementDir, "statement.html"), "Keren parah");
-
-            String json;
-
-            switch (gradingType) {
-                case BATCH_SUBTASK:
-                    json = new Gson().toJson(BatchGradingConfig.createDefault());
-                    break;
-                default:
-                    throw new IllegalStateException();
-            }
-
-            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), json);
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot create directory for problem!");
-        }
+        createProblemDirs(problemRecord);
 
         return createProblemFromModel(problemRecord);
     }
@@ -116,7 +90,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public String getStatement(long id) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File problemDir = new File(problemsDir, problemRecord.jid);
         File statementDir = new File(problemDir, "statement");
         String statement;
@@ -132,7 +106,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public String getGradingConfig(long id) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File problemDir = new File(problemsDir, problemRecord.jid);
         File gradingDir = new File(problemDir, "grading");
         String json;
@@ -148,7 +122,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public void updateStatement(long id, String statement) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File problemDir = new File(problemsDir, problemRecord.jid);
         File statementDir = new File(problemDir, "statement");
         try {
@@ -161,7 +135,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public void uploadTestDataFile(long id, File file, String filename) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File problemDir = new File(problemsDir, problemRecord.jid);
         File gradingDir = new File(problemDir, "grading");
         try {
@@ -174,7 +148,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public void updateGradingConfig(long id, String json) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File problemDir = new File(problemsDir, problemRecord.jid);
         File gradingDir = new File(problemDir, "grading");
         try {
@@ -187,7 +161,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public List<File> getTestDataFiles(long id) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File testDataDir = FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "testdata");
 
         if (!testDataDir.isDirectory()) {
@@ -200,14 +174,14 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public File getTestDataFile(long id, String filename) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         return FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "testdata", filename);
     }
 
     @Override
     public List<File> getHelperFiles(long id) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File helpersDir = FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "helpers");
 
         if (!helpersDir.isDirectory()) {
@@ -220,7 +194,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public List<File> getMediaFiles(long id) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File mediaDir = FileUtils.getFile(problemsDir, problemRecord.jid, "media");
 
         if (!mediaDir.isDirectory()) {
@@ -246,6 +220,48 @@ public final class ProblemServiceImpl implements ProblemService {
 
         FakeClientMessage message = new FakeClientMessage("SFDSFDS", "BlackBoxGradingRequest", new Gson().toJson(request));
         sealtiel.sendMessage(message);
+    }
+
+    private void createProblemDirs(ProblemModel problemRecord) {
+        createProblemGradingDir(problemRecord);
+        createProblemStatementDir(problemRecord);
+    }
+
+    private void createProblemGradingDir(ProblemModel problemRecord) {
+        File gradingDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading");
+
+        try {
+            FileUtils.forceMkdir(gradingDir);
+            FileUtils.forceMkdir(new File(gradingDir, "testdata"));
+
+            String json;
+
+            switch (problemRecord.gradingType) {
+                case BATCH_SUBTASK:
+                    json = new Gson().toJson(BatchGradingConfig.createDefault());
+                    break;
+                default:
+                    throw new IllegalStateException();
+            }
+
+            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), json);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot create directory for problem!");
+        }
+    }
+
+
+    private void createProblemStatementDir(ProblemModel problemRecord) {
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
+        File statementDir = FileUtils.getFile(problemsDir, problemRecord.jid, "statement");
+
+        try {
+            FileUtils.forceMkdir(statementDir);
+            FileUtils.forceMkdir(new File(statementDir, "media"));
+            FileUtils.writeStringToFile(new File(statementDir, "statement.html"), "Problem description here");
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot create directory for problem!");
+        }
     }
     
     private Problem createProblemFromModel(ProblemModel record) {

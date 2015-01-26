@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
@@ -237,9 +238,10 @@ public final class ProgrammingProblemController extends Controller {
 
         Form<BatchGradingConfigForm> form = Form.form(BatchGradingConfigForm.class).fill(ProblemUtils.toGradingForm(config));
 
-        //List<File> filenames = service.getTestDataFiles(id);
+        List<File> files = service.getTestDataFiles(id);
+        List<String> filenames = Lists.transform(files, file -> file.getName());
 
-        return showUpdateGrading(form, problem, ImmutableList.of());
+        return showUpdateGrading(form, problem, filenames);
     }
 
     @RequireCSRFCheck

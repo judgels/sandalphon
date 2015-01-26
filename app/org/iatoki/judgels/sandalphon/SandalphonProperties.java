@@ -8,26 +8,26 @@ import java.io.IOException;
 public final class SandalphonProperties {
     private static SandalphonProperties INSTANCE;
 
-    private final File problemsDir;
-    private final File submissionsDir;
+    private final File problemDir;
+    private final File submissionDir;
 
     private SandalphonProperties(File baseDir) {
         try {
-            this.problemsDir = new File(baseDir, "problems");
-            FileUtils.forceMkdir(problemsDir);
-            this.submissionsDir = new File(baseDir, "submissions");
-            FileUtils.forceMkdir(submissionsDir);
+            this.problemDir = new File(baseDir, "problem");
+            FileUtils.forceMkdir(problemDir);
+            this.submissionDir = new File(baseDir, "submission");
+            FileUtils.forceMkdir(submissionDir);
         } catch (IOException e) {
             throw new RuntimeException("Cannot create folder inside " + baseDir.getAbsolutePath());
         }
     }
 
-    public File getProblemsDir() {
-        return this.problemsDir;
+    public File getProblemDir() {
+        return this.problemDir;
     }
 
-    public File getSubmissionsDir() {
-        return this.submissionsDir;
+    public File getSubmissionDir() {
+        return this.submissionDir;
     }
 
     public static SandalphonProperties getInstance() {

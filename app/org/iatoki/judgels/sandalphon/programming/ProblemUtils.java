@@ -19,7 +19,7 @@ public final class ProblemUtils {
         ImmutableList.Builder<TestSet> testSets = ImmutableList.builder();
 
         for (int i = 0; i < testSetsCount; i++) {
-            Set<Integer> subtasks = form.testSetSubtasks.get(i).stream()
+            Set<Integer> subtasks = form.testGroupSubtasks.get(i).stream()
                     .filter(s -> s != null)
                     .collect(Collectors.toSet());
 
@@ -74,7 +74,7 @@ public final class ProblemUtils {
 
         form.testCaseInputs = testCasesIn.build();
         form.testCaseOutputs = testCasesOut.build();
-        form.testSetSubtasks = testSetsSubtasks.build();
+        form.testGroupSubtasks = testSetsSubtasks.build();
         form.subtaskPoints = subtaskPoints.build();
         form.subtaskParams = subtaskParams.build();
         form.scoringExecutorFilename = config.getScoringExecutorFilename();
