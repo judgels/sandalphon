@@ -1,5 +1,6 @@
 package org.iatoki.judgels.sandalphon.programming;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
@@ -184,14 +185,49 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public List<String> getTestDataFilenames(long id) {
+    public List<File> getTestDataFiles(long id) {
         ProblemModel problemRecord = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
-        File problemDir = new File(problemsDir, problemRecord.jid);
-        File gradingDir = new File(problemDir, "grading");
-        File testDataDir = new File(gradingDir, "testdata");
+        File testDataDir = FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "testdata");
 
-        return Lists.transform(Arrays.asList(testDataDir.listFiles()), f -> f.getName());
+        if (!testDataDir.isDirectory()) {
+            return ImmutableList.of();
+        }
+
+        return Arrays.asList(testDataDir.listFiles());
+    }
+
+    @Override
+    public File getTestDataFile(long id, String filename) {
+        ProblemModel problemRecord = dao.findById(id);
+        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        return FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "testdata", filename);
+    }
+
+    @Override
+    public List<File> getHelperFiles(long id) {
+        ProblemModel problemRecord = dao.findById(id);
+        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File helpersDir = FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "helpers");
+
+        if (!helpersDir.isDirectory()) {
+            return ImmutableList.of();
+        }
+
+        return Arrays.asList(helpersDir.listFiles());
+    }
+
+    @Override
+    public List<File> getMediaFiles(long id) {
+        ProblemModel problemRecord = dao.findById(id);
+        File problemsDir = SandalphonProperties.getInstance().getProblemsDir();
+        File mediaDir = FileUtils.getFile(problemsDir, problemRecord.jid, "media");
+
+        if (!mediaDir.isDirectory()) {
+            return ImmutableList.of();
+        }
+
+        return Arrays.asList(mediaDir.listFiles());
     }
 
     @Override
@@ -211,7 +247,7 @@ public final class ProblemServiceImpl implements ProblemService {
         FakeClientMessage message = new FakeClientMessage("SFDSFDS", "BlackBoxGradingRequest", new Gson().toJson(request));
         sealtiel.sendMessage(message);
     }
-
+    
     private Problem createProblemFromModel(ProblemModel record) {
         return new Problem(record.id, record.jid, record.name, record.gradingType, record.additionalNote);
     }

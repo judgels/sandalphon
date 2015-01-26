@@ -129,6 +129,7 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
+    @AddCSRFToken
     @Transactional
     public Result viewStatement(long id) {
         String statement = service.getStatement(id);
@@ -206,8 +207,8 @@ public final class ProgrammingProblemController extends Controller {
     public Result updateFiles(long id) {
         Problem problem = service.findProblemById(id);
         Form<UpdateFilesForm> form = Form.form(UpdateFilesForm.class);
-        List<String> filenames = service.getTestDataFilenames(id);
-        return showUpdateFiles(form, id, problem.getName(), filenames);
+        List<File> testDataFiles = service.getTestDataFiles(id);
+        return showUpdateFiles(form, id, problem.getName(), testDataFiles);
     }
 
     @RequireCSRFCheck
@@ -236,9 +237,9 @@ public final class ProgrammingProblemController extends Controller {
 
         Form<BatchGradingConfigForm> form = Form.form(BatchGradingConfigForm.class).fill(ProblemUtils.toGradingForm(config));
 
-        List<String> filenames = service.getTestDataFilenames(id);
+        //List<File> filenames = service.getTestDataFiles(id);
 
-        return showUpdateGrading(form, problem, filenames);
+        return showUpdateGrading(form, problem, ImmutableList.of());
     }
 
     @RequireCSRFCheck
@@ -279,6 +280,16 @@ public final class ProgrammingProblemController extends Controller {
         return redirect(routes.ProgrammingProblemController.viewStatement(id));
     }
 
+    @Transactional
+    public Result downloadTestDataFile(long id, String filename) {
+        File file = service.getTestDataFile(id, filename);
+        if (file.exists()) {
+            return downloadFile(file);
+        } else {
+            return ok("File does not exist :(");
+        }
+    }
+
     public Result delete(long id) {
         return TODO;
     }
@@ -316,8 +327,8 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
-    private Result showUpdateFiles(Form<UpdateFilesForm> form, long id, String problemName, List<String> filenames) {
-        LazyHtml content = new LazyHtml(updateFilesView.render(form, id, filenames));
+    private Result showUpdateFiles(Form<UpdateFilesForm> form, long id, String problemName, List<File> testDataFiles) {
+        LazyHtml content = new LazyHtml(updateFilesView.render(form, id, testDataFiles));
         appendUpdateTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
@@ -359,6 +370,12 @@ public final class ProgrammingProblemController extends Controller {
         );
         content.appendLayout(c -> headerFooterLayout.render(c));
         content.appendLayout(c -> baseLayout.render("TODO", c));
+    }
+
+    private Result downloadFile(File file) {
+        response().setContentType("application/x-download");
+        response().setHeader("Content-disposition","attachment; filename=" + file.getName());
+        return ok(file);
     }
 
     private Result lazyOk(LazyHtml content) {

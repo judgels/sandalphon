@@ -1,31 +1,57 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm], id: Long, filenames: List[String])
+@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm], id: Long, testDataFiles: List[java.io.File])
 
 @import play.i18n.Messages
-@import b3.vertical.fieldConstructor
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.SandalphonUtils
+
+<ul class="nav nav-tabs">
+    <li role="presentation" class="active"><a href="#">Test Data</a></li>
+    <li role="presentation"><a href="#">Helpers</a></li>
+    <li role="presentation"><a href="#">Media</a></li>
+</ul>
+
+<h3>Upload New Test Data File(s)</h3>
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
 @b3.form(routes.ProgrammingProblemController.postUpdateFiles(id), 'enctype->"multipart/form-data") {
   @helper.CSRF.formField
 
-  @b3.file(form("file"), '_label -> "File")
+  @b3.file(form("file"), '_label -> "As a single file")
 
   @b3.submit('class -> "btn btn-primary") { @Messages.get("Upload") }
 }
 
-<h3>Files</h3>
+@b3.form(routes.ProgrammingProblemController.postUpdateFiles(id), 'enctype->"multipart/form-data") {
+    @helper.CSRF.formField
+
+    @b3.file(form("file"), '_label -> "As a zip file")
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("Upload") }
+}
+
+<hr />
+
+<h3>Test Data Files</h3>
 
 <table class="table">
     <thead>
-      <tr>
-        <th>File</th></tr>
+        <tr>
+            <th>File</th>
+            <th>Last Modified</th>
+            <th>Size</th>
+            <th></th>
+        </tr>
     </thead>
 
     <tbody>
-      @for(name <- filenames) {
-        <tr>
-
-        <td>@name</td>
-          </tr>
-      }
+        @for(file <- testDataFiles) {
+            <tr>
+                <td>@file.getName</td>
+                <td>@SandalphonUtils.timestampToFormattedDate(file.lastModified)</td>
+                <td>@SandalphonUtils.byteCountToFormattedSize(file.length)</td>
+                <td><a href="@routes.ProgrammingProblemController.downloadTestDataFile(id, file.getName)"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
+            </tr>
+        }
     </tbody>
 </table>

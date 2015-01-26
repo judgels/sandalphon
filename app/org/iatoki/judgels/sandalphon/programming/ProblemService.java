@@ -29,7 +29,13 @@ public interface ProblemService {
 
     void updateGradingConfig(long id, String json);
 
-    List<String> getTestDataFilenames(long id);
+    List<File> getTestDataFiles(long id);
+
+    File getTestDataFile(long id, String filename);
+
+    List<File> getHelperFiles(long id);
+
+    List<File> getMediaFiles(long id);
 
     void submit(long id, Map<String, byte[]> sourceFiles);
 }

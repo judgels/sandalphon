@@ -31,4 +31,5 @@ POST        /problem/programming/:id/update/files           @org.iatoki.judgels.
 GET         /problem/programming/:id/update/grading         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGrading(id: Long)
 POST        /problem/programming/:id/update/grading         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateGrading(id: Long)
 POST        /problem/programming/:id/submit                 @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postSubmit(id: Long)
+GET         /problem/programming/:id/download/testdata/:filename                 @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadTestDataFile(id: Long, filename: String)
 
