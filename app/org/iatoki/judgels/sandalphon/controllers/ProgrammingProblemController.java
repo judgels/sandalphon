@@ -16,11 +16,11 @@ import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
-import org.iatoki.judgels.gabriel.blackbox.BlackBoxGradingConfig;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
+import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
 import org.iatoki.judgels.sandalphon.programming.Problem;
 import org.iatoki.judgels.sandalphon.programming.ProblemService;
@@ -261,7 +261,7 @@ public final class ProgrammingProblemController extends Controller {
             List<File> helperFiles = problemService.getHelperFiles(id);
             return showUpdateGrading(form, problem, testDataFiles, helperFiles);
         } else {
-            BlackBoxGradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createConfigFromForm(form);
+            GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createConfigFromForm(form);
             String configAsJson = new Gson().toJson(config);
             problemService.updateGradingConfig(id, configAsJson);
             return redirect(routes.ProgrammingProblemController.updateGrading(id));

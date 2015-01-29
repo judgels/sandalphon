@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.programming;
 
-import org.iatoki.judgels.gabriel.blackbox.BlackBoxGradingConfig;
+import org.iatoki.judgels.gabriel.GradingConfig;
 import play.data.Form;
 import play.mvc.Http;
 import play.twirl.api.Html;
@@ -13,7 +13,7 @@ public interface GradingConfigAdapter {
 
     Form<?> createFormFromRequest(Http.Request request);
 
-    BlackBoxGradingConfig createConfigFromForm(Form<?> form);
+    GradingConfig createConfigFromForm(Form<?> form);
 
     Html renderForm(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles);
 }
