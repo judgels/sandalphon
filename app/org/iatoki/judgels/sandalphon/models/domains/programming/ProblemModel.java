@@ -2,7 +2,6 @@ package org.iatoki.judgels.sandalphon.models.domains.programming;
 
 import org.iatoki.judgels.commons.models.domains.AbstractJudgelsModel;
 import org.iatoki.judgels.gabriel.GradingType;
-import org.iatoki.judgels.sandalphon.programming.Problem;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,8 +13,7 @@ import javax.persistence.Table;
 public final class ProblemModel extends AbstractJudgelsModel {
     public String name;
 
-    @Enumerated(EnumType.STRING)
-    public GradingType gradingType;
+    public String gradingType;
 
     public String additionalNote;
 
@@ -23,13 +21,13 @@ public final class ProblemModel extends AbstractJudgelsModel {
 
     }
 
-    public ProblemModel(String name, GradingType gradingType, String additionalNote) {
+    public ProblemModel(String name, String gradingType, String additionalNote) {
         this.name = name;
         this.gradingType = gradingType;
         this.additionalNote = additionalNote;
     }
 
-    public ProblemModel(long id, String jid, String name, GradingType gradingType, String note) {
+    public ProblemModel(long id, String jid, String name, String gradingType, String note) {
         this(name, gradingType, note);
         this.id = id;
         this.jid = jid;

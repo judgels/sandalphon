@@ -56,7 +56,8 @@ public final class SubmissionHibernateDao extends AbstractJudgelsHibernateDao<Su
         selection.add(root.get("id"));
         selection.add(root.get("jid"));
         selection.add(root.get("problemJid"));
-        selection.add(root.get("verdict"));
+        selection.add(root.get("verdictCode"));
+        selection.add(root.get("verdictName"));
         selection.add(root.get("score"));
         selection.add(root.get("message"));
         selection.add(root.get("details"));

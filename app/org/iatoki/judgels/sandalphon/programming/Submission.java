@@ -9,17 +9,15 @@ public final class Submission {
     private final String authorJid;
     private final Verdict verdict;
     private final int score;
-    private final String message;
     private final String details;
 
-    public Submission(long id, String jid, String problemJid, String authorJid, Verdict verdict, int score, String message, String details) {
+    public Submission(long id, String jid, String problemJid, String authorJid, Verdict verdict, int score, String details) {
         this.id = id;
         this.jid = jid;
         this.problemJid = problemJid;
         this.authorJid = authorJid;
         this.verdict = verdict;
         this.score = score;
-        this.message = message;
         this.details = details;
     }
 
@@ -45,10 +43,6 @@ public final class Submission {
 
     public int getScore() {
         return score;
-    }
-
-    public String getMessage() {
-        return message;
     }
 
     public Object getDetails() {

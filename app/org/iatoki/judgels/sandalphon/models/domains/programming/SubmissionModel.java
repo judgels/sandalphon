@@ -13,13 +13,13 @@ public final class SubmissionModel extends org.iatoki.judgels.commons.models.dom
 
     }
 
-    public SubmissionModel(long id, String jid, String problemJid, Verdict verdict, int score, String message, char[] details) {
+    public SubmissionModel(long id, String jid, String problemJid, String verdictCode, String verdictName, int score, String details) {
         this.id = id;
         this.jid = jid;
         this.problemJid = problemJid;
-        this.verdict = verdict;
+        this.verdictCode = verdictCode;
+        this.verdictName = verdictName;
         this.score = score;
-        this.message = message;
         this.details = details;
     }
 }

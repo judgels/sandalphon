@@ -7,11 +7,11 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.FakeClientMessage;
 import org.iatoki.judgels.gabriel.FakeSealtiel;
+import org.iatoki.judgels.gabriel.GraderRegistry;
 import org.iatoki.judgels.gabriel.GradingLanguage;
 import org.iatoki.judgels.gabriel.GradingType;
 import org.iatoki.judgels.gabriel.Verdict;
 import org.iatoki.judgels.gabriel.blackbox.BlackBoxGradingRequest;
-import org.iatoki.judgels.gabriel.graders.BatchGradingConfig;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.SubmissionDao;
@@ -78,7 +78,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Problem createProblem(String name, GradingType gradingType, String additionalNote) {
+    public Problem createProblem(String name, String gradingType, String additionalNote) {
         ProblemModel problemRecord = new ProblemModel(name, gradingType, additionalNote);
         dao.persist(problemRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
@@ -182,7 +182,7 @@ public final class ProblemServiceImpl implements ProblemService {
     public List<File> getHelperFiles(long id) {
         ProblemModel problemRecord = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File helpersDir = FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "helpers");
+        File helpersDir = FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "helper");
 
         if (!helpersDir.isDirectory()) {
             return ImmutableList.of();
@@ -206,20 +206,20 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public void submit(long id, Map<String, byte[]> sourceFiles) {
-        ProblemModel problemRecord = dao.findById(id);
-
-        SubmissionModel submissionRecord = new SubmissionModel();
-        submissionRecord.problemJid = problemRecord.jid;
-        submissionRecord.verdict = Verdict.PENDING;
-        submissionRecord.score = 0;
-        submissionRecord.message = "Waiting for grading";
-
-        submissionDao.persist(submissionRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
-        BlackBoxGradingRequest request = new BlackBoxGradingRequest(submissionRecord.jid, problemRecord.jid, problemRecord.timeUpdate, problemRecord.gradingType, GradingLanguage.CPP, sourceFiles);
-
-        FakeClientMessage message = new FakeClientMessage("SFDSFDS", "BlackBoxGradingRequest", new Gson().toJson(request));
-        sealtiel.sendMessage(message);
+//        ProblemModel problemRecord = dao.findById(id);
+//
+//        SubmissionModel submissionRecord = new SubmissionModel();
+//        submissionRecord.problemJid = problemRecord.jid;
+//        submissionRecord.verdict = Verdict.PENDING;
+//        submissionRecord.score = 0;
+//        submissionRecord.message = "Waiting for grading";
+//
+//        submissionDao.persist(submissionRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+//
+//        BlackBoxGradingRequest request = new BlackBoxGradingRequest(submissionRecord.jid, problemRecord.jid, problemRecord.timeUpdate, problemRecord.gradingType, GradingLanguage.CPP, sourceFiles);
+//
+//        FakeClientMessage message = new FakeClientMessage("SFDSFDS", "BlackBoxGradingRequest", new Gson().toJson(request));
+//        sealtiel.sendMessage(message);
     }
 
     private void createProblemDirs(ProblemModel problemRecord) {
@@ -233,18 +233,11 @@ public final class ProblemServiceImpl implements ProblemService {
         try {
             FileUtils.forceMkdir(gradingDir);
             FileUtils.forceMkdir(new File(gradingDir, "testdata"));
+            FileUtils.forceMkdir(new File(gradingDir, "helper"));
 
-            String json;
+            String config = GraderRegistry.getInstance().getGrader(problemRecord.gradingType).createDefaultGradingConfig();
 
-            switch (problemRecord.gradingType) {
-                case BATCH_SUBTASK:
-                    json = new Gson().toJson(BatchGradingConfig.createDefault());
-                    break;
-                default:
-                    throw new IllegalStateException();
-            }
-
-            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), json);
+            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), config);
         } catch (IOException e) {
             throw new RuntimeException("Cannot create directory for problem!");
         }
@@ -269,6 +262,26 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     private Submission createSubmissionFromModel(SubmissionModel record) {
-        return new Submission(record.id, record.jid, record.problemJid, record.userCreate, record.verdict, record.score, record.message, new String(record.details));
+        return new Submission(record.id, record.jid, record.problemJid, record.userCreate, new DisplayVerdict(record.verdictCode, record.verdictName), record.score, record.details);
+    }
+
+    static class DisplayVerdict implements Verdict {
+        private final String code;
+        private final String name;
+
+        public DisplayVerdict(String code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+
+        @Override
+        public String getCode() {
+            return code;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
     }
 }

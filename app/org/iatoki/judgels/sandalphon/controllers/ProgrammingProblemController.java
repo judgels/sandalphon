@@ -2,7 +2,6 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
@@ -17,18 +16,16 @@ import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
-import org.iatoki.judgels.gabriel.graders.BatchGradingConfig;
+import org.iatoki.judgels.gabriel.blackbox.BlackBoxGradingConfig;
+import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
 import org.iatoki.judgels.sandalphon.programming.Problem;
 import org.iatoki.judgels.sandalphon.programming.ProblemService;
-import org.iatoki.judgels.sandalphon.programming.ProblemUtils;
 import org.iatoki.judgels.sandalphon.controllers.authenticators.Secured;
-import org.iatoki.judgels.sandalphon.forms.grading.BatchGradingConfigForm;
 import org.iatoki.judgels.sandalphon.forms.programming.SubmitForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
 import org.iatoki.judgels.sandalphon.programming.Submission;
-import org.iatoki.judgels.sandalphon.views.html.grading.batch.batchGradingView;
 import org.iatoki.judgels.sandalphon.views.html.programming.createView;
 import org.iatoki.judgels.sandalphon.views.html.programming.listView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateFilesView;
@@ -231,32 +228,32 @@ public final class ProgrammingProblemController extends Controller {
     @Transactional
     public Result updateGrading(long id) {
         Problem problem = service.findProblemById(id);
-        String json = service.getGradingConfig(id);
+        String gradingConfigJson = service.getGradingConfig(id);
+        List<File> testDataFiles = service.getTestDataFiles(id);
+        List<File> helperFiles = service.getHelperFiles(id);
 
-        Gson gson = new Gson();
-        BatchGradingConfig config = gson.fromJson(json, BatchGradingConfig.class);
+        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createFormFromConfigJson(gradingConfigJson);
 
-        Form<BatchGradingConfigForm> form = Form.form(BatchGradingConfigForm.class).fill(ProblemUtils.toGradingForm(config));
-
-        List<File> files = service.getTestDataFiles(id);
-        List<String> filenames = Lists.transform(files, file -> file.getName());
-
-        return showUpdateGrading(form, problem, filenames);
+        return showUpdateGrading(form, problem, testDataFiles, helperFiles);
     }
 
     @RequireCSRFCheck
     @Transactional
     public Result postUpdateGrading(long id) {
-        Form<BatchGradingConfigForm> form = Form.form(BatchGradingConfigForm.class).bindFromRequest();
-        BatchGradingConfigForm data = form.get();
+        Problem problem = service.findProblemById(id);
 
+        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createFormFromRequest(request());
 
-        Gson gson = new Gson();
-        BatchGradingConfig config = ProblemUtils.toGradingConfig(data);
-
-        service.updateGradingConfig(id, gson.toJson(config));
-
-        return redirect(routes.ProgrammingProblemController.updateGrading(id));
+        if (form.hasErrors()) {
+            List<File> testDataFiles = service.getTestDataFiles(id);
+            List<File> helperFiles = service.getHelperFiles(id);
+            return showUpdateGrading(form, problem, testDataFiles, helperFiles);
+        } else {
+            BlackBoxGradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createConfigFromForm(form);
+            String configAsJson = new Gson().toJson(config);
+            service.updateGradingConfig(id, configAsJson);
+            return redirect(routes.ProgrammingProblemController.updateGrading(id));
+        }
     }
 
     @RequireCSRFCheck
@@ -320,8 +317,8 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
-    private Result showUpdateGrading(Form<BatchGradingConfigForm> form, Problem problem, List<String> gradingFilenames) {
-        LazyHtml content = new LazyHtml(batchGradingView.render(form, problem, gradingFilenames));
+    private Result showUpdateGrading(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles) {
+        LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingType()).renderForm(form, problem, testDataFiles, helperFiles));
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),

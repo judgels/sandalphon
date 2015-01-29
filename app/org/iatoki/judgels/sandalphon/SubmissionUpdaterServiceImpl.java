@@ -16,10 +16,10 @@ public class SubmissionUpdaterServiceImpl implements SubmissionUpdaterService {
     @Override
     public void updateResult(String submissionJid, GradingResult result) {
         SubmissionModel submissionRecord = dao.findByJid(submissionJid);
-        submissionRecord.verdict = result.getVerdict();
+        submissionRecord.verdictCode = result.getVerdict().getCode();
+        submissionRecord.verdictName = result.getVerdict().getName();
         submissionRecord.score = result.getScore();
-        submissionRecord.message = result.getMessage();
-        submissionRecord.details = result.getDetails().toCharArray();
+        submissionRecord.details = result.getDetailsAsJson();
 
         dao.edit(submissionRecord, "Grader", "Grader's IP");
     }

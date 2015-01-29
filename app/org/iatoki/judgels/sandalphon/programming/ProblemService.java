@@ -17,7 +17,7 @@ public interface ProblemService {
 
     Page<Submission> pageSubmission(long page, long pageSize, String sortBy, String order, String filterString);
 
-    Problem createProblem(String name, GradingType gradingType, String additionalNote);
+    Problem createProblem(String name, String gradingType, String additionalNote);
 
     String getStatement(long id);
 

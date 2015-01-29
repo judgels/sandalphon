@@ -1,7 +1,8 @@
 @(form: Form[org.iatoki.judgels.sandalphon.forms.programming.UpsertForm])
 
+@import scala.collection.JavaConverters._
+@import org.iatoki.judgels.gabriel.GraderRegistry
 @import play.i18n.Messages
-@import org.iatoki.judgels.gabriel.GradingType
 @import org.iatoki.judgels.sandalphon.controllers.routes
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
@@ -11,7 +12,7 @@
 
     @b3.text(form("name"), '_label -> Messages.get("problem.programming.field.name"))
 
-    @b3.select(form("gradingType"), GradingType.values().map(e => e.toString -> e.getName))
+    @b3.select(form("gradingType"), GraderRegistry.getInstance().getGradingTypes.asScala.toSeq)
 
     @b3.textarea(form("note"), '_label -> Messages.get("problem.programming.field.note"))
 
