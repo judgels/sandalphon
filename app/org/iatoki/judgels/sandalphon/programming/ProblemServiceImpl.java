@@ -5,13 +5,10 @@ import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.gabriel.FakeClientMessage;
 import org.iatoki.judgels.gabriel.FakeSealtiel;
 import org.iatoki.judgels.gabriel.GraderRegistry;
-import org.iatoki.judgels.gabriel.GradingLanguage;
-import org.iatoki.judgels.gabriel.GradingType;
+import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.Verdict;
-import org.iatoki.judgels.gabriel.blackbox.BlackBoxGradingRequest;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.SubmissionDao;
@@ -235,9 +232,9 @@ public final class ProblemServiceImpl implements ProblemService {
             FileUtils.forceMkdir(new File(gradingDir, "testdata"));
             FileUtils.forceMkdir(new File(gradingDir, "helper"));
 
-            String config = GraderRegistry.getInstance().getGrader(problemRecord.gradingType).createDefaultGradingConfig();
+            GradingConfig config = GraderRegistry.getInstance().getGrader(problemRecord.gradingType).createDefaultGradingConfig();
 
-            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), config);
+            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), new Gson().toJson(config));
         } catch (IOException e) {
             throw new RuntimeException("Cannot create directory for problem!");
         }

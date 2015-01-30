@@ -9,6 +9,7 @@ lazy val sandalphon = (project.in(file(".")))
                   .enablePlugins(PlayJava)
                   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
                   .dependsOn(frontendcommons)
+                  .aggregate(frontendcommons)
 
 
 lazy val frontendcommons = (RootProject(file("../judgels-frontend-commons")))
@@ -47,6 +48,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "less" % "1.7.5",
   "org.webjars" % "prettify" % "4-Mar-2013",
   "org.webjars" % "requirejs" % "2.1.15",
+  "org.webjars" % "bootstrap-datetimepicker" % "6aa746736d",
   "com.puppycrawl.tools" % "checkstyle" % "6.1",
   "com.adrianhurt" % "play-bootstrap3_2.11" % "0.3",
   "com.google.code.gson" % "gson" % "2.3.1",
