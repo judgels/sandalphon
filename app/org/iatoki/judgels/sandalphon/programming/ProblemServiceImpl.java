@@ -262,26 +262,6 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     private Submission createSubmissionFromModel(SubmissionModel record) {
-        return new Submission(record.id, record.jid, record.problemJid, record.userCreate, new DisplayVerdict(record.verdictCode, record.verdictName), record.score, record.details);
-    }
-
-    static class DisplayVerdict implements Verdict {
-        private final String code;
-        private final String name;
-
-        public DisplayVerdict(String code, String name) {
-            this.code = code;
-            this.name = name;
-        }
-
-        @Override
-        public String getCode() {
-            return code;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
+        return new Submission(record.id, record.jid, record.problemJid, record.userCreate, new Verdict(record.verdictCode, record.verdictName), record.score, record.details);
     }
 }

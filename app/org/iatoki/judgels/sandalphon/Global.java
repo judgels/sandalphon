@@ -62,7 +62,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
 
         Scheduler scheduler = Akka.system().scheduler();
         ExecutionContextExecutor context = Akka.system().dispatcher();
-        scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(10, TimeUnit.MILLISECONDS), poller, context);
+        scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(3, TimeUnit.SECONDS), poller, context);
     }
 
     @Override
