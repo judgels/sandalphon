@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.forms.grading;
+package org.iatoki.judgels.sandalphon.forms.configs;
 
 import java.util.List;
 

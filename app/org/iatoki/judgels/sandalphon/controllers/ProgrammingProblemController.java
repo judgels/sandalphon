@@ -9,6 +9,7 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
+import org.iatoki.judgels.commons.SubmissionAdapters;
 import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
 import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
@@ -42,8 +43,8 @@ import org.iatoki.judgels.sandalphon.views.html.programming.updateClientProblemV
 import org.iatoki.judgels.sandalphon.views.html.programming.updateViewClientProblemView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateUpdateClientProblemView;
 import org.iatoki.judgels.sandalphon.views.html.programming.viewGeneralView;
-import org.iatoki.judgels.sandalphon.views.html.programming.viewStatementView;
 import org.iatoki.judgels.sandalphon.views.html.programming.viewSubmissionsView;
+import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -144,8 +145,9 @@ public final class ProgrammingProblemController extends Controller {
         String statement = problemService.getStatement(id);
         Problem problem = problemService.findProblemById(id);
 
-        Form<SubmitForm> form = Form.form(SubmitForm.class);
-        LazyHtml content = new LazyHtml(viewStatementView.render(form, statement, id));
+        GradingConfig config = problemService.getGradingConfig(id);
+
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingType()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id), statement, config));
         content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
         appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -240,11 +242,11 @@ public final class ProgrammingProblemController extends Controller {
     @Transactional
     public Result updateGrading(long id) {
         Problem problem = problemService.findProblemById(id);
-        String gradingConfigJson = problemService.getGradingConfig(id);
+        GradingConfig config = problemService.getGradingConfig(id);
         List<File> testDataFiles = problemService.getTestDataFiles(id);
         List<File> helperFiles = problemService.getHelperFiles(id);
 
-        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createFormFromConfigJson(gradingConfigJson);
+        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createFormFromConfig(config);
 
         return showUpdateGrading(form, problem, testDataFiles, helperFiles);
     }
@@ -262,8 +264,7 @@ public final class ProgrammingProblemController extends Controller {
             return showUpdateGrading(form, problem, testDataFiles, helperFiles);
         } else {
             GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createConfigFromForm(form);
-            String configAsJson = new Gson().toJson(config);
-            problemService.updateGradingConfig(id, configAsJson);
+            problemService.updateGradingConfig(id, config);
             return redirect(routes.ProgrammingProblemController.updateGrading(id));
         }
     }
@@ -280,9 +281,8 @@ public final class ProgrammingProblemController extends Controller {
 
                 byte[] sourceFileData = FileUtils.readFileToByteArray(sourceFile);
                 Map<String, byte[]> sourceFiles = ImmutableMap.of(file.getFilename(), sourceFileData);
-
                 problemService.submit(id, sourceFiles);
-                return ok("dah disubmit");
+                return redirect(routes.ProgrammingProblemController.viewStatement(id));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -431,7 +431,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     private Result showUpdateGrading(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles) {
-        LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingType()).renderForm(form, problem, testDataFiles, helperFiles));
+        LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingType()).renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),

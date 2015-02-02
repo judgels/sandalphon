@@ -101,7 +101,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public String getGradingConfig(long id) {
+    public GradingConfig getGradingConfig(long id) {
         ProblemModel problemRecord = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File problemDir = new File(problemsDir, problemRecord.jid);
@@ -113,7 +113,7 @@ public final class ProblemServiceImpl implements ProblemService {
             throw new RuntimeException("Cannot read grading!");
         }
 
-        return json;
+        return GraderRegistry.getInstance().getGrader(problemRecord.gradingType).createGradingConfigFromJson(json);
     }
 
     @Override
@@ -143,13 +143,13 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void updateGradingConfig(long id, String json) {
+    public void updateGradingConfig(long id, GradingConfig config) {
         ProblemModel problemRecord = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File problemDir = new File(problemsDir, problemRecord.jid);
         File gradingDir = new File(problemDir, "grading");
         try {
-            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), json);
+            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), new Gson().toJson(config));
         } catch (IOException e) {
             throw new RuntimeException("Cannot write json!");
         }

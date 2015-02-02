@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.programming;
 
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingType;
 
 import java.io.File;
@@ -21,13 +22,13 @@ public interface ProblemService {
 
     String getStatement(long id);
 
-    String getGradingConfig(long id);
+    GradingConfig getGradingConfig(long id);
 
     void updateStatement(long id, String statement);
 
     void uploadTestDataFile(long id, File file, String filename);
 
-    void updateGradingConfig(long id, String json);
+    void updateGradingConfig(long id, GradingConfig config);
 
     List<File> getTestDataFiles(long id);
 

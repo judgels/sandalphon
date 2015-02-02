@@ -9,11 +9,11 @@ import java.io.File;
 import java.util.List;
 
 public interface GradingConfigAdapter {
-    Form<?> createFormFromConfigJson(String gradingConfigJson);
+    Form<?> createFormFromConfig(GradingConfig config);
 
     Form<?> createFormFromRequest(Http.Request request);
 
     GradingConfig createConfigFromForm(Form<?> form);
 
-    Html renderForm(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles);
+    Html renderUpdateGradingConfig(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles);
 }
