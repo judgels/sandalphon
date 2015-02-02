@@ -47,7 +47,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.clientDao = new ClientHibernateDao();
         this.clientProblemDao = new ClientProblemHibernateDao();
         this.userRoleDao = new UserRoleHibernateDao();
-        this.sealtiel = new FakeSealtiel(new File("/Users/dronjax/grading-requests"), new File("/Users/dronjax/grading-responses"));
+        this.sealtiel = new FakeSealtiel(new File("/Users/fushar/grading-requests"), new File("/Users/fushar/grading-responses"));
         this.problemService = new ProblemServiceImpl(problemDao, submissionDao, sealtiel);
         this.submissionUpdaterService = new SubmissionUpdaterServiceImpl(submissionDao);
         this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);

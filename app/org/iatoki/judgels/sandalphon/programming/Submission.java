@@ -45,7 +45,7 @@ public final class Submission {
         return score;
     }
 
-    public Object getDetails() {
+    public String getDetails() {
         return details;
     }
 }

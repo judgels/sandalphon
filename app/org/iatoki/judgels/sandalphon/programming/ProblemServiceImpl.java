@@ -5,9 +5,13 @@ import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.SubmissionAdapters;
+import org.iatoki.judgels.gabriel.FakeClientMessage;
 import org.iatoki.judgels.gabriel.FakeSealtiel;
 import org.iatoki.judgels.gabriel.GraderRegistry;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.gabriel.GradingRequest;
+import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.gabriel.Verdict;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
@@ -19,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class ProblemServiceImpl implements ProblemService {
@@ -202,21 +205,21 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void submit(long id, Map<String, byte[]> sourceFiles) {
-//        ProblemModel problemRecord = dao.findById(id);
-//
-//        SubmissionModel submissionRecord = new SubmissionModel();
-//        submissionRecord.problemJid = problemRecord.jid;
-//        submissionRecord.verdict = Verdict.PENDING;
-//        submissionRecord.score = 0;
-//        submissionRecord.message = "Waiting for grading";
-//
-//        submissionDao.persist(submissionRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-//
-//        BlackBoxGradingRequest request = new BlackBoxGradingRequest(submissionRecord.jid, problemRecord.jid, problemRecord.timeUpdate, problemRecord.gradingType, GradingLanguage.CPP, sourceFiles);
-//
-//        FakeClientMessage message = new FakeClientMessage("SFDSFDS", "BlackBoxGradingRequest", new Gson().toJson(request));
-//        sealtiel.sendMessage(message);
+    public void submit(long id, GradingSource source) {
+        ProblemModel problemRecord = dao.findById(id);
+
+        SubmissionModel submissionRecord = new SubmissionModel();
+        submissionRecord.problemJid = problemRecord.jid;
+        submissionRecord.verdictCode = "?";
+        submissionRecord.verdictName = "Pending";
+        submissionRecord.score = 0;
+        submissionRecord.details = "";
+
+        submissionDao.persist(submissionRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+
+        GradingRequest request = SubmissionAdapters.fromGradingType(problemRecord.gradingType).createGradingRequest(submissionRecord.jid, problemRecord.jid, problemRecord.timeUpdate, problemRecord.gradingType, source);
+        FakeClientMessage message = new FakeClientMessage("some-target", request.getClass().getSimpleName(), new Gson().toJson(request));
+        sealtiel.sendMessage(message);
     }
 
     private void createProblemDirs(ProblemModel problemRecord) {

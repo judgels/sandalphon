@@ -2,7 +2,6 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
@@ -17,6 +16,8 @@ import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
+import org.iatoki.judgels.gabriel.GraderRegistry;
+import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
@@ -29,7 +30,6 @@ import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
-import org.iatoki.judgels.sandalphon.forms.programming.SubmitForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
@@ -172,6 +172,11 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
+    @Transactional
+    public Result viewSubmission(long submissionId) {
+        return ok();
+    }
+
     public Result update(long id) {
         return redirect(routes.ProgrammingProblemController.updateGeneral(id));
     }
@@ -271,24 +276,15 @@ public final class ProgrammingProblemController extends Controller {
 
     @RequireCSRFCheck
     @Transactional
-    public Result postSubmit(long id) {
+    public Result postSubmit(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        GradingConfig config = problemService.getGradingConfig(problemId);
         Http.MultipartFormData body = request().body().asMultipartFormData();
-        Http.MultipartFormData.FilePart file = body.getFile("file");
+        GradingSource source = SubmissionAdapters.fromGradingType(problem.getGradingType()).createGradingSource(config, body);
 
-        if (file != null) {
-            try {
-                File sourceFile = file.getFile();
+        problemService.submit(problemId, source);
 
-                byte[] sourceFileData = FileUtils.readFileToByteArray(sourceFile);
-                Map<String, byte[]> sourceFiles = ImmutableMap.of(file.getFilename(), sourceFileData);
-                problemService.submit(id, sourceFiles);
-                return redirect(routes.ProgrammingProblemController.viewStatement(id));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return redirect(routes.ProgrammingProblemController.viewStatement(id));
+        return redirect(routes.ProgrammingProblemController.viewSubmissions(problemId));
     }
 
     @AddCSRFToken
@@ -480,6 +476,7 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.update.tab.statement"), routes.ProgrammingProblemController.updateStatement(id)),
                 new InternalLink(Messages.get("problem.programming.update.tab.grading"), routes.ProgrammingProblemController.updateGrading(id)),
                 new InternalLink(Messages.get("problem.programming.update.tab.files"), routes.ProgrammingProblemController.updateFiles(id)),
+                new InternalLink(Messages.get("Submissions"), routes.ProgrammingProblemController.viewSubmissions(id)),
                 new InternalLink(Messages.get("problem.programming.update.tab.clients"), routes.ProgrammingProblemController.updateClients(id))
         ), c));
 

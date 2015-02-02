@@ -21,19 +21,19 @@
   <table class="table table-hover table-condensed table-bordered">
     <tr>
       @tableHeader("id", Messages.get("commons.field.id"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "id"))
-      @tableHeader("verdict", Messages.get("problem.programming.field.verdict"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "verdict"))
-      @tableHeader("score", Messages.get("problem.programming.field.score"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "score"))
+      @tableHeader("verdict", Messages.get("Verdict"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "verdict"))
+      @tableHeader("score", Messages.get("Score"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "score"))
+      @tableHeader("details", Messages.get("Details"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "details"))
       <th></th>
     </tr>
     @for(page <- currentPage.getList()) {
       <tr>
         <td>@page.getId</td>
-        <td>@page.getVerdict</td>
+        <td>@page.getVerdict.getCode - @page.getVerdict.getName</td>
         <td>@page.getScore</td>
+        <td>@page.getDetails</td>
         <td class="text-center">
-          <a href="@routes.ProgrammingProblemController.view(page.getId)"><span class="glyphicon glyphicon-search"></span></a>
-          <a href="@routes.ProgrammingProblemController.update(page.getId)"><span class="glyphicon glyphicon-edit"></span></a>
-          <a href="@routes.ProgrammingProblemController.delete(page.getId)" onclick="confirmLink ( event, this.href )"><span class="glyphicon glyphicon-remove"></span></a>
+          <a href="@routes.ProgrammingProblemController.viewSubmission(page.getId)"><span class="glyphicon glyphicon-search"></span></a>
         </td>
       </tr>
     }

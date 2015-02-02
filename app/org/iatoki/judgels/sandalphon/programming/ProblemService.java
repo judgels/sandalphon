@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.programming;
 
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.gabriel.GradingType;
 
 import java.io.File;
@@ -38,5 +39,5 @@ public interface ProblemService {
 
     List<File> getMediaFiles(long id);
 
-    void submit(long id, Map<String, byte[]> sourceFiles);
+    void submit(long id, GradingSource source);
 }
