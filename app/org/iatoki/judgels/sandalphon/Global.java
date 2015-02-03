@@ -7,13 +7,16 @@ import org.iatoki.judgels.commons.SubmissionUpdaterService;
 import org.iatoki.judgels.gabriel.FakeSealtiel;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;
 import org.iatoki.judgels.sandalphon.controllers.ClientController;
+import org.iatoki.judgels.sandalphon.controllers.GraderClientController;
 import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController;
 import org.iatoki.judgels.sandalphon.controllers.UserRoleController;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ClientHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ClientProblemHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.hibernate.GraderClientHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.UserRoleHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientProblemDao;
+import org.iatoki.judgels.sandalphon.models.daos.interfaces.GraderClientDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.UserRoleDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.hibernate.ProblemHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.hibernate.SubmissionHibernateDao;
@@ -35,12 +38,14 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private final ProblemDao problemDao;
     private final SubmissionDao submissionDao;
     private final ClientDao clientDao;
+    private final GraderClientDao graderClientDao;
     private final ClientProblemDao clientProblemDao;
     private final UserRoleDao userRoleDao;
     private final SubmissionUpdaterService submissionUpdaterService;
     private final ProblemService problemService;
     private final SubmissionService submissionService;
     private final ClientService clientService;
+    private final GraderClientService graderClientService;
     private final UserRoleService userRoleService;
     private final FakeSealtiel sealtiel;
 
@@ -48,6 +53,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.problemDao = new ProblemHibernateDao();
         this.submissionDao = new SubmissionHibernateDao();
         this.clientDao = new ClientHibernateDao();
+        this.graderClientDao = new GraderClientHibernateDao();
         this.clientProblemDao = new ClientProblemHibernateDao();
         this.userRoleDao = new UserRoleHibernateDao();
         this.sealtiel = new FakeSealtiel(new File("/Users/fushar/grading-requests"), new File("/Users/fushar/grading-responses"));
@@ -55,6 +61,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.submissionService = new SubmissionServiceImpl(submissionDao, sealtiel);
         this.submissionUpdaterService = new SubmissionUpdaterServiceImpl(submissionDao);
         this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);
+        this.graderClientService = new GraderClientServiceImpl(graderClientDao);
         this.userRoleService = new UserRoleServiceImpl(userRoleDao);
     }
 
@@ -76,6 +83,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
             return (A) new ProgrammingProblemController(problemService, submissionService, clientService);
          } else if (controllerClass.equals(ClientController.class)) {
             return (A) new ClientController(clientService);
+         } else if (controllerClass.equals(GraderClientController.class)) {
+             return (A) new GraderClientController(graderClientService);
          } else if (controllerClass.equals(ApplicationController.class)) {
             return (A) new ApplicationController(userRoleService);
          } else if (controllerClass.equals(UserRoleController.class)) {

@@ -1,0 +1,13 @@
+@(client: org.iatoki.judgels.sandalphon.GraderClient)
+@import play.i18n.Messages
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-xs-2", "col-xs-10") }
+
+@b3.form(play.api.mvc.Call("GET", "#")) {
+
+    @b3.static(Messages.get("commons.field.id")) { @client.getId }
+    @b3.static(Messages.get("commons.field.jid")) { @client.getJid }
+    @b3.static(Messages.get("client.field.name")) { @client.getName }
+    @b3.static(Messages.get("client.field.secret")) { @client.getSecret }
+
+}

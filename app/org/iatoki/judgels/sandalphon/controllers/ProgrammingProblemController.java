@@ -551,6 +551,7 @@ public final class ProgrammingProblemController extends Controller {
 
         if (SandalphonUtils.hasRole("admin")) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
+            internalLinkBuilder.add(new InternalLink(Messages.get("graderclient.clients"), routes.GraderClientController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
         }
 

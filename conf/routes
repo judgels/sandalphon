@@ -53,6 +53,15 @@ GET         /client/:cId/update                                         @org.iat
 POST        /client/:cId/update                                         @org.iatoki.judgels.sandalphon.controllers.ClientController.postUpdate(cId: Long)
 GET         /client/:cId/delete                                         @org.iatoki.judgels.sandalphon.controllers.ClientController.delete(cId: Long)
 
+GET         /graderclient                                                     @org.iatoki.judgels.sandalphon.controllers.GraderClientController.index()
+GET         /graderclient/                                                    @org.iatoki.judgels.sandalphon.controllers.GraderClientController.list(page: Long ?= 0, sortBy ?= "id", orderBy ?= "asc", filterString ?= "")
+GET         /graderclient/create                                              @org.iatoki.judgels.sandalphon.controllers.GraderClientController.create()
+POST        /graderclient/create                                              @org.iatoki.judgels.sandalphon.controllers.GraderClientController.postCreate()
+GET         /graderclient/:cId/view                                           @org.iatoki.judgels.sandalphon.controllers.GraderClientController.view(cId: Long)
+GET         /graderclient/:cId/update                                         @org.iatoki.judgels.sandalphon.controllers.GraderClientController.update(cId: Long)
+POST        /graderclient/:cId/update                                         @org.iatoki.judgels.sandalphon.controllers.GraderClientController.postUpdate(cId: Long)
+
+
 GET         /userRole                                                @org.iatoki.judgels.sandalphon.controllers.UserRoleController.index()
 GET         /userRole/                                               @org.iatoki.judgels.sandalphon.controllers.UserRoleController.list(page: Long ?= 0, sortBy ?= "id", orderBy ?= "asc", filterString ?= "")
 GET         /userRole/:uId/update                                    @org.iatoki.judgels.sandalphon.controllers.UserRoleController.update(uId: Long)

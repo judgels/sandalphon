@@ -1,12 +1,6 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
-import com.warrenstrange.googleauth.GoogleAuthenticator;
-import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
-import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
-import com.warrenstrange.googleauth.KeyRepresentation;
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Base64;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
@@ -17,18 +11,18 @@ import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
-import org.iatoki.judgels.sandalphon.Client;
-import org.iatoki.judgels.sandalphon.ClientService;
-import org.iatoki.judgels.sandalphon.ClientUpsertForm;
+import org.iatoki.judgels.sandalphon.GraderClient;
+import org.iatoki.judgels.sandalphon.GraderClientService;
+import org.iatoki.judgels.sandalphon.GraderClientUpsertForm;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
-import org.iatoki.judgels.sandalphon.views.html.client.createView;
-import org.iatoki.judgels.sandalphon.views.html.client.listView;
-import org.iatoki.judgels.sandalphon.views.html.client.updateView;
-import org.iatoki.judgels.sandalphon.views.html.client.viewView;
+import org.iatoki.judgels.sandalphon.views.html.graderclient.createView;
+import org.iatoki.judgels.sandalphon.views.html.graderclient.listView;
+import org.iatoki.judgels.sandalphon.views.html.graderclient.updateView;
+import org.iatoki.judgels.sandalphon.views.html.graderclient.viewView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -38,17 +32,15 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
-import java.util.UUID;
-
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
-public final class ClientController extends Controller {
+public final class GraderClientController extends Controller {
 
     private static final long PAGE_SIZE = 20;
 
-    private ClientService clientService;
+    private GraderClientService clientService;
 
-    public ClientController(ClientService clientService) {
+    public GraderClientController(GraderClientService clientService) {
         this.clientService = clientService;
     }
 
@@ -57,12 +49,12 @@ public final class ClientController extends Controller {
         return list(0, "id", "asc", "");
     }
 
-    private Result showCreate(Form<ClientUpsertForm> form) {
+    private Result showCreate(Form<GraderClientUpsertForm> form) {
         LazyHtml content = new LazyHtml(createView.render(form));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.create"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
-                new InternalLink(Messages.get("client.create"), routes.ClientController.create())
+                new InternalLink(Messages.get("graderclient.clients"), routes.GraderClientController.index()),
+                new InternalLink(Messages.get("graderclient.create"), routes.GraderClientController.create())
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
@@ -70,7 +62,7 @@ public final class ClientController extends Controller {
 
     @AddCSRFToken
     public Result create() {
-        Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class);
+        Form<GraderClientUpsertForm> form = Form.form(GraderClientUpsertForm.class);
 
         return showCreate(form);
     }
@@ -78,38 +70,38 @@ public final class ClientController extends Controller {
     @RequireCSRFCheck
     @Transactional
     public Result postCreate() {
-        Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).bindFromRequest();
+        Form<GraderClientUpsertForm> form = Form.form(GraderClientUpsertForm.class).bindFromRequest();
 
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showCreate(form);
         } else {
-            ClientUpsertForm clientUpsertForm = form.get();
+            GraderClientUpsertForm clientUpsertForm = form.get();
 
-            clientService.createClient(clientUpsertForm.name);
+            clientService.createGraderClient(clientUpsertForm.name);
 
-            return redirect(routes.ClientController.index());
+            return redirect(routes.GraderClientController.index());
         }
     }
 
     @Transactional
     public Result view(long clientId) {
-        Client client = clientService.findClientById(clientId);
+        GraderClient client = clientService.findGraderClientById(clientId);
         LazyHtml content = new LazyHtml(viewView.render(client));
-        content.appendLayout(c -> headingWithActionLayout.render(client.getName(), new InternalLink(Messages.get("client.update"), routes.ClientController.update(clientId)), c));
+        content.appendLayout(c -> headingWithActionLayout.render(client.getName(), new InternalLink(Messages.get("graderclient.update"), routes.GraderClientController.update(clientId)), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
-                new InternalLink(Messages.get("client.view"), routes.ClientController.view(clientId))
+                new InternalLink(Messages.get("graderclient.clients"), routes.GraderClientController.index()),
+                new InternalLink(Messages.get("graderclient.view"), routes.GraderClientController.view(clientId))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
     }
 
-    private Result showUpdate(Form<ClientUpsertForm> form, Client client) {
+    private Result showUpdate(Form<GraderClientUpsertForm> form, GraderClient client) {
         LazyHtml content = new LazyHtml(updateView.render(form, client.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.update"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
-                new InternalLink(Messages.get("client.update"), routes.ClientController.update(client.getId()))
+                new InternalLink(Messages.get("client.clients"), routes.GraderClientController.index()),
+                new InternalLink(Messages.get("client.update"), routes.GraderClientController.update(client.getId()))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
@@ -118,44 +110,38 @@ public final class ClientController extends Controller {
     @AddCSRFToken
     @Transactional
     public Result update(long clientId) {
-        Client client = clientService.findClientById(clientId);
-        ClientUpsertForm clientUpsertForm = new ClientUpsertForm(client);
-        Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).fill(clientUpsertForm);
+        GraderClient client = clientService.findGraderClientById(clientId);
+        GraderClientUpsertForm clientUpsertForm = new GraderClientUpsertForm();
+        clientUpsertForm.name = client.getName();
+        Form<GraderClientUpsertForm> form = Form.form(GraderClientUpsertForm.class).fill(clientUpsertForm);
 
         return showUpdate(form, client);
     }
 
     @Transactional
     public Result postUpdate(long clientId) {
-        Client client = clientService.findClientById(clientId);
-        Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).bindFromRequest();
+        GraderClient client = clientService.findGraderClientById(clientId);
+        Form<GraderClientUpsertForm> form = Form.form(GraderClientUpsertForm.class).bindFromRequest();
 
         if (form.hasErrors()) {
             return showUpdate(form, client);
         } else {
-            ClientUpsertForm clientUpsertForm = form.get();
+            GraderClientUpsertForm clientUpsertForm = form.get();
 
-            clientService.updateClient(clientId, clientUpsertForm.name);
+            clientService.updateGraderClient(clientId, clientUpsertForm.name);
 
-            return redirect(routes.ClientController.index());
+            return redirect(routes.GraderClientController.index());
         }
     }
 
     @Transactional
-    public Result delete(long clientId) {
-        clientService.deleteClient(clientId);
-
-        return redirect(routes.ClientController.index());
-    }
-
-    @Transactional
     public Result list(long page, String sortBy, String orderBy, String filterString) {
-        Page<Client> currentPage = clientService.pageClient(page, PAGE_SIZE, sortBy, orderBy, filterString);
+        Page<GraderClient> currentPage = clientService.pageGraderClient(page, PAGE_SIZE, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.list"), new InternalLink(Messages.get("client.create"), routes.ClientController.create()), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("graderclient.list"), new InternalLink(Messages.get("graderclient.create"), routes.GraderClientController.create()), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("client.clients"), routes.ClientController.index())
+                new InternalLink(Messages.get("graderclient.clients"), routes.GraderClientController.index())
         ), c));
         appendTemplateLayout(content);
 
