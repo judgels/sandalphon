@@ -68,8 +68,8 @@ $(document).ready(function() {
         for (var subtaskNo = 0; subtaskNo < @form.get.subtaskPoints.size(); subtaskNo++) {
             var subtaskCheckbox = sampleTestCaseSubtaskTemplate.clone().removeAttr('id');
             subtaskCheckbox.find('input')
-                .val(subtaskNo)
-                .attr('name', 'sampleTestCaseSubtaskNumbers[' + caseNo + '][' + subtaskNo + ']')
+                .val(subtaskNo + 1)
+                .attr('name', 'sampleTestCaseSubtaskIds[' + caseNo + '][' + subtaskNo + ']')
                 .attr('checked', false);
 
             subtaskCheckbox.find('span').html(subtaskNo + 1);
@@ -130,7 +130,7 @@ $(document).ready(function() {
 
             for (var subtaskNo = 0; subtaskNo < sampleTestCase.subtask.checkboxes.length; subtaskNo++) {
                 var subtaskCheckbox = sampleTestCase.subtask.checkboxes[subtaskNo];
-                subtaskCheckbox.find('input').attr('name', 'sampleTestCaseSubtaskNumbers[' + caseNo + '][' + subtaskNo + ']');
+                subtaskCheckbox.find('input').attr('name', 'sampleTestCaseSubtaskIds[' + caseNo + '][' + subtaskNo + ']');
             }
         }
     }
@@ -201,8 +201,8 @@ $(document).ready(function() {
         for (var subtaskNo = 0; subtaskNo < @form.get.subtaskPoints.size(); subtaskNo++) {
             var subtaskCheckbox = testGroupSubtaskTemplate.clone().removeAttr('id');
             subtaskCheckbox.find('input')
-                .val(subtaskNo)
-                .attr('name', 'testGroupSubtaskNumbers[' + groupNo + '][' + subtaskNo + ']')
+                .val(subtaskNo + 1)
+                .attr('name', 'testGroupSubtaskIds[' + groupNo + '][' + subtaskNo + ']')
                 .attr('checked', false);
             subtaskCheckbox.find('span').html(subtaskNo + 1);
             container.find('div').last().append(subtaskCheckbox);
@@ -251,7 +251,7 @@ $(document).ready(function() {
 
             for (var subtaskNo = 0; subtaskNo < testGroup.subtaskCheckboxes.length; subtaskNo++) {
                 var subtaskCheckbox = testGroup.subtaskCheckboxes[subtaskNo];
-                subtaskCheckbox.find('input').attr('name', 'testGroupSubtaskNumbers[' + groupNo + '][' + subtaskNo + ']');
+                subtaskCheckbox.find('input').attr('name', 'testGroupSubtaskIds[' + groupNo + '][' + subtaskNo + ']');
             }
         }
 
@@ -296,8 +296,8 @@ $(document).ready(function() {
 
     @for(i <- 0 until form.get.sampleTestCaseInputs.size) {
         addNewSampleTestCase('@form.get.sampleTestCaseInputs.get(i)', '@form.get.sampleTestCaseOutputs.get(i)');
-        @for(j <- 0 until form.get.sampleTestCaseSubtaskNumbers.get(i).size) {
-            @if(form.get.sampleTestCaseSubtaskNumbers.get(i).get(j) != null) {
+        @for(j <- 0 until form.get.sampleTestCaseSubtaskIds.get(i).size) {
+            @if(form.get.sampleTestCaseSubtaskIds.get(i).get(j) != null) {
                 checkSampleTestCaseSubtask(@i, @j);
             }
         }
@@ -308,8 +308,8 @@ $(document).ready(function() {
         @for(j <- 0 until form.get.testCaseInputs.get(i).size) {
             addNewTestCase(@i, '@form.get.testCaseInputs.get(i).get(j)', '@form.get.testCaseOutputs.get(i).get(j)');
         }
-        @for(j <- 0 until form.get.testGroupSubtaskNumbers.get(i).size) {
-            @if(form.get.testGroupSubtaskNumbers.get(i).get(j) != null) {
+        @for(j <- 0 until form.get.testGroupSubtaskIds.get(i).size) {
+            @if(form.get.testGroupSubtaskIds.get(i).get(j) != null) {
                 checkTestGroupSubtask(@i, @j);
             }
         }

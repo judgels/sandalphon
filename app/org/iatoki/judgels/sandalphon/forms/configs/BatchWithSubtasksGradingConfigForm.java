@@ -11,13 +11,13 @@ public final class BatchWithSubtasksGradingConfigForm {
 
     public List<String> sampleTestCaseOutputs;
 
-    public List<List<Integer>> sampleTestCaseSubtaskNumbers;
+    public List<List<Integer>> sampleTestCaseSubtaskIds;
 
     public List<List<String>> testCaseInputs;
 
     public List<List<String>> testCaseOutputs;
 
-    public List<List<Integer>> testGroupSubtaskNumbers;
+    public List<List<Integer>> testGroupSubtaskIds;
 
     public List<Integer> subtaskPoints;
 
