@@ -52,8 +52,6 @@ public final class SandalphonUtils {
     }
 
     public static void saveRoleInSession(List<String> roles) {
-        System.out.println(roles);
-        System.out.println("AAAAAA");
         Http.Context.current().session().put("role", StringUtils.join(roles, ","));
     }
 

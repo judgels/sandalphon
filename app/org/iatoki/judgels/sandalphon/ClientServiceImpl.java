@@ -90,6 +90,14 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public ClientProblem findClientProblemByClientJidAndProblemJid(String clientJid, String problemJid) {
+        ClientProblemModel clientProblemModel = clientProblemDao.findByClientJidAndProblemJid(clientJid, problemJid);
+        ClientModel clientModel = clientDao.findByJid(clientProblemModel.clientJid);
+
+        return new ClientProblem(clientProblemModel.id, clientProblemModel.clientJid, clientModel.name, clientProblemModel.problemJid, clientProblemModel.secret);
+    }
+
+    @Override
     public ClientProblem findClientProblemByClientProblemId(long clientProblemId) {
         ClientProblemModel clientProblemModel = clientProblemDao.findById(clientProblemId);
         ClientModel clientModel = clientDao.findByJid(clientProblemModel.clientJid);

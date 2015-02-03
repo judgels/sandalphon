@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface ProblemDao extends JudgelsDao<ProblemModel> {
 
+    boolean isProblemExistByProblemJid(String problemJid);
+
     long countByFilter(String filterString);
 
     List<ProblemModel> findByFilterAndSort(String filterString, String sortBy, String order, long first, long max);

@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.models.daos.programming.hibernate;
 
 import org.iatoki.judgels.commons.models.daos.hibernate.AbstractJudgelsHibernateDao;
+import org.iatoki.judgels.commons.models.domains.AbstractJudgelsModel_;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.domains.programming.ProblemModel;
 import play.db.jpa.JPA;
@@ -10,6 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ProblemHibernateDao extends AbstractJudgelsHibernateDao<ProblemModel> implements ProblemDao {
+
+    @Override
+    public boolean isProblemExistByProblemJid(String problemJid) {
+        CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<ProblemModel> root = query.from(ProblemModel.class);
+
+        query
+                .select(cb.count(root))
+                .where(cb.equal(root.get(AbstractJudgelsModel_.jid), problemJid));
+
+        return (JPA.em().createQuery(query).getSingleResult() != 0);
+    }
+
     @Override
     public long countByFilter(String filterString) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();

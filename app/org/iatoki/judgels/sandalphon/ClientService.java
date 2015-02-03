@@ -24,6 +24,8 @@ public interface ClientService {
 
     boolean isClientProblemInProblemByClientJid(String problemJid, String clientJid);
 
+    ClientProblem findClientProblemByClientJidAndProblemJid(String clientJid, String problemJid);
+
     ClientProblem findClientProblemByClientProblemId(long clientProblemId);
 
     List<ClientProblem> findAllClientProblemByProblemId(String problemJid);

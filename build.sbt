@@ -52,7 +52,8 @@ libraryDependencies ++= Seq(
   "com.puppycrawl.tools" % "checkstyle" % "6.1",
   "com.adrianhurt" % "play-bootstrap3_2.11" % "0.3",
   "com.google.code.gson" % "gson" % "2.3.1",
-  "com.nimbusds" % "c2id-server-sdk" % "2.0"
+  "com.nimbusds" % "c2id-server-sdk" % "2.0",
+  "com.warrenstrange" % "googleauth" % "0.4.3"
 )
 
 TestNGPlugin.testNGSettings

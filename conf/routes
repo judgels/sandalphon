@@ -41,6 +41,9 @@ GET         /problem/programming/:id/update/client/:cpid/delete         @org.iat
 POST        /problem/programming/:id/submit                             @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postSubmit(id: Long)
 GET         /problem/programming/:id/download/testdata/:filename        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadTestDataFile(id: Long, filename: String)
 
+GET         /verifyProblem                                              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.verifyProblem()
+GET         /totp/:cid/:pid/statement/:TOTP/:lang                      @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewProblemStatementTOTP(cid: String, pid: String, TOTP: Int, lang: String)
+
 GET         /client                                                     @org.iatoki.judgels.sandalphon.controllers.ClientController.index()
 GET         /client/                                                    @org.iatoki.judgels.sandalphon.controllers.ClientController.list(page: Long ?= 0, sortBy ?= "id", orderBy ?= "asc", filterString ?= "")
 GET         /client/create                                              @org.iatoki.judgels.sandalphon.controllers.ClientController.create()

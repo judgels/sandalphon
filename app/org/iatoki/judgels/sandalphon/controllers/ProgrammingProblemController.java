@@ -2,6 +2,9 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
+import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
@@ -59,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 
 @Transactional
-@Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProgrammingProblemController extends Controller {
 
     private final ProblemService problemService;
@@ -70,12 +72,12 @@ public final class ProgrammingProblemController extends Controller {
         this.clientService = clientService;
     }
 
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result index() {
         return list(0, "id", "asc", "");
     }
 
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result list(long page, String sortBy, String orderBy, String filterString) {
         Page<Problem> currentPage = problemService.pageProblem(page, 20, sortBy, orderBy, filterString);
 
@@ -90,13 +92,14 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @AddCSRFToken
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result create() {
         Form<UpsertForm> form = Form.form(UpsertForm.class);
         return showCreate(form);
     }
 
     @RequireCSRFCheck
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postCreate() {
         Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
 
@@ -121,11 +124,12 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result view(long id) {
         return redirect(routes.ProgrammingProblemController.viewGeneral(id));
     }
 
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewGeneral(long id) {
         Problem problem = problemService.findProblemById(id);
         LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
@@ -140,7 +144,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @AddCSRFToken
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewStatement(long id) {
         String statement = problemService.getStatement(id);
         Problem problem = problemService.findProblemById(id);
@@ -158,7 +162,7 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewSubmissions(long id) {
         Problem problem = problemService.findProblemById(id);
         Page<Submission> submissions = problemService.pageSubmission(0, 20, "id", "asc", problem.getJid());
@@ -172,17 +176,18 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewSubmission(long submissionId) {
         return ok();
     }
 
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result update(long id) {
         return redirect(routes.ProgrammingProblemController.updateGeneral(id));
     }
 
     @AddCSRFToken
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateGeneral(long id) {
         Problem problem = problemService.findProblemById(id);
         UpsertForm content = new UpsertForm();
@@ -194,7 +199,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @RequireCSRFCheck
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateGeneral(long id) {
         Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
         problemService.updateProblem(id, form.get().name, form.get().additionalNote);
@@ -202,7 +207,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @AddCSRFToken
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateStatement(long id) {
         Problem problem = problemService.findProblemById(id);
         String statement = problemService.getStatement(id);
@@ -212,7 +217,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @RequireCSRFCheck
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateStatement(long id) {
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
         problemService.updateStatement(id, form.get().statement);
@@ -220,7 +225,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @AddCSRFToken
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateFiles(long id) {
         Problem problem = problemService.findProblemById(id);
         Form<UpdateFilesForm> form = Form.form(UpdateFilesForm.class);
@@ -229,7 +234,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @RequireCSRFCheck
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateFiles(long id) {
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart file = body.getFile("file");
@@ -244,7 +249,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @AddCSRFToken
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateGrading(long id) {
         Problem problem = problemService.findProblemById(id);
         GradingConfig config = problemService.getGradingConfig(id);
@@ -257,7 +262,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @RequireCSRFCheck
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateGrading(long id) {
         Problem problem = problemService.findProblemById(id);
 
@@ -275,7 +280,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @RequireCSRFCheck
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postSubmit(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         GradingConfig config = problemService.getGradingConfig(problemId);
@@ -288,7 +293,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @AddCSRFToken
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateClients(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class);
@@ -299,6 +304,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @RequireCSRFCheck
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateClients(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
@@ -320,6 +326,7 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateViewClients(long problemId, long clientProblemId) {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
@@ -340,7 +347,7 @@ public final class ProgrammingProblemController extends Controller {
 
 
     @AddCSRFToken
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateUpdateClients(long problemId, long clientProblemId) {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
@@ -356,6 +363,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @RequireCSRFCheck
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateUpdateClients(long problemId, long clientProblemId) {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
@@ -376,6 +384,7 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result deleteClients(long problemId, long clientProblemId) {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
@@ -388,7 +397,7 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
-    @Transactional
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result downloadTestDataFile(long id, String filename) {
         File file = problemService.getTestDataFile(id, filename);
         if (file.exists()) {
@@ -398,8 +407,48 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result delete(long id) {
         return TODO;
+    }
+
+    public Result verifyProblem() {
+        DynamicForm form = DynamicForm.form().bindFromRequest();
+        String clientJid = form.get("clientId");
+        String clientSecret = form.get("clientSecret");
+        if (clientService.isClientExist(clientJid)) {
+            Client client = clientService.findClientByJid(clientJid);
+            System.out.println("A");
+            if (client.getSecret().equals(clientSecret)) {
+                System.out.println("B");
+                String problemJid = form.get("problemJid");
+                if (problemService.isProblemExistByProblemJid(problemJid)) {
+                    return ok();
+                } else {
+                    return notFound();
+                }
+            } else {
+                return forbidden();
+            }
+        } else {
+            return notFound();
+        }
+    }
+
+    public Result viewProblemStatementTOTP(String clientJid, String problemJid, int TOTP, String lang) {
+        response().setHeader("Access-Control-Allow-Origin", "*");
+        if (clientService.isClientProblemInProblemByClientJid(problemJid, clientJid)) {
+            ClientProblem clientProblem = clientService.findClientProblemByClientJidAndProblemJid(clientJid, problemJid);
+            GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
+            if (googleAuthenticator.authorize(new Base32().encodeAsString(clientProblem.getSecret().getBytes()), TOTP)) {
+                System.out.println(problemService.getStatement(problemJid));
+                return ok(problemService.getStatement(problemJid));
+            } else {
+                return forbidden();
+            }
+        } else {
+            return notFound();
+        }
     }
 
     private Result showUpdateGeneral(Form<UpsertForm> form, long id) {

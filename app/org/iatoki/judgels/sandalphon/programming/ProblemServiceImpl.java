@@ -38,6 +38,11 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
+    public boolean isProblemExistByProblemJid(String problemJid) {
+        return dao.isProblemExistByProblemJid(problemJid);
+    }
+
+    @Override
     public final Problem findProblemById(long id) {
         ProblemModel problemRecord = dao.findById(id);
         return createProblemFromModel(problemRecord);
@@ -90,6 +95,22 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public String getStatement(long id) {
         ProblemModel problemRecord = dao.findById(id);
+        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
+        File problemDir = new File(problemsDir, problemRecord.jid);
+        File statementDir = new File(problemDir, "statement");
+        String statement;
+        try {
+            statement = FileUtils.readFileToString(new File(statementDir, "statement.html"));
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot read statement!");
+        }
+
+        return statement;
+    }
+
+    @Override
+    public String getStatement(String problemJid) {
+        ProblemModel problemRecord = dao.findByJid(problemJid);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File problemDir = new File(problemsDir, problemRecord.jid);
         File statementDir = new File(problemDir, "statement");

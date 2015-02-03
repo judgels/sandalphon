@@ -11,6 +11,8 @@ import java.util.Map;
 
 public interface ProblemService {
 
+    boolean isProblemExistByProblemJid(String problemJid);
+
     Problem findProblemById(long id);
 
     void updateProblem(long id, String name, String additionalNote);
@@ -22,6 +24,8 @@ public interface ProblemService {
     Problem createProblem(String name, String gradingType, String additionalNote);
 
     String getStatement(long id);
+
+    String getStatement(String problemJid);
 
     GradingConfig getGradingConfig(long id);
 
