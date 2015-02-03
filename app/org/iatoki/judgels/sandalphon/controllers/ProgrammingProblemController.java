@@ -179,7 +179,19 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewSubmission(long problemId, long submissionId) {
         Problem problem = problemService.findProblemById(problemId);
-        return ok();
+        GradingConfig config = problemService.getGradingConfig(problemId);
+        Submission submission = submissionService.findSubmissionById(submissionId);
+
+
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingType()).renderViewSubmission(submissionId, submission.getVerdict(), submission.getScore(), submission.getDetails(), config));
+
+        appendTabsLayout(content, problemId, problem.getName());
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(problemId))
+        ), c));
+        appendTemplateLayout(content);
+        return getResult(content, Http.Status.OK);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})

@@ -41,7 +41,8 @@ public final class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     public Submission findSubmissionById(long submissionId) {
-        return null;
+        SubmissionModel submissionRecord = submissionDao.findById(submissionId);
+        return createSubmissionFromModel(submissionRecord);
     }
 
     @Override
