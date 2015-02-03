@@ -1,4 +1,4 @@
-@(currentPage: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.programming.Submission], currentSortBy: String, currentOrder: String, currentFilter: String)
+@(currentPage: org.iatoki.judgels.commons.Page[org.iatoki.judgels.commons.Submission], problemId: Long, currentSortBy: String, currentOrder: String, currentFilter: String)
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.commons.views.html.pagination.tablePagination
@@ -6,6 +6,7 @@
 @import org.iatoki.judgels.commons.views.html.pagination.link
 
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.SandalphonUtils
 
 @shortLink(newPage: scala.Long, newSortBy: String) = {@link(currentSortBy, true, currentOrder, currentFilter, newPage, newSortBy, routes.ProgrammingProblemController.list)}
 
@@ -21,19 +22,21 @@
   <table class="table table-hover table-condensed table-bordered">
     <tr>
       @tableHeader("id", Messages.get("commons.field.id"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "id"))
+      @tableHeader("author", Messages.get("Author"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "author"))
+      @tableHeader("time", Messages.get("Time"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "time"))
       @tableHeader("verdict", Messages.get("Verdict"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "verdict"))
       @tableHeader("score", Messages.get("Score"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "score"))
-      @tableHeader("details", Messages.get("Details"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "details"))
       <th></th>
     </tr>
     @for(page <- currentPage.getList()) {
       <tr>
         <td>@page.getId</td>
+        <td>@page.getAuthorJid</td>
+        <td>@SandalphonUtils.timestampToFormattedDate(page.getTimestamp)</td>
         <td>@page.getVerdict.getCode - @page.getVerdict.getName</td>
         <td>@page.getScore</td>
-        <td>@page.getDetails</td>
         <td class="text-center">
-          <a href="@routes.ProgrammingProblemController.viewSubmission(page.getId)"><span class="glyphicon glyphicon-search"></span></a>
+          <a href="@routes.ProgrammingProblemController.viewSubmission(problemId, page.getId)"><span class="glyphicon glyphicon-search"></span></a>
         </td>
       </tr>
     }

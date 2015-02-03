@@ -19,8 +19,6 @@ public interface ProblemService {
 
     Page<Problem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString);
 
-    Page<Submission> pageSubmission(long page, long pageSize, String sortBy, String order, String filterString);
-
     Problem createProblem(String name, String gradingType, String additionalNote);
 
     String getStatement(long id);
@@ -42,6 +40,4 @@ public interface ProblemService {
     List<File> getHelperFiles(long id);
 
     List<File> getMediaFiles(long id);
-
-    void submit(long id, GradingSource source);
 }

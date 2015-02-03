@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon;
 
 import akka.actor.Scheduler;
 import org.iatoki.judgels.commons.GradingResponsePoller;
+import org.iatoki.judgels.commons.SubmissionService;
 import org.iatoki.judgels.commons.SubmissionUpdaterService;
 import org.iatoki.judgels.gabriel.FakeSealtiel;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;
@@ -20,6 +21,7 @@ import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemD
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.SubmissionDao;
 import org.iatoki.judgels.sandalphon.programming.ProblemService;
 import org.iatoki.judgels.sandalphon.programming.ProblemServiceImpl;
+import org.iatoki.judgels.sandalphon.programming.SubmissionServiceImpl;
 import play.Application;
 import play.libs.Akka;
 import scala.concurrent.ExecutionContextExecutor;
@@ -37,6 +39,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private final UserRoleDao userRoleDao;
     private final SubmissionUpdaterService submissionUpdaterService;
     private final ProblemService problemService;
+    private final SubmissionService submissionService;
     private final ClientService clientService;
     private final UserRoleService userRoleService;
     private final FakeSealtiel sealtiel;
@@ -48,7 +51,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.clientProblemDao = new ClientProblemHibernateDao();
         this.userRoleDao = new UserRoleHibernateDao();
         this.sealtiel = new FakeSealtiel(new File("/Users/fushar/grading-requests"), new File("/Users/fushar/grading-responses"));
-        this.problemService = new ProblemServiceImpl(problemDao, submissionDao, sealtiel);
+        this.problemService = new ProblemServiceImpl(problemDao);
+        this.submissionService = new SubmissionServiceImpl(submissionDao, sealtiel);
         this.submissionUpdaterService = new SubmissionUpdaterServiceImpl(submissionDao);
         this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);
         this.userRoleService = new UserRoleServiceImpl(userRoleDao);
@@ -69,7 +73,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     @SuppressWarnings("unchecked")
     public <A> A getControllerInstance(Class<A> controllerClass) throws Exception {
          if (controllerClass.equals(ProgrammingProblemController.class)) {
-            return (A) new ProgrammingProblemController(problemService, clientService);
+            return (A) new ProgrammingProblemController(problemService, submissionService, clientService);
          } else if (controllerClass.equals(ClientController.class)) {
             return (A) new ClientController(clientService);
          } else if (controllerClass.equals(ApplicationController.class)) {

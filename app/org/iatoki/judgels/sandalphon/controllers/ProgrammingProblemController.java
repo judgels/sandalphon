@@ -2,14 +2,14 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.Submission;
+import org.iatoki.judgels.commons.SubmissionService;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.commons.SubmissionAdapters;
 import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
@@ -19,7 +19,6 @@ import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
-import org.iatoki.judgels.gabriel.GraderRegistry;
 import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
@@ -36,7 +35,6 @@ import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
-import org.iatoki.judgels.sandalphon.programming.Submission;
 import org.iatoki.judgels.sandalphon.views.html.programming.createView;
 import org.iatoki.judgels.sandalphon.views.html.programming.listView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateFilesView;
@@ -65,10 +63,12 @@ import java.util.Map;
 public final class ProgrammingProblemController extends Controller {
 
     private final ProblemService problemService;
+    private final SubmissionService submissionService;
     private final ClientService clientService;
 
-    public ProgrammingProblemController(ProblemService problemService, ClientService clientService) {
+    public ProgrammingProblemController(ProblemService problemService, SubmissionService submissionService, ClientService clientService) {
         this.problemService = problemService;
+        this.submissionService = submissionService;
         this.clientService = clientService;
     }
 
@@ -163,21 +163,22 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result viewSubmissions(long id) {
-        Problem problem = problemService.findProblemById(id);
-        Page<Submission> submissions = problemService.pageSubmission(0, 20, "id", "asc", problem.getJid());
-        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, "id", "asc", problem.getJid()));
-        appendTabsLayout(content, id, problem.getName());
+    public Result viewSubmissions(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        Page<Submission> submissions = submissionService.pageSubmission(0, 20, "id", "asc", problem.getJid());
+        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, problemId, "id", "asc", problem.getJid()));
+        appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
+                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(problemId))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result viewSubmission(long submissionId) {
+    public Result viewSubmission(long problemId, long submissionId) {
+        Problem problem = problemService.findProblemById(problemId);
         return ok();
     }
 
@@ -287,7 +288,7 @@ public final class ProgrammingProblemController extends Controller {
         Http.MultipartFormData body = request().body().asMultipartFormData();
         GradingSource source = SubmissionAdapters.fromGradingType(problem.getGradingType()).createGradingSource(config, body);
 
-        problemService.submit(problemId, source);
+        submissionService.submit(problem.getJid(), problem.getGradingType(), problem.getTimeUpdate(), source);
 
         return redirect(routes.ProgrammingProblemController.viewSubmissions(problemId));
     }
