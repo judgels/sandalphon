@@ -53,7 +53,7 @@ public final class ProblemHibernateDao extends AbstractJudgelsHibernateDao<Probl
         selection.add(root.get("id"));
         selection.add(root.get("jid"));
         selection.add(root.get("name"));
-        selection.add(root.get("gradingType"));
+        selection.add(root.get("gradingEngine"));
         selection.add(root.get("additionalNote"));
 
         List<Predicate> predicates = new ArrayList<>();

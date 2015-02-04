@@ -115,7 +115,7 @@ public final class ProgrammingProblemController extends Controller {
             return showCreate(form);
         } else {
             UpsertForm data = form.get();
-            Problem problem = problemService.createProblem(data.name, data.gradingType, data.additionalNote);
+            Problem problem = problemService.createProblem(data.name, data.gradingEngine, data.additionalNote);
 
             return redirect(routes.ProgrammingProblemController.update(problem.getId()));
         }
@@ -159,7 +159,7 @@ public final class ProgrammingProblemController extends Controller {
 
         GradingConfig config = problemService.getGradingConfig(id);
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingType()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id), problem.getName(), statement, config));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id), problem.getName(), statement, config));
         content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
         appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -187,11 +187,9 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewSubmission(long problemId, long submissionId) {
         Problem problem = problemService.findProblemById(problemId);
-        GradingConfig config = problemService.getGradingConfig(problemId);
         Submission submission = submissionService.findSubmissionById(submissionId);
 
-
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingType()).renderViewSubmission(submissionId, submission.getVerdict(), submission.getScore(), submission.getDetails(), config));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingEngine()).renderViewSubmission(submissionId, submission.getVerdict(), submission.getScore(), submission.getDetails()));
 
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -336,7 +334,7 @@ public final class ProgrammingProblemController extends Controller {
         List<File> testDataFiles = problemService.getTestDataFiles(id);
         List<File> helperFiles = problemService.getHelperFiles(id);
 
-        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createFormFromConfig(config);
+        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromConfig(config);
 
         return showUpdateGrading(form, problem, testDataFiles, helperFiles);
     }
@@ -346,14 +344,14 @@ public final class ProgrammingProblemController extends Controller {
     public Result postUpdateGrading(long id) {
         Problem problem = problemService.findProblemById(id);
 
-        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createFormFromRequest(request());
+        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromRequest(request());
 
         if (form.hasErrors()) {
             List<File> testDataFiles = problemService.getTestDataFiles(id);
             List<File> helperFiles = problemService.getHelperFiles(id);
             return showUpdateGrading(form, problem, testDataFiles, helperFiles);
         } else {
-            GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingType()).createConfigFromForm(form);
+            GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createConfigFromForm(form);
             problemService.updateGradingConfig(id, config);
             return redirect(routes.ProgrammingProblemController.updateGrading(id));
         }
@@ -367,8 +365,8 @@ public final class ProgrammingProblemController extends Controller {
         Http.MultipartFormData body = request().body().asMultipartFormData();
 
         try {
-            GradingSource source = SubmissionAdapters.fromGradingType(problem.getGradingType()).createGradingSource(config, body);
-            submissionService.submit(problem.getJid(), problem.getGradingType(), problem.getTimeUpdate(), source);
+            GradingSource source = SubmissionAdapters.fromGradingType(problem.getGradingEngine()).createGradingSource(config, body);
+            submissionService.submit(problem.getJid(), problem.getGradingEngine(), problem.getTimeUpdate(), source);
         } catch (SubmissionException e) {
             flash("submissionError", e.getMessage());
             return redirect(routes.ProgrammingProblemController.viewStatement(problemId));
@@ -598,7 +596,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     private Result showUpdateGrading(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles) {
-        LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingType()).renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
+        LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),

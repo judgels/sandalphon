@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.gabriel.GraderRegistry;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.domains.programming.ProblemModel;
@@ -118,7 +118,7 @@ public final class ProblemServiceImpl implements ProblemService {
             throw new RuntimeException("Cannot read grading!");
         }
 
-        return GraderRegistry.getInstance().getGrader(problemRecord.gradingType).createGradingConfigFromJson(json);
+        return GradingEngineRegistry.getInstance().getEngine(problemRecord.gradingEngine).createGradingConfigFromJson(json);
     }
 
     @Override
@@ -336,7 +336,7 @@ public final class ProblemServiceImpl implements ProblemService {
             FileUtils.forceMkdir(new File(gradingDir, "testdata"));
             FileUtils.forceMkdir(new File(gradingDir, "helper"));
 
-            GradingConfig config = GraderRegistry.getInstance().getGrader(problemRecord.gradingType).createDefaultGradingConfig();
+            GradingConfig config = GradingEngineRegistry.getInstance().getEngine(problemRecord.gradingEngine).createDefaultGradingConfig();
 
             FileUtils.writeStringToFile(new File(gradingDir, "config.json"), new Gson().toJson(config));
             FileUtils.writeStringToFile(new File(gradingDir, "lastUpdateTime.txt"), "" + problemRecord.timeCreate);
@@ -359,7 +359,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
     
     private Problem createProblemFromModel(ProblemModel record) {
-        return new Problem(record.id, record.jid, record.name, record.gradingType, record.timeUpdate, record.additionalNote);
+        return new Problem(record.id, record.jid, record.name, record.gradingEngine, record.timeUpdate, record.additionalNote);
     }
 
     private List<File> getGradingFiles(String problemJid) {
