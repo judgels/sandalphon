@@ -20,6 +20,8 @@ import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
+import org.iatoki.judgels.gabriel.GradingLanguage;
+import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
@@ -27,6 +29,7 @@ import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.sandalphon.GraderClientService;
+import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateHelperFilesForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateMediaFilesForm;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
@@ -159,7 +162,7 @@ public final class ProgrammingProblemController extends Controller {
 
         GradingConfig config = problemService.getGradingConfig(id);
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id), problem.getName(), statement, config));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id), problem.getName(), statement, config));
         content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
         appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -187,9 +190,12 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewSubmission(long problemId, long submissionId) {
         Problem problem = problemService.findProblemById(problemId);
+        GradingConfig config = problemService.getGradingConfig(problemId);
         Submission submission = submissionService.findSubmissionById(submissionId);
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingEngine()).renderViewSubmission(submissionId, submission.getVerdict(), submission.getScore(), submission.getDetails()));
+        GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromPastSubmission(config, SandalphonProperties.getInstance().getSubmissionDir(), submission.getJid());
+
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewSubmission(submission, source));
 
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -364,9 +370,12 @@ public final class ProgrammingProblemController extends Controller {
         GradingConfig config = problemService.getGradingConfig(problemId);
         Http.MultipartFormData body = request().body().asMultipartFormData();
 
+        String gradingLanguage = body.asFormUrlEncoded().get("language")[0];
+
         try {
-            GradingSource source = SubmissionAdapters.fromGradingType(problem.getGradingEngine()).createGradingSource(config, body);
-            submissionService.submit(problem.getJid(), problem.getGradingEngine(), problem.getTimeUpdate(), source);
+            GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromNewSubmission(config, body);
+            String submissionJid = submissionService.submit(problem.getJid(), problem.getGradingEngine(), gradingLanguage, problem.getTimeUpdate(), source);
+            SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid, source);
         } catch (SubmissionException e) {
             flash("submissionError", e.getMessage());
             return redirect(routes.ProgrammingProblemController.viewStatement(problemId));

@@ -8,6 +8,7 @@ import org.iatoki.judgels.commons.SubmissionAdapters;
 import org.iatoki.judgels.commons.SubmissionService;
 import org.iatoki.judgels.gabriel.FakeClientMessage;
 import org.iatoki.judgels.gabriel.FakeSealtiel;
+import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingRequest;
 import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.gabriel.Verdict;
@@ -46,9 +47,10 @@ public final class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public void submit(String problemJid, String problemGradingEngine, long gradingLastUpdateTime, GradingSource source) {
+    public String submit(String problemJid, String problemGradingEngine, String gradingLanguage, long gradingLastUpdateTime, GradingSource source) {
         SubmissionModel submissionRecord = new SubmissionModel();
         submissionRecord.problemJid = problemJid;
+        submissionRecord.gradingLanguage = gradingLanguage;
         submissionRecord.verdictCode = "?";
         submissionRecord.verdictName = "Pending";
         submissionRecord.score = 0;
@@ -56,13 +58,16 @@ public final class SubmissionServiceImpl implements SubmissionService {
 
         submissionDao.persist(submissionRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        GradingRequest request = SubmissionAdapters.fromGradingType(problemGradingEngine).createGradingRequest(submissionRecord.jid, problemJid, gradingLastUpdateTime, problemGradingEngine, source);
+        GradingRequest request = SubmissionAdapters.fromGradingEngine(problemGradingEngine).createGradingRequest(submissionRecord.jid, problemJid, gradingLastUpdateTime, problemGradingEngine, gradingLanguage, source);
 
         FakeClientMessage message = new FakeClientMessage("some-target", request.getClass().getSimpleName(), new Gson().toJson(request));
         sealtiel.sendMessage(message);
+
+        return submissionRecord.jid;
     }
 
     private Submission createSubmissionFromModel(SubmissionModel record) {
-        return new Submission(record.id, record.jid, record.problemJid, record.userCreate, record.timeCreate, new Verdict(record.verdictCode, record.verdictName), record.score, record.details);
+        String language = GradingLanguageRegistry.getInstance().getLanguage(record.gradingLanguage).getName();
+        return new Submission(record.id, record.jid, record.problemJid, record.userCreate, language, record.timeCreate, new Verdict(record.verdictCode, record.verdictName), record.score, record.details);
     }
 }

@@ -24,6 +24,7 @@
       @tableHeader("id", Messages.get("commons.field.id"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "id"))
       @tableHeader("author", Messages.get("Author"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "author"))
       @tableHeader("time", Messages.get("Time"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "time"))
+      @tableHeader("language", Messages.get("Language"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "language"))
       @tableHeader("verdict", Messages.get("Verdict"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "verdict"))
       @tableHeader("score", Messages.get("Score"), currentSortBy, currentOrder, shortLink(currentPage.getPageIndex(), "score"))
       <th></th>
@@ -33,6 +34,7 @@
         <td>@page.getId</td>
         <td>@page.getAuthorJid</td>
         <td>@SandalphonUtils.timestampToFormattedDate(page.getTimestamp)</td>
+        <td>@page.getGradingLanguage</td>
         <td>@page.getVerdict.getName</td>
         <td>@page.getScore</td>
         <td class="text-center">
