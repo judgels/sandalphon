@@ -9,6 +9,7 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.Submission;
+import org.iatoki.judgels.commons.SubmissionException;
 import org.iatoki.judgels.commons.SubmissionService;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.commons.SubmissionAdapters;
@@ -155,7 +156,7 @@ public final class ProgrammingProblemController extends Controller {
 
         GradingConfig config = problemService.getGradingConfig(id);
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingType()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id), statement, config));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingType(problem.getGradingType()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id), problem.getName(), statement, config));
         content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
         appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -302,9 +303,14 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
         GradingConfig config = problemService.getGradingConfig(problemId);
         Http.MultipartFormData body = request().body().asMultipartFormData();
-        GradingSource source = SubmissionAdapters.fromGradingType(problem.getGradingType()).createGradingSource(config, body);
 
-        submissionService.submit(problem.getJid(), problem.getGradingType(), problem.getTimeUpdate(), source);
+        try {
+            GradingSource source = SubmissionAdapters.fromGradingType(problem.getGradingType()).createGradingSource(config, body);
+            submissionService.submit(problem.getJid(), problem.getGradingType(), problem.getTimeUpdate(), source);
+        } catch (SubmissionException e) {
+            flash("submissionError", e.getMessage());
+            return redirect(routes.ProgrammingProblemController.viewStatement(problemId));
+        }
 
         return redirect(routes.ProgrammingProblemController.viewSubmissions(problemId));
     }
