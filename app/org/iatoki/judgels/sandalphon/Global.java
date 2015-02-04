@@ -80,7 +80,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     @SuppressWarnings("unchecked")
     public <A> A getControllerInstance(Class<A> controllerClass) throws Exception {
          if (controllerClass.equals(ProgrammingProblemController.class)) {
-            return (A) new ProgrammingProblemController(problemService, submissionService, clientService);
+            return (A) new ProgrammingProblemController(problemService, submissionService, clientService, graderClientService);
          } else if (controllerClass.equals(ClientController.class)) {
             return (A) new ClientController(clientService);
          } else if (controllerClass.equals(GraderClientController.class)) {

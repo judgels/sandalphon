@@ -64,4 +64,11 @@ public final class GraderClientServiceImpl implements GraderClientService {
 
         return new Page<>(clients, totalPage, page, pageSize);
     }
+
+    @Override
+    public boolean verifyGraderClient(String clientJid, String clientSecret) {
+        GraderClientModel graderClientRecord = clientDao.findByJid(clientJid);
+
+        return graderClientRecord != null && graderClientRecord.secret.equals(clientSecret);
+    }
 }

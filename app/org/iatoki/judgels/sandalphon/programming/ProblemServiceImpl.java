@@ -11,11 +11,15 @@ import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.domains.programming.ProblemModel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public final class ProblemServiceImpl implements ProblemService {
 
@@ -41,7 +45,7 @@ public final class ProblemServiceImpl implements ProblemService {
         ProblemModel model = dao.findById(id);
         model.name = name;
         model.additionalNote = additionalNote;
-        dao.edit(model, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        updateProblemRecord(model, false);
     }
 
     @Override
@@ -116,6 +120,17 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
+    public long getGradingLastUpdateTime(long id) {
+        ProblemModel problemRecord = dao.findById(id);
+        File gradingLastUpdateTimeFile = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "lastUpdateTime.txt");
+        try {
+            return Long.parseLong(FileUtils.readFileToString(gradingLastUpdateTimeFile));
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot read grading last update time");
+        }
+    }
+
+    @Override
     public void updateStatement(long id, String statement) {
         ProblemModel problemRecord = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
@@ -126,6 +141,8 @@ public final class ProblemServiceImpl implements ProblemService {
         } catch (IOException e) {
             throw new RuntimeException("Cannot write statement!");
         }
+
+        updateProblemRecord(problemRecord, false);
     }
 
     @Override
@@ -139,6 +156,8 @@ public final class ProblemServiceImpl implements ProblemService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        updateProblemRecord(problemRecord, true);
     }
 
     @Override
@@ -152,6 +171,8 @@ public final class ProblemServiceImpl implements ProblemService {
         } catch (IOException e) {
             throw new RuntimeException("Cannot write json!");
         }
+
+        updateProblemRecord(problemRecord, true);
     }
 
     @Override
@@ -200,6 +221,38 @@ public final class ProblemServiceImpl implements ProblemService {
         return Arrays.asList(mediaDir.listFiles());
     }
 
+    @Override
+    public ByteArrayOutputStream getZippedGradingFilesStream(String problemJid) {
+        List<File> files = getGradingFiles(problemJid);
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+
+        try {
+            ZipOutputStream zos = new ZipOutputStream(os);
+            for (File file : files) {
+                int beginIndex = file.getAbsolutePath().indexOf(problemJid) + problemJid.length() + 1 + "grading".length() + 1;
+                ZipEntry ze = new ZipEntry(file.getAbsolutePath().substring(beginIndex));
+                zos.putNextEntry(ze);
+
+                try (FileInputStream fin = new FileInputStream(file)) {
+                    int len;
+                    while ((len = fin.read(buffer)) > 0) {
+                        zos.write(buffer, 0, len);
+                    }
+                }
+            }
+
+            zos.closeEntry();
+            zos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return os;
+    }
+
     private void createProblemDirs(ProblemModel problemRecord) {
         createProblemGradingDir(problemRecord);
         createProblemStatementDir(problemRecord);
@@ -216,11 +269,11 @@ public final class ProblemServiceImpl implements ProblemService {
             GradingConfig config = GraderRegistry.getInstance().getGrader(problemRecord.gradingType).createDefaultGradingConfig();
 
             FileUtils.writeStringToFile(new File(gradingDir, "config.json"), new Gson().toJson(config));
+            FileUtils.writeStringToFile(new File(gradingDir, "lastUpdateTime.txt"), "" + problemRecord.timeCreate);
         } catch (IOException e) {
             throw new RuntimeException("Cannot create directory for problem!");
         }
     }
-
 
     private void createProblemStatementDir(ProblemModel problemRecord) {
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
@@ -237,5 +290,42 @@ public final class ProblemServiceImpl implements ProblemService {
     
     private Problem createProblemFromModel(ProblemModel record) {
         return new Problem(record.id, record.jid, record.name, record.gradingType, record.timeUpdate, record.additionalNote);
+    }
+
+    private List<File> getGradingFiles(String problemJid) {
+        ProblemModel problemRecord = dao.findByJid(problemJid);
+        File gradingDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading");
+
+        ImmutableList.Builder<File> files = ImmutableList.builder();
+        populateGradingFiles(gradingDir, files);
+        return files.build();
+    }
+
+    void populateGradingFiles(File node, ImmutableList.Builder<File> files) {
+        if (node.isFile()) {
+            files.add(node);
+        } else {
+            File[] newNodes = node.listFiles();
+            if (newNodes != null) {
+                for (File newNode : newNodes) {
+                    populateGradingFiles(newNode, files);
+                }
+            }
+        }
+    }
+
+    private void updateProblemRecord(ProblemModel problemRecord, boolean isRelatedToGrading) {
+        dao.edit(problemRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+
+        if (isRelatedToGrading) {
+            File lastUpdateTimeFile = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "lastUpdateTime.txt");
+
+            try {
+                FileUtils.forceDelete(lastUpdateTimeFile);
+                FileUtils.writeStringToFile(lastUpdateTimeFile, "" + problemRecord.timeUpdate);
+            } catch (IOException e) {
+                throw new RuntimeException("Cannot update lastUpdateTime.txt");
+            }
+        }
     }
 }

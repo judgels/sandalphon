@@ -2,12 +2,10 @@ package org.iatoki.judgels.sandalphon.programming;
 
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingConfig;
-import org.iatoki.judgels.gabriel.GradingSource;
-import org.iatoki.judgels.gabriel.GradingType;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 public interface ProblemService {
 
@@ -27,6 +25,8 @@ public interface ProblemService {
 
     GradingConfig getGradingConfig(long id);
 
+    long getGradingLastUpdateTime(long id);
+
     void updateStatement(long id, String statement);
 
     void uploadTestDataFile(long id, File file, String filename);
@@ -40,4 +40,6 @@ public interface ProblemService {
     List<File> getHelperFiles(long id);
 
     List<File> getMediaFiles(long id);
+
+    ByteArrayOutputStream getZippedGradingFilesStream(String problemJid);
 }

@@ -25,6 +25,7 @@ import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.sandalphon.GraderClientService;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
 import org.iatoki.judgels.sandalphon.programming.Problem;
 import org.iatoki.judgels.sandalphon.programming.ProblemService;
@@ -55,6 +56,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -65,11 +67,13 @@ public final class ProgrammingProblemController extends Controller {
     private final ProblemService problemService;
     private final SubmissionService submissionService;
     private final ClientService clientService;
+    private final GraderClientService graderClientService;
 
-    public ProgrammingProblemController(ProblemService problemService, SubmissionService submissionService, ClientService clientService) {
+    public ProgrammingProblemController(ProblemService problemService, SubmissionService submissionService, ClientService clientService, GraderClientService graderClientService) {
         this.problemService = problemService;
         this.submissionService = submissionService;
         this.clientService = clientService;
+        this.graderClientService = graderClientService;
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -462,6 +466,23 @@ public final class ProgrammingProblemController extends Controller {
         } else {
             return notFound();
         }
+    }
+
+    public Result downloadGradingFiles() {
+        DynamicForm form = DynamicForm.form().bindFromRequest();
+
+        String graderClientJid = form.get("graderClientJid");
+        String graderClientSecret = form.get("graderClientSecret");
+        String problemJid = form.get("problemJid");
+
+        if (!problemService.isProblemExistByProblemJid(problemJid) || !graderClientService.verifyGraderClient(graderClientJid, graderClientSecret)) {
+            return forbidden();
+        }
+
+        ByteArrayOutputStream os = problemService.getZippedGradingFilesStream(problemJid);
+        response().setContentType("application/x-download");
+        response().setHeader("Content-disposition","attachment; filename=" + problemJid + ".zip");
+        return ok(os.toByteArray()).as("application/zip");
     }
 
     private Result showUpdateGeneral(Form<UpsertForm> form, long id) {

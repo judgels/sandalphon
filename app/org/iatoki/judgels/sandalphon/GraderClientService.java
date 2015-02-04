@@ -15,4 +15,6 @@ public interface GraderClientService {
     void createGraderClient(String name);
 
     void updateGraderClient(long clientId, String name);
+
+    boolean verifyGraderClient(String clientJid, String clientSecret);
 }

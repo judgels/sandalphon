@@ -46,7 +46,7 @@ public final class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public void submit(String problemJid, String problemGradingType, long problemTimeUpdate, GradingSource source) {
+    public void submit(String problemJid, String problemGradingType, long gradingLastUpdateTime, GradingSource source) {
         SubmissionModel submissionRecord = new SubmissionModel();
         submissionRecord.problemJid = problemJid;
         submissionRecord.verdictCode = "?";
@@ -56,7 +56,7 @@ public final class SubmissionServiceImpl implements SubmissionService {
 
         submissionDao.persist(submissionRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        GradingRequest request = SubmissionAdapters.fromGradingType(problemGradingType).createGradingRequest(submissionRecord.jid, problemJid, problemTimeUpdate, problemGradingType, source);
+        GradingRequest request = SubmissionAdapters.fromGradingType(problemGradingType).createGradingRequest(submissionRecord.jid, problemJid, gradingLastUpdateTime, problemGradingType, source);
         FakeClientMessage message = new FakeClientMessage("some-target", request.getClass().getSimpleName(), new Gson().toJson(request));
         sealtiel.sendMessage(message);
     }
