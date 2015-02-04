@@ -65,6 +65,6 @@ public final class SubmissionServiceImpl implements SubmissionService {
     }
 
     private Submission createSubmissionFromModel(SubmissionModel record) {
-        return new Submission(record.id, record.jid, record.problemJid, record.userCreate, record.timeUpdate, new Verdict(record.verdictCode, record.verdictName), record.score, record.details);
+        return new Submission(record.id, record.jid, record.problemJid, record.userCreate, record.timeCreate, new Verdict(record.verdictCode, record.verdictName), record.score, record.details);
     }
 }

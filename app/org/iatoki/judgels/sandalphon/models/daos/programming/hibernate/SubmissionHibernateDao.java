@@ -52,15 +52,6 @@ public final class SubmissionHibernateDao extends AbstractJudgelsHibernateDao<Su
         CriteriaQuery<SubmissionModel> query = cb.createQuery(SubmissionModel.class);
         Root<SubmissionModel> root = query.from(SubmissionModel.class);
 
-        List<Selection<?>> selection = new ArrayList<>();
-        selection.add(root.get("id"));
-        selection.add(root.get("jid"));
-        selection.add(root.get("problemJid"));
-        selection.add(root.get("verdictCode"));
-        selection.add(root.get("verdictName"));
-        selection.add(root.get("score"));
-        selection.add(root.get("details"));
-
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.like(root.get("problemJid"), "%" + filterString + "%"));
 
@@ -74,7 +65,6 @@ public final class SubmissionHibernateDao extends AbstractJudgelsHibernateDao<Su
         }
 
         query
-                .multiselect(selection)
                 .where(condition)
                 .orderBy(orderBy);
 

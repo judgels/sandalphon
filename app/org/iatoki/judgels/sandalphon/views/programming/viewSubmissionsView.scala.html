@@ -33,7 +33,7 @@
         <td>@page.getId</td>
         <td>@page.getAuthorJid</td>
         <td>@SandalphonUtils.timestampToFormattedDate(page.getTimestamp)</td>
-        <td>@page.getVerdict.getCode - @page.getVerdict.getName</td>
+        <td>@page.getVerdict.getName</td>
         <td>@page.getScore</td>
         <td class="text-center">
           <a href="@routes.ProgrammingProblemController.viewSubmission(problemId, page.getId)"><span class="glyphicon glyphicon-search"></span></a>
