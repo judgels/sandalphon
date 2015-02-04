@@ -29,17 +29,31 @@ public interface ProblemService {
 
     void updateStatement(long id, String statement);
 
-    void uploadTestDataFile(long id, File file, String filename);
+    void uploadTestDataFile(long id, File testDataFile, String filename);
+
+    void uploadTestDataFileZipped(long id, File testDataFileZipped);
+
+    void uploadHelperFile(long id, File helperFile, String filename);
+
+    void uploadHelperFileZipped(long id, File helperFileZipped);
+
+    void uploadMediaFile(long id, File mediaFile, String filename);
+
+    void uploadMediaFileZipped(long id, File mediaFileZipped);
 
     void updateGradingConfig(long id, GradingConfig config);
 
     List<File> getTestDataFiles(long id);
 
-    File getTestDataFile(long id, String filename);
-
     List<File> getHelperFiles(long id);
 
     List<File> getMediaFiles(long id);
+
+    File getTestDataFile(long id, String filename);
+
+    File getHelperFile(long id, String filename);
+
+    File getMediaFile(long id, String filename);
 
     ByteArrayOutputStream getZippedGradingFilesStream(String problemJid);
 }

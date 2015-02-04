@@ -30,6 +30,9 @@ GET         /problem/programming/:id/update/statement                   @org.iat
 POST        /problem/programming/:id/update/statement                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateStatement(id: Long)
 GET         /problem/programming/:id/update/files                       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateFiles(id: Long)
 POST        /problem/programming/:id/update/files                       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateFiles(id: Long)
+GET         /problem/programming/:id/update/files/testdata                       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateTestDataFiles(id: Long)
+GET         /problem/programming/:id/update/files/helper                       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateHelperFiles(id: Long)
+GET         /problem/programming/:id/update/files/media                       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateMediaFiles(id: Long)
 GET         /problem/programming/:id/update/grading                     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGrading(id: Long)
 POST        /problem/programming/:id/update/grading                     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateGrading(id: Long)
 GET         /problem/programming/:id/update/client                      @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateClients(id: Long)
@@ -40,6 +43,8 @@ POST        /problem/programming/:id/update/client/:cpid/update         @org.iat
 GET         /problem/programming/:id/update/client/:cpid/delete         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.deleteClients(id: Long, cpid: Long)
 POST        /problem/programming/:id/submit                             @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postSubmit(id: Long)
 GET         /problem/programming/:id/download/testdata/:filename        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadTestDataFile(id: Long, filename: String)
+GET         /problem/programming/:id/download/helper/:filename        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadHelperFile(id: Long, filename: String)
+GET         /problem/programming/:id/download/media/:filename        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadMediaFile(id: Long, filename: String)
 
 POST         /problem/programming/download/grading                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadGradingFiles
 

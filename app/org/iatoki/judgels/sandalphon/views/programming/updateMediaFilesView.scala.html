@@ -1,0 +1,57 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.UpdateMediaFilesForm], id: Long, mediaFiles: List[java.io.File])
+
+@import play.i18n.Messages
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.SandalphonUtils
+
+<ul class="nav nav-tabs">
+    <li role="presentation"><a href="@routes.ProgrammingProblemController.updateTestDataFiles(id)">Test Data</a></li>
+    <li role="presentation"><a href="@routes.ProgrammingProblemController.updateHelperFiles(id)">Helpers</a></li>
+    <li role="presentation"><a href="@routes.ProgrammingProblemController.updateMediaFiles(id)">Media</a></li>
+</ul>
+
+<h3>Upload New Media File(s)</h3>
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
+
+@b3.form(routes.ProgrammingProblemController.postUpdateFiles(id), 'enctype->"multipart/form-data") {
+    @helper.CSRF.formField
+
+    @b3.file(form("mediaFile"), '_label -> "As a single file")
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("Upload") }
+}
+
+@b3.form(routes.ProgrammingProblemController.postUpdateFiles(id), 'enctype->"multipart/form-data") {
+    @helper.CSRF.formField
+
+    @b3.file(form("mediaFileZipped"), '_label -> "As a zip file")
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("Upload") }
+}
+
+<hr />
+
+<h3>Media Files</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>File</th>
+            <th>Last Modified</th>
+            <th>Size</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+    @for(file <- mediaFiles) {
+        <tr>
+            <td>@file.getName</td>
+            <td>@SandalphonUtils.timestampToFormattedDate(file.lastModified)</td>
+            <td>@SandalphonUtils.byteCountToFormattedSize(file.length)</td>
+            <td><a href="@routes.ProgrammingProblemController.downloadMediaFile(id, file.getName)"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
+        </tr>
+    }
+    </tbody>
+</table>

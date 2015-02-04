@@ -27,6 +27,8 @@ import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.sandalphon.GraderClientService;
+import org.iatoki.judgels.sandalphon.forms.programming.UpdateHelperFilesForm;
+import org.iatoki.judgels.sandalphon.forms.programming.UpdateMediaFilesForm;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
 import org.iatoki.judgels.sandalphon.programming.Problem;
 import org.iatoki.judgels.sandalphon.programming.ProblemService;
@@ -34,12 +36,14 @@ import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
-import org.iatoki.judgels.sandalphon.forms.programming.UpdateFilesForm;
+import org.iatoki.judgels.sandalphon.forms.programming.UpdateTestDataFilesForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
 import org.iatoki.judgels.sandalphon.views.html.programming.createView;
 import org.iatoki.judgels.sandalphon.views.html.programming.listView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateFilesView;
+import org.iatoki.judgels.sandalphon.views.html.programming.updateTestDataFilesView;
+import org.iatoki.judgels.sandalphon.views.html.programming.updateHelperFilesView;
+import org.iatoki.judgels.sandalphon.views.html.programming.updateMediaFilesView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateGeneralView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateStatementView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateClientProblemView;
@@ -60,7 +64,6 @@ import play.mvc.Result;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 @Transactional
 public final class ProgrammingProblemController extends Controller {
@@ -242,25 +245,84 @@ public final class ProgrammingProblemController extends Controller {
         return redirect(routes.ProgrammingProblemController.updateStatement(id));
     }
 
-    @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateFiles(long id) {
+        return redirect(routes.ProgrammingProblemController.updateTestDataFiles(id));
+    }
+
+    @AddCSRFToken
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result updateTestDataFiles(long id) {
         Problem problem = problemService.findProblemById(id);
-        Form<UpdateFilesForm> form = Form.form(UpdateFilesForm.class);
+        Form<UpdateTestDataFilesForm> form = Form.form(UpdateTestDataFilesForm.class);
         List<File> testDataFiles = problemService.getTestDataFiles(id);
-        return showUpdateFiles(form, id, problem.getName(), testDataFiles);
+        return showUpdateTestDataFiles(form, id, problem.getName(), testDataFiles);
+    }
+
+    @AddCSRFToken
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result updateHelperFiles(long id) {
+        Problem problem = problemService.findProblemById(id);
+        Form<UpdateHelperFilesForm> form = Form.form(UpdateHelperFilesForm.class);
+        List<File> helperFiles = problemService.getHelperFiles(id);
+        return showUpdateHelperFiles(form, id, problem.getName(), helperFiles);
+    }
+
+    @AddCSRFToken
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result updateMediaFiles(long id) {
+        Problem problem = problemService.findProblemById(id);
+        Form<UpdateMediaFilesForm> form = Form.form(UpdateMediaFilesForm.class);
+        List<File> mediaFiles = problemService.getMediaFiles(id);
+        return showUpdateMediaFiles(form, id, problem.getName(), mediaFiles);
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateFiles(long id) {
         Http.MultipartFormData body = request().body().asMultipartFormData();
-        Http.MultipartFormData.FilePart file = body.getFile("file");
+        Http.MultipartFormData.FilePart file;
 
+        file = body.getFile("testDataFile");
         if (file != null) {
-            File evaluatorFile = file.getFile();
+            File testDataFile = file.getFile();
+            problemService.uploadTestDataFile(id, testDataFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(id));
+        }
 
-            problemService.uploadTestDataFile(id, evaluatorFile, file.getFilename());
+        file = body.getFile("testDataFileZipped");
+        if (file != null) {
+            File testDataFile = file.getFile();
+            problemService.uploadTestDataFileZipped(id, testDataFile);
+            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(id));
+        }
+
+        file = body.getFile("helperFile");
+        if (file != null) {
+            File helperFile = file.getFile();
+            problemService.uploadHelperFile(id, helperFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateHelperFiles(id));
+        }
+
+        file = body.getFile("helperFileZipped");
+        if (file != null) {
+            File helperFileZipped = file.getFile();
+            problemService.uploadHelperFileZipped(id, helperFileZipped);
+            return redirect(routes.ProgrammingProblemController.updateHelperFiles(id));
+        }
+
+        file = body.getFile("mediaFile");
+        if (file != null) {
+            File mediaFile = file.getFile();
+            problemService.uploadMediaFile(id, mediaFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateMediaFiles(id));
+        }
+
+        file = body.getFile("mediaFileZipped");
+        if (file != null) {
+            File mediaFileZipped = file.getFile();
+            problemService.uploadMediaFileZipped(id, mediaFileZipped);
+            return redirect(routes.ProgrammingProblemController.updateMediaFiles(id));
         }
 
         return redirect(routes.ProgrammingProblemController.updateFiles(id));
@@ -426,7 +488,27 @@ public final class ProgrammingProblemController extends Controller {
         if (file.exists()) {
             return downloadFile(file);
         } else {
-            return ok("File does not exist :(");
+            return notFound();
+        }
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result downloadHelperFile(long id, String filename) {
+        File file = problemService.getHelperFile(id, filename);
+        if (file.exists()) {
+            return downloadFile(file);
+        } else {
+            return notFound();
+        }
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result downloadMediaFile(long id, String filename) {
+        File file = problemService.getMediaFile(id, filename);
+        if (file.exists()) {
+            return downloadFile(file);
+        } else {
+            return notFound();
         }
     }
 
@@ -526,8 +608,30 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
-    private Result showUpdateFiles(Form<UpdateFilesForm> form, long id, String problemName, List<File> testDataFiles) {
-        LazyHtml content = new LazyHtml(updateFilesView.render(form, id, testDataFiles));
+    private Result showUpdateTestDataFiles(Form<UpdateTestDataFilesForm> form, long id, String problemName, List<File> testDataFiles) {
+        LazyHtml content = new LazyHtml(updateTestDataFilesView.render(form, id, testDataFiles));
+        appendTabsLayout(content, id, problemName);
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.update.files"), routes.ProgrammingProblemController.updateFiles(id))
+        ), c));
+        appendTemplateLayout(content);
+        return lazyOk(content);
+    }
+
+    private Result showUpdateHelperFiles(Form<UpdateHelperFilesForm> form, long id, String problemName, List<File> helperFiles) {
+        LazyHtml content = new LazyHtml(updateHelperFilesView.render(form, id, helperFiles));
+        appendTabsLayout(content, id, problemName);
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("problem.programming.update.files"), routes.ProgrammingProblemController.updateFiles(id))
+        ), c));
+        appendTemplateLayout(content);
+        return lazyOk(content);
+    }
+
+    private Result showUpdateMediaFiles(Form<UpdateMediaFilesForm> form, long id, String problemName, List<File> mediaFiles) {
+        LazyHtml content = new LazyHtml(updateMediaFilesView.render(form, id, mediaFiles));
         appendTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),

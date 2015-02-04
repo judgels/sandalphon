@@ -14,11 +14,13 @@ import org.iatoki.judgels.sandalphon.models.domains.programming.ProblemModel;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public final class ProblemServiceImpl implements ProblemService {
@@ -146,16 +148,70 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void uploadTestDataFile(long id, File file, String filename) {
+    public void uploadTestDataFile(long id, File testDataFile, String filename) {
         ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File problemDir = new File(problemsDir, problemRecord.jid);
-        File gradingDir = new File(problemDir, "grading");
+        File testDataDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "testdata");
         try {
-            FileUtils.copyFile(file, new File(new File(gradingDir, "testdata"), filename));
+            FileUtils.copyFile(testDataFile, new File(testDataDir, filename));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        updateProblemRecord(problemRecord, true);
+    }
+
+    @Override
+    public void uploadTestDataFileZipped(long id, File testDataFileZipped) {
+        ProblemModel problemRecord = dao.findById(id);
+        File testDataDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "testdata");
+
+        uploadZippedFiles(testDataDir, testDataFileZipped);
+
+        updateProblemRecord(problemRecord, true);
+    }
+
+    @Override
+    public void uploadHelperFile(long id, File helperFile, String filename) {
+        ProblemModel problemRecord = dao.findById(id);
+        File helperDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "helper");
+        try {
+            FileUtils.copyFile(helperFile, new File(helperDir, filename));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        updateProblemRecord(problemRecord, true);
+    }
+
+    @Override
+    public void uploadHelperFileZipped(long id, File helperFileZipped) {
+        ProblemModel problemRecord = dao.findById(id);
+        File helperDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "helper");
+
+        uploadZippedFiles(helperDir, helperFileZipped);
+
+        updateProblemRecord(problemRecord, true);
+    }
+
+    @Override
+    public void uploadMediaFile(long id, File mediaFile, String filename) {
+        ProblemModel problemRecord = dao.findById(id);
+        File mediaDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "statement", "media");
+        try {
+            FileUtils.copyFile(mediaFile, new File(mediaDir, filename));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        updateProblemRecord(problemRecord, true);
+    }
+
+    @Override
+    public void uploadMediaFileZipped(long id, File mediaFileZipped) {
+        ProblemModel problemRecord = dao.findById(id);
+        File mediaDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "statement", "media");
+
+        uploadZippedFiles(mediaDir, mediaFileZipped);
 
         updateProblemRecord(problemRecord, true);
     }
@@ -189,13 +245,6 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public File getTestDataFile(long id, String filename) {
-        ProblemModel problemRecord = dao.findById(id);
-        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        return FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "testdata", filename);
-    }
-
-    @Override
     public List<File> getHelperFiles(long id) {
         ProblemModel problemRecord = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
@@ -212,13 +261,34 @@ public final class ProblemServiceImpl implements ProblemService {
     public List<File> getMediaFiles(long id) {
         ProblemModel problemRecord = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File mediaDir = FileUtils.getFile(problemsDir, problemRecord.jid, "media");
+        File mediaDir = FileUtils.getFile(problemsDir, problemRecord.jid, "statement", "media");
 
         if (!mediaDir.isDirectory()) {
             return ImmutableList.of();
         }
 
         return Arrays.asList(mediaDir.listFiles());
+    }
+
+
+    @Override
+    public File getTestDataFile(long id, String filename) {
+        ProblemModel problemRecord = dao.findById(id);
+        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "testdata", filename);
+    }
+
+
+    @Override
+    public File getHelperFile(long id, String filename) {
+        ProblemModel problemRecord = dao.findById(id);
+        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "helper", filename);
+    }
+
+
+    @Override
+    public File getMediaFile(long id, String filename) {
+        ProblemModel problemRecord = dao.findById(id);
+        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "statement", "media", filename);
     }
 
     @Override
@@ -301,7 +371,7 @@ public final class ProblemServiceImpl implements ProblemService {
         return files.build();
     }
 
-    void populateGradingFiles(File node, ImmutableList.Builder<File> files) {
+    private void populateGradingFiles(File node, ImmutableList.Builder<File> files) {
         if (node.isFile()) {
             files.add(node);
         } else {
@@ -311,6 +381,35 @@ public final class ProblemServiceImpl implements ProblemService {
                     populateGradingFiles(newNode, files);
                 }
             }
+        }
+    }
+
+    private void uploadZippedFiles(File targetDir, File zippedFiles) {
+        byte[] buffer = new byte[4096];
+        try {
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(zippedFiles));
+            ZipEntry ze = zis.getNextEntry();
+            while (ze != null) {
+                String filename = ze.getName();
+                File file = new File(targetDir, filename);
+
+                // only process outer files
+                if (file.isDirectory() || targetDir.getAbsolutePath().equals(file.getParentFile().getAbsolutePath())) {
+                    try (FileOutputStream fos = new FileOutputStream(file)) {
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                    }
+                }
+
+                ze = zis.getNextEntry();
+            }
+
+            zis.closeEntry();
+            zis.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
