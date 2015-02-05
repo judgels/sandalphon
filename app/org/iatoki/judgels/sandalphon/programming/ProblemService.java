@@ -13,6 +13,8 @@ public interface ProblemService {
 
     Problem findProblemById(long id);
 
+    Problem findProblemByJid(String jid);
+
     void updateProblem(long id, String name, String additionalNote);
 
     Page<Problem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString);

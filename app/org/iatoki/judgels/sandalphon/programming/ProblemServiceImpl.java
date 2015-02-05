@@ -43,6 +43,12 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
+    public final Problem findProblemByJid(String jid) {
+        ProblemModel problemRecord = dao.findByJid(jid);
+        return createProblemFromModel(problemRecord);
+    }
+
+    @Override
     public final void updateProblem(long id, String name, String additionalNote) {
         ProblemModel model = dao.findById(id);
         model.name = name;

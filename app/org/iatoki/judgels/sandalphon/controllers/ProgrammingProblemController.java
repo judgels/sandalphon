@@ -58,11 +58,15 @@ import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
+import play.filters.csrf.CSRF;
+import play.filters.csrf.CSRFConf;
+import play.filters.csrf.CSRFFilter;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.twirl.api.Html;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -154,15 +158,15 @@ public final class ProgrammingProblemController extends Controller {
         return getResult(content, Http.Status.OK);
     }
 
-    @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewStatement(long id) {
         String statement = problemService.getStatement(id);
         Problem problem = problemService.findProblemById(id);
 
+
         GradingConfig config = problemService.getGradingConfig(id);
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id), problem.getName(), statement, config));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id).absoluteURL(request()), problem.getName(), statement, config));
         content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
         appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -363,7 +367,6 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
-    @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postSubmit(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
@@ -547,20 +550,26 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
-    public Result viewProblemStatementTOTP(String clientJid, String problemJid, int TOTP, String lang) {
+    public Result viewProblemStatementTOTP(String clientJid, String problemJid, int TOTP, String lang, String postSubmitUri) {
         response().setHeader("Access-Control-Allow-Origin", "*");
-        if (clientService.isClientProblemInProblemByClientJid(problemJid, clientJid)) {
-            ClientProblem clientProblem = clientService.findClientProblemByClientJidAndProblemJid(clientJid, problemJid);
-            GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
-            if (googleAuthenticator.authorize(new Base32().encodeAsString(clientProblem.getSecret().getBytes()), TOTP)) {
-                System.out.println(problemService.getStatement(problemJid));
-                return ok(problemService.getStatement(problemJid));
-            } else {
-                return forbidden();
-            }
-        } else {
+        if (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid)) {
             return notFound();
         }
+
+        ClientProblem clientProblem = clientService.findClientProblemByClientJidAndProblemJid(clientJid, problemJid);
+
+        GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
+        if (!googleAuthenticator.authorize(new Base32().encodeAsString(clientProblem.getSecret().getBytes()), TOTP)) {
+            return forbidden();
+        }
+
+        String statement = problemService.getStatement(problemJid);
+        Problem problem = problemService.findProblemByJid(problemJid);
+
+        GradingConfig config = problemService.getGradingConfig(problem.getId());
+
+        Html html = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(postSubmitUri, problem.getName(), statement, config);
+        return ok(html);
     }
 
     public Result downloadGradingFiles() {

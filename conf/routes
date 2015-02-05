@@ -49,7 +49,7 @@ GET         /problem/programming/:id/download/media/:filename        @org.iatoki
 POST         /problem/programming/download/grading                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadGradingFiles
 
 GET         /verifyProblem                                              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.verifyProblem()
-GET         /totp/:cid/:pid/statement/:TOTP/:lang                      @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewProblemStatementTOTP(cid: String, pid: String, TOTP: Int, lang: String)
+GET         /totp/:cid/:pid/statement/:TOTP/:lang/:postSubmitUri                      @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewProblemStatementTOTP(cid: String, pid: String, TOTP: Int, lang: String, postSubmitUri: String)
 
 GET         /client                                                     @org.iatoki.judgels.sandalphon.controllers.ClientController.index()
 GET         /client/                                                    @org.iatoki.judgels.sandalphon.controllers.ClientController.list(page: Long ?= 0, sortBy ?= "id", orderBy ?= "asc", filterString ?= "")
