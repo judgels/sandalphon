@@ -2,7 +2,6 @@ package org.iatoki.judgels.sandalphon;
 
 import akka.actor.Scheduler;
 import org.iatoki.judgels.commons.GradingResponsePoller;
-import org.iatoki.judgels.commons.SubmissionService;
 import org.iatoki.judgels.commons.SubmissionUpdaterService;
 import org.iatoki.judgels.gabriel.FakeSealtiel;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;
@@ -19,12 +18,13 @@ import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.GraderClientDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.UserRoleDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.hibernate.ProblemHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.programming.hibernate.SubmissionHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.programming.hibernate.ProblemSubmissionHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
-import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.SubmissionDao;
+import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemSubmissionDao;
 import org.iatoki.judgels.sandalphon.programming.ProblemService;
 import org.iatoki.judgels.sandalphon.programming.ProblemServiceImpl;
-import org.iatoki.judgels.sandalphon.programming.SubmissionServiceImpl;
+import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionService;
+import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionServiceImpl;
 import play.Application;
 import play.libs.Akka;
 import scala.concurrent.ExecutionContextExecutor;
@@ -36,14 +36,14 @@ import java.util.concurrent.TimeUnit;
 public final class Global extends org.iatoki.judgels.commons.Global {
 
     private final ProblemDao problemDao;
-    private final SubmissionDao submissionDao;
+    private final ProblemSubmissionDao submissionDao;
     private final ClientDao clientDao;
     private final GraderClientDao graderClientDao;
     private final ClientProblemDao clientProblemDao;
     private final UserRoleDao userRoleDao;
     private final SubmissionUpdaterService submissionUpdaterService;
     private final ProblemService problemService;
-    private final SubmissionService submissionService;
+    private final ProblemSubmissionService submissionService;
     private final ClientService clientService;
     private final GraderClientService graderClientService;
     private final UserRoleService userRoleService;
@@ -51,14 +51,14 @@ public final class Global extends org.iatoki.judgels.commons.Global {
 
     public Global() {
         this.problemDao = new ProblemHibernateDao();
-        this.submissionDao = new SubmissionHibernateDao();
+        this.submissionDao = new ProblemSubmissionHibernateDao();
         this.clientDao = new ClientHibernateDao();
         this.graderClientDao = new GraderClientHibernateDao();
         this.clientProblemDao = new ClientProblemHibernateDao();
         this.userRoleDao = new UserRoleHibernateDao();
         this.sealtiel = new FakeSealtiel(new File("/Users/fushar/grading-requests"), new File("/Users/fushar/grading-responses"));
         this.problemService = new ProblemServiceImpl(problemDao);
-        this.submissionService = new SubmissionServiceImpl(submissionDao, sealtiel);
+        this.submissionService = new ProblemSubmissionServiceImpl(submissionDao, sealtiel);
         this.submissionUpdaterService = new SubmissionUpdaterServiceImpl(submissionDao);
         this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);
         this.graderClientService = new GraderClientServiceImpl(graderClientDao);

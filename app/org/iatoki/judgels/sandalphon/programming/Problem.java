@@ -1,7 +1,6 @@
 package org.iatoki.judgels.sandalphon.programming;
 
 public final class Problem {
-
     private final long id;
     private final String jid;
     private final String name;

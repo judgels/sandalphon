@@ -10,7 +10,6 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.Submission;
 import org.iatoki.judgels.commons.SubmissionException;
-import org.iatoki.judgels.commons.SubmissionService;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.commons.SubmissionAdapters;
 import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
@@ -20,8 +19,6 @@ import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
-import org.iatoki.judgels.gabriel.GradingLanguage;
-import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
@@ -42,6 +39,8 @@ import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateTestDataFilesForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
+import org.iatoki.judgels.sandalphon.programming.ProblemSubmission;
+import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionService;
 import org.iatoki.judgels.sandalphon.views.html.programming.createView;
 import org.iatoki.judgels.sandalphon.views.html.programming.listView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateTestDataFilesView;
@@ -58,9 +57,6 @@ import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
-import play.filters.csrf.CSRF;
-import play.filters.csrf.CSRFConf;
-import play.filters.csrf.CSRFFilter;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Controller;
@@ -76,11 +72,11 @@ import java.util.List;
 public final class ProgrammingProblemController extends Controller {
 
     private final ProblemService problemService;
-    private final SubmissionService submissionService;
+    private final ProblemSubmissionService submissionService;
     private final ClientService clientService;
     private final GraderClientService graderClientService;
 
-    public ProgrammingProblemController(ProblemService problemService, SubmissionService submissionService, ClientService clientService, GraderClientService graderClientService) {
+    public ProgrammingProblemController(ProblemService problemService, ProblemSubmissionService submissionService, ClientService clientService, GraderClientService graderClientService) {
         this.problemService = problemService;
         this.submissionService = submissionService;
         this.clientService = clientService;
@@ -163,10 +159,10 @@ public final class ProgrammingProblemController extends Controller {
         String statement = problemService.getStatement(id);
         Problem problem = problemService.findProblemById(id);
 
-
         GradingConfig config = problemService.getGradingConfig(id);
+        long gradingLastUpdateTime = problemService.getGradingLastUpdateTime(id);
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id).absoluteURL(request()), problem.getName(), statement, config));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine(), gradingLastUpdateTime));
         content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
         appendTabsLayout(content, id, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -180,7 +176,7 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewSubmissions(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        Page<Submission> submissions = submissionService.pageSubmission(0, 20, "id", "asc", problem.getJid());
+        Page<ProblemSubmission> submissions = submissionService.pageSubmission(0, 20, "id", "asc", problem.getJid());
         LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, problemId, "id", "asc", problem.getJid()));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -194,10 +190,9 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result viewSubmission(long problemId, long submissionId) {
         Problem problem = problemService.findProblemById(problemId);
-        GradingConfig config = problemService.getGradingConfig(problemId);
         Submission submission = submissionService.findSubmissionById(submissionId);
 
-        GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromPastSubmission(config, SandalphonProperties.getInstance().getSubmissionDir(), submission.getJid());
+        GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getSubmissionDir(), submission.getJid());
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewSubmission(submission, source));
 
@@ -370,13 +365,12 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postSubmit(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        GradingConfig config = problemService.getGradingConfig(problemId);
         Http.MultipartFormData body = request().body().asMultipartFormData();
 
         String gradingLanguage = body.asFormUrlEncoded().get("language")[0];
 
         try {
-            GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromNewSubmission(config, body);
+            GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromNewSubmission(body);
             String submissionJid = submissionService.submit(problem.getJid(), problem.getGradingEngine(), gradingLanguage, problem.getTimeUpdate(), source);
             SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid, source);
         } catch (SubmissionException e) {
@@ -565,10 +559,11 @@ public final class ProgrammingProblemController extends Controller {
 
         String statement = problemService.getStatement(problemJid);
         Problem problem = problemService.findProblemByJid(problemJid);
+        long gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problem.getId());
 
         GradingConfig config = problemService.getGradingConfig(problem.getId());
 
-        Html html = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(postSubmitUri, problem.getName(), statement, config);
+        Html html = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(postSubmitUri, problem.getName(), statement, config, problem.getGradingEngine(), gradingLastUpdateTime);
         return ok(html);
     }
 
