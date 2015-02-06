@@ -36,6 +36,11 @@ $(document).ready(function() {
     };
 
     function addNewSampleTestCase(inputVal, outputVal) {
+        if (!inputVal) {
+            alert("You don't have any test data files");
+            return;
+        }
+
         var container = sampleTestCaseTemplate.clone().removeAttr('id');
         var inInput = container.find('input').first();
         var outInput = container.find('input').last();
@@ -137,6 +142,11 @@ $(document).ready(function() {
 
 
     function addNewTestCase(groupNo, inputVal, outputVal) {
+        if (!inputVal) {
+            alert("You don't have any test data files");
+            return;
+        }
+
         var testGroup = testGroups[groupNo];
 
         var container = testCaseTemplate.clone().removeAttr('id');
@@ -451,8 +461,11 @@ $(document).ready(function() {
         </div>
     </div>
 
-    @b3.select(form("communicator"), helperFiles.map(f => f.getName -> f.getName).toSeq ++ Seq("(None)" -> "(None)"), '_label -> "Communicator")
-
+    @if(helperFiles.isEmpty) {
+        @b3.select(form("communicator"), Seq("none" -> "(None yet - please add communicator as a helper file)"), '_label -> "Communicator")
+    }else {
+        @b3.select(form("communicator"), helperFiles.map(f => f.getName -> f.getName).toSeq, '_label -> "Communicator")
+    }
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
 }

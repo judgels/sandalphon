@@ -36,6 +36,11 @@ $(document).ready(function() {
     };
 
     function addNewSampleTestCase(inputVal, outputVal) {
+        if (!inputVal || !outputVal) {
+            alert("You don't have any test data files");
+            return;
+        }
+
         var container = sampleTestCaseTemplate.clone().removeAttr('id');
         var inInput = container.find('input').first();
         var outInput = container.find('input').last();
@@ -137,6 +142,10 @@ $(document).ready(function() {
 
 
     function addNewTestCase(groupNo, inputVal, outputVal) {
+        if (!inputVal || !outputVal) {
+            alert("You don't have any test data files");
+            return;
+        }
         var testGroup = testGroups[groupNo];
 
         var container = testCaseTemplate.clone().removeAttr('id');
@@ -454,7 +463,7 @@ $(document).ready(function() {
         </div>
     </div>
 
-    @b3.select(form("customScorer"), helperFiles.map(f => f.getName -> f.getName).toSeq ++ Seq("(None)" -> "(None)"), '_label -> "Custom Scorer")
+    @b3.select(form("customScorer"), helperFiles.map(f => f.getName -> f.getName).toSeq ++ Seq("(none)" -> "(None)"), '_label -> "Custom Scorer")
 
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
