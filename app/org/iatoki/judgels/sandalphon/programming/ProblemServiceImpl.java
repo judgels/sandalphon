@@ -365,7 +365,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
     
     private Problem createProblemFromModel(ProblemModel record) {
-        return new Problem(record.id, record.jid, record.name, record.gradingEngine, record.timeUpdate, record.additionalNote);
+        return new Problem(record.id, record.jid, record.name, record.userCreate, record.gradingEngine, record.timeUpdate, record.additionalNote);
     }
 
     private List<File> getGradingFiles(String problemJid) {

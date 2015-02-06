@@ -7,6 +7,7 @@
 @b3.form(play.api.mvc.Call("GET", "#")) {
 
     @b3.static(Messages.get("commons.field.id")) { @problem.getId }
+    @b3.static(Messages.get("commons.field.jid")) { @problem.getJid }
     @b3.static(Messages.get("problem.programming.field.name")) { @problem.getName }
-
+    @b3.static(Messages.get("Grading Engine")) { @problem.getGradingEngine }
 }
