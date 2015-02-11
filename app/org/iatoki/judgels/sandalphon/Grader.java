@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon;
 
-public final class GraderClient {
+public final class Grader {
 
     private long id;
 
@@ -10,7 +10,7 @@ public final class GraderClient {
 
     private String secret;
 
-    public GraderClient(long id, String jid, String name, String secret) {
+    public Grader(long id, String jid, String name, String secret) {
         this.id = id;
         this.jid = jid;
         this.name = name;
