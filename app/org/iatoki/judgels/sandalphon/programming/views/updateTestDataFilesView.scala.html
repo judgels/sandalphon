@@ -1,0 +1,57 @@
+@(form: Form[org.iatoki.judgels.sandalphon.programming.forms.UpdateTestDataFilesForm], problemId: Long, testDataFiles: List[java.io.File])
+
+@import play.i18n.Messages
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.commons.JudgelsUtils
+
+<ul class="nav nav-tabs">
+    <li role="presentation"><a href="@routes.ProgrammingProblemController.updateTestDataFiles(problemId)">Test Data</a></li>
+    <li role="presentation"><a href="@routes.ProgrammingProblemController.updateHelperFiles(problemId)">Helpers</a></li>
+    <li role="presentation"><a href="@routes.ProgrammingProblemController.updateMediaFiles(problemId)">Media</a></li>
+</ul>
+
+<h3>@Messages.get("programming.uploadNewTestDataFiles")</h3>
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
+
+@b3.form(routes.ProgrammingProblemController.postUpdateFiles(problemId), 'enctype->"multipart/form-data") {
+    @helper.CSRF.formField
+
+    @b3.file(form("testDataFile"), '_label -> Messages.get("programming.asSingleFile"))
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.upload") }
+}
+
+@b3.form(routes.ProgrammingProblemController.postUpdateFiles(problemId), 'enctype->"multipart/form-data") {
+    @helper.CSRF.formField
+
+    @b3.file(form("testDataFileZipped"), '_label -> Messages.get("programming.asZipFile"))
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.upload") }
+}
+
+<hr />
+
+<h3>@Messages.get("programming.testDataFiles")</h3>
+
+<table class="table table-striped table-condensed table-bordered">
+    <thead>
+        <tr>
+            <th>@Messages.get("programming.filename")</th>
+            <th>@Messages.get("programming.lastModified")</th>
+            <th>@Messages.get("programming.size")</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+    @for(file <- testDataFiles) {
+        <tr>
+            <td>@file.getName</td>
+            <td>@JudgelsUtils.timestampToFormattedDate(file.lastModified)</td>
+            <td>@JudgelsUtils.byteCountToFormattedSize(file.length)</td>
+            <td class="text-center"><a href="@routes.ProgrammingProblemController.downloadTestDataFile(problemId, file.getName)"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
+        </tr>
+    }
+    </tbody>
+</table>

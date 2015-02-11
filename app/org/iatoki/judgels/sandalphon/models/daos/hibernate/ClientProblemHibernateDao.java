@@ -13,8 +13,12 @@ import java.util.List;
 
 public final class ClientProblemHibernateDao extends AbstractHibernateDao<Long, ClientProblemModel> implements ClientProblemDao {
 
+    public ClientProblemHibernateDao() {
+        super(ClientProblemModel.class);
+    }
+
     @Override
-    public boolean isExistByClientJid(String problemJid, String clientJid) {
+    public boolean existsByProblemJidAndClientJid(String problemJid, String clientJid) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
         Root<ClientProblemModel> root = query.from(ClientProblemModel.class);

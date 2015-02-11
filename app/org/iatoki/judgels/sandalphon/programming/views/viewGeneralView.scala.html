@@ -1,0 +1,24 @@
+@(problem: org.iatoki.judgels.sandalphon.programming.Problem)
+
+@import play.i18n.Messages
+@import org.iatoki.judgels.sandalphon.JidCacheService
+
+<table class="table">
+    <tbody>
+        <tr>
+            <td>@Messages.get("commons.id")</td><td>@problem.getId</td>
+        </tr>
+        <tr>
+            <td>@Messages.get("commons.jid")</td><td>@problem.getJid</td>
+        </tr>
+        <tr>
+            <td>@Messages.get("programming.name")</td><td>@problem.getName</td>
+        </tr>
+        <tr>
+            <td>@Messages.get("programming.author")</td><td>@JidCacheService.getInstance().getDisplayName(problem.getAuthorJid)</td>
+        </tr>
+        <tr>
+            <td>@Messages.get("programming.gradingEngine")</td><td>@problem.getGradingEngine</td>
+        </tr>
+    </tbody>
+</table>

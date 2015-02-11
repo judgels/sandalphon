@@ -18,34 +18,6 @@ public final class SandalphonUtils {
         // prevent instantiation
     }
 
-    public static String timestampToFormattedDate(long timestamp) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd - HH:mm");
-        return formatter.format(timestamp);
-    }
-
-    public static String byteCountToFormattedSize(long bytes) {
-        return FileUtils.byteCountToDisplaySize(bytes);
-    }
-
-    public static String hashSHA256(String s) {
-        return messageDigest(s, "SHA-256");
-    }
-
-    public static String hashMD5(String s) {
-        return messageDigest(s, "MD5");
-    }
-
-    private static String messageDigest(String s, String algorithm) {
-        byte[] hash = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance(algorithm);
-            hash = md.digest(s.getBytes("UTF-8"));
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            // No way this thing will ever happen
-            e.printStackTrace();
-        }
-        return new String(Hex.encodeHex(hash));
-    }
 
     public static List<String> getDefaultRole() {
         return ImmutableList.of("user");

@@ -4,7 +4,7 @@ import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingSource;
 
 public interface ProblemSubmissionService {
-    Page<ProblemSubmission> pageSubmission(long page, long pageSize, String sortBy, String order, String filterString);
+    Page<ProblemSubmission> pageSubmissions(long pageIndex, long pageSize, String orderBy, String orderDir, String authorJid, String problemJid);
 
     ProblemSubmission findSubmissionById(long submissionId);
 

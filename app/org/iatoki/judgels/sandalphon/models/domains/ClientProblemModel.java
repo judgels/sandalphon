@@ -20,8 +20,4 @@ public final class ClientProblemModel extends AbstractModel {
     public String problemJid;
 
     public String secret;
-
-    public ClientProblemModel() {
-
-    }
 }

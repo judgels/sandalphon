@@ -7,14 +7,9 @@ import java.util.List;
 
 public interface UserRoleDao extends Dao<Long, UserRoleModel> {
 
-    boolean isExistByUserJid(String userJid);
+    boolean existsByUserJid(String userJid);
 
     UserRoleModel findByUserJid(String userJid);
 
-    long countByFilter(String filterString);
-
-    List<UserRoleModel> findByFilterAndSort(String filterString, String sortBy, String order, long first, long max);
-
     List<String> findUserJidByFilter(String filterString);
-
 }

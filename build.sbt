@@ -50,7 +50,6 @@ libraryDependencies ++= Seq(
   "org.webjars" % "requirejs" % "2.1.15",
   "org.webjars" % "bootstrap-datetimepicker" % "6aa746736d",
   "com.puppycrawl.tools" % "checkstyle" % "6.1",
-  "com.adrianhurt" % "play-bootstrap3_2.11" % "0.3",
   "com.google.code.gson" % "gson" % "2.3.1",
   "com.nimbusds" % "c2id-server-sdk" % "2.0",
   "com.warrenstrange" % "googleauth" % "0.4.3"
@@ -77,5 +76,3 @@ javaOptions in Test ++= Seq(
 )
 
 javacOptions ++= Seq("-s", "app")
-
-javacOptions ++= Seq("-Xlint:unchecked")

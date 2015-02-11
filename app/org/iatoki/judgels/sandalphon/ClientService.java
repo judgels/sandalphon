@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ClientService {
 
-    boolean isClientExist(String clientJid);
+    boolean existsByJid(String clientJid);
 
     List<Client> findAllClients();
 
@@ -20,7 +20,7 @@ public interface ClientService {
 
     void deleteClient(long clientId);
 
-    Page<Client> pageClient(long page, long pageSize, String sortBy, String order, String filterString);
+    Page<Client> pageClients(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
     boolean isClientProblemInProblemByClientJid(String problemJid, String clientJid);
 
@@ -32,8 +32,5 @@ public interface ClientService {
 
     void createClientProblem(String problemJid, String clientJid);
 
-    void updateClientProblem(long clientProblemId, String clientJid);
-
     void deleteClientProblem(long clientProblemId);
-
 }

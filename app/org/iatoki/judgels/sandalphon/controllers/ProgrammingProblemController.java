@@ -8,10 +8,10 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.commons.Submission;
-import org.iatoki.judgels.commons.SubmissionException;
+import org.iatoki.judgels.sandalphon.commons.Submission;
+import org.iatoki.judgels.sandalphon.commons.SubmissionException;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
-import org.iatoki.judgels.commons.SubmissionAdapters;
+import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
 import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
 import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
@@ -25,10 +25,10 @@ import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.gabriel.GradingConfig;
-import org.iatoki.judgels.sandalphon.GraderClientService;
+import org.iatoki.judgels.sandalphon.GraderService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
-import org.iatoki.judgels.sandalphon.forms.programming.UpdateHelperFilesForm;
-import org.iatoki.judgels.sandalphon.forms.programming.UpdateMediaFilesForm;
+import org.iatoki.judgels.sandalphon.programming.forms.UpdateHelperFilesForm;
+import org.iatoki.judgels.sandalphon.programming.forms.UpdateMediaFilesForm;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
 import org.iatoki.judgels.sandalphon.programming.Problem;
 import org.iatoki.judgels.sandalphon.programming.ProblemService;
@@ -36,23 +36,22 @@ import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
-import org.iatoki.judgels.sandalphon.forms.programming.UpdateTestDataFilesForm;
-import org.iatoki.judgels.sandalphon.forms.programming.UpdateStatementForm;
-import org.iatoki.judgels.sandalphon.forms.programming.UpsertForm;
+import org.iatoki.judgels.sandalphon.programming.forms.UpdateTestDataFilesForm;
+import org.iatoki.judgels.sandalphon.programming.forms.UpdateStatementForm;
+import org.iatoki.judgels.sandalphon.programming.forms.UpsertForm;
 import org.iatoki.judgels.sandalphon.programming.ProblemSubmission;
 import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionService;
-import org.iatoki.judgels.sandalphon.views.html.programming.createView;
-import org.iatoki.judgels.sandalphon.views.html.programming.listView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateTestDataFilesView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateHelperFilesView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateMediaFilesView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateGeneralView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateStatementView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateClientProblemView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateViewClientProblemView;
-import org.iatoki.judgels.sandalphon.views.html.programming.updateUpdateClientProblemView;
-import org.iatoki.judgels.sandalphon.views.html.programming.viewGeneralView;
-import org.iatoki.judgels.sandalphon.views.html.programming.viewSubmissionsView;
+import org.iatoki.judgels.sandalphon.programming.views.html.createView;
+import org.iatoki.judgels.sandalphon.programming.views.html.listView;
+import org.iatoki.judgels.sandalphon.programming.views.html.updateTestDataFilesView;
+import org.iatoki.judgels.sandalphon.programming.views.html.updateHelperFilesView;
+import org.iatoki.judgels.sandalphon.programming.views.html.updateMediaFilesView;
+import org.iatoki.judgels.sandalphon.programming.views.html.updateGeneralView;
+import org.iatoki.judgels.sandalphon.programming.views.html.updateStatementView;
+import org.iatoki.judgels.sandalphon.programming.views.html.updateClientProblemsView;
+import org.iatoki.judgels.sandalphon.programming.views.html.viewClientProblemView;
+import org.iatoki.judgels.sandalphon.programming.views.html.viewGeneralView;
+import org.iatoki.judgels.sandalphon.programming.views.html.viewSubmissionsView;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -71,16 +70,18 @@ import java.util.List;
 @Transactional
 public final class ProgrammingProblemController extends Controller {
 
+    private static final long PAGE_SIZE = 20;
+
     private final ProblemService problemService;
     private final ProblemSubmissionService submissionService;
     private final ClientService clientService;
-    private final GraderClientService graderClientService;
+    private final GraderService graderService;
 
-    public ProgrammingProblemController(ProblemService problemService, ProblemSubmissionService submissionService, ClientService clientService, GraderClientService graderClientService) {
+    public ProgrammingProblemController(ProblemService problemService, ProblemSubmissionService submissionService, ClientService clientService, GraderService graderService) {
         this.problemService = problemService;
         this.submissionService = submissionService;
         this.clientService = clientService;
-        this.graderClientService = graderClientService;
+        this.graderService = graderService;
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -90,12 +91,12 @@ public final class ProgrammingProblemController extends Controller {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result list(long page, String sortBy, String orderBy, String filterString) {
-        Page<Problem> currentPage = problemService.pageProblem(page, 20, sortBy, orderBy, filterString);
+        Page<Problem> currentPage = problemService.pageProblems(page, PAGE_SIZE, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.programming.list"), new InternalLink(Messages.get("problem.programming.create"), routes.ProgrammingProblemController.create()), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("programming.list"), new InternalLink(Messages.get("commons.create"), routes.ProgrammingProblemController.create()), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index())
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index())
         ), c));
         appendTemplateLayout(content);
 
@@ -114,22 +115,22 @@ public final class ProgrammingProblemController extends Controller {
     public Result postCreate() {
         Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
 
-        if (form.hasErrors()) {
+        if (form.hasErrors() || form.hasGlobalErrors()) {
             return showCreate(form);
         } else {
             UpsertForm data = form.get();
             Problem problem = problemService.createProblem(data.name, data.gradingEngine, data.additionalNote);
 
-            return redirect(routes.ProgrammingProblemController.update(problem.getId()));
+            return redirect(routes.ProgrammingProblemController.viewGeneral(problem.getId()));
         }
     }
 
     private Result showCreate(Form<UpsertForm> form) {
         LazyHtml content = new LazyHtml(createView.render(form));
-        content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
+        content.appendLayout(c -> headingLayout.render(Messages.get("programming.create"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.create"), routes.ProgrammingProblemController.create())
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.create"), routes.ProgrammingProblemController.create())
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -141,47 +142,47 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result viewGeneral(long id) {
-        Problem problem = problemService.findProblemById(id);
-        LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
-        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewGeneral(id), routes.ProgrammingProblemController.updateGeneral(id), c));
-        appendTabsLayout(content, id, problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
-        ), c));
-        appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
-    }
-
-    @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result viewStatement(long id) {
-        String statement = problemService.getStatement(id);
-        Problem problem = problemService.findProblemById(id);
-
-        GradingConfig config = problemService.getGradingConfig(id);
-        long gradingLastUpdateTime = problemService.getGradingLastUpdateTime(id);
-
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(id).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine(), gradingLastUpdateTime));
-        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
-        appendTabsLayout(content, id, problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(id))
-        ), c));
-        appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
-    }
-
-    @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result viewSubmissions(long problemId) {
+    public Result viewGeneral(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        Page<ProblemSubmission> submissions = submissionService.pageSubmission(0, 20, "id", "asc", problem.getJid());
-        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, problemId, "id", "asc", problem.getJid()));
+        LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
+        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewGeneral(problemId), routes.ProgrammingProblemController.updateGeneral(problemId), c));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(problemId))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.viewGeneral"), routes.ProgrammingProblemController.viewGeneral(problemId))
+        ), c));
+        appendTemplateLayout(content);
+        return getResult(content, Http.Status.OK);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result viewStatement(long problemId) {
+        String statement = problemService.getStatement(problemId);
+        Problem problem = problemService.findProblemById(problemId);
+
+        GradingConfig config = problemService.getGradingConfig(problemId);
+        long gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problemId);
+
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine(), gradingLastUpdateTime));
+        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(problemId), routes.ProgrammingProblemController.updateStatement(problemId), c));
+        appendTabsLayout(content, problemId, problem.getName());
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.viewStatement"), routes.ProgrammingProblemController.viewStatement(problemId))
+        ), c));
+        appendTemplateLayout(content);
+        return getResult(content, Http.Status.OK);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result viewSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
+        Problem problem = problemService.findProblemById(problemId);
+        Page<ProblemSubmission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, IdentityUtils.getUserJid(), problem.getJid());
+        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, problemId, pageIndex, orderBy, orderDir));
+        appendTabsLayout(content, problemId, problem.getName());
+        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.viewSubmssions"), routes.ProgrammingProblemController.viewSubmissions(problemId, pageIndex, orderBy, orderDir))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -198,28 +199,23 @@ public final class ProgrammingProblemController extends Controller {
 
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.view.general"), routes.ProgrammingProblemController.viewGeneral(problemId))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.viewSubmission"), routes.ProgrammingProblemController.viewSubmission(problemId, submissionId))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
     }
 
-    @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result update(long id) {
-        return redirect(routes.ProgrammingProblemController.updateGeneral(id));
-    }
-
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateGeneral(long id) {
-        Problem problem = problemService.findProblemById(id);
+    public Result updateGeneral(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
         UpsertForm content = new UpsertForm();
         content.name = problem.getName();
         content.additionalNote = problem.getAdditionalNote();
         Form<UpsertForm> form = Form.form(UpsertForm.class).fill(content);
 
-        return showUpdateGeneral(form, id);
+        return showUpdateGeneral(form, problemId);
     }
 
     @RequireCSRFCheck
@@ -232,20 +228,20 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateStatement(long id) {
-        Problem problem = problemService.findProblemById(id);
-        String statement = problemService.getStatement(id);
+    public Result updateStatement(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        String statement = problemService.getStatement(problemId);
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
         form = form.bind(ImmutableMap.of("statement", statement));
-        return showUpdateStatement(form, id, problem.getName());
+        return showUpdateStatement(form, problemId, problem.getName());
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result postUpdateStatement(long id) {
+    public Result postUpdateStatement(long problemId) {
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
-        problemService.updateStatement(id, form.get().statement);
-        return redirect(routes.ProgrammingProblemController.updateStatement(id));
+        problemService.updateStatement(problemId, form.get().statement);
+        return redirect(routes.ProgrammingProblemController.updateStatement(problemId));
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -255,89 +251,89 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateTestDataFiles(long id) {
-        Problem problem = problemService.findProblemById(id);
+    public Result updateTestDataFiles(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
         Form<UpdateTestDataFilesForm> form = Form.form(UpdateTestDataFilesForm.class);
-        List<File> testDataFiles = problemService.getTestDataFiles(id);
-        return showUpdateTestDataFiles(form, id, problem.getName(), testDataFiles);
+        List<File> testDataFiles = problemService.getTestDataFiles(problemId);
+        return showUpdateTestDataFiles(form, problemId, problem.getName(), testDataFiles);
     }
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateHelperFiles(long id) {
-        Problem problem = problemService.findProblemById(id);
+    public Result updateHelperFiles(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
         Form<UpdateHelperFilesForm> form = Form.form(UpdateHelperFilesForm.class);
-        List<File> helperFiles = problemService.getHelperFiles(id);
-        return showUpdateHelperFiles(form, id, problem.getName(), helperFiles);
+        List<File> helperFiles = problemService.getHelperFiles(problemId);
+        return showUpdateHelperFiles(form, problemId, problem.getName(), helperFiles);
     }
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateMediaFiles(long id) {
-        Problem problem = problemService.findProblemById(id);
+    public Result updateMediaFiles(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
         Form<UpdateMediaFilesForm> form = Form.form(UpdateMediaFilesForm.class);
-        List<File> mediaFiles = problemService.getMediaFiles(id);
-        return showUpdateMediaFiles(form, id, problem.getName(), mediaFiles);
+        List<File> mediaFiles = problemService.getMediaFiles(problemId);
+        return showUpdateMediaFiles(form, problemId, problem.getName(), mediaFiles);
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result postUpdateFiles(long id) {
+    public Result postUpdateFiles(long problemId) {
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart file;
 
         file = body.getFile("testDataFile");
         if (file != null) {
             File testDataFile = file.getFile();
-            problemService.uploadTestDataFile(id, testDataFile, file.getFilename());
-            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(id));
+            problemService.uploadTestDataFile(problemId, testDataFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(problemId));
         }
 
         file = body.getFile("testDataFileZipped");
         if (file != null) {
             File testDataFile = file.getFile();
-            problemService.uploadTestDataFileZipped(id, testDataFile);
-            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(id));
+            problemService.uploadTestDataFileZipped(problemId, testDataFile);
+            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(problemId));
         }
 
         file = body.getFile("helperFile");
         if (file != null) {
             File helperFile = file.getFile();
-            problemService.uploadHelperFile(id, helperFile, file.getFilename());
-            return redirect(routes.ProgrammingProblemController.updateHelperFiles(id));
+            problemService.uploadHelperFile(problemId, helperFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateHelperFiles(problemId));
         }
 
         file = body.getFile("helperFileZipped");
         if (file != null) {
             File helperFileZipped = file.getFile();
-            problemService.uploadHelperFileZipped(id, helperFileZipped);
-            return redirect(routes.ProgrammingProblemController.updateHelperFiles(id));
+            problemService.uploadHelperFileZipped(problemId, helperFileZipped);
+            return redirect(routes.ProgrammingProblemController.updateHelperFiles(problemId));
         }
 
         file = body.getFile("mediaFile");
         if (file != null) {
             File mediaFile = file.getFile();
-            problemService.uploadMediaFile(id, mediaFile, file.getFilename());
-            return redirect(routes.ProgrammingProblemController.updateMediaFiles(id));
+            problemService.uploadMediaFile(problemId, mediaFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateMediaFiles(problemId));
         }
 
         file = body.getFile("mediaFileZipped");
         if (file != null) {
             File mediaFileZipped = file.getFile();
-            problemService.uploadMediaFileZipped(id, mediaFileZipped);
-            return redirect(routes.ProgrammingProblemController.updateMediaFiles(id));
+            problemService.uploadMediaFileZipped(problemId, mediaFileZipped);
+            return redirect(routes.ProgrammingProblemController.updateMediaFiles(problemId));
         }
 
-        return redirect(routes.ProgrammingProblemController.updateFiles(id));
+        return redirect(routes.ProgrammingProblemController.updateFiles(problemId));
     }
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateGrading(long id) {
-        Problem problem = problemService.findProblemById(id);
-        GradingConfig config = problemService.getGradingConfig(id);
-        List<File> testDataFiles = problemService.getTestDataFiles(id);
-        List<File> helperFiles = problemService.getHelperFiles(id);
+    public Result updateGrading(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        GradingConfig config = problemService.getGradingConfig(problemId);
+        List<File> testDataFiles = problemService.getTestDataFiles(problemId);
+        List<File> helperFiles = problemService.getHelperFiles(problemId);
 
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromConfig(config);
 
@@ -346,19 +342,19 @@ public final class ProgrammingProblemController extends Controller {
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result postUpdateGrading(long id) {
-        Problem problem = problemService.findProblemById(id);
+    public Result postUpdateGrading(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
 
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromRequest(request());
 
         if (form.hasErrors()) {
-            List<File> testDataFiles = problemService.getTestDataFiles(id);
-            List<File> helperFiles = problemService.getHelperFiles(id);
+            List<File> testDataFiles = problemService.getTestDataFiles(problemId);
+            List<File> helperFiles = problemService.getHelperFiles(problemId);
             return showUpdateGrading(form, problem, testDataFiles, helperFiles);
         } else {
             GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createConfigFromForm(form);
-            problemService.updateGradingConfig(id, config);
-            return redirect(routes.ProgrammingProblemController.updateGrading(id));
+            problemService.updateGradingConfig(problemId, config);
+            return redirect(routes.ProgrammingProblemController.updateGrading(problemId));
         }
     }
 
@@ -378,53 +374,53 @@ public final class ProgrammingProblemController extends Controller {
             return redirect(routes.ProgrammingProblemController.viewStatement(problemId));
         }
 
-        return redirect(routes.ProgrammingProblemController.viewSubmissions(problemId));
+        return redirect(routes.ProgrammingProblemController.viewSubmissions(problemId, 0, "id", "asc"));
     }
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateClients(long problemId) {
+    public Result updateClientProblems(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class);
         List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
         List<Client> clients = clientService.findAllClients();
 
-        return showUpdateClients(form, problem, clients, clientProblems);
+        return showUpdateClientProblems(form, problem, clients, clientProblems);
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result postUpdateClients(long problemId) {
+    public Result postUpdateClientProblems(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
 
-        if ((form.hasErrors() || form.hasGlobalErrors())) {
+        if (form.hasErrors() || form.hasGlobalErrors()) {
             List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
             List<Client> clients = clientService.findAllClients();
-            return showUpdateClients(form, problem, clients, clientProblems);
+            return showUpdateClientProblems(form, problem, clients, clientProblems);
         } else {
             ClientProblemUpsertForm clientProblemUpsertForm = form.get();
-            if ((clientService.isClientExist(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
+            if ((clientService.existsByJid(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
                 clientService.createClientProblem(problem.getJid(), clientProblemUpsertForm.clientJid);
-                return redirect(routes.ProgrammingProblemController.updateClients(problem.getId()));
+                return redirect(routes.ProgrammingProblemController.updateClientProblems(problem.getId()));
             } else {
                 List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
                 List<Client> clients = clientService.findAllClients();
-                return showUpdateClients(form, problem, clients, clientProblems);
+                return showUpdateClientProblems(form, problem, clients, clientProblems);
             }
         }
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateViewClients(long problemId, long clientProblemId) {
+    public Result viewClientProblem(long problemId, long clientProblemId) {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
         if (clientProblem.getProblemJid().equals(problem.getJid())) {
-            LazyHtml content = new LazyHtml(updateViewClientProblemView.render(problem, clientProblem));
+            LazyHtml content = new LazyHtml(viewClientProblemView.render(problem, clientProblem));
             appendTabsLayout(content, problemId, problem.getName());
             content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                    new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                    new InternalLink(Messages.get("problem.programming.update.general"), routes.ProgrammingProblemController.updateGeneral(problemId))
+                    new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                    new InternalLink(Messages.get("programming.viewClient"), routes.ProgrammingProblemController.viewClientProblem(problemId, clientProblemId))
             ), c));
             appendTemplateLayout(content);
 
@@ -434,53 +430,14 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
-
-    @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateUpdateClients(long problemId, long clientProblemId) {
-        Problem problem = problemService.findProblemById(problemId);
-        ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
-        if (clientProblem.getProblemJid().equals(problem.getJid())) {
-            Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class);
-            form.fill(new ClientProblemUpsertForm(clientProblem));
-            List<Client> clients = clientService.findAllClients();
-
-            return showUpdateUpdateClients(form, problem, clientProblem, clients);
-        } else {
-            return redirect(routes.ProgrammingProblemController.updateGeneral(problem.getId()));
-        }
-    }
-
-    @RequireCSRFCheck
-    @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result postUpdateUpdateClients(long problemId, long clientProblemId) {
-        Problem problem = problemService.findProblemById(problemId);
-        ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
-        Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
-
-        if ((form.hasErrors() || form.hasGlobalErrors())) {
-            List<Client> clients = clientService.findAllClients();
-            return showUpdateUpdateClients(form, problem, clientProblem, clients);
-        } else {
-            ClientProblemUpsertForm clientProblemUpsertForm = form.get();
-            if ((clientProblem.getProblemJid().equals(problem.getJid())) && (clientService.isClientExist(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
-                clientService.updateClientProblem(clientProblem.getId(), clientProblemUpsertForm.clientJid);
-                return redirect(routes.ProgrammingProblemController.updateClients(problem.getId()));
-            } else {
-                List<Client> clients = clientService.findAllClients();
-                return showUpdateUpdateClients(form, problem, clientProblem, clients);
-            }
-        }
-    }
-
-    @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result deleteClients(long problemId, long clientProblemId) {
+    public Result deleteClientProblem(long problemId, long clientProblemId) {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
         if (clientProblem.getProblemJid().equals(problem.getJid())) {
             clientService.deleteClientProblem(clientProblem.getId());
 
-            return redirect(routes.ProgrammingProblemController.updateClients(problem.getId()));
+            return redirect(routes.ProgrammingProblemController.updateClientProblems(problem.getId()));
         } else {
             return forbidden();
         }
@@ -525,13 +482,11 @@ public final class ProgrammingProblemController extends Controller {
         DynamicForm form = DynamicForm.form().bindFromRequest();
         String clientJid = form.get("clientId");
         String clientSecret = form.get("clientSecret");
-        if (clientService.isClientExist(clientJid)) {
+        if (clientService.existsByJid(clientJid)) {
             Client client = clientService.findClientByJid(clientJid);
-            System.out.println("A");
             if (client.getSecret().equals(clientSecret)) {
-                System.out.println("B");
                 String problemJid = form.get("problemJid");
-                if (problemService.isProblemExistByProblemJid(problemJid)) {
+                if (problemService.problemExistsByJid(problemJid)) {
                     return ok();
                 } else {
                     return notFound();
@@ -570,11 +525,11 @@ public final class ProgrammingProblemController extends Controller {
     public Result downloadGradingFiles() {
         DynamicForm form = DynamicForm.form().bindFromRequest();
 
-        String graderClientJid = form.get("graderClientJid");
-        String graderClientSecret = form.get("graderClientSecret");
+        String graderJid = form.get("graderJid");
+        String graderSecret = form.get("graderSecret");
         String problemJid = form.get("problemJid");
 
-        if (!problemService.isProblemExistByProblemJid(problemJid) || !graderClientService.verifyGraderClient(graderClientJid, graderClientSecret)) {
+        if (!problemService.problemExistsByJid(problemJid) || !graderService.verifyGrader(graderJid, graderSecret)) {
             return forbidden();
         }
 
@@ -589,8 +544,8 @@ public final class ProgrammingProblemController extends Controller {
         content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewGeneral(id), routes.ProgrammingProblemController.updateGeneral(id), c));
         appendTabsLayout(content, id, form.get().name);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.update.general"), routes.ProgrammingProblemController.updateGeneral(id))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.updateGeneral"), routes.ProgrammingProblemController.updateGeneral(id))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -601,30 +556,30 @@ public final class ProgrammingProblemController extends Controller {
         content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
         appendTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.update.statement"), routes.ProgrammingProblemController.updateStatement(id))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.updateStatement"), routes.ProgrammingProblemController.updateStatement(id))
         ), c));
         appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
+        return lazyOk(content);
     }
 
     private Result showUpdateGrading(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles) {
         LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.update.grading"), routes.ProgrammingProblemController.updateGrading(problem.getId()))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.updateGrading"), routes.ProgrammingProblemController.updateGrading(problem.getId()))
         ), c));
         appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
+        return lazyOk(content);
     }
 
     private Result showUpdateTestDataFiles(Form<UpdateTestDataFilesForm> form, long id, String problemName, List<File> testDataFiles) {
         LazyHtml content = new LazyHtml(updateTestDataFilesView.render(form, id, testDataFiles));
         appendTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.update.files"), routes.ProgrammingProblemController.updateFiles(id))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.updateTestDataFiles"), routes.ProgrammingProblemController.updateFiles(id))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
@@ -634,8 +589,8 @@ public final class ProgrammingProblemController extends Controller {
         LazyHtml content = new LazyHtml(updateHelperFilesView.render(form, id, helperFiles));
         appendTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.update.files"), routes.ProgrammingProblemController.updateFiles(id))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.updateHelperFiles"), routes.ProgrammingProblemController.updateFiles(id))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
@@ -645,43 +600,33 @@ public final class ProgrammingProblemController extends Controller {
         LazyHtml content = new LazyHtml(updateMediaFilesView.render(form, id, mediaFiles));
         appendTabsLayout(content, id, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.update.files"), routes.ProgrammingProblemController.updateFiles(id))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.updateMediaFiles"), routes.ProgrammingProblemController.updateFiles(id))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
     }
 
-    private Result showUpdateClients(Form<ClientProblemUpsertForm> form, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
-        LazyHtml content = new LazyHtml(updateClientProblemView.render(form, problem.getId(), clients, clientProblems));
+    private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> form, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
+        LazyHtml content = new LazyHtml(updateClientProblemsView.render(form, problem.getId(), clients, clientProblems));
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.update.clients"), routes.ProgrammingProblemController.updateClients(problem.getId()))
+                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.clients"), routes.ProgrammingProblemController.updateClientProblems(problem.getId()))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
     }
 
-    private Result showUpdateUpdateClients(Form<ClientProblemUpsertForm> form, Problem problem, ClientProblem clientProblem, List<Client> clients) {
-        LazyHtml content = new LazyHtml(updateUpdateClientProblemView.render(form, problem.getId(), clientProblem.getId(), clients));
-        appendTabsLayout(content, problem.getId(), problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.update.clients"), routes.ProgrammingProblemController.updateClients(problem.getId()))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
-    }
 
     private void appendTabsLayout(LazyHtml content, long id, String problemName) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.update.tab.general"), routes.ProgrammingProblemController.updateGeneral(id)),
-                new InternalLink(Messages.get("problem.programming.update.tab.statement"), routes.ProgrammingProblemController.updateStatement(id)),
-                new InternalLink(Messages.get("problem.programming.update.tab.grading"), routes.ProgrammingProblemController.updateGrading(id)),
-                new InternalLink(Messages.get("problem.programming.update.tab.files"), routes.ProgrammingProblemController.updateFiles(id)),
-                new InternalLink(Messages.get("Submissions"), routes.ProgrammingProblemController.viewSubmissions(id)),
-                new InternalLink(Messages.get("problem.programming.update.tab.clients"), routes.ProgrammingProblemController.updateClients(id))
+                new InternalLink(Messages.get("programming.general"), routes.ProgrammingProblemController.viewGeneral(id)),
+                new InternalLink(Messages.get("programming.statement"), routes.ProgrammingProblemController.viewStatement(id)),
+                new InternalLink(Messages.get("programming.grading"), routes.ProgrammingProblemController.updateGrading(id)),
+                new InternalLink(Messages.get("programming.files"), routes.ProgrammingProblemController.updateFiles(id)),
+                new InternalLink(Messages.get("programming.submissions"), routes.ProgrammingProblemController.viewSubmissions(id, 0, "id", "asc")),
+                new InternalLink(Messages.get("programming.clients"), routes.ProgrammingProblemController.updateClientProblems(id))
         ), c));
 
         content.appendLayout(c -> headingLayout.render("#" + id + ": " + problemName, c));
@@ -693,7 +638,7 @@ public final class ProgrammingProblemController extends Controller {
 
         if (SandalphonUtils.hasRole("admin")) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("graderclient.clients"), routes.GraderClientController.index()));
+            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
         }
 

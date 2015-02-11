@@ -61,7 +61,7 @@ public final class ApplicationController extends Controller {
             String userRoleJid = IdentityUtils.getUserJid();
             String username = IdentityUtils.getUsername();
             String name = IdentityUtils.getUserRealName();
-            if (userRoleService.isUserRoleExist(userRoleJid)) {
+            if (userRoleService.existsByUserJid(userRoleJid)) {
                 userRoleService.updateUserRole(userRoleJid, username);
                 UserRole userRole = userRoleService.findUserRoleByUserJid(userRoleJid);
                 SandalphonUtils.saveRoleInSession(userRole.getRoles());

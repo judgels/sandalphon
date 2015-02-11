@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang3.StringUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
@@ -18,8 +19,8 @@ import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
-import org.iatoki.judgels.sandalphon.views.html.userRole.listView;
-import org.iatoki.judgels.sandalphon.views.html.userRole.updateView;
+import org.iatoki.judgels.sandalphon.views.html.userrole.listView;
+import org.iatoki.judgels.sandalphon.views.html.userrole.updateView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -48,8 +49,9 @@ public final class UserRoleController extends Controller {
     }
 
     private Result showUpdate(Form<UserRoleUpdateForm> form, long userRoleId) {
+        UserRole userRole = userRoleService.findUserRoleById(userRoleId);
         LazyHtml content = new LazyHtml(updateView.render(form, userRoleId));
-        content.appendLayout(c -> headingLayout.render(Messages.get("userRole.update"), c));
+        content.appendLayout(c -> headingLayout.render(userRole.getUsername() + "'s Roles", c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()),
                 new InternalLink(Messages.get("userRole.update"), routes.UserRoleController.update(userRoleId))
@@ -61,7 +63,8 @@ public final class UserRoleController extends Controller {
     @AddCSRFToken
     public Result update(long userRoleId) {
         UserRole userRole = userRoleService.findUserRoleById(userRoleId);
-        UserRoleUpdateForm userRoleUpdateForm = new UserRoleUpdateForm(userRole);
+        UserRoleUpdateForm userRoleUpdateForm = new UserRoleUpdateForm();
+        userRoleUpdateForm.roles = StringUtils.join(userRole.getRoles(), ",");
         Form<UserRoleUpdateForm> form = Form.form(UserRoleUpdateForm.class).fill(userRoleUpdateForm);
 
         return showUpdate(form, userRoleId);
@@ -75,7 +78,7 @@ public final class UserRoleController extends Controller {
             return showUpdate(form, userRoleId);
         } else {
             UserRoleUpdateForm userRoleUpdateForm = form.get();
-            userRoleService.updateUserRole(userRoleId, userRoleUpdateForm.alias, Arrays.asList(userRoleUpdateForm.roles.split(",")));
+            userRoleService.updateUserRole(userRoleId, Arrays.asList(userRoleUpdateForm.roles.split(",")));
 
             return redirect(routes.UserRoleController.index());
         }
@@ -88,7 +91,7 @@ public final class UserRoleController extends Controller {
     }
 
     public Result list(long page, String sortBy, String orderBy, String filterString) {
-        Page<UserRole> currentPage = userRoleService.pageUserRole(page, PAGE_SIZE, sortBy, orderBy, filterString);
+        Page<UserRole> currentPage = userRoleService.pageUserRoles(page, PAGE_SIZE, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingLayout.render(Messages.get("userRole.list"), c));

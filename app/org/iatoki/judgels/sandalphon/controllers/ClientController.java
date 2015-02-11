@@ -1,12 +1,6 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
-import com.warrenstrange.googleauth.GoogleAuthenticator;
-import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
-import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
-import com.warrenstrange.googleauth.KeyRepresentation;
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Base64;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
@@ -37,8 +31,6 @@ import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import java.util.UUID;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
@@ -95,7 +87,7 @@ public final class ClientController extends Controller {
     public Result view(long clientId) {
         Client client = clientService.findClientById(clientId);
         LazyHtml content = new LazyHtml(viewView.render(client));
-        content.appendLayout(c -> headingWithActionLayout.render(client.getName(), new InternalLink(Messages.get("client.update"), routes.ClientController.update(clientId)), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), new InternalLink(Messages.get("commons.update"), routes.ClientController.update(clientId)), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.view"), routes.ClientController.view(clientId))
@@ -106,7 +98,7 @@ public final class ClientController extends Controller {
 
     private Result showUpdate(Form<ClientUpsertForm> form, Client client) {
         LazyHtml content = new LazyHtml(updateView.render(form, client.getId()));
-        content.appendLayout(c -> headingLayout.render(Messages.get("client.update"), c));
+        content.appendLayout(c -> headingLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.update"), routes.ClientController.update(client.getId()))
@@ -119,7 +111,8 @@ public final class ClientController extends Controller {
     @Transactional
     public Result update(long clientId) {
         Client client = clientService.findClientById(clientId);
-        ClientUpsertForm clientUpsertForm = new ClientUpsertForm(client);
+        ClientUpsertForm clientUpsertForm = new ClientUpsertForm();
+        clientUpsertForm.name = client.getName();
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).fill(clientUpsertForm);
 
         return showUpdate(form, client);
@@ -130,7 +123,7 @@ public final class ClientController extends Controller {
         Client client = clientService.findClientById(clientId);
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).bindFromRequest();
 
-        if (form.hasErrors()) {
+        if (form.hasErrors() || form.hasGlobalErrors()) {
             return showUpdate(form, client);
         } else {
             ClientUpsertForm clientUpsertForm = form.get();
@@ -150,10 +143,10 @@ public final class ClientController extends Controller {
 
     @Transactional
     public Result list(long page, String sortBy, String orderBy, String filterString) {
-        Page<Client> currentPage = clientService.pageClient(page, PAGE_SIZE, sortBy, orderBy, filterString);
+        Page<Client> currentPage = clientService.pageClients(page, PAGE_SIZE, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.list"), new InternalLink(Messages.get("client.create"), routes.ClientController.create()), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.list"), new InternalLink(Messages.get("commons.create"), routes.ClientController.create()), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index())
         ), c));
@@ -168,7 +161,7 @@ public final class ClientController extends Controller {
 
         if (SandalphonUtils.hasRole("admin")) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("graderclient.clients"), routes.GraderClientController.index()));
+            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
         }
 

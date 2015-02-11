@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.programming;
 
-import org.iatoki.judgels.commons.Submission;
+import org.iatoki.judgels.sandalphon.commons.Submission;
 import org.iatoki.judgels.gabriel.Verdict;
 
 public final class ProblemSubmission implements Submission {

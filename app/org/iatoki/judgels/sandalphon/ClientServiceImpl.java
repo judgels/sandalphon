@@ -1,7 +1,10 @@
 package org.iatoki.judgels.sandalphon;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientProblemDao;
@@ -9,7 +12,6 @@ import org.iatoki.judgels.sandalphon.models.domains.ClientModel;
 import org.iatoki.judgels.sandalphon.models.domains.ClientProblemModel;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class ClientServiceImpl implements ClientService {
@@ -23,8 +25,8 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public boolean isClientExist(String clientJid) {
-        return clientDao.isExistByClientJid(clientJid);
+    public boolean existsByJid(String clientJid) {
+        return clientDao.existsByJid(clientJid);
     }
 
     @Override
@@ -38,21 +40,22 @@ public final class ClientServiceImpl implements ClientService {
     public Client findClientById(long clientId) {
         ClientModel clientModel = clientDao.findById(clientId);
 
-        return new Client(clientModel.id, clientModel.jid, clientModel.name, clientModel.secret);
+        return createClientFromModel(clientModel);
     }
+
 
     @Override
     public Client findClientByJid(String clientJid) {
         ClientModel clientModel = clientDao.findByJid(clientJid);
 
-        return new Client(clientModel.id, clientModel.jid, clientModel.name, clientModel.secret);
+        return createClientFromModel(clientModel);
     }
 
     @Override
     public void createClient(String name) {
         ClientModel clientModel = new ClientModel();
         clientModel.name = name;
-        clientModel.secret = SandalphonUtils.hashMD5(UUID.randomUUID().toString());
+        clientModel.secret = JudgelsUtils.generateNewSecret();
 
         clientDao.persist(clientModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -73,20 +76,18 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Page<Client> pageClient(long page, long pageSize, String sortBy, String order, String filterString) {
-        long totalPage = clientDao.countByFilter(filterString);
-        List<ClientModel> clientModel = clientDao.findByFilterAndSort(filterString, sortBy, order, page * pageSize, pageSize);
+    public Page<Client> pageClients(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
+        long totalPages = clientDao.countByFilters(filterString, ImmutableMap.of());
+        List<ClientModel> clientModels = clientDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
-        List<Client> clients = clientModel
-                .stream()
-                .map(c -> new Client(c.id, c.jid, c.name, c.secret)).collect(Collectors.toList());
+        List<Client> clients = Lists.transform(clientModels, m -> createClientFromModel(m));
 
-        return new Page<>(clients, totalPage, page, pageSize);
+        return new Page<>(clients, totalPages, pageIndex, pageSize);
     }
 
     @Override
     public boolean isClientProblemInProblemByClientJid(String problemJid, String clientJid) {
-        return clientProblemDao.isExistByClientJid(problemJid, clientJid);
+        return clientProblemDao.existsByProblemJidAndClientJid(problemJid, clientJid);
     }
 
     @Override
@@ -123,24 +124,18 @@ public final class ClientServiceImpl implements ClientService {
         ClientProblemModel clientProblemModel = new ClientProblemModel();
         clientProblemModel.problemJid = problemJid;
         clientProblemModel.clientJid = clientJid;
-        clientProblemModel.secret = SandalphonUtils.hashMD5(UUID.randomUUID().toString());
+        clientProblemModel.secret = JudgelsUtils.generateNewSecret();
 
         clientProblemDao.persist(clientProblemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-    }
-
-    @Override
-    public void updateClientProblem(long clientProblemId, String clientJid) {
-        ClientProblemModel clientProblemModel = clientProblemDao.findById(clientProblemId);
-        clientProblemModel.clientJid = clientJid;
-        clientProblemModel.secret = SandalphonUtils.hashMD5(UUID.randomUUID().toString());
-
-        clientProblemDao.persist(clientProblemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
     }
 
     @Override
     public void deleteClientProblem(long clientProblemId) {
         ClientProblemModel clientProblemModel = clientProblemDao.findById(clientProblemId);
         clientProblemDao.remove(clientProblemModel);
+    }
+
+    private Client createClientFromModel(ClientModel clientModel) {
+        return new Client(clientModel.id, clientModel.jid, clientModel.name, clientModel.secret);
     }
 }

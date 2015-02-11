@@ -1,20 +1,22 @@
 package org.iatoki.judgels.sandalphon.programming;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.commons.SubmissionAdapters;
+import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
 import org.iatoki.judgels.gabriel.FakeClientMessage;
 import org.iatoki.judgels.gabriel.FakeSealtiel;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingRequest;
 import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.gabriel.Verdict;
-import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemSubmissionDao;
-import org.iatoki.judgels.sandalphon.models.domains.programming.ProblemSubmissionModel;
+import org.iatoki.judgels.sandalphon.programming.models.daos.interfaces.ProblemSubmissionDao;
+import org.iatoki.judgels.sandalphon.programming.models.domains.ProblemSubmissionModel;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public final class ProblemSubmissionServiceImpl implements ProblemSubmissionService {
     private final ProblemSubmissionDao submissionDao;
@@ -26,16 +28,23 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
     }
 
     @Override
-    public Page<ProblemSubmission> pageSubmission(long page, long pageSize, String sortBy, String order, String filterString) {
-        long totalPage = submissionDao.countByFilter(filterString);
-        List<ProblemSubmissionModel> submissionRecords = submissionDao.findByFilterAndSort(filterString, sortBy, order, page * pageSize, pageSize);
+    public Page<ProblemSubmission> pageSubmissions(long pageIndex, long pageSize, String orderBy, String orderDir, String authorJid, String problemJid) {
+        ImmutableMap.Builder<String, String> filterColumnsBuilder = ImmutableMap.builder();
+        if (authorJid != null) {
+            filterColumnsBuilder.put("userCreate", authorJid);
+        }
+        if (problemJid != null) {
+            filterColumnsBuilder.put("problemJid", problemJid);
+        }
 
-        List<ProblemSubmission> submissions = submissionRecords
-                .stream()
-                .map(submissionRecord -> createSubmissionFromModel(submissionRecord))
-                .collect(Collectors.toList());
+        Map<String, String> filterColumns = filterColumnsBuilder.build();
 
-        return new Page<>(submissions, totalPage, page, pageSize);
+        long totalPages = submissionDao.countByFilters("", filterColumns);
+        List<ProblemSubmissionModel> submissionModels = submissionDao.findSortedByFilters(orderBy, orderDir, "", filterColumns, pageIndex * pageSize, pageSize);
+
+        List<ProblemSubmission> submissions = Lists.transform(submissionModels, m -> createSubmissionFromModel(m));
+
+        return new Page<>(submissions, totalPages, pageIndex, pageSize);
     }
 
     @Override
@@ -64,8 +73,8 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
         return submissionRecord.jid;
     }
 
-    private ProblemSubmission createSubmissionFromModel(ProblemSubmissionModel record) {
-        String language = GradingLanguageRegistry.getInstance().getLanguage(record.gradingLanguage).getName();
-        return new ProblemSubmission(record.id, record.jid, record.problemJid, record.userCreate, language, record.timeCreate, new Verdict(record.verdictCode, record.verdictName), record.score, record.details);
+    private ProblemSubmission createSubmissionFromModel(ProblemSubmissionModel submissionModel) {
+        String language = GradingLanguageRegistry.getInstance().getLanguage(submissionModel.gradingLanguage).getName();
+        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.timeCreate, new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.score, submissionModel.details);
     }
 }

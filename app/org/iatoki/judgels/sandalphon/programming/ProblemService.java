@@ -9,15 +9,15 @@ import java.util.List;
 
 public interface ProblemService {
 
-    boolean isProblemExistByProblemJid(String problemJid);
+    boolean problemExistsByJid(String problemJid);
 
-    Problem findProblemById(long id);
+    Problem findProblemById(long problemId);
 
-    Problem findProblemByJid(String jid);
+    Problem findProblemByJid(String problemJid);
 
     void updateProblem(long id, String name, String additionalNote);
 
-    Page<Problem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString);
+    Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
     Problem createProblem(String name, String gradingType, String additionalNote);
 

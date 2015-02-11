@@ -1,27 +1,89 @@
 problem.problems=Problems
 
-problem.programming.problems=Programming Problems
+programming.problems=Programming Problems
 
-problem.programming.create=Create Programming Problem
-problem.programming.view=View Programming Problem
-problem.programming.update=Update Programming Problem
-problem.programming.list=Programming Problems
+programming.create=Create Programming Problem
+programming.view=View Programming Problem
+programming.update=Update Programming Problem
+programming.list=Programming Problems
 
-problem.programming.field.name=Name
-problem.programming.field.note=Note
-problem.programming.field.type=Type
+programming.name=Name
+programming.additionalNote=Additional Note
+programming.gradingEngine=Grading Engine
+programming.author=Author
 
-problem.programming.view.general=View General
+programming.viewGeneral=View General
+programming.viewStatement=View Statement
+programming.viewClient=View Client
 
-problem.programming.view.tab.general=General
-problem.programming.view.tab.statement=Statement
+programming.general=General
+programming.statement=Statement
+programming.files=Files
+programming.grading=Grading
+programming.clients=Clients
+programming.submissions=Submissions
 
-problem.programming.update.general=Update General
-problem.programming.update.statement=Update Statement
-problem.programming.update.files=Update Files
-problem.programming.update.grading=Update Grading
+programming.updateGeneral=Update General
+programming.updateStatement=Update Statement
+programming.updateFiles=Update Files
+programming.updateGrading=Update Grading
+programming.updateTestDataFiles=Update Test Data Files
+programming.updateHelperFiles=Update Helper Files
+programming.updateMediaFiles=Update Media Files
+programming.updateClients=Update Clients
 
-problem.programming.update.tab.general=General
-problem.programming.update.tab.statement=Statement
-problem.programming.update.tab.files=Files
-problem.programming.update.tab.grading=Grading
+programming.client=Client
+programming.clientName=Client Name
+programming.clientJid=Client JID
+programming.clientSecret=Client Secret
+programming.viewClient=View Client
+
+programming.testDataFiles = Test Data Files
+programming.helperFiles=Helper Files
+programming.mediaFiles=Media Files
+
+programming.uploadNewTestDataFiles=Upload New Test Data File(s)
+programming.uploadNewHelperFiles=Upload New Helper File(s)
+programming.uploadNewMediaFiles=Upload New Media File(s)
+programming.asSingleFile=As single file
+programming.asZipFile=As zip file
+
+programming.filename=Filename
+programming.lastModified=Last Modified
+programming.size=Size
+
+programming.time=Time
+programming.gradingLanguage=Language
+programming.verdict=Verdict
+programming.score=Score
+
+client.clients=Clients
+client.client=Client
+
+client.list=Clients
+client.create=Create Client
+client.view=View Client
+client.update=Update Client
+
+client.name=Name
+client.secret=Secret
+
+
+grader.graders=Graders
+grader.grader=Grader
+
+grader.list=Graders
+grader.create=Create Grader
+grader.view=View Grader
+grader.update=Update Grader
+
+grader.name=Name
+grader.secret=Secret
+
+userRole.list=User Roles
+userRole.update=Update User Roles
+
+userRole.userRoles=User Roles
+userRole.userJid=User JID
+userRole.username=Username
+userRole.roles=Roles

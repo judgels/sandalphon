@@ -1,6 +1,8 @@
 package org.iatoki.judgels.sandalphon.programming;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
@@ -8,8 +10,8 @@ import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
-import org.iatoki.judgels.sandalphon.models.daos.programming.interfaces.ProblemDao;
-import org.iatoki.judgels.sandalphon.models.domains.programming.ProblemModel;
+import org.iatoki.judgels.sandalphon.programming.models.daos.interfaces.ProblemDao;
+import org.iatoki.judgels.sandalphon.programming.models.domains.ProblemModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,7 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -32,20 +33,20 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public boolean isProblemExistByProblemJid(String problemJid) {
-        return dao.isProblemExistByProblemJid(problemJid);
+    public boolean problemExistsByJid(String problemJid) {
+        return dao.existsByJid(problemJid);
     }
 
     @Override
-    public final Problem findProblemById(long id) {
-        ProblemModel problemRecord = dao.findById(id);
-        return createProblemFromModel(problemRecord);
+    public final Problem findProblemById(long problemId) {
+        ProblemModel problemModel = dao.findById(problemId);
+        return createProblemFromModel(problemModel);
     }
 
     @Override
-    public final Problem findProblemByJid(String jid) {
-        ProblemModel problemRecord = dao.findByJid(jid);
-        return createProblemFromModel(problemRecord);
+    public final Problem findProblemByJid(String problemJid) {
+        ProblemModel problemModel = dao.findByJid(problemJid);
+        return createProblemFromModel(problemModel);
     }
 
     @Override
@@ -53,37 +54,34 @@ public final class ProblemServiceImpl implements ProblemService {
         ProblemModel model = dao.findById(id);
         model.name = name;
         model.additionalNote = additionalNote;
-        updateProblemRecord(model, false);
+        updateProblemModel(model, false);
     }
 
     @Override
-    public Page<Problem> pageProblem(long page, long pageSize, String sortBy, String order, String filterString) {
-        long totalPage = dao.countByFilter(filterString);
-        List<ProblemModel> problemRecords = dao.findByFilterAndSort(filterString, sortBy, order, page * pageSize, pageSize);
+    public Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
+        long totalPages = dao.countByFilters(filterString, ImmutableMap.of());
+        List<ProblemModel> problemModels = dao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
-        List<Problem> problems = problemRecords
-                .stream()
-                .map(problemRecord -> createProblemFromModel(problemRecord))
-                .collect(Collectors.toList());
+        List<Problem> problems = Lists.transform(problemModels, m -> createProblemFromModel(m));
 
-        return new Page<>(problems, totalPage, page, pageSize);
+        return new Page<>(problems, totalPages, pageIndex, pageSize);
     }
 
     @Override
     public Problem createProblem(String name, String gradingType, String additionalNote) {
-        ProblemModel problemRecord = new ProblemModel(name, gradingType, additionalNote);
-        dao.persist(problemRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        ProblemModel problemModel = new ProblemModel(name, gradingType, additionalNote);
+        dao.persist(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        createProblemDirs(problemRecord);
+        createProblemDirs(problemModel);
 
-        return createProblemFromModel(problemRecord);
+        return createProblemFromModel(problemModel);
     }
 
     @Override
-    public String getStatement(long id) {
-        ProblemModel problemRecord = dao.findById(id);
+    public String getStatement(long problemId) {
+        ProblemModel problemModel = dao.findById(problemId);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File problemDir = new File(problemsDir, problemRecord.jid);
+        File problemDir = new File(problemsDir, problemModel.jid);
         File statementDir = new File(problemDir, "statement");
         String statement;
         try {
@@ -97,25 +95,15 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public String getStatement(String problemJid) {
-        ProblemModel problemRecord = dao.findByJid(problemJid);
-        File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File problemDir = new File(problemsDir, problemRecord.jid);
-        File statementDir = new File(problemDir, "statement");
-        String statement;
-        try {
-            statement = FileUtils.readFileToString(new File(statementDir, "statement.html"));
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot read statement!");
-        }
-
-        return statement;
+        ProblemModel problemModel = dao.findByJid(problemJid);
+        return getStatement(problemModel.id);
     }
 
     @Override
     public GradingConfig getGradingConfig(long id) {
-        ProblemModel problemRecord = dao.findById(id);
+        ProblemModel problemModel = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File problemDir = new File(problemsDir, problemRecord.jid);
+        File problemDir = new File(problemsDir, problemModel.jid);
         File gradingDir = new File(problemDir, "grading");
         String json;
         try {
@@ -124,13 +112,13 @@ public final class ProblemServiceImpl implements ProblemService {
             throw new RuntimeException("Cannot read grading!");
         }
 
-        return GradingEngineRegistry.getInstance().getEngine(problemRecord.gradingEngine).createGradingConfigFromJson(json);
+        return GradingEngineRegistry.getInstance().getEngine(problemModel.gradingEngine).createGradingConfigFromJson(json);
     }
 
     @Override
     public long getGradingLastUpdateTime(long id) {
-        ProblemModel problemRecord = dao.findById(id);
-        File gradingLastUpdateTimeFile = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "lastUpdateTime.txt");
+        ProblemModel problemModel = dao.findById(id);
+        File gradingLastUpdateTimeFile = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "lastUpdateTime.txt");
         try {
             return Long.parseLong(FileUtils.readFileToString(gradingLastUpdateTimeFile));
         } catch (IOException e) {
@@ -140,9 +128,9 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public void updateStatement(long id, String statement) {
-        ProblemModel problemRecord = dao.findById(id);
+        ProblemModel problemModel = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File problemDir = new File(problemsDir, problemRecord.jid);
+        File problemDir = new File(problemsDir, problemModel.jid);
         File statementDir = new File(problemDir, "statement");
         try {
             FileUtils.writeStringToFile(new File(statementDir, "statement.html"), statement);
@@ -150,83 +138,83 @@ public final class ProblemServiceImpl implements ProblemService {
             throw new RuntimeException("Cannot write statement!");
         }
 
-        updateProblemRecord(problemRecord, false);
+        updateProblemModel(problemModel, false);
     }
 
     @Override
     public void uploadTestDataFile(long id, File testDataFile, String filename) {
-        ProblemModel problemRecord = dao.findById(id);
-        File testDataDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "testdata");
+        ProblemModel problemModel = dao.findById(id);
+        File testDataDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "testdata");
         try {
             FileUtils.copyFile(testDataFile, new File(testDataDir, filename));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        updateProblemRecord(problemRecord, true);
+        updateProblemModel(problemModel, true);
     }
 
     @Override
     public void uploadTestDataFileZipped(long id, File testDataFileZipped) {
-        ProblemModel problemRecord = dao.findById(id);
-        File testDataDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "testdata");
+        ProblemModel problemModel = dao.findById(id);
+        File testDataDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "testdata");
 
         uploadZippedFiles(testDataDir, testDataFileZipped);
 
-        updateProblemRecord(problemRecord, true);
+        updateProblemModel(problemModel, true);
     }
 
     @Override
     public void uploadHelperFile(long id, File helperFile, String filename) {
-        ProblemModel problemRecord = dao.findById(id);
-        File helperDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "helper");
+        ProblemModel problemModel = dao.findById(id);
+        File helperDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "helper");
         try {
             FileUtils.copyFile(helperFile, new File(helperDir, filename));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        updateProblemRecord(problemRecord, true);
+        updateProblemModel(problemModel, true);
     }
 
     @Override
     public void uploadHelperFileZipped(long id, File helperFileZipped) {
-        ProblemModel problemRecord = dao.findById(id);
-        File helperDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "helper");
+        ProblemModel problemModel = dao.findById(id);
+        File helperDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "helper");
 
         uploadZippedFiles(helperDir, helperFileZipped);
 
-        updateProblemRecord(problemRecord, true);
+        updateProblemModel(problemModel, true);
     }
 
     @Override
     public void uploadMediaFile(long id, File mediaFile, String filename) {
-        ProblemModel problemRecord = dao.findById(id);
-        File mediaDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "statement", "media");
+        ProblemModel problemModel = dao.findById(id);
+        File mediaDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "statement", "media");
         try {
             FileUtils.copyFile(mediaFile, new File(mediaDir, filename));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        updateProblemRecord(problemRecord, true);
+        updateProblemModel(problemModel, true);
     }
 
     @Override
     public void uploadMediaFileZipped(long id, File mediaFileZipped) {
-        ProblemModel problemRecord = dao.findById(id);
-        File mediaDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "statement", "media");
+        ProblemModel problemModel = dao.findById(id);
+        File mediaDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "statement", "media");
 
         uploadZippedFiles(mediaDir, mediaFileZipped);
 
-        updateProblemRecord(problemRecord, true);
+        updateProblemModel(problemModel, true);
     }
 
     @Override
     public void updateGradingConfig(long id, GradingConfig config) {
-        ProblemModel problemRecord = dao.findById(id);
+        ProblemModel problemModel = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File problemDir = new File(problemsDir, problemRecord.jid);
+        File problemDir = new File(problemsDir, problemModel.jid);
         File gradingDir = new File(problemDir, "grading");
         try {
             FileUtils.writeStringToFile(new File(gradingDir, "config.json"), new Gson().toJson(config));
@@ -234,14 +222,14 @@ public final class ProblemServiceImpl implements ProblemService {
             throw new RuntimeException("Cannot write json!");
         }
 
-        updateProblemRecord(problemRecord, true);
+        updateProblemModel(problemModel, true);
     }
 
     @Override
     public List<File> getTestDataFiles(long id) {
-        ProblemModel problemRecord = dao.findById(id);
+        ProblemModel problemModel = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File testDataDir = FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "testdata");
+        File testDataDir = FileUtils.getFile(problemsDir, problemModel.jid, "grading", "testdata");
 
         if (!testDataDir.isDirectory()) {
             return ImmutableList.of();
@@ -252,9 +240,9 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public List<File> getHelperFiles(long id) {
-        ProblemModel problemRecord = dao.findById(id);
+        ProblemModel problemModel = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File helpersDir = FileUtils.getFile(problemsDir, problemRecord.jid, "grading", "helper");
+        File helpersDir = FileUtils.getFile(problemsDir, problemModel.jid, "grading", "helper");
 
         if (!helpersDir.isDirectory()) {
             return ImmutableList.of();
@@ -265,9 +253,9 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public List<File> getMediaFiles(long id) {
-        ProblemModel problemRecord = dao.findById(id);
+        ProblemModel problemModel = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File mediaDir = FileUtils.getFile(problemsDir, problemRecord.jid, "statement", "media");
+        File mediaDir = FileUtils.getFile(problemsDir, problemModel.jid, "statement", "media");
 
         if (!mediaDir.isDirectory()) {
             return ImmutableList.of();
@@ -279,22 +267,22 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public File getTestDataFile(long id, String filename) {
-        ProblemModel problemRecord = dao.findById(id);
-        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "testdata", filename);
+        ProblemModel problemModel = dao.findById(id);
+        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "testdata", filename);
     }
 
 
     @Override
     public File getHelperFile(long id, String filename) {
-        ProblemModel problemRecord = dao.findById(id);
-        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "helper", filename);
+        ProblemModel problemModel = dao.findById(id);
+        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "helper", filename);
     }
 
 
     @Override
     public File getMediaFile(long id, String filename) {
-        ProblemModel problemRecord = dao.findById(id);
-        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "statement", "media", filename);
+        ProblemModel problemModel = dao.findById(id);
+        return FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "statement", "media", filename);
     }
 
     @Override
@@ -329,31 +317,31 @@ public final class ProblemServiceImpl implements ProblemService {
         return os;
     }
 
-    private void createProblemDirs(ProblemModel problemRecord) {
-        createProblemGradingDir(problemRecord);
-        createProblemStatementDir(problemRecord);
+    private void createProblemDirs(ProblemModel problemModel) {
+        createProblemGradingDir(problemModel);
+        createProblemStatementDir(problemModel);
     }
 
-    private void createProblemGradingDir(ProblemModel problemRecord) {
-        File gradingDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading");
+    private void createProblemGradingDir(ProblemModel problemModel) {
+        File gradingDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading");
 
         try {
             FileUtils.forceMkdir(gradingDir);
             FileUtils.forceMkdir(new File(gradingDir, "testdata"));
             FileUtils.forceMkdir(new File(gradingDir, "helper"));
 
-            GradingConfig config = GradingEngineRegistry.getInstance().getEngine(problemRecord.gradingEngine).createDefaultGradingConfig();
+            GradingConfig config = GradingEngineRegistry.getInstance().getEngine(problemModel.gradingEngine).createDefaultGradingConfig();
 
             FileUtils.writeStringToFile(new File(gradingDir, "config.json"), new Gson().toJson(config));
-            FileUtils.writeStringToFile(new File(gradingDir, "lastUpdateTime.txt"), "" + problemRecord.timeCreate);
+            FileUtils.writeStringToFile(new File(gradingDir, "lastUpdateTime.txt"), "" + problemModel.timeCreate);
         } catch (IOException e) {
             throw new RuntimeException("Cannot create directory for problem!");
         }
     }
 
-    private void createProblemStatementDir(ProblemModel problemRecord) {
+    private void createProblemStatementDir(ProblemModel problemModel) {
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
-        File statementDir = FileUtils.getFile(problemsDir, problemRecord.jid, "statement");
+        File statementDir = FileUtils.getFile(problemsDir, problemModel.jid, "statement");
 
         try {
             FileUtils.forceMkdir(statementDir);
@@ -369,8 +357,8 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     private List<File> getGradingFiles(String problemJid) {
-        ProblemModel problemRecord = dao.findByJid(problemJid);
-        File gradingDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading");
+        ProblemModel problemModel = dao.findByJid(problemJid);
+        File gradingDir = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading");
 
         ImmutableList.Builder<File> files = ImmutableList.builder();
         populateGradingFiles(gradingDir, files);
@@ -419,15 +407,15 @@ public final class ProblemServiceImpl implements ProblemService {
         }
     }
 
-    private void updateProblemRecord(ProblemModel problemRecord, boolean isRelatedToGrading) {
-        dao.edit(problemRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+    private void updateProblemModel(ProblemModel problemModel, boolean isRelatedToGrading) {
+        dao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         if (isRelatedToGrading) {
-            File lastUpdateTimeFile = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemRecord.jid, "grading", "lastUpdateTime.txt");
+            File lastUpdateTimeFile = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "lastUpdateTime.txt");
 
             try {
                 FileUtils.forceDelete(lastUpdateTimeFile);
-                FileUtils.writeStringToFile(lastUpdateTimeFile, "" + problemRecord.timeUpdate);
+                FileUtils.writeStringToFile(lastUpdateTimeFile, "" + problemModel.timeUpdate);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot update lastUpdateTime.txt");
             }

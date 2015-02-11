@@ -1,0 +1,17 @@
+@(form: Form[org.iatoki.judgels.sandalphon.programming.forms.UpdateStatementForm], problemId: Long)
+
+@import play.i18n.Messages
+@import b3.vertical.fieldConstructor
+@import org.iatoki.judgels.sandalphon.controllers.routes
+
+@b3.form(routes.ProgrammingProblemController.postUpdateStatement(problemId)) {
+    @helper.CSRF.formField
+
+    @b3.input(form("statement"), '_label -> None) { (id, name, value, args) =>
+        <textarea class="ckeditor" id="@id" name="@name">
+            @value
+        </textarea>
+    }
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
+}

@@ -10,15 +10,12 @@ public final class UserRole {
 
     private String username;
 
-    private String alias;
-
     private List<String> roles;
 
-    public UserRole(long id, String userJid, String username, String alias, List<String> roles) {
+    public UserRole(long id, String userJid, String username, List<String> roles) {
         this.id = id;
         this.userJid = userJid;
         this.username = username;
-        this.alias = alias;
         this.roles = roles;
     }
 
@@ -32,10 +29,6 @@ public final class UserRole {
 
     public String getUsername() {
         return username;
-    }
-
-    public String getAlias() {
-        return alias;
     }
 
     public List<String> getRoles() {

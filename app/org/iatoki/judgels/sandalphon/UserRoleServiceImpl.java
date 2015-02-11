@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.Page;
@@ -21,24 +22,20 @@ public final class UserRoleServiceImpl implements UserRoleService {
     }
 
     @Override
-    public boolean isUserRoleExist(String userJid) {
-        return userRoleDao.isExistByUserJid(userJid);
+    public boolean existsByUserJid(String userJid) {
+        return userRoleDao.existsByUserJid(userJid);
     }
 
     @Override
     public UserRole findUserRoleById(long userRoleId) {
         UserRoleModel userRoleModel = userRoleDao.findById(userRoleId);
-        UserRole userRole = new UserRole(userRoleModel.id, userRoleModel.userJid, userRoleModel.username, userRoleModel.alias, Arrays.asList(userRoleModel.roles.split(",")));
-
-        return userRole;
+        return createUserRoleFromModel(userRoleModel);
     }
 
     @Override
     public UserRole findUserRoleByUserJid(String userJid) {
         UserRoleModel userRoleModel = userRoleDao.findByUserJid(userJid);
-        UserRole userRole = new UserRole(userRoleModel.id, userRoleModel.userJid, userRoleModel.username, userRoleModel.alias, Arrays.asList(userRoleModel.roles.split(",")));
-
-        return userRole;
+        return createUserRoleFromModel(userRoleModel);
     }
 
     @Override
@@ -46,7 +43,6 @@ public final class UserRoleServiceImpl implements UserRoleService {
         UserRoleModel userRoleModel = new UserRoleModel();
         userRoleModel.userJid = userJid;
         userRoleModel.username = username;
-        userRoleModel.alias = username;
         userRoleModel.roles = StringUtils.join(roles, ",");
 
         userRoleDao.persist(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
@@ -62,9 +58,8 @@ public final class UserRoleServiceImpl implements UserRoleService {
     }
 
     @Override
-    public void updateUserRole(long userRoleId, String alias, List<String> roles) {
+    public void updateUserRole(long userRoleId, List<String> roles) {
         UserRoleModel userRoleModel = userRoleDao.findById(userRoleId);
-        userRoleModel.alias = alias;
         userRoleModel.roles = StringUtils.join(roles, ",");
 
         userRoleDao.edit(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
@@ -77,24 +72,20 @@ public final class UserRoleServiceImpl implements UserRoleService {
     }
 
     @Override
-    public Page<UserRole> pageUserRole(long page, long pageSize, String sortBy, String order, String filterString) {
-        long totalPage = userRoleDao.countByFilter(filterString);
-        List<UserRoleModel> userRoleModels = userRoleDao.findByFilterAndSort(filterString, sortBy, order, page * pageSize, pageSize);
-        ImmutableList.Builder<UserRole> listBuilder = ImmutableList.builder();
+    public Page<UserRole> pageUserRoles(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
+        long totalPages = userRoleDao.countByFilters(filterString, ImmutableMap.of());
+        List<UserRoleModel> userRoleModels = userRoleDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
-        for (UserRoleModel userRoleModel : userRoleModels) {
-            listBuilder.add(new UserRole(userRoleModel.id, userRoleModel.userJid, userRoleModel.username, userRoleModel.alias, Arrays.asList(userRoleModel.roles.split(","))));
-        }
+        List<UserRole> userRoles = Lists.transform(userRoleModels, m -> createUserRoleFromModel(m));
 
-        Page<UserRole> ret = new Page<>(listBuilder.build(), totalPage, page, pageSize);
-        return ret;
+        return new Page<>(userRoles, totalPages, pageIndex, pageSize);
     }
 
     @Override
     public void upsertUserRoleFromJophielUserJid(String userJid) {
         User user = JophielUtils.getUserByJid(userJid);
 
-        if (userRoleDao.isExistByUserJid(userJid)) {
+        if (userRoleDao.existsByUserJid(userJid)) {
             UserRoleModel userRoleModel = userRoleDao.findByUserJid(userJid);
             userRoleModel.username = user.getUsername();
 
@@ -103,11 +94,13 @@ public final class UserRoleServiceImpl implements UserRoleService {
             UserRoleModel userRoleModel = new UserRoleModel();
             userRoleModel.userJid = user.getJid();
             userRoleModel.username = user.getUsername();
-            userRoleModel.alias = user.getName();
             userRoleModel.roles = "user";
 
             userRoleDao.edit(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         }
     }
 
+    private UserRole createUserRoleFromModel(UserRoleModel userRoleModel) {
+        return new UserRole(userRoleModel.id, userRoleModel.userJid, userRoleModel.username, Arrays.asList(userRoleModel.roles.split(",")));
+    }
 }
