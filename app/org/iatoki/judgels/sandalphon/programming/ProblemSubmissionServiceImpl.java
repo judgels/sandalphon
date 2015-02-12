@@ -75,6 +75,6 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
 
     private ProblemSubmission createSubmissionFromModel(ProblemSubmissionModel submissionModel) {
         String language = GradingLanguageRegistry.getInstance().getLanguage(submissionModel.gradingLanguage).getName();
-        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.timeCreate, new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.score, submissionModel.details);
+        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.gradingEngine, submissionModel.timeCreate, new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.score, submissionModel.details);
     }
 }

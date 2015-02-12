@@ -9,17 +9,19 @@ public final class ProblemSubmission implements Submission {
     private final String problemJid;
     private final String authorJid;
     private final String gradingLanguage;
+    private final String gradingEngine;
     private final long timestamp;
     private final Verdict verdict;
     private final int score;
     private final String details;
 
-    public ProblemSubmission(long id, String jid, String problemJid, String authorJid, String gradingLanguage, long timestamp, Verdict verdict, int score, String details) {
+    public ProblemSubmission(long id, String jid, String problemJid, String authorJid, String gradingLanguage, String gradingEngine, long timestamp, Verdict verdict, int score, String details) {
         this.id = id;
         this.jid = jid;
         this.problemJid = problemJid;
         this.authorJid = authorJid;
         this.gradingLanguage = gradingLanguage;
+        this.gradingEngine = gradingEngine;
         this.timestamp = timestamp;
         this.verdict = verdict;
         this.score = score;
@@ -54,6 +56,11 @@ public final class ProblemSubmission implements Submission {
     @Override
     public String getGradingLanguage() {
         return gradingLanguage;
+    }
+
+    @Override
+    public String getGradingEngine() {
+        return gradingEngine;
     }
 
     @Override

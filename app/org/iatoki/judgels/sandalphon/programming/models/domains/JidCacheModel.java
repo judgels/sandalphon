@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "sandalphon_jidcache")
+@Table(name = "sandalphon_jid_cache")
 public final class JidCacheModel extends AbstractJidCacheModel {
 
 }

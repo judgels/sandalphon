@@ -38,6 +38,9 @@ programming.clientJid=Client JID
 programming.clientSecret=Client Secret
 programming.viewClient=View Client
 
+programming.problemJid=Problem JID
+programming.problemSecret=Problem Secret
+
 programming.testDataFiles = Test Data Files
 programming.helperFiles=Helper Files
 programming.mediaFiles=Media Files

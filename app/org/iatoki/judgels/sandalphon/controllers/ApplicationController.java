@@ -57,17 +57,13 @@ public final class ApplicationController extends Controller {
         if ((session().containsKey("username")) && (session().containsKey("role"))) {
             return redirect(routes.ProgrammingProblemController.index());
         } else {
-            System.out.println("Z "+((session().containsKey("username")) && (session().containsKey("role"))));
             String userRoleJid = IdentityUtils.getUserJid();
-            String username = IdentityUtils.getUsername();
-            String name = IdentityUtils.getUserRealName();
             if (userRoleService.existsByUserJid(userRoleJid)) {
-                userRoleService.updateUserRole(userRoleJid, username);
                 UserRole userRole = userRoleService.findUserRoleByUserJid(userRoleJid);
                 SandalphonUtils.saveRoleInSession(userRole.getRoles());
                 return redirect(returnUri);
             } else {
-                userRoleService.createUserRole(userRoleJid, name, SandalphonUtils.getDefaultRole());
+                userRoleService.createUserRole(userRoleJid, SandalphonUtils.getDefaultRole());
                 SandalphonUtils.saveRoleInSession(SandalphonUtils.getDefaultRole());
                 return redirect(returnUri);
             }

@@ -17,7 +17,5 @@ public final class UserRoleModel extends AbstractModel {
 
     public String userJid;
 
-    public String username;
-
     public String roles;
 }

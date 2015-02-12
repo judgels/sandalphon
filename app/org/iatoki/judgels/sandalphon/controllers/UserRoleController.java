@@ -51,7 +51,7 @@ public final class UserRoleController extends Controller {
     private Result showUpdate(Form<UserRoleUpdateForm> form, long userRoleId) {
         UserRole userRole = userRoleService.findUserRoleById(userRoleId);
         LazyHtml content = new LazyHtml(updateView.render(form, userRoleId));
-        content.appendLayout(c -> headingLayout.render(userRole.getUsername() + "'s Roles", c));
+        content.appendLayout(c -> headingLayout.render(Messages.get("userRole.update"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()),
                 new InternalLink(Messages.get("userRole.update"), routes.UserRoleController.update(userRoleId))
@@ -109,6 +109,7 @@ public final class UserRoleController extends Controller {
 
         if (SandalphonUtils.hasRole("admin")) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
+            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
         }
 

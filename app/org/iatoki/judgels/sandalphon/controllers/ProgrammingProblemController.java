@@ -480,7 +480,7 @@ public final class ProgrammingProblemController extends Controller {
 
     public Result verifyProblem() {
         DynamicForm form = DynamicForm.form().bindFromRequest();
-        String clientJid = form.get("clientId");
+        String clientJid = form.get("clientJid");
         String clientSecret = form.get("clientSecret");
         if (clientService.existsByJid(clientJid)) {
             Client client = clientService.findClientByJid(clientJid);

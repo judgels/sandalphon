@@ -39,22 +39,12 @@ public final class UserRoleServiceImpl implements UserRoleService {
     }
 
     @Override
-    public void createUserRole(String userJid, String username, List<String> roles) {
+    public void createUserRole(String userJid, List<String> roles) {
         UserRoleModel userRoleModel = new UserRoleModel();
         userRoleModel.userJid = userJid;
-        userRoleModel.username = username;
         userRoleModel.roles = StringUtils.join(roles, ",");
 
         userRoleDao.persist(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-    }
-
-    @Override
-    public void updateUserRole(String userJid, String username) {
-        UserRoleModel userRoleModel = userRoleDao.findByUserJid(userJid);
-        userRoleModel.userJid = userJid;
-        userRoleModel.username = username;
-
-        userRoleDao.edit(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
@@ -87,13 +77,11 @@ public final class UserRoleServiceImpl implements UserRoleService {
 
         if (userRoleDao.existsByUserJid(userJid)) {
             UserRoleModel userRoleModel = userRoleDao.findByUserJid(userJid);
-            userRoleModel.username = user.getUsername();
 
             userRoleDao.persist(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         } else {
             UserRoleModel userRoleModel = new UserRoleModel();
             userRoleModel.userJid = user.getJid();
-            userRoleModel.username = user.getUsername();
             userRoleModel.roles = "user";
 
             userRoleDao.edit(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
@@ -101,6 +89,6 @@ public final class UserRoleServiceImpl implements UserRoleService {
     }
 
     private UserRole createUserRoleFromModel(UserRoleModel userRoleModel) {
-        return new UserRole(userRoleModel.id, userRoleModel.userJid, userRoleModel.username, Arrays.asList(userRoleModel.roles.split(",")));
+        return new UserRole(userRoleModel.id, userRoleModel.userJid, Arrays.asList(userRoleModel.roles.split(",")));
     }
 }

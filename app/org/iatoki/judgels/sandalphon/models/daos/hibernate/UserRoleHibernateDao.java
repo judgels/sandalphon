@@ -53,7 +53,6 @@ public final class UserRoleHibernateDao extends AbstractHibernateDao<Long, UserR
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.like(root.get(UserRoleModel_.userJid), "%" + filterString + "%"));
-        predicates.add(cb.like(root.get(UserRoleModel_.username), "%" + filterString + "%"));
 
         Predicate condition = cb.or(predicates.toArray(new Predicate[predicates.size()]));
 
@@ -66,6 +65,6 @@ public final class UserRoleHibernateDao extends AbstractHibernateDao<Long, UserR
 
     @Override
     protected List<SingularAttribute<UserRoleModel, String>> getColumnsFilterableByString() {
-        return ImmutableList.of(UserRoleModel_.userJid, UserRoleModel_.username);
+        return ImmutableList.of(UserRoleModel_.userJid);
     }
 }

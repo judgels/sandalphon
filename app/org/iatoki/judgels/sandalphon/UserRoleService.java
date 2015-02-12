@@ -12,9 +12,7 @@ public interface UserRoleService {
 
     UserRole findUserRoleByUserJid(String userJid);
 
-    void createUserRole(String userJid, String username, List<String> roles);
-
-    void updateUserRole(String userJid, String username);
+    void createUserRole(String userJid, List<String> roles);
 
     void updateUserRole(long userRoleId, List<String> roles);
 
