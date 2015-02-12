@@ -8,7 +8,19 @@ public final class LoggedIn extends Security.Authenticator {
 
     @Override
     public String getUsername(Http.Context context) {
-        return context.session().get("username");
+        if ((context.session().get("username") != null) && (context.request().cookie("JOSAID") != null)) {
+            String jID = context.request().cookie("JOSAID").value();
+            if (context.session().get("idToken").startsWith(jID)) {
+                return context.session().get("username");
+            } else {
+                return null;
+            }
+        } else if (context.session().get("username") != null) {
+            context.session().clear();
+            return null;
+        } else {
+            return null;
+        }
     }
 
     @Override

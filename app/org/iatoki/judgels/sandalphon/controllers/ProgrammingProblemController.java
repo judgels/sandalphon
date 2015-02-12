@@ -535,7 +535,7 @@ public final class ProgrammingProblemController extends Controller {
 
         ByteArrayOutputStream os = problemService.getZippedGradingFilesStream(problemJid);
         response().setContentType("application/x-download");
-        response().setHeader("Content-disposition","attachment; filename=" + problemJid + ".zip");
+        response().setHeader("Content-disposition", "attachment; filename=" + problemJid + ".zip");
         return ok(os.toByteArray()).as("application/zip");
     }
 
@@ -645,7 +645,7 @@ public final class ProgrammingProblemController extends Controller {
         content.appendLayout(c -> leftSidebarLayout.render(
                         IdentityUtils.getUsername(),
                         IdentityUtils.getUserRealName(),
-                        "#",
+                        org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(routes.ProgrammingProblemController.index().absoluteURL(request())).absoluteURL(request()),
                         org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(request())).absoluteURL(request()),
                         internalLinkBuilder.build(), c)
         );

@@ -168,7 +168,7 @@ public final class ClientController extends Controller {
         content.appendLayout(c -> leftSidebarLayout.render(
                         IdentityUtils.getUsername(),
                         IdentityUtils.getUserRealName(),
-                        "#",
+                        org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(routes.ClientController.index().absoluteURL(request())).absoluteURL(request()),
                         org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(request())).absoluteURL(request()),
                         internalLinkBuilder.build(), c)
         );
