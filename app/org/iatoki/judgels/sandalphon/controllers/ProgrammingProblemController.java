@@ -215,33 +215,44 @@ public final class ProgrammingProblemController extends Controller {
         content.additionalNote = problem.getAdditionalNote();
         Form<UpsertForm> form = Form.form(UpsertForm.class).fill(content);
 
-        return showUpdateGeneral(form, problemId);
+        return showUpdateGeneral(form, problem.getId());
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result postUpdateGeneral(long id) {
+    public Result postUpdateGeneral(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
         Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
-        problemService.updateProblem(id, form.get().name, form.get().additionalNote);
-        return redirect(routes.ProgrammingProblemController.updateGeneral(id));
+        if (form.hasErrors() || form.hasGlobalErrors()) {
+            return showUpdateGeneral(form, problem.getId());
+        } else {
+            problemService.updateProblem(problem.getId(), form.get().name, form.get().additionalNote);
+            return redirect(routes.ProgrammingProblemController.updateGeneral(problem.getId()));
+        }
     }
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateStatement(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        String statement = problemService.getStatement(problemId);
+        String statement = problemService.getStatement(problem.getId());
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
         form = form.bind(ImmutableMap.of("statement", statement));
-        return showUpdateStatement(form, problemId, problem.getName());
+
+        return showUpdateStatement(form, problem.getId(), problem.getName());
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateStatement(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
-        problemService.updateStatement(problemId, form.get().statement);
-        return redirect(routes.ProgrammingProblemController.updateStatement(problemId));
+        if (form.hasErrors() || form.hasGlobalErrors()) {
+            return showUpdateStatement(form, problem.getId(), problem.getName());
+        } else {
+            problemService.updateStatement(problemId, form.get().statement);
+            return redirect(routes.ProgrammingProblemController.updateStatement(problem.getId()));
+        }
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -255,7 +266,8 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateTestDataFilesForm> form = Form.form(UpdateTestDataFilesForm.class);
         List<File> testDataFiles = problemService.getTestDataFiles(problemId);
-        return showUpdateTestDataFiles(form, problemId, problem.getName(), testDataFiles);
+
+        return showUpdateTestDataFiles(form, problem.getId(), problem.getName(), testDataFiles);
     }
 
     @AddCSRFToken
@@ -263,8 +275,9 @@ public final class ProgrammingProblemController extends Controller {
     public Result updateHelperFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateHelperFilesForm> form = Form.form(UpdateHelperFilesForm.class);
-        List<File> helperFiles = problemService.getHelperFiles(problemId);
-        return showUpdateHelperFiles(form, problemId, problem.getName(), helperFiles);
+        List<File> helperFiles = problemService.getHelperFiles(problem.getId());
+
+        return showUpdateHelperFiles(form, problem.getId(), problem.getName(), helperFiles);
     }
 
     @AddCSRFToken
@@ -272,68 +285,70 @@ public final class ProgrammingProblemController extends Controller {
     public Result updateMediaFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateMediaFilesForm> form = Form.form(UpdateMediaFilesForm.class);
-        List<File> mediaFiles = problemService.getMediaFiles(problemId);
-        return showUpdateMediaFiles(form, problemId, problem.getName(), mediaFiles);
+        List<File> mediaFiles = problemService.getMediaFiles(problem.getId());
+
+        return showUpdateMediaFiles(form, problem.getId(), problem.getName(), mediaFiles);
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateFiles(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart file;
 
         file = body.getFile("testDataFile");
         if (file != null) {
             File testDataFile = file.getFile();
-            problemService.uploadTestDataFile(problemId, testDataFile, file.getFilename());
-            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(problemId));
+            problemService.uploadTestDataFile(problem.getId(), testDataFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(problem.getId()));
         }
 
         file = body.getFile("testDataFileZipped");
         if (file != null) {
             File testDataFile = file.getFile();
-            problemService.uploadTestDataFileZipped(problemId, testDataFile);
-            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(problemId));
+            problemService.uploadTestDataFileZipped(problem.getId(), testDataFile);
+            return redirect(routes.ProgrammingProblemController.updateTestDataFiles(problem.getId()));
         }
 
         file = body.getFile("helperFile");
         if (file != null) {
             File helperFile = file.getFile();
-            problemService.uploadHelperFile(problemId, helperFile, file.getFilename());
-            return redirect(routes.ProgrammingProblemController.updateHelperFiles(problemId));
+            problemService.uploadHelperFile(problem.getId(), helperFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateHelperFiles(problem.getId()));
         }
 
         file = body.getFile("helperFileZipped");
         if (file != null) {
             File helperFileZipped = file.getFile();
-            problemService.uploadHelperFileZipped(problemId, helperFileZipped);
-            return redirect(routes.ProgrammingProblemController.updateHelperFiles(problemId));
+            problemService.uploadHelperFileZipped(problem.getId(), helperFileZipped);
+            return redirect(routes.ProgrammingProblemController.updateHelperFiles(problem.getId()));
         }
 
         file = body.getFile("mediaFile");
         if (file != null) {
             File mediaFile = file.getFile();
-            problemService.uploadMediaFile(problemId, mediaFile, file.getFilename());
-            return redirect(routes.ProgrammingProblemController.updateMediaFiles(problemId));
+            problemService.uploadMediaFile(problem.getId(), mediaFile, file.getFilename());
+            return redirect(routes.ProgrammingProblemController.updateMediaFiles(problem.getId()));
         }
 
         file = body.getFile("mediaFileZipped");
         if (file != null) {
             File mediaFileZipped = file.getFile();
-            problemService.uploadMediaFileZipped(problemId, mediaFileZipped);
-            return redirect(routes.ProgrammingProblemController.updateMediaFiles(problemId));
+            problemService.uploadMediaFileZipped(problem.getId(), mediaFileZipped);
+            return redirect(routes.ProgrammingProblemController.updateMediaFiles(problem.getId()));
         }
 
-        return redirect(routes.ProgrammingProblemController.updateFiles(problemId));
+        return redirect(routes.ProgrammingProblemController.updateFiles(problem.getId()));
     }
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result updateGrading(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        GradingConfig config = problemService.getGradingConfig(problemId);
-        List<File> testDataFiles = problemService.getTestDataFiles(problemId);
-        List<File> helperFiles = problemService.getHelperFiles(problemId);
+        GradingConfig config = problemService.getGradingConfig(problem.getId());
+        List<File> testDataFiles = problemService.getTestDataFiles(problem.getId());
+        List<File> helperFiles = problemService.getHelperFiles(problem.getId());
 
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromConfig(config);
 
@@ -344,17 +359,16 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateGrading(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromRequest(request());
 
-        if (form.hasErrors()) {
-            List<File> testDataFiles = problemService.getTestDataFiles(problemId);
-            List<File> helperFiles = problemService.getHelperFiles(problemId);
+        if (form.hasErrors() || form.hasGlobalErrors()) {
+            List<File> testDataFiles = problemService.getTestDataFiles(problem.getId());
+            List<File> helperFiles = problemService.getHelperFiles(problem.getId());
             return showUpdateGrading(form, problem, testDataFiles, helperFiles);
         } else {
             GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createConfigFromForm(form);
             problemService.updateGradingConfig(problemId, config);
-            return redirect(routes.ProgrammingProblemController.updateGrading(problemId));
+            return redirect(routes.ProgrammingProblemController.updateGrading(problem.getId()));
         }
     }
 
@@ -371,10 +385,10 @@ public final class ProgrammingProblemController extends Controller {
             SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid, source);
         } catch (SubmissionException e) {
             flash("submissionError", e.getMessage());
-            return redirect(routes.ProgrammingProblemController.viewStatement(problemId));
+            return redirect(routes.ProgrammingProblemController.viewStatement(problem.getId()));
         }
 
-        return redirect(routes.ProgrammingProblemController.viewSubmissions(problemId, 0, "id", "asc"));
+        return redirect(routes.ProgrammingProblemController.viewSubmissions(problem.getId(), 0, "id", "asc"));
     }
 
     @AddCSRFToken

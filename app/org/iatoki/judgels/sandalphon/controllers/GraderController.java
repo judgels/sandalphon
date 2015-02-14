@@ -76,7 +76,6 @@ public final class GraderController extends Controller {
             return showCreate(form);
         } else {
             GraderUpsertForm clientUpsertForm = form.get();
-
             graderService.createGrader(clientUpsertForm.name);
 
             return redirect(routes.GraderController.index());
@@ -127,7 +126,6 @@ public final class GraderController extends Controller {
             return showUpdate(form, grader);
         } else {
             GraderUpsertForm clientUpsertForm = form.get();
-
             graderService.updateGrader(graderId, clientUpsertForm.name);
 
             return redirect(routes.GraderController.index());

@@ -76,7 +76,6 @@ public final class ClientController extends Controller {
             return showCreate(form);
         } else {
             ClientUpsertForm clientUpsertForm = form.get();
-
             clientService.createClient(clientUpsertForm.name);
 
             return redirect(routes.ClientController.index());
@@ -127,7 +126,6 @@ public final class ClientController extends Controller {
             return showUpdate(form, client);
         } else {
             ClientUpsertForm clientUpsertForm = form.get();
-
             clientService.updateClient(clientId, clientUpsertForm.name);
 
             return redirect(routes.ClientController.index());
