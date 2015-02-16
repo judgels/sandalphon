@@ -5,24 +5,26 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
-import org.iatoki.judgels.gabriel.FakeClientMessage;
-import org.iatoki.judgels.gabriel.FakeSealtiel;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingRequest;
 import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.gabriel.Verdict;
+import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.programming.models.daos.interfaces.ProblemSubmissionDao;
 import org.iatoki.judgels.sandalphon.programming.models.domains.ProblemSubmissionModel;
+import org.iatoki.judgels.sealtiel.client.ClientMessage;
+import org.iatoki.judgels.sealtiel.client.Sealtiel;
+import play.Play;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public final class ProblemSubmissionServiceImpl implements ProblemSubmissionService {
     private final ProblemSubmissionDao submissionDao;
-    private final FakeSealtiel sealtiel;
+    private final Sealtiel sealtiel;
 
-    public ProblemSubmissionServiceImpl(ProblemSubmissionDao submissionDao, FakeSealtiel sealtiel) {
+    public ProblemSubmissionServiceImpl(ProblemSubmissionDao submissionDao, Sealtiel sealtiel) {
         this.submissionDao = submissionDao;
         this.sealtiel = sealtiel;
     }
@@ -67,8 +69,11 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
 
         GradingRequest request = SubmissionAdapters.fromGradingEngine(problemGradingEngine).createGradingRequest(submissionRecord.jid, problemJid, gradingLastUpdateTime, problemGradingEngine, gradingLanguage, source);
 
-        FakeClientMessage message = new FakeClientMessage("some-target", request.getClass().getSimpleName(), new Gson().toJson(request));
-        sealtiel.sendMessage(message);
+        try {
+            System.out.println(sealtiel.sendMessage(new ClientMessage(Play.application().configuration().getString("sealtiel.gabrielClientJid"), request.getClass().getSimpleName(), new Gson().toJson(request))).name());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return submissionRecord.jid;
     }

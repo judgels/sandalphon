@@ -1,9 +1,10 @@
 package org.iatoki.judgels.sandalphon;
 
 import akka.actor.Scheduler;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.iatoki.judgels.gabriel.commons.GradingResponsePoller;
 import org.iatoki.judgels.sandalphon.commons.SubmissionUpdaterService;
-import org.iatoki.judgels.gabriel.FakeSealtiel;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;
 import org.iatoki.judgels.sandalphon.controllers.ClientController;
 import org.iatoki.judgels.sandalphon.controllers.GraderController;
@@ -17,6 +18,10 @@ import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.GraderDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.UserRoleDao;
+import org.iatoki.judgels.sandalphon.programming.ProblemService;
+import org.iatoki.judgels.sandalphon.programming.ProblemServiceImpl;
+import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionService;
+import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionServiceImpl;
 import org.iatoki.judgels.sandalphon.programming.SubmissionUpdaterServiceImpl;
 import org.iatoki.judgels.sandalphon.programming.models.daos.hibernate.JidCacheHibernateDao;
 import org.iatoki.judgels.sandalphon.programming.models.daos.hibernate.ProblemHibernateDao;
@@ -24,16 +29,12 @@ import org.iatoki.judgels.sandalphon.programming.models.daos.hibernate.ProblemSu
 import org.iatoki.judgels.sandalphon.programming.models.daos.interfaces.JidCacheDao;
 import org.iatoki.judgels.sandalphon.programming.models.daos.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.programming.models.daos.interfaces.ProblemSubmissionDao;
-import org.iatoki.judgels.sandalphon.programming.ProblemService;
-import org.iatoki.judgels.sandalphon.programming.ProblemServiceImpl;
-import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionService;
-import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionServiceImpl;
+import org.iatoki.judgels.sealtiel.client.Sealtiel;
 import play.Application;
 import play.libs.Akka;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.duration.Duration;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 public final class Global extends org.iatoki.judgels.commons.Global {
@@ -50,17 +51,19 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private final ClientService clientService;
     private final GraderService graderService;
     private final UserRoleService userRoleService;
-    private final FakeSealtiel sealtiel;
+    private final Sealtiel sealtiel;
     private final JidCacheDao jidCacheDao;
 
     public Global() {
+        Config playConfig = ConfigFactory.load();
+
         this.problemDao = new ProblemHibernateDao();
         this.submissionDao = new ProblemSubmissionHibernateDao();
         this.clientDao = new ClientHibernateDao();
         this.graderDao = new GraderHibernateDao();
         this.clientProblemDao = new ClientProblemHibernateDao();
         this.userRoleDao = new UserRoleHibernateDao();
-        this.sealtiel = new FakeSealtiel(new File("/Users/fushar/Projects/moe/grading-requests"), new File("/Users/fushar/Projects/moe/grading-responses"));
+        this.sealtiel = new Sealtiel(playConfig.getString("sealtiel.clientJid"), playConfig.getString("sealtiel.clientSecret"), playConfig.getString("sealtiel.baseUrl"));
         this.jidCacheDao = new JidCacheHibernateDao();
         this.problemService = new ProblemServiceImpl(problemDao);
         this.submissionService = new ProblemSubmissionServiceImpl(submissionDao, sealtiel);

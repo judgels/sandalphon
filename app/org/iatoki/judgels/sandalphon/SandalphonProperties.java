@@ -60,9 +60,9 @@ public final class SandalphonProperties {
                 "jophiel.clientJid",
                 "jophiel.clientSecret",
                 "sealtiel.baseUrl",
-                "sealtiel.clientChannel",
                 "sealtiel.clientJid",
                 "sealtiel.clientSecret",
+                "sealtiel.gabrielClientJid",
                 "sandalphon.baseDir"
         );
 
