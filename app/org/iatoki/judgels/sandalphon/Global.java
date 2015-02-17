@@ -79,6 +79,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     public void onStart(Application application) {
         super.onStart(application);
 
+        SandalphonProperties.getInstance();
+
         GradingResponsePoller poller = new GradingResponsePoller(submissionUpdaterService, sealtiel);
 
         Scheduler scheduler = Akka.system().scheduler();

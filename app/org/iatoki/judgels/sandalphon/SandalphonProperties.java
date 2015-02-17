@@ -62,8 +62,8 @@ public final class SandalphonProperties {
                 "sealtiel.baseUrl",
                 "sealtiel.clientJid",
                 "sealtiel.clientSecret",
-                "sealtiel.gabrielClientJid",
-                "sandalphon.baseDir"
+                "sandalphon.baseDir",
+                "sealtiel.gabrielClientJid"
         );
 
         for (String key : requiredKeys) {
