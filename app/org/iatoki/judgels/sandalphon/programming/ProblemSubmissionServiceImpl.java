@@ -59,9 +59,11 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
     public String submit(String problemJid, String problemGradingEngine, String gradingLanguage, long gradingLastUpdateTime, GradingSource source) {
         ProblemSubmissionModel submissionRecord = new ProblemSubmissionModel();
         submissionRecord.problemJid = problemJid;
+        submissionRecord.gradingEngine = problemGradingEngine;
         submissionRecord.gradingLanguage = gradingLanguage;
         submissionRecord.verdictCode = "?";
         submissionRecord.verdictName = "Pending";
+        submissionRecord.message = null;
         submissionRecord.score = 0;
         submissionRecord.details = "";
 
@@ -80,6 +82,6 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
 
     private ProblemSubmission createSubmissionFromModel(ProblemSubmissionModel submissionModel) {
         String language = GradingLanguageRegistry.getInstance().getLanguage(submissionModel.gradingLanguage).getName();
-        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.gradingEngine, submissionModel.timeCreate, new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.score, submissionModel.details);
+        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.gradingEngine, submissionModel.timeCreate, new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.message, submissionModel.score, submissionModel.details);
     }
 }
