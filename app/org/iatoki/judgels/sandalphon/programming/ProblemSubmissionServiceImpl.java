@@ -63,7 +63,6 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
         submissionRecord.gradingLanguage = gradingLanguage;
         submissionRecord.verdictCode = "?";
         submissionRecord.verdictName = "Pending";
-        submissionRecord.message = null;
         submissionRecord.score = 0;
         submissionRecord.details = "";
 
@@ -72,7 +71,7 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
         GradingRequest request = SubmissionAdapters.fromGradingEngine(problemGradingEngine).createGradingRequest(submissionRecord.jid, problemJid, gradingLastUpdateTime, problemGradingEngine, gradingLanguage, source);
 
         try {
-            System.out.println(sealtiel.sendMessage(new ClientMessage(Play.application().configuration().getString("sealtiel.gabrielClientJid"), request.getClass().getSimpleName(), new Gson().toJson(request))).name());
+            sealtiel.sendMessage(new ClientMessage(Play.application().configuration().getString("sealtiel.gabrielClientJid"), request.getClass().getSimpleName(), new Gson().toJson(request)));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -82,6 +81,6 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
 
     private ProblemSubmission createSubmissionFromModel(ProblemSubmissionModel submissionModel) {
         String language = GradingLanguageRegistry.getInstance().getLanguage(submissionModel.gradingLanguage).getName();
-        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.gradingEngine, submissionModel.timeCreate, new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.message, submissionModel.score, submissionModel.details);
+        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.gradingEngine, submissionModel.timeCreate, new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.score, submissionModel.details);
     }
 }
