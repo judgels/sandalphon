@@ -9,6 +9,7 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.commons.Submission;
 import org.iatoki.judgels.sandalphon.commons.SubmissionException;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
@@ -69,6 +70,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 @Transactional
@@ -90,7 +92,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result index() {
-        return list(0, "id", "asc", "");
+        return list(0, "timeUpdate", "desc", "");
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -98,9 +100,9 @@ public final class ProgrammingProblemController extends Controller {
         Page<Problem> currentPage = problemService.pageProblems(page, PAGE_SIZE, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("programming.list"), new InternalLink(Messages.get("commons.create"), routes.ProgrammingProblemController.create()), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("programming.problem.list"), new InternalLink(Messages.get("commons.create"), routes.ProgrammingProblemController.create()), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index())
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index())
         ), c));
         appendTemplateLayout(content);
 
@@ -131,10 +133,10 @@ public final class ProgrammingProblemController extends Controller {
 
     private Result showCreate(Form<UpsertForm> form) {
         LazyHtml content = new LazyHtml(createView.render(form));
-        content.appendLayout(c -> headingLayout.render(Messages.get("programming.create"), c));
+        content.appendLayout(c -> headingLayout.render(Messages.get("programming.problem.create"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.create"), routes.ProgrammingProblemController.create())
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.problem.create"), routes.ProgrammingProblemController.create())
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -149,11 +151,14 @@ public final class ProgrammingProblemController extends Controller {
     public Result viewGeneral(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
-        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewGeneral(problemId), routes.ProgrammingProblemController.updateGeneral(problemId), c));
+        content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewGeneral(problemId)),
+                new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateGeneral(problemId))
+                ), c));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.viewGeneral"), routes.ProgrammingProblemController.viewGeneral(problemId))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.general.general"), routes.ProgrammingProblemController.viewGeneral(problemId))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -165,28 +170,36 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
 
         GradingConfig config = problemService.getGradingConfig(problemId);
-        long gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problemId);
+        Date gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problemId);
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine(), gradingLastUpdateTime));
-        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(problemId), routes.ProgrammingProblemController.updateStatement(problemId), c));
+        content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewStatement(problemId)),
+                new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateStatement(problemId))
+                ), c));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.viewStatement"), routes.ProgrammingProblemController.viewStatement(problemId))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.statement.statement"), routes.ProgrammingProblemController.viewStatement(problemId))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result viewSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
+    public Result viewSubmissions(long problemId) {
+        return listSubmissions(problemId, 0, "timeCreate", "desc");
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
         Problem problem = problemService.findProblemById(problemId);
         Page<ProblemSubmission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, IdentityUtils.getUserJid(), problem.getJid());
         LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, problemId, pageIndex, orderBy, orderDir));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.viewSubmssions"), routes.ProgrammingProblemController.viewSubmissions(problemId, pageIndex, orderBy, orderDir))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.submission.submissions"), routes.ProgrammingProblemController.viewSubmissions(problemId))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -199,12 +212,13 @@ public final class ProgrammingProblemController extends Controller {
 
         GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getSubmissionDir(), submission.getJid());
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewSubmission(submission, source));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewSubmission(submission, source, JidCacheService.getInstance()));
 
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.viewSubmission"), routes.ProgrammingProblemController.viewSubmission(problemId, submissionId))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.submission.submissions"), routes.ProgrammingProblemController.viewSubmissions(problemId)),
+                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewSubmission(problemId, submissionId))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
@@ -348,7 +362,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result updateGrading(long problemId) {
+    public Result updateConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         GradingConfig config = problemService.getGradingConfig(problem.getId());
         List<File> testDataFiles = problemService.getTestDataFiles(problem.getId());
@@ -356,23 +370,23 @@ public final class ProgrammingProblemController extends Controller {
 
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromConfig(config);
 
-        return showUpdateGrading(form, problem, testDataFiles, helperFiles);
+        return showUpdateConfig(form, problem, testDataFiles, helperFiles);
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
-    public Result postUpdateGrading(long problemId) {
+    public Result postUpdateConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createEmptyForm().bindFromRequest(request());
 
         if (form.hasErrors() || form.hasGlobalErrors()) {
             List<File> testDataFiles = problemService.getTestDataFiles(problem.getId());
             List<File> helperFiles = problemService.getHelperFiles(problem.getId());
-            return showUpdateGrading(form, problem, testDataFiles, helperFiles);
+            return showUpdateConfig(form, problem, testDataFiles, helperFiles);
         } else {
             GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createConfigFromForm(form);
             problemService.updateGradingConfig(problemId, config);
-            return redirect(routes.ProgrammingProblemController.updateGrading(problem.getId()));
+            return redirect(routes.ProgrammingProblemController.updateConfig(problem.getId()));
         }
     }
 
@@ -385,14 +399,14 @@ public final class ProgrammingProblemController extends Controller {
 
         try {
             GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromNewSubmission(body);
-            String submissionJid = submissionService.submit(problem.getJid(), problem.getGradingEngine(), gradingLanguage, problem.getTimeUpdate(), source);
+            String submissionJid = submissionService.submit(problem.getJid(), problem.getGradingEngine(), gradingLanguage, problem.getLastUpdate(), source);
             SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid, source);
         } catch (SubmissionException e) {
             flash("submissionError", e.getMessage());
             return redirect(routes.ProgrammingProblemController.viewStatement(problem.getId()));
         }
 
-        return redirect(routes.ProgrammingProblemController.viewSubmissions(problem.getId(), 0, "id", "asc"));
+        return redirect(routes.ProgrammingProblemController.viewSubmissions(problem.getId()));
     }
 
     @AddCSRFToken
@@ -437,8 +451,8 @@ public final class ProgrammingProblemController extends Controller {
             LazyHtml content = new LazyHtml(viewClientProblemView.render(problem, clientProblem));
             appendTabsLayout(content, problemId, problem.getName());
             content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                    new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                    new InternalLink(Messages.get("programming.viewClient"), routes.ProgrammingProblemController.viewClientProblem(problemId, clientProblemId))
+                    new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                    new InternalLink(Messages.get("programming.client.client"), routes.ProgrammingProblemController.viewClientProblem(problemId, clientProblemId))
             ), c));
             appendTemplateLayout(content);
 
@@ -505,7 +519,7 @@ public final class ProgrammingProblemController extends Controller {
             if (client.getSecret().equals(clientSecret)) {
                 String problemJid = form.get("problemJid");
                 if (problemService.problemExistsByJid(problemJid)) {
-                    return ok();
+                    return ok(problemService.findProblemByJid(problemJid).getName());
                 } else {
                     return notFound();
                 }
@@ -532,7 +546,7 @@ public final class ProgrammingProblemController extends Controller {
 
         String statement = problemService.getStatement(problemJid);
         Problem problem = problemService.findProblemByJid(problemJid);
-        long gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problem.getId());
+        Date gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problem.getId());
 
         GradingConfig config = problemService.getGradingConfig(problem.getId());
 
@@ -576,69 +590,80 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
-    private Result showUpdateGeneral(Form<UpsertForm> form, long id) {
-        LazyHtml content = new LazyHtml(updateGeneralView.render(form, id));
-        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewGeneral(id), routes.ProgrammingProblemController.updateGeneral(id), c));
-        appendTabsLayout(content, id, form.get().name);
+    private Result showUpdateGeneral(Form<UpsertForm> form, long problemId) {
+        LazyHtml content = new LazyHtml(updateGeneralView.render(form, problemId));
+        content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewGeneral(problemId)),
+                new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateGeneral(problemId))
+        ), c));
+        appendTabsLayout(content, problemId, form.get().name);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.updateGeneral"), routes.ProgrammingProblemController.updateGeneral(id))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.general.general"), routes.ProgrammingProblemController.viewGeneral(problemId)),
+                new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateGeneral(problemId))
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
     }
 
-    private Result showUpdateStatement(Form<UpdateStatementForm> form, long id, String problemName) {
-        LazyHtml content = new LazyHtml(updateStatementView.render(form, id));
-        content.appendLayout(c -> accessTypesLayout.render(routes.ProgrammingProblemController.viewStatement(id), routes.ProgrammingProblemController.updateStatement(id), c));
-        appendTabsLayout(content, id, problemName);
+    private Result showUpdateStatement(Form<UpdateStatementForm> form, long problemId, String problemName) {
+        LazyHtml content = new LazyHtml(updateStatementView.render(form, problemId));
+        content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewStatement(problemId)),
+                new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateStatement(problemId))
+                ), c));
+        appendTabsLayout(content, problemId, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.updateStatement"), routes.ProgrammingProblemController.updateStatement(id))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.statement.statement"), routes.ProgrammingProblemController.viewStatement(problemId)),
+                new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateStatement(problemId))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
     }
 
-    private Result showUpdateGrading(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles) {
+    private Result showUpdateConfig(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles) {
         LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.updateGrading"), routes.ProgrammingProblemController.updateGrading(problem.getId()))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.config.config"), routes.ProgrammingProblemController.updateConfig(problem.getId()))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
     }
 
-    private Result showUpdateTestDataFiles(Form<UpdateTestDataFilesForm> form, long id, String problemName, List<File> testDataFiles) {
-        LazyHtml content = new LazyHtml(updateTestDataFilesView.render(form, id, testDataFiles));
-        appendTabsLayout(content, id, problemName);
+    private Result showUpdateTestDataFiles(Form<UpdateTestDataFilesForm> form, long problemId, String problemName, List<File> testDataFiles) {
+        LazyHtml content = new LazyHtml(updateTestDataFilesView.render(form, problemId, testDataFiles));
+        appendTabsLayout(content, problemId, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.updateTestDataFiles"), routes.ProgrammingProblemController.updateFiles(id))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.file.files"), routes.ProgrammingProblemController.updateFiles(problemId)),
+                new InternalLink(Messages.get("programming.file.testData"), routes.ProgrammingProblemController.updateTestDataFiles(problemId))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
     }
 
-    private Result showUpdateHelperFiles(Form<UpdateHelperFilesForm> form, long id, String problemName, List<File> helperFiles) {
-        LazyHtml content = new LazyHtml(updateHelperFilesView.render(form, id, helperFiles));
-        appendTabsLayout(content, id, problemName);
+    private Result showUpdateHelperFiles(Form<UpdateHelperFilesForm> form, long problemId, String problemName, List<File> helperFiles) {
+        LazyHtml content = new LazyHtml(updateHelperFilesView.render(form, problemId, helperFiles));
+        appendTabsLayout(content, problemId, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.updateHelperFiles"), routes.ProgrammingProblemController.updateFiles(id))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.file.files"), routes.ProgrammingProblemController.updateFiles(problemId)),
+                new InternalLink(Messages.get("programming.file.helper"), routes.ProgrammingProblemController.updateHelperFiles(problemId))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
     }
 
-    private Result showUpdateMediaFiles(Form<UpdateMediaFilesForm> form, long id, String problemName, List<File> mediaFiles) {
-        LazyHtml content = new LazyHtml(updateMediaFilesView.render(form, id, mediaFiles));
-        appendTabsLayout(content, id, problemName);
+    private Result showUpdateMediaFiles(Form<UpdateMediaFilesForm> form, long problemId, String problemName, List<File> mediaFiles) {
+        LazyHtml content = new LazyHtml(updateMediaFilesView.render(form, problemId, mediaFiles));
+        appendTabsLayout(content, problemId, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.updateMediaFiles"), routes.ProgrammingProblemController.updateFiles(id))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.file.files"), routes.ProgrammingProblemController.updateFiles(problemId)),
+                new InternalLink(Messages.get("programming.file.media"), routes.ProgrammingProblemController.updateMediaFiles(problemId))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
@@ -648,25 +673,25 @@ public final class ProgrammingProblemController extends Controller {
         LazyHtml content = new LazyHtml(updateClientProblemsView.render(form, problem.getId(), clients, clientProblems));
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.problems"), routes.ProgrammingProblemController.index()),
-                new InternalLink(Messages.get("programming.clients"), routes.ProgrammingProblemController.updateClientProblems(problem.getId()))
+                new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
+                new InternalLink(Messages.get("programming.client.clients"), routes.ProgrammingProblemController.updateClientProblems(problem.getId()))
         ), c));
         appendTemplateLayout(content);
         return lazyOk(content);
     }
 
 
-    private void appendTabsLayout(LazyHtml content, long id, String problemName) {
+    private void appendTabsLayout(LazyHtml content, long problemId, String problemName) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("programming.general"), routes.ProgrammingProblemController.viewGeneral(id)),
-                new InternalLink(Messages.get("programming.statement"), routes.ProgrammingProblemController.viewStatement(id)),
-                new InternalLink(Messages.get("programming.grading"), routes.ProgrammingProblemController.updateGrading(id)),
-                new InternalLink(Messages.get("programming.files"), routes.ProgrammingProblemController.updateFiles(id)),
-                new InternalLink(Messages.get("programming.submissions"), routes.ProgrammingProblemController.viewSubmissions(id, 0, "id", "asc")),
-                new InternalLink(Messages.get("programming.clients"), routes.ProgrammingProblemController.updateClientProblems(id))
+                new InternalLink(Messages.get("programming.general.general"), routes.ProgrammingProblemController.viewGeneral(problemId)),
+                new InternalLink(Messages.get("programming.statement.statement"), routes.ProgrammingProblemController.viewStatement(problemId)),
+                new InternalLink(Messages.get("programming.config.config"), routes.ProgrammingProblemController.updateConfig(problemId)),
+                new InternalLink(Messages.get("programming.file.files"), routes.ProgrammingProblemController.updateFiles(problemId)),
+                new InternalLink(Messages.get("programming.submission.submissions"), routes.ProgrammingProblemController.viewSubmissions(problemId)),
+                new InternalLink(Messages.get("programming.client.clients"), routes.ProgrammingProblemController.updateClientProblems(problemId))
         ), c));
 
-        content.appendLayout(c -> headingLayout.render("#" + id + ": " + problemName, c));
+        content.appendLayout(c -> headingLayout.render("#" + problemId + ": " + problemName, c));
     }
 
     private void appendTemplateLayout(LazyHtml content) {

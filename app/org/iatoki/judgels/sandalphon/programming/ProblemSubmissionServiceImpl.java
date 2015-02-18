@@ -17,6 +17,7 @@ import org.iatoki.judgels.sealtiel.client.Sealtiel;
 import play.Play;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -56,10 +57,10 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
     }
 
     @Override
-    public String submit(String problemJid, String problemGradingEngine, String gradingLanguage, long gradingLastUpdateTime, GradingSource source) {
+    public String submit(String problemJid, String gradingEngine, String gradingLanguage, Date gradingLastUpdateTime, GradingSource source) {
         ProblemSubmissionModel submissionRecord = new ProblemSubmissionModel();
         submissionRecord.problemJid = problemJid;
-        submissionRecord.gradingEngine = problemGradingEngine;
+        submissionRecord.gradingEngine = gradingEngine;
         submissionRecord.gradingLanguage = gradingLanguage;
         submissionRecord.verdictCode = "?";
         submissionRecord.verdictName = "Pending";
@@ -68,7 +69,7 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
 
         submissionDao.persist(submissionRecord, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        GradingRequest request = SubmissionAdapters.fromGradingEngine(problemGradingEngine).createGradingRequest(submissionRecord.jid, problemJid, gradingLastUpdateTime, problemGradingEngine, gradingLanguage, source);
+        GradingRequest request = SubmissionAdapters.fromGradingEngine(gradingEngine).createGradingRequest(submissionRecord.jid, problemJid, gradingLastUpdateTime, gradingEngine, gradingLanguage, source);
 
         try {
             sealtiel.sendMessage(new ClientMessage(Play.application().configuration().getString("sealtiel.gabrielClientJid"), request.getClass().getSimpleName(), new Gson().toJson(request)));
@@ -81,6 +82,6 @@ public final class ProblemSubmissionServiceImpl implements ProblemSubmissionServ
 
     private ProblemSubmission createSubmissionFromModel(ProblemSubmissionModel submissionModel) {
         String language = GradingLanguageRegistry.getInstance().getLanguage(submissionModel.gradingLanguage).getName();
-        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.gradingEngine, submissionModel.timeCreate, new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.score, submissionModel.details);
+        return new ProblemSubmission(submissionModel.id, submissionModel.jid, submissionModel.problemJid, submissionModel.userCreate, language, submissionModel.gradingEngine, new Date(submissionModel.timeCreate), new Verdict(submissionModel.verdictCode, submissionModel.verdictName), submissionModel.score, submissionModel.details);
     }
 }

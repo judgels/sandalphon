@@ -11,16 +11,16 @@
 
 <div class="clearfix"></div>
 
-@listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ProgrammingProblemController.viewSubmissions(problemId, newPageIndex, newOrderBy, newOrderDir)}
+@listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ProgrammingProblemController.listSubmissions(problemId, newPageIndex, newOrderBy, newOrderDir)}
 
 @tableView() {
     @tableHeadersView(page.getPageIndex, orderBy, orderDir, "", listFunc)(
         "id" -> Messages.get("commons.id"),
-        "userCreate" -> Messages.get("programming.author"),
-        "timeCreate" -> Messages.get("programming.time"),
-        "gradingLanguage" -> Messages.get("programming.gradingLanguage"),
-        "verdictName" -> Messages.get("programming.verdict"),
-        "score" -> Messages.get("programming.score")
+        "userCreate" -> Messages.get("programming.submission.author"),
+        "timeCreate" -> Messages.get("programming.submission.time"),
+        "gradingLanguage" -> Messages.get("programming.submission.gradingLanguage"),
+        "verdictName" -> Messages.get("programming.submission.verdict"),
+        "score" -> Messages.get("programming.submission.score")
     )
     <tbody>
 
@@ -28,7 +28,7 @@
         <tr>
             <td>@submission.getId</td>
             <td>@JidCacheService.getInstance().getDisplayName(submission.getAuthorJid)</td>
-            <td>@JudgelsUtils.timestampToFormattedDate(submission.getTimestamp)</td>
+            <td>@JudgelsUtils.formatDate(submission.getTime)</td>
             <td>@submission.getGradingLanguage</td>
             <td>@submission.getVerdict.getName</td>
             <td>@submission.getScore</td>

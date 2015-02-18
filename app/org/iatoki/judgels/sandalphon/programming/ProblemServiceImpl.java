@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -116,11 +117,11 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public long getGradingLastUpdateTime(long id) {
+    public Date getGradingLastUpdateTime(long id) {
         ProblemModel problemModel = dao.findById(id);
         File gradingLastUpdateTimeFile = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "lastUpdateTime.txt");
         try {
-            return Long.parseLong(FileUtils.readFileToString(gradingLastUpdateTimeFile));
+            return new Date(Long.parseLong(FileUtils.readFileToString(gradingLastUpdateTimeFile)));
         } catch (IOException e) {
             throw new RuntimeException("Cannot read grading last update time");
         }
@@ -353,7 +354,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
     
     private Problem createProblemFromModel(ProblemModel record) {
-        return new Problem(record.id, record.jid, record.name, record.userCreate, record.gradingEngine, record.timeUpdate, record.additionalNote);
+        return new Problem(record.id, record.jid, record.name, record.userCreate, record.gradingEngine, new Date(record.timeUpdate), record.additionalNote);
     }
 
     private List<File> getGradingFiles(String problemJid) {

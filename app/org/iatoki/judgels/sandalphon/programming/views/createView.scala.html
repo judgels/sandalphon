@@ -10,11 +10,11 @@
 @b3.form(routes.ProgrammingProblemController.postCreate()) {
     @helper.CSRF.formField
 
-    @b3.text(form("name"), '_label -> Messages.get("programming.name"))
+    @b3.text(form("name"), '_label -> Messages.get("programming.problem.name"))
 
-    @b3.select(form("gradingEngine"), GradingEngineRegistry.getInstance().getGradingEngines.asScala.toSeq, '_label -> Messages.get("programming.gradingEngine"))
+    @b3.select(form("gradingEngine"), GradingEngineRegistry.getInstance().getGradingEngines.asScala.toSeq, '_label -> Messages.get("programming.problem.gradingEngine"))
 
-    @b3.textarea(form("additionalNote"), '_label -> Messages.get("programming.additionalNote"))
+    @b3.textarea(form("additionalNote"), '_label -> Messages.get("programming.problem.additionalNote"))
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.create") }
 }

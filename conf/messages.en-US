@@ -1,64 +1,50 @@
 problem.problems=Problems
 
-programming.problems=Programming Problems
+programming.problem.problems=Programming Problems
 
-programming.create=Create Programming Problem
-programming.view=View Programming Problem
-programming.update=Update Programming Problem
-programming.list=Programming Problems
+programming.problem.create=Create Programming Problem
+programming.problem.list=Programming Problems
 
-programming.name=Name
-programming.additionalNote=Additional Note
-programming.gradingEngine=Grading Engine
-programming.author=Author
+programming.problem.name=Name
+programming.problem.additionalNote=Additional Note
+programming.problem.gradingEngine=Grading Engine
+programming.problem.lastUpdateTime=Last Update Time
+programming.problem.author=Author
+programming.problem.jid=Problem JID
+programming.problem.secret=Problem Secret
 
-programming.viewGeneral=View General
-programming.viewStatement=View Statement
-programming.viewClient=View Client
+programming.general.general=General
 
-programming.general=General
-programming.statement=Statement
-programming.files=Files
-programming.grading=Grading
-programming.clients=Clients
-programming.submissions=Submissions
+programming.statement.statement=Statement
 
-programming.updateGeneral=Update General
-programming.updateStatement=Update Statement
-programming.updateFiles=Update Files
-programming.updateGrading=Update Grading
-programming.updateTestDataFiles=Update Test Data Files
-programming.updateHelperFiles=Update Helper Files
-programming.updateMediaFiles=Update Media Files
-programming.updateClients=Update Clients
+programming.config.config=Config
 
-programming.client=Client
-programming.clientName=Client Name
-programming.clientJid=Client JID
-programming.clientSecret=Client Secret
-programming.viewClient=View Client
+programming.file.files=Files
+programming.file.testData=Test Data
+programming.file.testDataFiles=Test Data Files
+programming.file.testData.upload=Upload New Test Data File(s)
+programming.file.helper=Helpers
+programming.file.helperFiles=Helper Files
+programming.file.helper.upload=Upload New Helper File(s)
+programming.file.media=Media
+programming.file.mediaFiles=Media Files
+programming.file.media.upload=Upload New Media File(s)
+programming.file.size=Size
+programming.file.filename=Filename
+programming.file.lastModified=Last Modified
+programming.file.asSingleFile=As single file
+programming.file.asZipFile=As zip file
 
-programming.problemJid=Problem JID
-programming.problemSecret=Problem Secret
+programming.submission.submissions=Submissions
+programming.submission.author=Author
+programming.submission.time=Time
+programming.submission.gradingLanguage=Language
+programming.submission.verdict=Verdict
+programming.submission.score=Score
 
-programming.testDataFiles = Test Data Files
-programming.helperFiles=Helper Files
-programming.mediaFiles=Media Files
-
-programming.uploadNewTestDataFiles=Upload New Test Data File(s)
-programming.uploadNewHelperFiles=Upload New Helper File(s)
-programming.uploadNewMediaFiles=Upload New Media File(s)
-programming.asSingleFile=As single file
-programming.asZipFile=As zip file
-
-programming.filename=Filename
-programming.lastModified=Last Modified
-programming.size=Size
-
-programming.time=Time
-programming.gradingLanguage=Language
-programming.verdict=Verdict
-programming.score=Score
+programming.client.clients=Clients
+programming.client.client=Client
+programming.client.name=Name
 
 client.clients=Clients
 client.client=Client

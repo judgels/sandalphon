@@ -5,6 +5,7 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 
 public interface ProblemService {
@@ -15,47 +16,47 @@ public interface ProblemService {
 
     Problem findProblemByJid(String problemJid);
 
-    void updateProblem(long id, String name, String additionalNote);
+    void updateProblem(long problemId, String name, String additionalNote);
 
     Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
     Problem createProblem(String name, String gradingType, String additionalNote);
 
-    String getStatement(long id);
+    String getStatement(long problemId);
 
     String getStatement(String problemJid);
 
-    GradingConfig getGradingConfig(long id);
+    GradingConfig getGradingConfig(long problemId);
 
-    long getGradingLastUpdateTime(long id);
+    Date getGradingLastUpdateTime(long problemId);
 
-    void updateStatement(long id, String statement);
+    void updateStatement(long problemId, String statement);
 
-    void uploadTestDataFile(long id, File testDataFile, String filename);
+    void uploadTestDataFile(long problemId, File testDataFile, String filename);
 
-    void uploadTestDataFileZipped(long id, File testDataFileZipped);
+    void uploadTestDataFileZipped(long problemId, File testDataFileZipped);
 
-    void uploadHelperFile(long id, File helperFile, String filename);
+    void uploadHelperFile(long problemId, File helperFile, String filename);
 
-    void uploadHelperFileZipped(long id, File helperFileZipped);
+    void uploadHelperFileZipped(long problemId, File helperFileZipped);
 
-    void uploadMediaFile(long id, File mediaFile, String filename);
+    void uploadMediaFile(long problemId, File mediaFile, String filename);
 
-    void uploadMediaFileZipped(long id, File mediaFileZipped);
+    void uploadMediaFileZipped(long problemId, File mediaFileZipped);
 
-    void updateGradingConfig(long id, GradingConfig config);
+    void updateGradingConfig(long problemId, GradingConfig config);
 
-    List<File> getTestDataFiles(long id);
+    List<File> getTestDataFiles(long problemId);
 
-    List<File> getHelperFiles(long id);
+    List<File> getHelperFiles(long problemId);
 
-    List<File> getMediaFiles(long id);
+    List<File> getMediaFiles(long problemId);
 
-    File getTestDataFile(long id, String filename);
+    File getTestDataFile(long problemId, String filename);
 
-    File getHelperFile(long id, String filename);
+    File getHelperFile(long problemId, String filename);
 
-    File getMediaFile(long id, String filename);
+    File getMediaFile(long problemId, String filename);
 
     ByteArrayOutputStream getZippedGradingFilesStream(String problemJid);
 }

@@ -1,22 +1,24 @@
 package org.iatoki.judgels.sandalphon.programming;
 
+import java.util.Date;
+
 public final class Problem {
     private final long id;
     private final String jid;
     private final String name;
     private final String authorJid;
     private final String gradingEngine;
-    private final long timeUpdate;
+    private final Date lastUpdate;
 
     private final String additionalNote;
 
-    public Problem(long id, String jid, String name, String authorJid, String gradingEngine, long timeUpdate, String additionalNote) {
+    public Problem(long id, String jid, String name, String authorJid, String gradingEngine, Date lastUpdate, String additionalNote) {
         this.id = id;
         this.jid = jid;
         this.name = name;
         this.authorJid = authorJid;
         this.gradingEngine = gradingEngine;
-        this.timeUpdate = timeUpdate;
+        this.lastUpdate = lastUpdate;
         this.additionalNote = additionalNote;
     }
 
@@ -40,8 +42,8 @@ public final class Problem {
         return gradingEngine;
     }
 
-    public long getTimeUpdate() {
-        return timeUpdate;
+    public Date getLastUpdate() {
+        return lastUpdate;
     }
 
     public String getAdditionalNote() {

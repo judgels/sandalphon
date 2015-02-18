@@ -8,7 +8,7 @@
     @helper.CSRF.formField
 
     <div class="form-group" id="clientJid_field">
-        <label class="control-label col-md-2">@Messages.get("programming.client")</label>
+        <label class="control-label col-md-2">@Messages.get("programming.client.client")</label>
         <div class="col-md-10">
             <select id="clientJid" name="clientJid" class="form-control">
                 @for(client <- clients) {
@@ -25,7 +25,7 @@
     <thead>
         <tr>
             <th class="col-md-1">@Messages.get("commons.id")</th>
-            <th>@Messages.get("programming.clientName")</th>
+            <th>@Messages.get("programming.client.name")</th>
             <th></th>
         </tr>
     </thead>
