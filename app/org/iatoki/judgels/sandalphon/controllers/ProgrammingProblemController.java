@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.io.FilenameUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
@@ -63,8 +64,11 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Transactional
@@ -551,6 +555,25 @@ public final class ProgrammingProblemController extends Controller {
         response().setContentType("application/x-download");
         response().setHeader("Content-disposition", "attachment; filename=" + problemJid + ".zip");
         return ok(os.toByteArray()).as("application/zip");
+    }
+
+    public Result renderImage(long problemId, String imageFilename) {
+        File image = problemService.getMediaFile(problemId, imageFilename);
+        if (!image.exists()) {
+            return notFound();
+        }
+
+        try {
+            BufferedImage in = ImageIO.read(image);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            String type = FilenameUtils.getExtension(image.getAbsolutePath());
+
+            ImageIO.write(in, type, baos);
+            return ok(baos.toByteArray()).as("image/" + type);
+        } catch (IOException e) {
+            return internalServerError();
+        }
     }
 
     private Result showUpdateGeneral(Form<UpsertForm> form, long id) {
