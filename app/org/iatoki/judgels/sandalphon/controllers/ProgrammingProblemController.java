@@ -359,7 +359,7 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postUpdateGrading(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromRequest(request());
+        Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createEmptyForm().bindFromRequest(request());
 
         if (form.hasErrors() || form.hasGlobalErrors()) {
             List<File> testDataFiles = problemService.getTestDataFiles(problem.getId());
