@@ -9,11 +9,12 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.gabriel.commons.SubmissionService;
 import org.iatoki.judgels.sandalphon.JidCacheService;
-import org.iatoki.judgels.sandalphon.commons.Submission;
-import org.iatoki.judgels.sandalphon.commons.SubmissionException;
+import org.iatoki.judgels.gabriel.commons.Submission;
+import org.iatoki.judgels.gabriel.commons.SubmissionException;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
-import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
+import org.iatoki.judgels.gabriel.commons.SubmissionAdapters;
 import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
 import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
@@ -41,8 +42,6 @@ import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
 import org.iatoki.judgels.sandalphon.programming.forms.UpdateTestDataFilesForm;
 import org.iatoki.judgels.sandalphon.programming.forms.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.programming.forms.UpsertForm;
-import org.iatoki.judgels.sandalphon.programming.ProblemSubmission;
-import org.iatoki.judgels.sandalphon.programming.ProblemSubmissionService;
 import org.iatoki.judgels.sandalphon.programming.views.html.createView;
 import org.iatoki.judgels.sandalphon.programming.views.html.listView;
 import org.iatoki.judgels.sandalphon.programming.views.html.updateTestDataFilesView;
@@ -79,11 +78,11 @@ public final class ProgrammingProblemController extends Controller {
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
-    private final ProblemSubmissionService submissionService;
+    private final SubmissionService submissionService;
     private final ClientService clientService;
     private final GraderService graderService;
 
-    public ProgrammingProblemController(ProblemService problemService, ProblemSubmissionService submissionService, ClientService clientService, GraderService graderService) {
+    public ProgrammingProblemController(ProblemService problemService, SubmissionService submissionService, ClientService clientService, GraderService graderService) {
         this.problemService = problemService;
         this.submissionService = submissionService;
         this.clientService = clientService;
@@ -194,7 +193,7 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
         Problem problem = problemService.findProblemById(problemId);
-        Page<ProblemSubmission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, IdentityUtils.getUserJid(), problem.getJid());
+        Page<Submission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, IdentityUtils.getUserJid(), problem.getJid(), null);
         LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, problemId, pageIndex, orderBy, orderDir));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -399,7 +398,7 @@ public final class ProgrammingProblemController extends Controller {
 
         try {
             GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromNewSubmission(body);
-            String submissionJid = submissionService.submit(problem.getJid(), problem.getGradingEngine(), gradingLanguage, problem.getLastUpdate(), source);
+            String submissionJid = submissionService.submit(problem.getJid(), null, problem.getGradingEngine(), gradingLanguage, problem.getLastUpdate(), source);
             SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid, source);
         } catch (SubmissionException e) {
             flash("submissionError", e.getMessage());

@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.programming;
 
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.gabriel.commons.Submission;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
