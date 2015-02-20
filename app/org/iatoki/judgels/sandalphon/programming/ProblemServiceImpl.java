@@ -347,7 +347,36 @@ public final class ProblemServiceImpl implements ProblemService {
         try {
             FileUtils.forceMkdir(statementDir);
             FileUtils.forceMkdir(new File(statementDir, "media"));
-            FileUtils.writeStringToFile(new File(statementDir, "statement.html"), "Problem description here");
+            FileUtils.writeStringToFile(new File(statementDir, "statement.html"),
+
+                    "<h3>Deskripsi</h3>\n" +
+                            "\n" +
+                            "<p>Blabla.</p>\n" +
+                            "\n" +
+                            "<h3>Format Masukan</h3>\n" +
+                            "\n" +
+                            "<p>Blabla.</p>\n" +
+                            "\n" +
+                            "<h3>Format Keluaran</h3>\n" +
+                            "\n" +
+                            "<p>Blabla.</p>\n" +
+                            "\n" +
+                            "<h3>Contoh Masukan</h3>\n" +
+                            "\n" +
+                            "<pre>\n" +
+                            "Blabla.</pre>\n" +
+                            "\n" +
+                            "<h3>Contoh Keluaran</h3>\n" +
+                            "\n" +
+                            "<pre>\n" +
+                            "Blabla.</pre>\n" +
+                            "\n" +
+                            "<h3>Batasan/Subsoal</h3>\n" +
+                            "\n" +
+                            "<ul>\n" +
+                            "\t<li>Blabla</li>\n" +
+                            "</ul>\n"
+            );
         } catch (IOException e) {
             throw new RuntimeException("Cannot create directory for problem!");
         }
