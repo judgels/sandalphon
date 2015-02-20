@@ -55,6 +55,7 @@ import org.iatoki.judgels.sandalphon.programming.views.html.updateClientProblems
 import org.iatoki.judgels.sandalphon.programming.views.html.viewClientProblemView;
 import org.iatoki.judgels.sandalphon.programming.views.html.viewGeneralView;
 import org.iatoki.judgels.sandalphon.programming.views.html.viewSubmissionsView;
+import org.iatoki.judgels.sandalphon.programming.views.html.tokilibLayout;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -414,6 +415,18 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result updateConfigWithTokilib(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        List<File> testDataFiles = problemService.getTestDataFiles(problemId);
+        GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createConfigFromTokilib(testDataFiles);
+        problemService.updateGradingConfig(problemId, config);
+
+        return redirect(routes.ProgrammingProblemController.updateConfig(problem.getId()));
+    }
+
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result postSubmit(long problemId) {
@@ -665,6 +678,7 @@ public final class ProgrammingProblemController extends Controller {
 
     private Result showUpdateConfig(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles) {
         LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
+        content.appendLayout(c -> tokilibLayout.render(problem.getId(), c));
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),

@@ -1,0 +1,11 @@
+@(problemId: Long)(content: Html)
+
+@import org.iatoki.judgels.sandalphon.controllers.routes
+
+<a href="@routes.ProgrammingProblemController.updateConfigWithTokilib(problemId)" class="btn btn-primary">Load test data files in tokilib format (experimental)</a>
+
+<br />
+<br />
+<br />
+
+@content
