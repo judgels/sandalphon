@@ -605,6 +605,8 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     public Result renderImage(long problemId, String imageFilename) {
+        Problem problem = problemService.findProblemById(problemId);
+
         File image = problemService.getMediaFile(problemId, imageFilename);
         if (!image.exists()) {
             return notFound();
@@ -621,6 +623,12 @@ public final class ProgrammingProblemController extends Controller {
         } catch (IOException e) {
             return internalServerError();
         }
+    }
+
+    public Result renderImageByJid(String problemJid, String imageFilename) {
+        Problem problem = problemService.findProblemByJid(problemJid);
+
+        return renderImage(problem.getId(), imageFilename);
     }
 
     private Result showUpdateGeneral(Form<UpsertForm> form, long problemId) {

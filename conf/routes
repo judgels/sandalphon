@@ -27,6 +27,8 @@ GET         /problem/programming/:pId/statement/update                    @org.i
 POST        /problem/programming/:pId/statement/update                    @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateStatement(pId: Long)
 GET         /problem/programming/:pId/statement/render/:name              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.renderImage(pId: Long, name: String)
 
+GET         /problem/:pJid/render/:name                                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.renderImageByJid(pJid: String, name: String)
+
 GET         /problem/programming/:pId/submission                          @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewSubmissions(pId: Long)
 GET         /problem/programming/:pId/submission/                         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.listSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc")
 GET         /problem/programming/:pId/submission/:sId                     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewSubmission(pId: Long, sId: Long)
