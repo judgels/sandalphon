@@ -74,5 +74,5 @@ userRole.update=Update User Roles
 
 userRole.userRoles=User Roles
 userRole.userJid=User JID
-userRole.username=Username
+userRole.name=Name
 userRole.roles=Roles

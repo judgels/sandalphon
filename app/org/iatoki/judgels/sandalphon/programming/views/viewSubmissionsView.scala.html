@@ -9,6 +9,8 @@
 @import org.iatoki.judgels.commons.JudgelsUtils
 @import org.iatoki.judgels.sandalphon.JidCacheService
 
+@import scala.collection.JavaConversions
+
 <div class="clearfix"></div>
 
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ProgrammingProblemController.listSubmissions(problemId, newPageIndex, newOrderBy, newOrderDir)}
@@ -24,18 +26,20 @@
     )
     <tbody>
 
-    @for(submission <- page.getData) {
-        <tr>
-            <td>@submission.getId</td>
-            <td>@JidCacheService.getInstance().getDisplayName(submission.getAuthorJid)</td>
-            <td>@JudgelsUtils.formatDate(submission.getTime)</td>
-            <td>@submission.getGradingLanguage</td>
-            <td>@submission.getLatestVerdict.getName</td>
-            <td>@submission.getLatestScore</td>
-            <td class="text-center">
-                <a href="@routes.ProgrammingProblemController.viewSubmission(problemId, submission.getId)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
-            </td>
-        </tr>
+    @defining(JidCacheService.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
+        @for(submission <- page.getData) {
+            <tr>
+                <td>@submission.getId</td>
+                <td>@displayNamesMap.get(submission.getAuthorJid)</td>
+                <td>@JudgelsUtils.formatDate(submission.getTime)</td>
+                <td>@submission.getGradingLanguage</td>
+                <td>@submission.getLatestVerdict.getName</td>
+                <td>@submission.getLatestScore</td>
+                <td class="text-center">
+                    <a href="@routes.ProgrammingProblemController.viewSubmission(problemId, submission.getId)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
+                </td>
+            </tr>
+        }
     }
     </tbody>
 }

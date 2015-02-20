@@ -44,7 +44,7 @@ public final class UserRoleController extends Controller {
 
     public UserRoleController(UserRoleService userRoleService) {
         this.userRoleService = userRoleService;
-        
+
         JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
     }
 
