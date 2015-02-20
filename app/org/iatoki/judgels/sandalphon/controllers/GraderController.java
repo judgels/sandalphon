@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
@@ -14,6 +15,7 @@ import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.sandalphon.Grader;
 import org.iatoki.judgels.sandalphon.GraderService;
 import org.iatoki.judgels.sandalphon.GraderUpsertForm;
+import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
@@ -34,6 +36,7 @@ import play.mvc.Result;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
+@Transactional
 public final class GraderController extends Controller {
 
     private static final long PAGE_SIZE = 20;
@@ -42,9 +45,10 @@ public final class GraderController extends Controller {
 
     public GraderController(GraderService graderService) {
         this.graderService = graderService;
+
+        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
     }
 
-    @Transactional
     public Result index() {
         return list(0, "id", "asc", "");
     }
@@ -68,7 +72,6 @@ public final class GraderController extends Controller {
     }
 
     @RequireCSRFCheck
-    @Transactional
     public Result postCreate() {
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).bindFromRequest();
 
@@ -82,7 +85,6 @@ public final class GraderController extends Controller {
         }
     }
 
-    @Transactional
     public Result view(long graderId) {
         Grader grader = graderService.findGraderById(graderId);
         LazyHtml content = new LazyHtml(viewView.render(grader));
@@ -107,7 +109,6 @@ public final class GraderController extends Controller {
     }
 
     @AddCSRFToken
-    @Transactional
     public Result update(long graderId) {
         Grader grader = graderService.findGraderById(graderId);
         GraderUpsertForm clientUpsertForm = new GraderUpsertForm();
@@ -117,7 +118,6 @@ public final class GraderController extends Controller {
         return showUpdate(form, grader);
     }
 
-    @Transactional
     public Result postUpdate(long graderId) {
         Grader grader = graderService.findGraderById(graderId);
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).bindFromRequest();
@@ -132,7 +132,6 @@ public final class GraderController extends Controller {
         }
     }
 
-    @Transactional
     public Result list(long pageIndex, String orderBy, String orderDir, String filterString) {
         Page<Grader> graders = graderService.pageGraders(pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 

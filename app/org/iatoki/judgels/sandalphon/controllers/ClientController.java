@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
@@ -14,6 +15,7 @@ import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.ClientUpsertForm;
+import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
@@ -34,6 +36,7 @@ import play.mvc.Result;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
+@Transactional
 public final class ClientController extends Controller {
 
     private static final long PAGE_SIZE = 20;
@@ -42,9 +45,10 @@ public final class ClientController extends Controller {
 
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
+
+        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
     }
 
-    @Transactional
     public Result index() {
         return list(0, "id", "asc", "");
     }
@@ -68,7 +72,6 @@ public final class ClientController extends Controller {
     }
 
     @RequireCSRFCheck
-    @Transactional
     public Result postCreate() {
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).bindFromRequest();
 
@@ -82,7 +85,6 @@ public final class ClientController extends Controller {
         }
     }
 
-    @Transactional
     public Result view(long clientId) {
         Client client = clientService.findClientById(clientId);
         LazyHtml content = new LazyHtml(viewView.render(client));
@@ -107,7 +109,6 @@ public final class ClientController extends Controller {
     }
 
     @AddCSRFToken
-    @Transactional
     public Result update(long clientId) {
         Client client = clientService.findClientById(clientId);
         ClientUpsertForm clientUpsertForm = new ClientUpsertForm();
@@ -117,7 +118,6 @@ public final class ClientController extends Controller {
         return showUpdate(form, client);
     }
 
-    @Transactional
     public Result postUpdate(long clientId) {
         Client client = clientService.findClientById(clientId);
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).bindFromRequest();
@@ -132,14 +132,12 @@ public final class ClientController extends Controller {
         }
     }
 
-    @Transactional
     public Result delete(long clientId) {
         clientService.deleteClient(clientId);
 
         return redirect(routes.ClientController.index());
     }
 
-    @Transactional
     public Result list(long page, String sortBy, String orderBy, String filterString) {
         Page<Client> currentPage = clientService.pageClients(page, PAGE_SIZE, sortBy, orderBy, filterString);
 

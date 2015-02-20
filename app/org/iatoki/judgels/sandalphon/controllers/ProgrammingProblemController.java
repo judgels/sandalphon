@@ -7,6 +7,7 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.commons.SubmissionService;
@@ -88,6 +89,8 @@ public final class ProgrammingProblemController extends Controller {
         this.submissionService = submissionService;
         this.clientService = clientService;
         this.graderService = graderService;
+
+        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})

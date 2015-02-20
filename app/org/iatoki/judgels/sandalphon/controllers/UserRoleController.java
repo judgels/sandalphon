@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
@@ -11,6 +12,7 @@ import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
+import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.UserRole;
 import org.iatoki.judgels.sandalphon.UserRoleService;
@@ -42,6 +44,8 @@ public final class UserRoleController extends Controller {
 
     public UserRoleController(UserRoleService userRoleService) {
         this.userRoleService = userRoleService;
+        
+        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
     }
 
     public Result index() {
