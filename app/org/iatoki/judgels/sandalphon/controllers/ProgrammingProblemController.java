@@ -30,6 +30,7 @@ import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.sandalphon.GraderService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
+import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.programming.forms.UpdateHelperFilesForm;
 import org.iatoki.judgels.sandalphon.programming.forms.UpdateMediaFilesForm;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
@@ -90,11 +91,13 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result index() {
         return list(0, "timeUpdate", "desc", "");
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result list(long page, String sortBy, String orderBy, String filterString) {
         Page<Problem> currentPage = problemService.pageProblems(page, PAGE_SIZE, sortBy, orderBy, filterString);
 
@@ -110,6 +113,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result create() {
         Form<UpsertForm> form = Form.form(UpsertForm.class);
         return showCreate(form);
@@ -117,6 +121,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result postCreate() {
         Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
 
@@ -142,11 +147,13 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result view(long id) {
         return redirect(routes.ProgrammingProblemController.viewGeneral(id));
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result viewGeneral(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         LazyHtml content = new LazyHtml(viewGeneralView.render(problem));
@@ -164,6 +171,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result viewStatement(long problemId) {
         String statement = problemService.getStatement(problemId);
         Problem problem = problemService.findProblemById(problemId);
@@ -186,11 +194,13 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result viewSubmissions(long problemId) {
         return listSubmissions(problemId, 0, "timeCreate", "desc");
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
         Problem problem = problemService.findProblemById(problemId);
         Page<Submission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, IdentityUtils.getUserJid(), problem.getJid(), null);
@@ -205,6 +215,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result viewSubmission(long problemId, long submissionId) {
         Problem problem = problemService.findProblemById(problemId);
         Submission submission = submissionService.findSubmissionById(submissionId);
@@ -225,6 +236,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result updateGeneral(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         UpsertForm content = new UpsertForm();
@@ -237,6 +249,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result postUpdateGeneral(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
@@ -250,6 +263,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result updateStatement(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         String statement = problemService.getStatement(problem.getId());
@@ -261,6 +275,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result postUpdateStatement(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
@@ -273,12 +288,14 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result updateFiles(long id) {
         return redirect(routes.ProgrammingProblemController.updateTestDataFiles(id));
     }
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result updateTestDataFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateTestDataFilesForm> form = Form.form(UpdateTestDataFilesForm.class);
@@ -289,6 +306,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result updateHelperFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateHelperFilesForm> form = Form.form(UpdateHelperFilesForm.class);
@@ -299,6 +317,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result updateMediaFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateMediaFilesForm> form = Form.form(UpdateMediaFilesForm.class);
@@ -309,6 +328,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result postUpdateFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Http.MultipartFormData body = request().body().asMultipartFormData();
@@ -361,6 +381,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result updateConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         GradingConfig config = problemService.getGradingConfig(problem.getId());
@@ -374,6 +395,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result postUpdateConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createEmptyForm().bindFromRequest(request());
@@ -390,6 +412,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result postSubmit(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Http.MultipartFormData body = request().body().asMultipartFormData();
@@ -410,6 +433,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result updateClientProblems(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class);
@@ -421,6 +445,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result postUpdateClientProblems(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
@@ -443,6 +468,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result viewClientProblem(long problemId, long clientProblemId) {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
@@ -462,6 +488,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result deleteClientProblem(long problemId, long clientProblemId) {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
@@ -475,6 +502,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result downloadTestDataFile(long id, String filename) {
         File file = problemService.getTestDataFile(id, filename);
         if (file.exists()) {
@@ -485,6 +513,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result downloadHelperFile(long id, String filename) {
         File file = problemService.getHelperFile(id, filename);
         if (file.exists()) {
@@ -495,6 +524,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result downloadMediaFile(long id, String filename) {
         File file = problemService.getMediaFile(id, filename);
         if (file.exists()) {
@@ -505,6 +535,7 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result delete(long id) {
         return TODO;
     }
@@ -695,9 +726,12 @@ public final class ProgrammingProblemController extends Controller {
 
     private void appendTemplateLayout(LazyHtml content) {
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProgrammingProblemController.index()));
 
-        if (SandalphonUtils.hasRole("admin")) {
+        if (isAllowedToWrite()) {
+            internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProgrammingProblemController.index()));
+        }
+
+        if (isAdmin()) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
@@ -733,5 +767,17 @@ public final class ProgrammingProblemController extends Controller {
             default:
                 return badRequest(content.render(0));
         }
+    }
+
+    private boolean isAdmin() {
+        return SandalphonUtils.hasRole("admin");
+    }
+
+    private boolean isWriter() {
+        return SandalphonUtils.hasRole("writer");
+    }
+
+    private boolean isAllowedToWrite() {
+        return isAdmin() || isWriter();
     }
 }
