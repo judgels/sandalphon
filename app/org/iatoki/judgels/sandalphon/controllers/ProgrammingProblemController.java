@@ -207,7 +207,7 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
         Problem problem = problemService.findProblemById(problemId);
-        Page<Submission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, IdentityUtils.getUserJid(), problem.getJid(), null);
+        Page<Submission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, null, problem.getJid(), null);
         LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, problemId, pageIndex, orderBy, orderDir));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
