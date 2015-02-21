@@ -1,4 +1,4 @@
-@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.gabriel.commons.Submission], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
+@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.gabriel.commons.Submission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.commons.views.html.table.tableView
@@ -32,7 +32,7 @@
                 <td>@submission.getId</td>
                 <td>@displayNamesMap.get(submission.getAuthorJid)</td>
                 <td>@JudgelsUtils.formatDate(submission.getTime)</td>
-                <td>@submission.getGradingLanguage</td>
+                <td>@gradingLanguageToNameMap.get(submission.getGradingLanguage)</td>
                 <td>@submission.getLatestVerdict.getName</td>
                 <td>@submission.getLatestScore</td>
                 <td class="text-center">
