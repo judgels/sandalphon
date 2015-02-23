@@ -51,9 +51,15 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public final void updateProblem(long id, String name, String additionalNote) {
+    public final void updateProblem(long id, String name, String gradingEngine, String additionalNote) {
         ProblemModel model = dao.findById(id);
         model.name = name;
+
+        if (!gradingEngine.equals(model.gradingEngine)) {
+            updateGradingConfig(id, GradingEngineRegistry.getInstance().getEngine(gradingEngine).createDefaultGradingConfig());
+        }
+
+        model.gradingEngine = gradingEngine;
         model.additionalNote = additionalNote;
         updateProblemModel(model, false);
     }
@@ -69,8 +75,8 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Problem createProblem(String name, String gradingType, String additionalNote) {
-        ProblemModel problemModel = new ProblemModel(name, gradingType, additionalNote);
+    public Problem createProblem(String name, String gradingEngine, String additionalNote) {
+        ProblemModel problemModel = new ProblemModel(name, gradingEngine, additionalNote);
         dao.persist(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         createProblemDirs(problemModel);

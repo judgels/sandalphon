@@ -250,6 +250,7 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
         UpsertForm content = new UpsertForm();
         content.name = problem.getName();
+        content.gradingEngine = problem.getGradingEngine();
         content.additionalNote = problem.getAdditionalNote();
         Form<UpsertForm> form = Form.form(UpsertForm.class).fill(content);
 
@@ -265,7 +266,7 @@ public final class ProgrammingProblemController extends Controller {
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showUpdateGeneral(form, problem.getId());
         } else {
-            problemService.updateProblem(problem.getId(), form.get().name, form.get().additionalNote);
+            problemService.updateProblem(problem.getId(), form.get().name, form.get().gradingEngine, form.get().additionalNote);
             return redirect(routes.ProgrammingProblemController.updateGeneral(problem.getId()));
         }
     }

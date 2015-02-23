@@ -17,11 +17,11 @@ public interface ProblemService {
 
     Problem findProblemByJid(String problemJid);
 
-    void updateProblem(long problemId, String name, String additionalNote);
+    void updateProblem(long problemId, String name, String gradingEngine, String additionalNote);
 
     Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    Problem createProblem(String name, String gradingType, String additionalNote);
+    Problem createProblem(String name, String gradingEngine, String additionalNote);
 
     String getStatement(long problemId);
 
