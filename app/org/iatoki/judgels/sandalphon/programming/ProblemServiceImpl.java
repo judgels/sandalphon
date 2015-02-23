@@ -9,6 +9,7 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
+import org.iatoki.judgels.sandalphon.NaturalFilenameComparator;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.programming.models.daos.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.programming.models.domains.ProblemModel;
@@ -19,6 +20,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -237,12 +240,12 @@ public final class ProblemServiceImpl implements ProblemService {
         ProblemModel problemModel = dao.findById(id);
         File problemsDir = SandalphonProperties.getInstance().getProblemDir();
         File testDataDir = FileUtils.getFile(problemsDir, problemModel.jid, "grading", "testdata");
+        Comparator<String> comparator = new NaturalFilenameComparator();
 
-        if (!testDataDir.isDirectory()) {
-            return ImmutableList.of();
-        }
+        List<File> files = Arrays.asList(testDataDir.listFiles());
+        Collections.sort(files, (File a, File b) -> comparator.compare(a.getName(), b.getName()));
 
-        return Arrays.asList(testDataDir.listFiles());
+        return ImmutableList.copyOf(files);
     }
 
     @Override
@@ -255,7 +258,12 @@ public final class ProblemServiceImpl implements ProblemService {
             return ImmutableList.of();
         }
 
-        return Arrays.asList(helpersDir.listFiles());
+        Comparator<String> comparator = new NaturalFilenameComparator();
+
+        List<File> files = Arrays.asList(helpersDir.listFiles());
+        Collections.sort(files, (File a, File b) -> comparator.compare(a.getName(), b.getName()));
+
+        return ImmutableList.copyOf(files);
     }
 
     @Override
@@ -268,7 +276,12 @@ public final class ProblemServiceImpl implements ProblemService {
             return ImmutableList.of();
         }
 
-        return Arrays.asList(mediaDir.listFiles());
+        Comparator<String> comparator = new NaturalFilenameComparator();
+
+        List<File> files = Arrays.asList(mediaDir.listFiles());
+        Collections.sort(files, (File a, File b) -> comparator.compare(a.getName(), b.getName()));
+
+        return ImmutableList.copyOf(files);
     }
 
 
