@@ -33,6 +33,8 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.sandalphon.GraderService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
+import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapter;
+import org.iatoki.judgels.sandalphon.programming.adapters.ConfigurableWithTokilibFormat;
 import org.iatoki.judgels.sandalphon.programming.forms.UpdateHelperFilesForm;
 import org.iatoki.judgels.sandalphon.programming.forms.UpdateMediaFilesForm;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
@@ -424,11 +426,19 @@ public final class ProgrammingProblemController extends Controller {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
-    public Result updateConfigWithTokilib(long problemId) {
+    public Result updateConfigByTokilibFormat(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         List<File> testDataFiles = problemService.getTestDataFiles(problemId);
-        GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createConfigFromTokilib(testDataFiles);
-        problemService.updateGradingConfig(problemId, config);
+        GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(problem.getGradingEngine());
+
+        if (! (adapter instanceof ConfigurableWithTokilibFormat)) {
+            return forbidden();
+        }
+
+        GradingConfig config = problemService.getGradingConfig(problemId);
+        GradingConfig newConfig = ((ConfigurableWithTokilibFormat) adapter).updateConfigWithTokilibFormat(config, testDataFiles);
+
+        problemService.updateGradingConfig(problemId, newConfig);
 
         return redirect(routes.ProgrammingProblemController.updateConfig(problem.getId()));
     }
@@ -683,8 +693,12 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     private Result showUpdateConfig(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles) {
-        LazyHtml content = new LazyHtml(GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
-        content.appendLayout(c -> tokilibLayout.render(problem.getId(), c));
+        GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(problem.getGradingEngine());
+        LazyHtml content = new LazyHtml(adapter.renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
+
+        if (adapter instanceof ConfigurableWithTokilibFormat) {
+            content.appendLayout(c -> tokilibLayout.render(problem.getId(), c));
+        }
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),

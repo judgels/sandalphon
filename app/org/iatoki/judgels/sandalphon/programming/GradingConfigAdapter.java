@@ -14,7 +14,5 @@ public interface GradingConfigAdapter {
 
     GradingConfig createConfigFromForm(Form<?> form);
 
-    GradingConfig createConfigFromTokilib(List<File> testDataFiles);
-
     Html renderUpdateGradingConfig(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles);
 }

@@ -40,7 +40,7 @@ GET         /problem/programming/:pId/files/helper                        @org.i
 GET         /problem/programming/:pId/files/media                         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateMediaFiles(pId: Long)
 
 GET         /problem/programming/:pId/config                              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateConfig(pId: Long)
-GET         /problem/programming/:pId/configTokilib                       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateConfigWithTokilib(pId: Long)
+GET         /problem/programming/:pId/configTokilib                       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateConfigByTokilibFormat(pId: Long)
 POST        /problem/programming/:pId/config                              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateConfig(pId: Long)
 
 GET         /problem/programming/:pId/client                              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateClientProblems(pId: Long)
