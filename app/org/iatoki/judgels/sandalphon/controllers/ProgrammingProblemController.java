@@ -34,6 +34,7 @@ import org.iatoki.judgels.sandalphon.GraderService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapter;
+import org.iatoki.judgels.sandalphon.programming.adapters.ConfigurableWithAutoPopulation;
 import org.iatoki.judgels.sandalphon.programming.adapters.ConfigurableWithTokilibFormat;
 import org.iatoki.judgels.sandalphon.programming.forms.UpdateHelperFilesForm;
 import org.iatoki.judgels.sandalphon.programming.forms.UpdateMediaFilesForm;
@@ -58,7 +59,8 @@ import org.iatoki.judgels.sandalphon.programming.views.html.updateClientProblems
 import org.iatoki.judgels.sandalphon.programming.views.html.viewClientProblemView;
 import org.iatoki.judgels.sandalphon.programming.views.html.viewGeneralView;
 import org.iatoki.judgels.sandalphon.programming.views.html.viewSubmissionsView;
-import org.iatoki.judgels.sandalphon.programming.views.html.tokilibLayout;
+import org.iatoki.judgels.sandalphon.programming.views.html.configs.autoPopulationLayout;
+import org.iatoki.judgels.sandalphon.programming.views.html.configs.tokilibLayout;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -445,6 +447,25 @@ public final class ProgrammingProblemController extends Controller {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
+    public Result updateConfigByAutoPopulation(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        List<File> testDataFiles = problemService.getTestDataFiles(problemId);
+        GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(problem.getGradingEngine());
+
+        if (! (adapter instanceof ConfigurableWithAutoPopulation)) {
+            return forbidden();
+        }
+
+        GradingConfig config = problemService.getGradingConfig(problemId);
+        GradingConfig newConfig = ((ConfigurableWithAutoPopulation) adapter).updateConfigWithAutoPopulation(config, testDataFiles);
+
+        problemService.updateGradingConfig(problemId, newConfig);
+
+        return redirect(routes.ProgrammingProblemController.updateConfig(problem.getId()));
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result postSubmit(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Http.MultipartFormData body = request().body().asMultipartFormData();
@@ -698,6 +719,8 @@ public final class ProgrammingProblemController extends Controller {
 
         if (adapter instanceof ConfigurableWithTokilibFormat) {
             content.appendLayout(c -> tokilibLayout.render(problem.getId(), c));
+        } else if (adapter instanceof ConfigurableWithAutoPopulation) {
+            content.appendLayout(c -> autoPopulationLayout.render(problem.getId(), c));
         }
         appendTabsLayout(content, problem.getId(), problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
