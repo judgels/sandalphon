@@ -187,9 +187,8 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
 
         GradingConfig config = problemService.getGradingConfig(problemId);
-        Date gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problemId);
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine(), gradingLastUpdateTime));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine()));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewStatement(problemId)),
                 new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateStatement(problemId))
@@ -217,7 +216,7 @@ public final class ProgrammingProblemController extends Controller {
 
         Map<String, String> gradingLanguageToNameMap = GradingLanguageRegistry.getInstance().getGradingLanguages();
 
-        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir));
+        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir, request().uri()));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
@@ -245,6 +244,19 @@ public final class ProgrammingProblemController extends Controller {
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result regradeSubmission(long problemId, long submissionId, String redirectUri) {
+        Problem problem = problemService.findProblemById(problemId);
+        Submission submission = submissionService.findSubmissionById(submissionId);
+
+        GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getSubmissionDir(), submission.getJid());
+
+        submissionService.regrade(submission.getJid(), source);
+
+        return redirect(redirectUri);
     }
 
     @AddCSRFToken
@@ -474,7 +486,7 @@ public final class ProgrammingProblemController extends Controller {
 
         try {
             GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromNewSubmission(body);
-            String submissionJid = submissionService.submit(problem.getJid(), null, problem.getGradingEngine(), gradingLanguage, problem.getLastUpdate(), source);
+            String submissionJid = submissionService.submit(problem.getJid(), null, problem.getGradingEngine(), gradingLanguage, source);
             SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid, source);
         } catch (SubmissionException e) {
             flash("submissionError", e.getMessage());
@@ -629,11 +641,10 @@ public final class ProgrammingProblemController extends Controller {
 
         String statement = problemService.getStatement(problemJid);
         Problem problem = problemService.findProblemByJid(problemJid);
-        Date gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problem.getId());
 
         GradingConfig config = problemService.getGradingConfig(problem.getId());
 
-        Html html = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(postSubmitUri, problem.getName(), statement, config, problem.getGradingEngine(), gradingLastUpdateTime);
+        Html html = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(postSubmitUri, problem.getName(), statement, config, problem.getGradingEngine());
         return ok(html);
     }
 
@@ -652,6 +663,22 @@ public final class ProgrammingProblemController extends Controller {
         response().setContentType("application/x-download");
         response().setHeader("Content-disposition", "attachment; filename=" + problemJid + ".zip");
         return ok(os.toByteArray()).as("application/zip");
+    }
+
+    public Result getGradingLastUpdateTime() {
+        DynamicForm form = DynamicForm.form().bindFromRequest();
+
+        String graderJid = form.get("graderJid");
+        String graderSecret = form.get("graderSecret");
+        String problemJid = form.get("problemJid");
+
+        if (!problemService.problemExistsByJid(problemJid) || !graderService.verifyGrader(graderJid, graderSecret)) {
+            return forbidden();
+        }
+
+        Date gradingLastUpdateTime = problemService.getGradingLastUpdateTime(problemJid);
+
+        return ok("" + gradingLastUpdateTime.getTime());
     }
 
     public Result renderImage(long problemId, String imageFilename) {

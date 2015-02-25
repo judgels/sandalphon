@@ -126,8 +126,8 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Date getGradingLastUpdateTime(long id) {
-        ProblemModel problemModel = dao.findById(id);
+    public Date getGradingLastUpdateTime(String problemJid) {
+        ProblemModel problemModel = dao.findByJid(problemJid);
         File gradingLastUpdateTimeFile = FileUtils.getFile(SandalphonProperties.getInstance().getProblemDir(), problemModel.jid, "grading", "lastUpdateTime.txt");
         try {
             return new Date(Long.parseLong(FileUtils.readFileToString(gradingLastUpdateTimeFile)));

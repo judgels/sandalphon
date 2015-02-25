@@ -29,7 +29,7 @@ public interface ProblemService {
 
     GradingConfig getGradingConfig(long problemId);
 
-    Date getGradingLastUpdateTime(long problemId);
+    Date getGradingLastUpdateTime(String problemJid);
 
     void updateStatement(long problemId, String statement);
 

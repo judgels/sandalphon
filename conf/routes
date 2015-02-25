@@ -32,6 +32,7 @@ GET         /problem/:pJid/render/:name                                   @org.i
 GET         /problem/programming/:pId/submission                          @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewSubmissions(pId: Long)
 GET         /problem/programming/:pId/submission/                         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.listSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc")
 GET         /problem/programming/:pId/submission/:sId                     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewSubmission(pId: Long, sId: Long)
+GET         /problem/programming/:pId/submission/:sId/regrade/:returnUri  @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.regradeSubmission(pId: Long, sId: Long, returnUri: String)
 
 GET         /problem/programming/:pId/files                               @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateFiles(pId: Long)
 POST        /problem/programming/:pId/files                               @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateFiles(pId: Long)
@@ -56,6 +57,8 @@ GET         /problem/programming/:pId/download/helper/:filename           @org.i
 GET         /problem/programming/:pId/download/media/:filename            @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadMediaFile(pId: Long, filename: String)
 
 POST        /problem/programming/download/grading                         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.downloadGradingFiles()
+
+POST        /problem/programming/getGradingLastUpdateTime                 @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.getGradingLastUpdateTime()
 
 GET         /verifyProblem                                                @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.verifyProblem()
 GET         /totp/:cJid/:pJid/statement/:TOTP/:lang/:postSubmitUri        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewProblemStatementTOTP(cJid: String, pJid: String, TOTP: Int, lang: String, postSubmitUri: String)
