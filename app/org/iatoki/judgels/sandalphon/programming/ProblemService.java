@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface ProblemService {
 
@@ -30,6 +31,8 @@ public interface ProblemService {
     GradingConfig getGradingConfig(long problemId);
 
     Date getGradingLastUpdateTime(String problemJid);
+
+    Map<String, String> getGradingEngineMapByProblemJids(List<String> problemJids);
 
     void updateStatement(long problemId, String statement);
 

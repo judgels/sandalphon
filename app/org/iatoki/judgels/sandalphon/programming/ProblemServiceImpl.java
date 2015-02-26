@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -134,6 +136,13 @@ public final class ProblemServiceImpl implements ProblemService {
         } catch (IOException e) {
             throw new RuntimeException("Cannot read grading last update time");
         }
+    }
+
+    @Override
+    public Map<String, String> getGradingEngineMapByProblemJids(List<String> problemJids) {
+        List<ProblemModel> problemModels = dao.findByJids(problemJids);
+
+        return problemModels.stream().collect(Collectors.toMap(e -> e.jid, e -> e.gradingEngine));
     }
 
     @Override

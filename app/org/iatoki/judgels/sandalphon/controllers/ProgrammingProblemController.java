@@ -2,6 +2,8 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
@@ -9,6 +11,7 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.ListTableSelectionForm;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.commons.SubmissionService;
@@ -213,10 +216,10 @@ public final class ProgrammingProblemController extends Controller {
     public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
         Problem problem = problemService.findProblemById(problemId);
         Page<Submission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, null, problem.getJid(), null);
-
+        Form<ListTableSelectionForm> form = Form.form(ListTableSelectionForm.class);
         Map<String, String> gradingLanguageToNameMap = GradingLanguageRegistry.getInstance().getGradingLanguages();
 
-        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir, request().uri()));
+        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, form, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
@@ -224,6 +227,35 @@ public final class ProgrammingProblemController extends Controller {
         ), c));
         appendTemplateLayout(content);
         return getResult(content, Http.Status.OK);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result regradeSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
+        ListTableSelectionForm data = Form.form(ListTableSelectionForm.class).bindFromRequest().get();
+
+        Problem problem = problemService.findProblemById(problemId);
+
+        List<String> submissionJids;
+
+        if (data.selectAll) {
+            submissionJids = submissionService.getSubmissionJidsByFilter(orderBy, orderDir, null, problem.getJid(), null);
+        } else if (data.selectJids != null) {
+            submissionJids = data.selectJids;
+        } else {
+            return redirect(routes.ProgrammingProblemController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
+        }
+
+        Map<String, String> problemJidMap = submissionService.getProblemJidMapBySubmissionJids(submissionJids);
+        Map<String, String> gradingEngineMap = problemService.getGradingEngineMapByProblemJids(Lists.newArrayList(problemJidMap.values()));
+
+        for (String submissionJid : data.selectJids) {
+            String gradingEngine = gradingEngineMap.get(problemJidMap.get(submissionJid));
+            GradingSource source = SubmissionAdapters.fromGradingEngine(gradingEngine).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid);
+            submissionService.regrade(submissionJid, source);
+        }
+
+        return redirect(routes.ProgrammingProblemController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -248,7 +280,7 @@ public final class ProgrammingProblemController extends Controller {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
-    public Result regradeSubmission(long problemId, long submissionId, String redirectUri) {
+    public Result regradeSubmission(long problemId, long submissionId, long pageIndex, String orderBy, String orderDir) {
         Problem problem = problemService.findProblemById(problemId);
         Submission submission = submissionService.findSubmissionById(submissionId);
 
@@ -256,7 +288,7 @@ public final class ProgrammingProblemController extends Controller {
 
         submissionService.regrade(submission.getJid(), source);
 
-        return redirect(redirectUri);
+        return redirect(routes.ProgrammingProblemController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }
 
     @AddCSRFToken
