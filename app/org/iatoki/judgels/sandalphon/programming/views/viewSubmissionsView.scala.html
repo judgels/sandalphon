@@ -23,15 +23,14 @@
     });
 </script>
 
-<div class="clearfix"></div>
-
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ProgrammingProblemController.listSubmissions(problemId, newPageIndex, newOrderBy, newOrderDir)}
 
 <form method="POST" action="@routes.ProgrammingProblemController.regradeSubmissions(problemId, pageIndex, orderBy, orderDir)">
 
-<button type="submit" id="regradeButton" class="btn btn-primary btn-sm">Regrade selected</button>
+<button type="submit" id="regradeButton" class="btn btn-primary btn-xs">Regrade selected</button>
 
-<br />
+<div class="clearfix"></div>
+
 <br />
 
 @tableView() {

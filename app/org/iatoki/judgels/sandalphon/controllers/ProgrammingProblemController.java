@@ -235,23 +235,19 @@ public final class ProgrammingProblemController extends Controller {
 
         Problem problem = problemService.findProblemById(problemId);
 
-        List<String> submissionJids;
+        List<Submission> submissions;
 
         if (data.selectAll) {
-            submissionJids = submissionService.getSubmissionJidsByFilter(orderBy, orderDir, null, problem.getJid(), null);
+            submissions = submissionService.findSubmissionsWithoutGradingsByFilters(orderBy, orderDir, null, problem.getJid(), null);
         } else if (data.selectJids != null) {
-            submissionJids = data.selectJids;
+            submissions = submissionService.findSubmissionsWithoutGradingsByJids(data.selectJids);
         } else {
             return redirect(routes.ProgrammingProblemController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
         }
 
-        Map<String, String> problemJidMap = submissionService.getProblemJidMapBySubmissionJids(submissionJids);
-        Map<String, String> gradingEngineMap = problemService.getGradingEngineMapByProblemJids(Lists.newArrayList(problemJidMap.values()));
-
-        for (String submissionJid : data.selectJids) {
-            String gradingEngine = gradingEngineMap.get(problemJidMap.get(submissionJid));
-            GradingSource source = SubmissionAdapters.fromGradingEngine(gradingEngine).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid);
-            submissionService.regrade(submissionJid, source);
+        for (Submission submission : submissions) {
+            GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getSubmissionDir(), submission.getJid());
+            submissionService.regrade(submission.getJid(), source);
         }
 
         return redirect(routes.ProgrammingProblemController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
@@ -280,11 +276,8 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result regradeSubmission(long problemId, long submissionId, long pageIndex, String orderBy, String orderDir) {
-        Problem problem = problemService.findProblemById(problemId);
         Submission submission = submissionService.findSubmissionById(submissionId);
-
-        GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getSubmissionDir(), submission.getJid());
-
+        GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getSubmissionDir(), submission.getJid());
         submissionService.regrade(submission.getJid(), source);
 
         return redirect(routes.ProgrammingProblemController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
