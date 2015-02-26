@@ -208,7 +208,7 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result viewSubmissions(long problemId) {
-        return listSubmissions(problemId, 0, "timeCreate", "desc");
+        return listSubmissions(problemId, 0, "id", "desc");
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})

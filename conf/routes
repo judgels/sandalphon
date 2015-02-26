@@ -30,11 +30,11 @@ GET         /problem/programming/:pId/statement/render/:name              @org.i
 GET         /problem/:pJid/render/:name                                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.renderImageByJid(pJid: String, name: String)
 
 GET         /problem/programming/:pId/submission                          @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewSubmissions(pId: Long)
-GET         /problem/programming/:pId/submission/                         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.listSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc")
+GET         /problem/programming/:pId/submission/                         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.listSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
 GET         /problem/programming/:pId/submission/:sId                     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewSubmission(pId: Long, sId: Long)
-GET         /problem/programming/:pId/submission/:sId/regrade/            @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.regradeSubmission(pId: Long, sId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc")
+GET         /problem/programming/:pId/submission/:sId/regrade/            @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.regradeSubmission(pId: Long, sId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
 
-POST        /problem/programming/:pId/submission/regrade                  @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.regradeSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc")
+POST        /problem/programming/:pId/submission/regrade                  @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.regradeSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
 
 GET         /problem/programming/:pId/files                               @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateFiles(pId: Long)
 POST        /problem/programming/:pId/files                               @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateFiles(pId: Long)
