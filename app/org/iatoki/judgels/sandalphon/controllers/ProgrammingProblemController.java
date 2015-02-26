@@ -216,10 +216,9 @@ public final class ProgrammingProblemController extends Controller {
     public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
         Problem problem = problemService.findProblemById(problemId);
         Page<Submission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, null, problem.getJid(), null);
-        Form<ListTableSelectionForm> form = Form.form(ListTableSelectionForm.class);
         Map<String, String> gradingLanguageToNameMap = GradingLanguageRegistry.getInstance().getGradingLanguages();
 
-        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, form, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir));
+        LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir));
         appendTabsLayout(content, problemId, problem.getName());
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),

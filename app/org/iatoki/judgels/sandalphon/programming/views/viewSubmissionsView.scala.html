@@ -1,4 +1,4 @@
-@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.gabriel.commons.Submission], form: Form[org.iatoki.judgels.commons.ListTableSelectionForm], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
+@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.gabriel.commons.Submission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.commons.views.html.table.tableView
@@ -27,7 +27,7 @@
 
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ProgrammingProblemController.listSubmissions(problemId, newPageIndex, newOrderBy, newOrderDir)}
 
-<form method="POST" action="@routes.ProgrammingProblemController.regradeMultipleSubmissions(problemId, pageIndex, orderBy, orderDir)">
+<form method="POST" action="@routes.ProgrammingProblemController.regradeSubmissions(problemId, pageIndex, orderBy, orderDir)">
 
 <button type="submit" id="regradeButton" class="btn btn-primary btn-sm">Regrade selected</button>
 
@@ -35,7 +35,7 @@
 <br />
 
 @tableView() {
-    @tableHeadersWithSelectionFormView(page.getPageIndex, orderBy, orderDir, "", listFunc, form)(
+    @tableHeadersWithSelectionFormView(page.getPageIndex, orderBy, orderDir, "", listFunc)(
         "id" -> Messages.get("commons.id"),
         "userCreate" -> Messages.get("programming.submission.author"),
         "timeCreate" -> Messages.get("programming.submission.time"),
