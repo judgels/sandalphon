@@ -80,6 +80,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -712,6 +713,10 @@ public final class ProgrammingProblemController extends Controller {
         if (!image.exists()) {
             return notFound();
         }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+        response().setHeader("Cache-Control", "no-transform,public,max-age=300,s-maxage=900");
+        response().setHeader("Last-Modified", sdf.format(new Date(image.lastModified())));
 
         try {
             BufferedImage in = ImageIO.read(image);
