@@ -35,11 +35,11 @@ public final class SandalphonProperties {
 
             verifyConfiguration(conf);
 
-            String baseDirName = conf.getString("sandalphon.baseDir").replaceAll("\"", "");
+            String baseDirName = conf.getString("sandalphon.baseDataDir").replaceAll("\"", "");
 
             File baseDir = new File(baseDirName);
             if (!baseDir.isDirectory()) {
-                throw new RuntimeException("sandalphon.baseDir: " + baseDirName + " does not exist");
+                throw new RuntimeException("sandalphon.baseDataDir: " + baseDirName + " does not exist");
             }
 
             try {
@@ -62,7 +62,7 @@ public final class SandalphonProperties {
                 "sealtiel.baseUrl",
                 "sealtiel.clientJid",
                 "sealtiel.clientSecret",
-                "sandalphon.baseDir",
+                "sandalphon.baseDataDir",
                 "sealtiel.gabrielClientJid"
         );
 
