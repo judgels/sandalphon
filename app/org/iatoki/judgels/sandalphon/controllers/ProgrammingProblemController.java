@@ -2,8 +2,6 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
@@ -187,10 +185,10 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result viewStatement(long problemId) {
-        String statement = problemService.getStatement(problemId);
         Problem problem = problemService.findProblemById(problemId);
 
-        GradingConfig config = problemService.getGradingConfig(problemId);
+        String statement = problemService.getStatement(problem.getJid());
+        GradingConfig config = problemService.getGradingConfig(problem.getJid());
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine()));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
@@ -216,7 +214,7 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
         Problem problem = problemService.findProblemById(problemId);
-        Page<Submission> submissions = submissionService.pageSubmissions(pageIndex, 20, orderBy, orderDir, null, problem.getJid(), null);
+        Page<Submission> submissions = submissionService.pageSubmissions(pageIndex, PAGE_SIZE, orderBy, orderDir, null, problem.getJid(), null);
         Map<String, String> gradingLanguageToNameMap = GradingLanguageRegistry.getInstance().getGradingLanguages();
 
         LazyHtml content = new LazyHtml(viewSubmissionsView.render(submissions, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir));
@@ -317,7 +315,7 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateStatement(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        String statement = problemService.getStatement(problem.getId());
+        String statement = problemService.getStatement(problem.getJid());
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
         form = form.bind(ImmutableMap.of("statement", statement));
 
@@ -350,7 +348,7 @@ public final class ProgrammingProblemController extends Controller {
     public Result updateTestDataFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateTestDataFilesForm> form = Form.form(UpdateTestDataFilesForm.class);
-        List<File> testDataFiles = problemService.getTestDataFiles(problemId);
+        List<File> testDataFiles = problemService.getTestDataFiles(problem.getJid());
 
         return showUpdateTestDataFiles(form, problem.getId(), problem.getName(), testDataFiles);
     }
@@ -361,7 +359,7 @@ public final class ProgrammingProblemController extends Controller {
     public Result updateHelperFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateHelperFilesForm> form = Form.form(UpdateHelperFilesForm.class);
-        List<File> helperFiles = problemService.getHelperFiles(problem.getId());
+        List<File> helperFiles = problemService.getHelperFiles(problem.getJid());
 
         return showUpdateHelperFiles(form, problem.getId(), problem.getName(), helperFiles);
     }
@@ -372,7 +370,7 @@ public final class ProgrammingProblemController extends Controller {
     public Result updateMediaFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateMediaFilesForm> form = Form.form(UpdateMediaFilesForm.class);
-        List<File> mediaFiles = problemService.getMediaFiles(problem.getId());
+        List<File> mediaFiles = problemService.getMediaFiles(problem.getJid());
 
         return showUpdateMediaFiles(form, problem.getId(), problem.getName(), mediaFiles);
     }
@@ -435,9 +433,9 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        GradingConfig config = problemService.getGradingConfig(problem.getId());
-        List<File> testDataFiles = problemService.getTestDataFiles(problem.getId());
-        List<File> helperFiles = problemService.getHelperFiles(problem.getId());
+        GradingConfig config = problemService.getGradingConfig(problem.getJid());
+        List<File> testDataFiles = problemService.getTestDataFiles(problem.getJid());
+        List<File> helperFiles = problemService.getHelperFiles(problem.getJid());
 
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createFormFromConfig(config);
 
@@ -452,8 +450,8 @@ public final class ProgrammingProblemController extends Controller {
         Form<?> form = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createEmptyForm().bindFromRequest(request());
 
         if (form.hasErrors() || form.hasGlobalErrors()) {
-            List<File> testDataFiles = problemService.getTestDataFiles(problem.getId());
-            List<File> helperFiles = problemService.getHelperFiles(problem.getId());
+            List<File> testDataFiles = problemService.getTestDataFiles(problem.getJid());
+            List<File> helperFiles = problemService.getHelperFiles(problem.getJid());
             return showUpdateConfig(form, problem, testDataFiles, helperFiles);
         } else {
             GradingConfig config = GradingConfigAdapters.fromGradingType(problem.getGradingEngine()).createConfigFromForm(form);
@@ -467,14 +465,14 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateConfigByTokilibFormat(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        List<File> testDataFiles = problemService.getTestDataFiles(problemId);
+        List<File> testDataFiles = problemService.getTestDataFiles(problem.getJid());
         GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(problem.getGradingEngine());
 
         if (! (adapter instanceof ConfigurableWithTokilibFormat)) {
             return forbidden();
         }
 
-        GradingConfig config = problemService.getGradingConfig(problemId);
+        GradingConfig config = problemService.getGradingConfig(problem.getJid());
         GradingConfig newConfig = ((ConfigurableWithTokilibFormat) adapter).updateConfigWithTokilibFormat(config, testDataFiles);
 
         problemService.updateGradingConfig(problemId, newConfig);
@@ -486,14 +484,14 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateConfigByAutoPopulation(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        List<File> testDataFiles = problemService.getTestDataFiles(problemId);
+        List<File> testDataFiles = problemService.getTestDataFiles(problem.getJid());
         GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(problem.getGradingEngine());
 
         if (! (adapter instanceof ConfigurableWithAutoPopulation)) {
             return forbidden();
         }
 
-        GradingConfig config = problemService.getGradingConfig(problemId);
+        GradingConfig config = problemService.getGradingConfig(problem.getJid());
         GradingConfig newConfig = ((ConfigurableWithAutoPopulation) adapter).updateConfigWithAutoPopulation(config, testDataFiles);
 
         problemService.updateGradingConfig(problemId, newConfig);
@@ -594,7 +592,8 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result downloadTestDataFile(long id, String filename) {
-        File file = problemService.getTestDataFile(id, filename);
+        Problem problem = problemService.findProblemById(id);
+        File file = problemService.getTestDataFile(problem.getJid(), filename);
         if (file.exists()) {
             return downloadFile(file);
         } else {
@@ -605,7 +604,8 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result downloadHelperFile(long id, String filename) {
-        File file = problemService.getHelperFile(id, filename);
+        Problem problem = problemService.findProblemById(id);
+        File file = problemService.getHelperFile(problem.getJid(), filename);
         if (file.exists()) {
             return downloadFile(file);
         } else {
@@ -616,7 +616,8 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result downloadMediaFile(long id, String filename) {
-        File file = problemService.getMediaFile(id, filename);
+        Problem problem = problemService.findProblemById(id);
+        File file = problemService.getMediaFile(problem.getJid(), filename);
         if (file.exists()) {
             return downloadFile(file);
         } else {
@@ -667,7 +668,7 @@ public final class ProgrammingProblemController extends Controller {
         String statement = problemService.getStatement(problemJid);
         Problem problem = problemService.findProblemByJid(problemJid);
 
-        GradingConfig config = problemService.getGradingConfig(problem.getId());
+        GradingConfig config = problemService.getGradingConfig(problem.getJid());
 
         Html html = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(postSubmitUri, problem.getName(), statement, config, problem.getGradingEngine());
         return ok(html);
@@ -706,10 +707,8 @@ public final class ProgrammingProblemController extends Controller {
         return ok("" + gradingLastUpdateTime.getTime());
     }
 
-    public Result renderImage(long problemId, String imageFilename) {
-        Problem problem = problemService.findProblemById(problemId);
-
-        File image = problemService.getMediaFile(problemId, imageFilename);
+    public Result renderImageByJid(String problemJid, String imageFilename) {
+        File image = problemService.getMediaFile(problemJid, imageFilename);
         if (!image.exists()) {
             return notFound();
         }
@@ -731,10 +730,9 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
-    public Result renderImageByJid(String problemJid, String imageFilename) {
-        Problem problem = problemService.findProblemByJid(problemJid);
-
-        return renderImage(problem.getId(), imageFilename);
+    public Result renderImageById(long problemId, String imageFilename) {
+        Problem problem = problemService.findProblemById(problemId);
+        return renderImageByJid(problem.getJid(), imageFilename);
     }
 
     private Result showUpdateGeneral(Form<UpsertForm> form, long problemId) {

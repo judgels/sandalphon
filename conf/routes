@@ -25,7 +25,7 @@ POST        /problem/programming/:pId/general/update                      @org.i
 GET         /problem/programming/:pId/statement/view                      @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewStatement(pId: Long)
 GET         /problem/programming/:pId/statement/update                    @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateStatement(pId: Long)
 POST        /problem/programming/:pId/statement/update                    @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateStatement(pId: Long)
-GET         /problem/programming/:pId/statement/render/:name              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.renderImage(pId: Long, name: String)
+GET         /problem/programming/:pId/statement/render/:name              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.renderImageById(pId: Long, name: String)
 
 GET         /problem/:pJid/render/:name                                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.renderImageByJid(pJid: String, name: String)
 

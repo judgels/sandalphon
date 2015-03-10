@@ -2,13 +2,11 @@ package org.iatoki.judgels.sandalphon.programming;
 
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingConfig;
-import org.iatoki.judgels.gabriel.commons.Submission;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public interface ProblemService {
 
@@ -24,15 +22,11 @@ public interface ProblemService {
 
     Problem createProblem(String name, String gradingEngine, String additionalNote);
 
-    String getStatement(long problemId);
-
     String getStatement(String problemJid);
 
-    GradingConfig getGradingConfig(long problemId);
+    GradingConfig getGradingConfig(String problemJid);
 
     Date getGradingLastUpdateTime(String problemJid);
-
-    Map<String, String> getGradingEngineMapByProblemJids(List<String> problemJids);
 
     void updateStatement(long problemId, String statement);
 
@@ -50,17 +44,17 @@ public interface ProblemService {
 
     void updateGradingConfig(long problemId, GradingConfig config);
 
-    List<File> getTestDataFiles(long problemId);
+    List<File> getTestDataFiles(String problemJid);
 
-    List<File> getHelperFiles(long problemId);
+    List<File> getHelperFiles(String problemJid);
 
-    List<File> getMediaFiles(long problemId);
+    List<File> getMediaFiles(String problemJid);
 
-    File getTestDataFile(long problemId, String filename);
+    File getTestDataFile(String problemJid, String filename);
 
-    File getHelperFile(long problemId, String filename);
+    File getHelperFile(String problemJid, String filename);
 
-    File getMediaFile(long problemId, String filename);
+    File getMediaFile(String problemJid, String filename);
 
     ByteArrayOutputStream getZippedGradingFilesStream(String problemJid);
 }
