@@ -1,7 +1,10 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
@@ -33,6 +36,8 @@ import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.sandalphon.GraderService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
+import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
+import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapter;
 import org.iatoki.judgels.sandalphon.programming.adapters.ConfigurableWithAutoPopulation;
@@ -68,6 +73,7 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
+import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -82,6 +88,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Transactional
 public final class ProgrammingProblemController extends Controller {
@@ -141,13 +148,14 @@ public final class ProgrammingProblemController extends Controller {
             return showCreate(form);
         } else {
             UpsertForm data = form.get();
-            Problem problem = problemService.createProblem(data.name, data.gradingEngine, data.additionalNote);
+            Problem problem = problemService.createProblem(data.name, data.gradingEngine, data.additionalNote, null);
 
             return redirect(routes.ProgrammingProblemController.viewGeneral(problem.getId()));
         }
     }
 
     private Result showCreate(Form<UpsertForm> form) {
+        GradingLanguageRegistry.getInstance().getGradingLanguages();
         LazyHtml content = new LazyHtml(createView.render(form));
         content.appendLayout(c -> headingLayout.render(Messages.get("programming.problem.create"), c));
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
@@ -189,8 +197,9 @@ public final class ProgrammingProblemController extends Controller {
 
         String statement = problemService.getStatement(problem.getJid());
         GradingConfig config = problemService.getGradingConfig(problem.getJid());
+        Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problem.getLanguageRestriction()));
 
-        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine()));
+        LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, problem.getGradingEngine(), allowedLanguageNames));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewStatement(problemId)),
                 new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateStatement(problemId))
@@ -291,9 +300,11 @@ public final class ProgrammingProblemController extends Controller {
         content.name = problem.getName();
         content.gradingEngine = problem.getGradingEngine();
         content.additionalNote = problem.getAdditionalNote();
+        content.allowedLanguageNames = LanguageRestrictionAdapter.getFormAllowedLanguageNamesFromLanguageRestriction(problem.getLanguageRestriction());
+        content.isAllowedAll = LanguageRestrictionAdapter.getFormIsAllowedAllFromLanguageRestriction(problem.getLanguageRestriction());
         Form<UpsertForm> form = Form.form(UpsertForm.class).fill(content);
 
-        return showUpdateGeneral(form, problem.getId());
+        return showUpdateGeneral(form, problem.getId(), problem.getName());
     }
 
     @RequireCSRFCheck
@@ -303,9 +314,11 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpsertForm> form = Form.form(UpsertForm.class).bindFromRequest();
         if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showUpdateGeneral(form, problem.getId());
+            return showUpdateGeneral(form, problem.getId(), problem.getName());
         } else {
-            problemService.updateProblem(problem.getId(), form.get().name, form.get().gradingEngine, form.get().additionalNote);
+            UpsertForm content = form.get();
+            LanguageRestriction languageRestriction = LanguageRestrictionAdapter.createLanguageRestrictionFromForm(content.allowedLanguageNames, content.isAllowedAll);
+            problemService.updateProblem(problem.getId(), content.name, content.gradingEngine, content.additionalNote, languageRestriction);
             return redirect(routes.ProgrammingProblemController.updateGeneral(problem.getId()));
         }
     }
@@ -507,9 +520,11 @@ public final class ProgrammingProblemController extends Controller {
 
         String gradingLanguage = body.asFormUrlEncoded().get("language")[0];
 
+        Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problem.getLanguageRestriction()));
+
         try {
             GradingSource source = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).createGradingSourceFromNewSubmission(body);
-            String submissionJid = submissionService.submit(problem.getJid(), null, problem.getGradingEngine(), gradingLanguage, source);
+            String submissionJid = submissionService.submit(problem.getJid(), null, problem.getGradingEngine(), gradingLanguage, allowedLanguageNames, source);
             SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getSubmissionDir(), submissionJid, source);
         } catch (SubmissionException e) {
             flash("submissionError", e.getMessage());
@@ -658,6 +673,12 @@ public final class ProgrammingProblemController extends Controller {
             return notFound();
         }
 
+        LanguageRestriction languageRestriction = new Gson().fromJson(request().body().asText(), LanguageRestriction.class);
+
+        if (languageRestriction == null) {
+            return badRequest();
+        }
+
         ClientProblem clientProblem = clientService.findClientProblemByClientJidAndProblemJid(clientJid, problemJid);
 
         GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
@@ -667,10 +688,11 @@ public final class ProgrammingProblemController extends Controller {
 
         String statement = problemService.getStatement(problemJid);
         Problem problem = problemService.findProblemByJid(problemJid);
+        Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problem.getLanguageRestriction(), languageRestriction));
 
         GradingConfig config = problemService.getGradingConfig(problem.getJid());
 
-        Html html = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(postSubmitUri, problem.getName(), statement, config, problem.getGradingEngine());
+        Html html = SubmissionAdapters.fromGradingEngine(problem.getGradingEngine()).renderViewStatement(postSubmitUri, problem.getName(), statement, config, problem.getGradingEngine(), allowedLanguageNames);
         return ok(html);
     }
 
@@ -735,13 +757,13 @@ public final class ProgrammingProblemController extends Controller {
         return renderImageByJid(problem.getJid(), imageFilename);
     }
 
-    private Result showUpdateGeneral(Form<UpsertForm> form, long problemId) {
+    private Result showUpdateGeneral(Form<UpsertForm> form, long problemId, String problemName) {
         LazyHtml content = new LazyHtml(updateGeneralView.render(form, problemId));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewGeneral(problemId)),
                 new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateGeneral(problemId))
         ), c));
-        appendTabsLayout(content, problemId, form.get().name);
+        appendTabsLayout(content, problemId, problemName);
         content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("programming.problem.problems"), routes.ProgrammingProblemController.index()),
                 new InternalLink(Messages.get("programming.general.general"), routes.ProgrammingProblemController.viewGeneral(problemId)),

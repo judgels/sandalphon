@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.programming;
 
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,11 +17,11 @@ public interface ProblemService {
 
     Problem findProblemByJid(String problemJid);
 
-    void updateProblem(long problemId, String name, String gradingEngine, String additionalNote);
+    void updateProblem(long problemId, String name, String gradingEngine, String additionalNote, LanguageRestriction languageRestriction);
 
     Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    Problem createProblem(String name, String gradingEngine, String additionalNote);
+    Problem createProblem(String name, String gradingEngine, String additionalNote, LanguageRestriction languageRestriction);
 
     String getStatement(String problemJid);
 

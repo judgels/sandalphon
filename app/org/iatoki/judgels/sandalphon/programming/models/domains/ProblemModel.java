@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon.programming.models.domains;
 import org.iatoki.judgels.commons.models.JidPrefix;
 import org.iatoki.judgels.commons.models.domains.AbstractJudgelsModel;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -16,18 +17,22 @@ public final class ProblemModel extends AbstractJudgelsModel {
 
     public String additionalNote;
 
+    @Column(columnDefinition = "TEXT")
+    public String languageRestriction;
+
     public ProblemModel() {
 
     }
 
-    public ProblemModel(String name, String gradingEngine, String additionalNote) {
+    public ProblemModel(String name, String gradingEngine, String additionalNote, String languageRestriction) {
         this.name = name;
         this.gradingEngine = gradingEngine;
         this.additionalNote = additionalNote;
+        this.languageRestriction = languageRestriction;
     }
 
-    public ProblemModel(long id, String jid, String name, String gradingEngine, String note) {
-        this(name, gradingEngine, note);
+    public ProblemModel(long id, String jid, String name, String gradingEngine, String additionalNote, String languageRestriction) {
+        this(name, gradingEngine, additionalNote, languageRestriction);
         this.id = id;
         this.jid = jid;
     }

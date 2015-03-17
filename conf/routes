@@ -63,7 +63,7 @@ POST        /problem/programming/download/grading                         @org.i
 POST        /problem/programming/getGradingLastUpdateTime                 @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.getGradingLastUpdateTime()
 
 GET         /verifyProblem                                                @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.verifyProblem()
-GET         /totp/:cJid/:pJid/statement/:TOTP/:lang/:postSubmitUri        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewProblemStatementTOTP(cJid: String, pJid: String, TOTP: Int, lang: String, postSubmitUri: String)
+POST        /totp/:cJid/:pJid/statement/:TOTP/:lang/:postSubmitUri        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewProblemStatementTOTP(cJid: String, pJid: String, TOTP: Int, lang: String, postSubmitUri: String)
 
 GET         /client                                                       @org.iatoki.judgels.sandalphon.controllers.ClientController.index()
 GET         /client/                                                      @org.iatoki.judgels.sandalphon.controllers.ClientController.list(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")

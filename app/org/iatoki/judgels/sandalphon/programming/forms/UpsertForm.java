@@ -2,6 +2,8 @@ package org.iatoki.judgels.sandalphon.programming.forms;
 
 import play.data.validation.Constraints;
 
+import java.util.Map;
+
 public final class UpsertForm {
 
     @Constraints.Required
@@ -10,4 +12,8 @@ public final class UpsertForm {
     public String gradingEngine;
 
     public String additionalNote;
+
+    public Map<String, String> allowedLanguageNames;
+
+    public boolean isAllowedAll;
 }

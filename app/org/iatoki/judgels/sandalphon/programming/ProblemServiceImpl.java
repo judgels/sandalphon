@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.programming;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
@@ -11,6 +12,7 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.NaturalFilenameComparator;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
+import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.programming.models.daos.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.programming.models.domains.ProblemModel;
 
@@ -54,7 +56,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public final void updateProblem(long id, String name, String gradingEngine, String additionalNote) {
+    public final void updateProblem(long id, String name, String gradingEngine, String additionalNote, LanguageRestriction languageRestriction) {
         ProblemModel model = problemDao.findById(id);
         model.name = name;
 
@@ -64,6 +66,7 @@ public final class ProblemServiceImpl implements ProblemService {
 
         model.gradingEngine = gradingEngine;
         model.additionalNote = additionalNote;
+        model.languageRestriction = new Gson().toJson(languageRestriction);
         updateProblemModel(model, false);
     }
 
@@ -78,8 +81,8 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Problem createProblem(String name, String gradingEngine, String additionalNote) {
-        ProblemModel problemModel = new ProblemModel(name, gradingEngine, additionalNote);
+    public Problem createProblem(String name, String gradingEngine, String additionalNote, LanguageRestriction languageRestriction) {
+        ProblemModel problemModel = new ProblemModel(name, gradingEngine, additionalNote, new Gson().toJson(languageRestriction));
         problemDao.persist(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         createProblemDirs(problemModel);
@@ -386,7 +389,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
     
     private Problem createProblemFromModel(ProblemModel record) {
-        return new Problem(record.id, record.jid, record.name, record.userCreate, record.gradingEngine, new Date(record.timeUpdate), record.additionalNote);
+        return new Problem(record.id, record.jid, record.name, record.userCreate, record.gradingEngine, new Date(record.timeUpdate), record.additionalNote, new Gson().fromJson(record.languageRestriction, LanguageRestriction.class));
     }
 
     private List<File> getGradingFiles(String problemJid) {

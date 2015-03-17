@@ -12,6 +12,8 @@ programming.problem.lastUpdateTime=Last Update Time
 programming.problem.author=Author
 programming.problem.jid=Problem JID
 programming.problem.secret=Problem Secret
+programming.problem.allowedLanguages=Allowed Languages
+programming.problem.allowAll=Allow all
 
 programming.general.general=General
 
