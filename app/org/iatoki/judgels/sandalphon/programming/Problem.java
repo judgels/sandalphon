@@ -1,5 +1,7 @@
 package org.iatoki.judgels.sandalphon.programming;
 
+import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
+
 import java.util.Date;
 
 public final class Problem {
@@ -9,10 +11,10 @@ public final class Problem {
     private final String authorJid;
     private final String gradingEngine;
     private final Date lastUpdate;
-
     private final String additionalNote;
+    private final LanguageRestriction languageRestriction;
 
-    public Problem(long id, String jid, String name, String authorJid, String gradingEngine, Date lastUpdate, String additionalNote) {
+    public Problem(long id, String jid, String name, String authorJid, String gradingEngine, Date lastUpdate, String additionalNote, LanguageRestriction languageRestriction) {
         this.id = id;
         this.jid = jid;
         this.name = name;
@@ -20,6 +22,7 @@ public final class Problem {
         this.gradingEngine = gradingEngine;
         this.lastUpdate = lastUpdate;
         this.additionalNote = additionalNote;
+        this.languageRestriction = languageRestriction;
     }
 
     public long getId() {
@@ -48,5 +51,13 @@ public final class Problem {
 
     public String getAdditionalNote() {
         return additionalNote;
+    }
+
+    public LanguageRestriction getLanguageRestriction() {
+        if (languageRestriction == null) {
+            return LanguageRestriction.defaultRestriction();
+        } else {
+            return languageRestriction;
+        }
     }
 }
