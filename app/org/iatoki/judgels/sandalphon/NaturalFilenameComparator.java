@@ -92,8 +92,8 @@ public class NaturalFilenameComparator implements Comparator<String> {
      * into
      *  a A b B c C ... x X y Y z Z
      *
-     * @param String s1 The first file name
-     * @param String s2 The second file name
+     * @param s1 The first file name
+     * @param s2 The second file name
      * @return Negative value if s1 is lower than s2, positive value if s2 is lower than s1,
      *         or zero if they are equal.
      */
