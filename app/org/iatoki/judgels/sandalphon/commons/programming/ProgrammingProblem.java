@@ -1,11 +1,11 @@
 package org.iatoki.judgels.sandalphon.commons.programming;
 
-import org.iatoki.judgels.sandalphon.commons.AbstractProblem;
+import org.iatoki.judgels.sandalphon.commons.Problem;
 import org.iatoki.judgels.sandalphon.commons.ProblemType;
 
 import java.util.Date;
 
-public final class ProgrammingProblem extends AbstractProblem {
+public final class ProgrammingProblem extends Problem {
 
     private final String gradingEngine;
     private final String additionalNote;
