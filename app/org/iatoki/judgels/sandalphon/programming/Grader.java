@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon;
+package org.iatoki.judgels.sandalphon.programming;
 
 public final class Grader {
 
