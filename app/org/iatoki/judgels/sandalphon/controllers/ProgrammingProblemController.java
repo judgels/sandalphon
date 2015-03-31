@@ -144,14 +144,16 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problemId)),
                 new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problemId))
         ), c));
-        appendTabsLayout(content, problemId, problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problemId)),
                 new InternalLink(Messages.get("problem.statement.view"), routes.ProgrammingProblemController.viewStatement(problemId))
-        ), c));
-        appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
 
@@ -166,14 +168,16 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewGeneral(problemId)),
                 new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateGeneral(problemId))
                 ), c));
-        appendTabsLayout(content, problemId, problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.general"), routes.ProblemController.jumpToGeneral(problemId)),
                 new InternalLink(Messages.get("problem.general.view"), routes.ProgrammingProblemController.viewGeneral(problemId))
-        ), c));
-        appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @AddCSRFToken
@@ -190,7 +194,7 @@ public final class ProgrammingProblemController extends Controller {
         data.isAllowedAll = LanguageRestrictionAdapter.getFormIsAllowedAllFromLanguageRestriction(programmingProblem.getLanguageRestriction());
         Form<ProgrammingUpsertForm> form = Form.form(ProgrammingUpsertForm.class).fill(data);
 
-        return showUpdateGeneral(form, problem.getId(), problem.getName());
+        return showUpdateGeneral(form, problem);
     }
 
     @RequireCSRFCheck
@@ -200,7 +204,7 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
         Form<ProgrammingUpsertForm> form = Form.form(ProgrammingUpsertForm.class).bindFromRequest();
         if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showUpdateGeneral(form, problem.getId(), problem.getName());
+            return showUpdateGeneral(form, problem);
         } else {
             ProgrammingUpsertForm data = form.get();
             LanguageRestriction languageRestriction = LanguageRestrictionAdapter.createLanguageRestrictionFromForm(data.allowedLanguageNames, data.isAllowedAll);
@@ -225,14 +229,16 @@ public final class ProgrammingProblemController extends Controller {
         Map<String, String> gradingLanguageToNameMap = GradingLanguageRegistry.getInstance().getGradingLanguages();
 
         LazyHtml content = new LazyHtml(listSubmissionsView.render(submissions, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir));
-        appendTabsLayout(content, problemId, problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.submission"), routes.ProgrammingProblemController.jumpToSubmissions(problemId)),
                 new InternalLink(Messages.get("problem.programming.submission.list"), routes.ProgrammingProblemController.viewSubmissions(problemId))
-        ), c));
-        appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -246,14 +252,16 @@ public final class ProgrammingProblemController extends Controller {
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(programmingProblem.getGradingEngine()).renderViewSubmission(submission, source, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
 
-        appendTabsLayout(content, problemId, problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.submission"), routes.ProgrammingProblemController.jumpToSubmissions(problemId)),
                 new InternalLink(Messages.get("problem.programming.submission.view"), routes.ProgrammingProblemController.viewSubmission(problemId, submissionId))
-        ), c));
-        appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -388,7 +396,7 @@ public final class ProgrammingProblemController extends Controller {
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
         List<File> testDataFiles = programmingProblemService.getTestDataFiles(problem.getJid());
 
-        return showListGradingTestDataFiles(form, problem.getId(), problem.getName(), testDataFiles);
+        return showListGradingTestDataFiles(form, problem, testDataFiles);
     }
 
     @RequireCSRFCheck
@@ -424,7 +432,7 @@ public final class ProgrammingProblemController extends Controller {
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
         List<File> helperFiles = programmingProblemService.getHelperFiles(problem.getJid());
 
-        return showListGradingHelperFiles(form, problem.getId(), problem.getName(), helperFiles);
+        return showListGradingHelperFiles(form, problem, helperFiles);
     }
 
     @RequireCSRFCheck
@@ -573,28 +581,32 @@ public final class ProgrammingProblemController extends Controller {
         GradingLanguageRegistry.getInstance().getGradingLanguages();
         LazyHtml content = new LazyHtml(createView.render(form));
         content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.create"), routes.ProgrammingProblemController.create())
-        ), c));
-        appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateGeneral(Form<ProgrammingUpsertForm> form, long problemId, String problemName) {
-        LazyHtml content = new LazyHtml(updateGeneralView.render(form, problemId));
+    private Result showUpdateGeneral(Form<ProgrammingUpsertForm> form, Problem problem) {
+        LazyHtml content = new LazyHtml(updateGeneralView.render(form, problem.getId()));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewGeneral(problemId)),
-                new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateGeneral(problemId))
+                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewGeneral(problem.getId())),
+                new InternalLink(Messages.get("commons.update"), routes.ProgrammingProblemController.updateGeneral(problem.getId()))
         ), c));
-        appendTabsLayout(content, problemId, problemName);
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("problem.general"), routes.ProblemController.jumpToGeneral(problemId)),
-                new InternalLink(Messages.get("problem.general.update"), routes.ProgrammingProblemController.updateGeneral(problemId))
-        ), c));
-        appendTemplateLayout(content);
-        return getResult(content, Http.Status.OK);
+                new InternalLink(Messages.get("problem.general"), routes.ProblemController.jumpToGeneral(problem.getId())),
+                new InternalLink(Messages.get("problem.general.update"), routes.ProgrammingProblemController.updateGeneral(problem.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdateGradingConfig(Form<?> form, ProgrammingProblem problem, List<File> testDataFiles, List<File> helperFiles) {
@@ -613,110 +625,53 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.grading.helper"), routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId()))
         ), c));
 
-        appendTabsLayout(content, problem.getId(), problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading.config.update"), routes.ProgrammingProblemController.updateGradingConfig(problem.getId()))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showListGradingTestDataFiles(Form<UploadFileForm> form, long problemId, String problemName, List<File> testDataFiles) {
-        LazyHtml content = new LazyHtml(listGradingTestDataFilesView.render(form, problemId, testDataFiles));
+    private Result showListGradingTestDataFiles(Form<UploadFileForm> form, Problem problem, List<File> testDataFiles) {
+        LazyHtml content = new LazyHtml(listGradingTestDataFilesView.render(form, problem.getId(), testDataFiles));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemController.updateGradingConfig(problemId)),
-                new InternalLink(Messages.get("problem.programming.grading.testData"), routes.ProgrammingProblemController.listGradingTestDataFiles(problemId)),
-                new InternalLink(Messages.get("problem.programming.grading.helper"), routes.ProgrammingProblemController.listGradingHelperFiles(problemId))
+                new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemController.updateGradingConfig(problem.getId())),
+                new InternalLink(Messages.get("problem.programming.grading.testData"), routes.ProgrammingProblemController.listGradingTestDataFiles(problem.getId())),
+                new InternalLink(Messages.get("problem.programming.grading.helper"), routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId()))
         ), c));
-        appendTabsLayout(content, problemId, problemName);
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problemId)),
-                new InternalLink(Messages.get("problem.programming.grading.testData.list"), routes.ProgrammingProblemController.listGradingTestDataFiles(problemId))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
+                new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problem.getId())),
+                new InternalLink(Messages.get("problem.programming.grading.testData.list"), routes.ProgrammingProblemController.listGradingTestDataFiles(problem.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showListGradingHelperFiles(Form<UploadFileForm> form, long problemId, String problemName, List<File> helperFiles) {
-        LazyHtml content = new LazyHtml(listGradingHelperFilesView.render(form, problemId, helperFiles));
+    private Result showListGradingHelperFiles(Form<UploadFileForm> form, Problem problem, List<File> helperFiles) {
+        LazyHtml content = new LazyHtml(listGradingHelperFilesView.render(form, problem.getId(), helperFiles));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemController.updateGradingConfig(problemId)),
-                new InternalLink(Messages.get("problem.programming.grading.testData"), routes.ProgrammingProblemController.listGradingTestDataFiles(problemId)),
-                new InternalLink(Messages.get("problem.programming.grading.helper"), routes.ProgrammingProblemController.listGradingHelperFiles(problemId))
+                new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemController.updateGradingConfig(problem.getId())),
+                new InternalLink(Messages.get("problem.programming.grading.testData"), routes.ProgrammingProblemController.listGradingTestDataFiles(problem.getId())),
+                new InternalLink(Messages.get("problem.programming.grading.helper"), routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId()))
         ), c));
-        appendTabsLayout(content, problemId, problemName);
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problemId)),
-                new InternalLink(Messages.get("problem.programming.grading.helper.list"), routes.ProgrammingProblemController.listGradingHelperFiles(problemId))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
-    }
+                new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problem.getId())),
+                new InternalLink(Messages.get("problem.programming.grading.helper.list"), routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
-    private void appendTabsLayout(LazyHtml content, long problemId, String problemName) {
-        content.appendLayout(c -> tabLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.general"), routes.ProblemController.jumpToGeneral(problemId)),
-                new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problemId)),
-                new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problemId)),
-                new InternalLink(Messages.get("problem.programming.submission"), routes.ProgrammingProblemController.jumpToSubmissions(problemId)),
-                new InternalLink(Messages.get("problem.client"), routes.ProblemController.jumpToClients(problemId))
-        ), c));
-
-        content.appendLayout(c -> headingLayout.render("#" + problemId + ": " + problemName, c));
-    }
-
-    private void appendTemplateLayout(LazyHtml content) {
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-
-        if (isAllowedToWrite()) {
-            internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
-        }
-
-        if (isAdmin()) {
-            internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
-        }
-
-        content.appendLayout(c -> sidebarLayout.render(
-                        IdentityUtils.getUsername(),
-                        IdentityUtils.getUserRealName(),
-                        org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(routes.ProblemController.index().absoluteURL(request())).absoluteURL(request()),
-                        org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(request())).absoluteURL(request()),
-                        internalLinkBuilder.build(), c)
-        );
-        content.appendLayout(c -> headerFooterLayout.render(c));
-        content.appendLayout(c -> baseLayout.render("TODO", c));
-    }
-
-    private Result lazyOk(LazyHtml content) {
-        return getResult(content, Http.Status.OK);
-    }
-
-    private Result getResult(LazyHtml content, int statusCode) {
-        switch (statusCode) {
-            case Http.Status.OK:
-                return ok(content.render(0));
-            case Http.Status.NOT_FOUND:
-                return notFound(content.render(0));
-            default:
-                return badRequest(content.render(0));
-        }
-    }
-
-    private boolean isAdmin() {
-        return SandalphonUtils.hasRole("admin");
-    }
-
-    private boolean isWriter() {
-        return SandalphonUtils.hasRole("writer");
-    }
-
-    private boolean isAllowedToWrite() {
-        return isAdmin() || isWriter();
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 }
