@@ -1,7 +1,10 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.jophiel.commons.JophielUtils;
+import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.UserRole;
 import org.iatoki.judgels.sandalphon.UserRoleService;
@@ -37,6 +40,7 @@ public final class ApplicationController extends Controller {
         } else if (session().containsKey("username")) {
             return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
+            returnUri = org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterLogin(returnUri).absoluteURL(request());
             return redirect(org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.login(returnUri));
         }
     }
@@ -56,6 +60,16 @@ public final class ApplicationController extends Controller {
                 return redirect(returnUri);
             }
         }
+    }
+
+    public Result afterLogin(String returnUri) {
+        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
+        return redirect(returnUri);
+    }
+
+    public Result afterProfile(String returnUri) {
+        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
+        return redirect(returnUri);
     }
 
     private Result getResult(LazyHtml content, int statusCode) {
