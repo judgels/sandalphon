@@ -52,11 +52,11 @@ $(document).ready(function() {
 
         // Update input values
         inInput
-            .attr('name', 'sampleTestCaseInputs[' + caseNo + ']')
+            .prop('name', 'sampleTestCaseInputs[' + caseNo + ']')
             .val(inputVal);
 
         outInput
-            .attr('name', 'sampleTestCaseOutputs[' + caseNo + ']')
+            .prop('name', 'sampleTestCaseOutputs[' + caseNo + ']')
             .val(outputVal);
 
         // Update remove test case button
@@ -94,8 +94,8 @@ $(document).ready(function() {
         var sampleTestCasesCount = sampleTestData.sampleTestCases.length;
         for (var caseNo = 0; caseNo < sampleTestCasesCount; caseNo++) {
             var sampleTestCase = sampleTestData.sampleTestCases[caseNo];
-            sampleTestCase.inInput.attr('name', 'sampleTestCaseInputs[' + caseNo + ']');
-            sampleTestCase.outInput.attr('name', 'sampleTestCaseOutputs[' + caseNo + ']');
+            sampleTestCase.inInput.prop('name', 'sampleTestCaseInputs[' + caseNo + ']');
+            sampleTestCase.outInput.prop('name', 'sampleTestCaseOutputs[' + caseNo + ']');
 
             (function(caseNo) {
                 sampleTestCase.removeButton.off('click').on('click', function() {
@@ -121,11 +121,11 @@ $(document).ready(function() {
 
         // Update input values
         inInput
-                .attr('name', 'testCaseInputs[0][' + caseNo + ']')
+                .prop('name', 'testCaseInputs[0][' + caseNo + ']')
                 .val(inputVal);
 
         outInput
-                .attr('name', 'testCaseOutputs[0][' + caseNo + ']')
+                .prop('name', 'testCaseOutputs[0][' + caseNo + ']')
                 .val(outputVal);
 
         // Update remove test case button
@@ -161,8 +161,8 @@ $(document).ready(function() {
         var testCasesCount = testData.testCases.length;
         for (var caseNo = 0; caseNo < testCasesCount; caseNo++) {
             var testCase = testData.testCases[caseNo];
-            testCase.inInput.attr('name', 'testCaseInputs[0][' + caseNo + ']');
-            testCase.outInput.attr('name', 'testCaseOutputs[0][' + caseNo + ']');
+            testCase.inInput.prop('name', 'testCaseInputs[0][' + caseNo + ']');
+            testCase.outInput.prop('name', 'testCaseOutputs[0][' + caseNo + ']');
 
             (function(caseNo) {
                 testCase.removeButton.off('click').on('click', function() {
