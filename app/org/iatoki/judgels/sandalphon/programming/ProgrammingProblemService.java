@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.programming;
 
 import org.iatoki.judgels.gabriel.GradingConfig;
-import org.iatoki.judgels.sandalphon.commons.AbstractProblem;
+import org.iatoki.judgels.sandalphon.commons.Problem;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.commons.programming.ProgrammingProblem;
 
@@ -14,7 +14,7 @@ public interface ProgrammingProblemService {
 
     ProgrammingProblem findProgrammingProblemByJid(String problemJid);
 
-    ProgrammingProblem findProgrammingProblemByJid(String problemJid, AbstractProblem problemPart);
+    ProgrammingProblem findProgrammingProblemByJid(String problemJid, Problem problemPart);
 
     ProgrammingProblem createProgrammingProblem(String gradingEngine, String additionalNote, LanguageRestriction languageRestriction);
 

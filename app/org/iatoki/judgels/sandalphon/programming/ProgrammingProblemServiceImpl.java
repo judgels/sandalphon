@@ -8,7 +8,7 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.commons.AbstractProblem;
+import org.iatoki.judgels.sandalphon.commons.Problem;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.commons.programming.ProgrammingProblem;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.ProgrammingProblemDao;
@@ -38,7 +38,7 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
     }
 
     @Override
-    public ProgrammingProblem findProgrammingProblemByJid(String problemJid, AbstractProblem problemPart) {
+    public ProgrammingProblem findProgrammingProblemByJid(String problemJid, Problem problemPart) {
         ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
         return createProgrammingProblemFromModel(problemModel, problemPart);
     }
@@ -250,7 +250,7 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
         return new ProgrammingProblem(problemModel.jid, problemModel.gradingEngine, problemModel.additionalNote, new Gson().fromJson(problemModel.languageRestriction, LanguageRestriction.class));
     }
 
-    private ProgrammingProblem createProgrammingProblemFromModel(ProgrammingProblemModel problemModel, AbstractProblem problemPart) {
+    private ProgrammingProblem createProgrammingProblemFromModel(ProgrammingProblemModel problemModel, Problem problemPart) {
         return new ProgrammingProblem(problemPart.getId(), problemModel.jid, problemPart.getName(), problemPart.getAuthorJid(), problemPart.getLastUpdate(), problemModel.gradingEngine, problemModel.additionalNote, new Gson().fromJson(problemModel.languageRestriction, LanguageRestriction.class));
     }
 
