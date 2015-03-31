@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.programming;
 
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.sandalphon.commons.programming.ProgrammingProblem;
 import play.data.Form;
 import play.twirl.api.Html;
 
@@ -14,5 +15,5 @@ public interface GradingConfigAdapter {
 
     GradingConfig createConfigFromForm(Form<?> form);
 
-    Html renderUpdateGradingConfig(Form<?> form, Problem problem, List<File> testDataFiles, List<File> helperFiles);
+    Html renderUpdateGradingConfig(Form<?> form, ProgrammingProblem problem, List<File> testDataFiles, List<File> helperFiles);
 }

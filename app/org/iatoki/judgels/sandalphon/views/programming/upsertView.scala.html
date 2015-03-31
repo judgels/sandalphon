@@ -1,0 +1,55 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.ProgrammingUpsertForm])(implicit fieldConstructor: b3.B3FieldConstructor)
+
+@import scala.collection.JavaConverters._
+@import org.iatoki.judgels.gabriel.GradingEngineRegistry
+@import org.iatoki.judgels.gabriel.GradingLanguageRegistry
+@import play.i18n.Messages
+
+<script type="text/javascript" src="@controllers.routes.Assets.at("lib/jquery/jquery.min.js")"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#isAllowedAll').on('click', function() {
+            if ($('#isAllowedAll').prop('checked')) {
+                $('.allowedLanguageName').each(function() {
+                    $(this).prop('disabled', true);
+                    $(this).prop('checked', true);
+                });
+            } else {
+                $('.allowedLanguageName').each(function() {
+                    $(this).prop('disabled', false);
+                });
+            }
+        });
+    });
+</script>
+
+@helper.CSRF.formField
+
+@b3.text(form("name"), '_label -> Messages.get("problem.name"))
+
+@b3.select(form("gradingEngine"), GradingEngineRegistry.getInstance().getGradingEngines.asScala.toSeq, '_label -> Messages.get("problem.programming.gradingEngine"))
+
+@b3.textarea(form("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
+
+<div class="form-group">
+
+    <label class="control-label col-md-2">@Messages.get("problem.programming.allowedLanguages")</label>
+
+    <div class="col-md-10">
+
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" id="isAllowedAll" name="isAllowedAll" value="true" @if(form("isAllowedAll").value && form("isAllowedAll").value.equals("true")){ checked="checked" }> @Messages.get("problem.programming.allowAll")
+            </label>
+        </div>
+
+        @for((k, v) <- GradingLanguageRegistry.getInstance().getGradingLanguages) {
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" class="allowedLanguageName" name="allowedLanguageNames[@k]" value="@k" @if(form("allowedLanguageNames[" + k + "]").value && form("allowedLanguageNames[" + k + "]").value.equals(k)){ checked="checked" }> @v
+                </label>
+            </div>
+        }
+    </div>
+</div>

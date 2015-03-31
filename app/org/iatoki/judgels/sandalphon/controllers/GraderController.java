@@ -11,20 +11,20 @@ import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
-import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
-import org.iatoki.judgels.sandalphon.Grader;
-import org.iatoki.judgels.sandalphon.GraderService;
-import org.iatoki.judgels.sandalphon.GraderUpsertForm;
+import org.iatoki.judgels.commons.views.html.layouts.sidebarLayout;
+import org.iatoki.judgels.sandalphon.programming.Grader;
+import org.iatoki.judgels.sandalphon.programming.GraderService;
+import org.iatoki.judgels.sandalphon.programming.GraderUpsertForm;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
-import org.iatoki.judgels.sandalphon.views.html.grader.createView;
-import org.iatoki.judgels.sandalphon.views.html.grader.listView;
-import org.iatoki.judgels.sandalphon.views.html.grader.updateView;
-import org.iatoki.judgels.sandalphon.views.html.grader.viewView;
+import org.iatoki.judgels.sandalphon.views.html.programming.grader.createView;
+import org.iatoki.judgels.sandalphon.views.html.programming.grader.listView;
+import org.iatoki.judgels.sandalphon.views.html.programming.grader.updateView;
+import org.iatoki.judgels.sandalphon.views.html.programming.grader.viewView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -147,7 +147,7 @@ public final class GraderController extends Controller {
 
     private void appendTemplateLayout(LazyHtml content) {
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProgrammingProblemController.index()));
+        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
 
         if (SandalphonUtils.hasRole("admin")) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
@@ -155,7 +155,7 @@ public final class GraderController extends Controller {
             internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
         }
 
-        content.appendLayout(c -> leftSidebarLayout.render(
+        content.appendLayout(c -> sidebarLayout.render(
                         IdentityUtils.getUsername(),
                         IdentityUtils.getUserRealName(),
                         org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(routes.GraderController.index().absoluteURL(request())).absoluteURL(request()),

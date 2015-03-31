@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon;
 
 import org.iatoki.judgels.commons.AbstractJidCacheService;
-import org.iatoki.judgels.sandalphon.programming.models.domains.JidCacheModel;
+import org.iatoki.judgels.sandalphon.models.domains.JidCacheModel;
 
 public final class JidCacheService extends AbstractJidCacheService<JidCacheModel> {
     private static JidCacheService INSTANCE;

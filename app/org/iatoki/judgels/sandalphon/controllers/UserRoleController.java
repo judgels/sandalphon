@@ -11,7 +11,7 @@ import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
 import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
-import org.iatoki.judgels.commons.views.html.layouts.leftSidebarLayout;
+import org.iatoki.judgels.commons.views.html.layouts.sidebarLayout;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.UserRole;
@@ -109,7 +109,7 @@ public final class UserRoleController extends Controller {
 
     private void appendTemplateLayout(LazyHtml content) {
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProgrammingProblemController.index()));
+        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
 
         if (SandalphonUtils.hasRole("admin")) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
@@ -117,7 +117,7 @@ public final class UserRoleController extends Controller {
             internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
         }
 
-        content.appendLayout(c -> leftSidebarLayout.render(
+        content.appendLayout(c -> sidebarLayout.render(
             IdentityUtils.getUsername(),
             IdentityUtils.getUserRealName(),
             org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(routes.UserRoleController.index().absoluteURL(request())).absoluteURL(request()),
