@@ -1,17 +1,12 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
-import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
-import org.iatoki.judgels.commons.views.html.layouts.sidebarLayout;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.ClientUpsertForm;
@@ -56,12 +51,14 @@ public final class ClientController extends Controller {
     private Result showCreate(Form<ClientUpsertForm> form) {
         LazyHtml content = new LazyHtml(createView.render(form));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.create"), c));
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.create"), routes.ClientController.create())
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - Create");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @AddCSRFToken
@@ -89,23 +86,27 @@ public final class ClientController extends Controller {
         Client client = clientService.findClientById(clientId);
         LazyHtml content = new LazyHtml(viewView.render(client));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), new InternalLink(Messages.get("commons.update"), routes.ClientController.update(clientId)), c));
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.view"), routes.ClientController.view(clientId))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - View");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdate(Form<ClientUpsertForm> form, Client client) {
         LazyHtml content = new LazyHtml(updateView.render(form, client.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), c));
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.update"), routes.ClientController.update(client.getId()))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - Update");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @AddCSRFToken
@@ -143,48 +144,13 @@ public final class ClientController extends Controller {
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.list"), new InternalLink(Messages.get("commons.create"), routes.ClientController.create()), c));
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index())
-        ), c));
-        appendTemplateLayout(content);
+        ));
 
-        return lazyOk(content);
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - List");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
-
-    private void appendTemplateLayout(LazyHtml content) {
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
-
-        if (SandalphonUtils.hasRole("admin")) {
-            internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
-        }
-
-        content.appendLayout(c -> sidebarLayout.render(
-                        IdentityUtils.getUsername(),
-                        IdentityUtils.getUserRealName(),
-                        org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(routes.ClientController.index().absoluteURL(request())).absoluteURL(request()),
-                        org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(request())).absoluteURL(request()),
-                        internalLinkBuilder.build(), c)
-        );
-        content.appendLayout(c -> headerFooterLayout.render(c));
-        content.appendLayout(c -> baseLayout.render("TODO", c));
-    }
-
-    private Result lazyOk(LazyHtml content) {
-        return getResult(content, Http.Status.OK);
-    }
-
-    private Result getResult(LazyHtml content, int statusCode) {
-        switch (statusCode) {
-            case Http.Status.OK:
-                return ok(content.render(0));
-            case Http.Status.NOT_FOUND:
-                return notFound(content.render(0));
-            default:
-                return badRequest(content.render(0));
-        }
-    }
-
 }

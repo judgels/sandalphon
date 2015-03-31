@@ -56,12 +56,14 @@ public final class UserRoleController extends Controller {
         UserRole userRole = userRoleService.findUserRoleById(userRoleId);
         LazyHtml content = new LazyHtml(updateView.render(form, userRoleId));
         content.appendLayout(c -> headingLayout.render(Messages.get("userRole.update"), c));
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()),
                 new InternalLink(Messages.get("userRole.update"), routes.UserRoleController.update(userRoleId))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "User Roles - Update");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @AddCSRFToken
@@ -99,47 +101,12 @@ public final class UserRoleController extends Controller {
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingLayout.render(Messages.get("userRole.list"), c));
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index())
-        ), c));
-        appendTemplateLayout(content);
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "User Roles - List");
 
-        return lazyOk(content);
-    }
-
-    private void appendTemplateLayout(LazyHtml content) {
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
-
-        if (SandalphonUtils.hasRole("admin")) {
-            internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
-        }
-
-        content.appendLayout(c -> sidebarLayout.render(
-            IdentityUtils.getUsername(),
-            IdentityUtils.getUserRealName(),
-            org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(routes.UserRoleController.index().absoluteURL(request())).absoluteURL(request()),
-            org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(request())).absoluteURL(request()),
-            internalLinkBuilder.build(), c)
-        );
-        content.appendLayout(c -> headerFooterLayout.render(c));
-        content.appendLayout(c -> baseLayout.render("TODO", c));
-    }
-
-    private Result lazyOk(LazyHtml content) {
-        return getResult(content, Http.Status.OK);
-    }
-
-    private Result getResult(LazyHtml content, int statusCode) {
-        switch (statusCode) {
-            case Http.Status.OK:
-                return ok(content.render(0));
-            case Http.Status.NOT_FOUND:
-                return notFound(content.render(0));
-            default:
-                return badRequest(content.render(0));
-        }
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 }

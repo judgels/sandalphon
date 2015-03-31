@@ -3,7 +3,6 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FilenameUtils;
-import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
@@ -13,7 +12,6 @@ import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
 import org.iatoki.judgels.sandalphon.ProblemService;
-import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.commons.Problem;
 import org.iatoki.judgels.sandalphon.commons.ProblemType;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
@@ -33,13 +31,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
-import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
-import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
-import org.iatoki.judgels.commons.views.html.layouts.sidebarLayout;
-import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
 
 import org.iatoki.judgels.sandalphon.views.html.listView;
 import org.iatoki.judgels.sandalphon.views.html.updateStatementView;
@@ -48,6 +40,7 @@ import org.iatoki.judgels.sandalphon.views.html.updateClientProblemsView;
 import org.iatoki.judgels.sandalphon.views.html.viewClientProblemView;
 
 import javax.imageio.ImageIO;
+import javax.naming.ldap.Control;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -84,12 +77,14 @@ public final class ProblemController extends Controller {
 
         LazyHtml content = new LazyHtml(listView.render(problems, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.list"), new InternalLink(Messages.get("commons.create"), routes.ProgrammingProblemController.create()), c));
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
-        ), c));
-        appendTemplateLayout(content);
 
-        return lazyOk(content);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problems");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -143,7 +138,7 @@ public final class ProblemController extends Controller {
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
         form = form.bind(ImmutableMap.of("statement", statement));
 
-        return showUpdateStatement(form, problem.getId(), problem.getName());
+        return showUpdateStatement(form, problem);
     }
 
     @RequireCSRFCheck
@@ -153,7 +148,7 @@ public final class ProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
         if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showUpdateStatement(form, problem.getId(), problem.getName());
+            return showUpdateStatement(form, problem);
         } else {
             problemService.updateStatement(problemId, form.get().statement);
             return redirect(routes.ProblemController.updateStatement(problem.getId()));
@@ -173,7 +168,7 @@ public final class ProblemController extends Controller {
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
         List<File> mediaFiles = problemService.getStatementMediaFiles(problem.getJid());
 
-        return showListStatementMediaFiles(form, problem.getId(), problem.getName(), mediaFiles);
+        return showListStatementMediaFiles(form, problem, mediaFiles);
     }
 
     @RequireCSRFCheck
@@ -281,16 +276,17 @@ public final class ProblemController extends Controller {
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
         if (clientProblem.getProblemJid().equals(problem.getJid())) {
             LazyHtml content = new LazyHtml(viewClientProblemView.render(problem, clientProblem));
-            appendTabsLayout(content, problemId, problem.getName());
-            content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+            ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+            ControllerUtils.getInstance().appendSidebarLayout(content);
+            ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                     new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                     new InternalLink(Messages.get("problem.client.client"), routes.ProblemController.viewClientProblem(problemId, clientProblemId))
-            ), c));
-            appendTemplateLayout(content);
+            ));
+            ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
-            return lazyOk(content);
+            return ControllerUtils.getInstance().lazyOk(content);
         } else {
-            return redirect(routes.ProgrammingProblemController.updateGeneral(problem.getId()));
+            return notFound();
         }
     }
 
@@ -315,131 +311,60 @@ public final class ProblemController extends Controller {
         }
     }
 
-    private Result showUpdateStatement(Form<UpdateStatementForm> form, long problemId, String problemName) {
-        LazyHtml content = new LazyHtml(updateStatementView.render(form, problemId));
+    private Result showUpdateStatement(Form<UpdateStatementForm> form, Problem problem) {
+        LazyHtml content = new LazyHtml(updateStatementView.render(form, problem.getId()));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewStatement(problemId)),
-                new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problemId)),
-                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problemId))
+                new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewStatement(problem.getId())),
+                new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problem.getId()))
         ), c));
-        appendTabsLayout(content, problemId, problemName);
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problemId)),
-                new InternalLink(Messages.get("problem.statement.update"), routes.ProblemController.updateStatement(problemId))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
+                new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.update"), routes.ProblemController.updateStatement(problem.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showListStatementMediaFiles(Form<UploadFileForm> form, long problemId, String problemName, List<File> mediaFiles) {
-        LazyHtml content = new LazyHtml(listStatementMediaFilesView.render(form, problemId, mediaFiles));
+    private Result showListStatementMediaFiles(Form<UploadFileForm> form, Problem problem, List<File> mediaFiles) {
+        LazyHtml content = new LazyHtml(listStatementMediaFilesView.render(form, problem.getId(), mediaFiles));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewStatement(problemId)),
-                new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problemId)),
-                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problemId))
+                new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewStatement(problem.getId())),
+                new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problem.getId()))
                 ), c));
-        appendTabsLayout(content, problemId, problemName);
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
-                new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problemId)),
-                new InternalLink(Messages.get("problem.statement.media.list"), routes.ProblemController.listStatementMediaFiles(problemId))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
+                new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.media.list"), routes.ProblemController.listStatementMediaFiles(problem.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> form, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
         LazyHtml content = new LazyHtml(updateClientProblemsView.render(form, problem.getId(), clients, clientProblems));
-        appendTabsLayout(content, problem.getId(), problem.getName());
-        content.appendLayout(c -> breadcrumbsLayout.render(ImmutableList.of(
+        ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.client"), routes.ProblemController.jumpToClients(problem.getId())),
                 new InternalLink(Messages.get("problem.client.list"), routes.ProblemController.updateClientProblems(problem.getId()))
-        ), c));
-        appendTemplateLayout(content);
-        return lazyOk(content);
-    }
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
-    private void appendTabsLayout(LazyHtml content, long problemId, String problemName) {
-        Problem problem = problemService.findProblemById(problemId);
-
-        ImmutableList.Builder<InternalLink> internalLinksBuilder = ImmutableList.builder();
-        internalLinksBuilder.add(
-                new InternalLink(Messages.get("problem.general"), routes.ProblemController.jumpToGeneral(problemId)),
-                new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problemId))
-        );
-
-        if (problem.getType() == ProblemType.PROGRAMMING) {
-            internalLinksBuilder.add(
-                    new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problemId)),
-                    new InternalLink(Messages.get("problem.programming.submission"), routes.ProgrammingProblemController.jumpToSubmissions(problemId))
-            );
-        }
-
-        internalLinksBuilder.add(
-                new InternalLink(Messages.get("problem.client"), routes.ProblemController.jumpToClients(problemId))
-        );
-
-        content.appendLayout(c -> tabLayout.render(internalLinksBuilder.build(), c));
-
-        content.appendLayout(c -> headingLayout.render("#" + problemId + ": " + problemName, c));
-    }
-
-    private void appendTemplateLayout(LazyHtml content) {
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-
-        if (isAllowedToWrite()) {
-            internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
-        }
-
-        if (isAdmin()) {
-            internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("userRole.userRoles"), routes.UserRoleController.index()));
-        }
-
-        content.appendLayout(c -> sidebarLayout.render(
-                        IdentityUtils.getUsername(),
-                        IdentityUtils.getUserRealName(),
-                        org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(routes.ProblemController.index().absoluteURL(request())).absoluteURL(request()),
-                        org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(request())).absoluteURL(request()),
-                        internalLinkBuilder.build(), c)
-        );
-        content.appendLayout(c -> headerFooterLayout.render(c));
-        content.appendLayout(c -> baseLayout.render("TODO", c));
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result downloadFile(File file) {
         response().setContentType("application/x-download");
         response().setHeader("Content-disposition", "attachment; filename=" + file.getName());
         return ok(file);
-    }
-
-    private Result lazyOk(LazyHtml content) {
-        return getResult(content, Http.Status.OK);
-    }
-
-    private boolean isAdmin() {
-        return SandalphonUtils.hasRole("admin");
-    }
-
-    private boolean isWriter() {
-        return SandalphonUtils.hasRole("writer");
-    }
-
-    private boolean isAllowedToWrite() {
-        return isAdmin() || isWriter();
-    }
-
-    private Result getResult(LazyHtml content, int statusCode) {
-        switch (statusCode) {
-            case Http.Status.OK:
-                return ok(content.render(0));
-            case Http.Status.NOT_FOUND:
-                return notFound(content.render(0));
-            default:
-                return badRequest(content.render(0));
-        }
     }
 }
