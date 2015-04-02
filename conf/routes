@@ -46,6 +46,7 @@ GET         /problems/programming/create                                        
 POST        /problems/programming/create                                        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postCreate()
 
 GET         /problems/programming/:pId/statement/view                           @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewStatement(pId: Long)
+GET         /problems/programming/:pId/statement/render/:filename               @org.iatoki.judgels.sandalphon.controllers.ProblemController.renderMediaById(pId: Long, filename: String)
 
 GET         /problems/programming/:pId/general/view                             @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewGeneral(pId: Long)
 GET         /problems/programming/:pId/general/update                           @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGeneral(pId: Long)

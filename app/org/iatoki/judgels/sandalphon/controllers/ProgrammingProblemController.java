@@ -4,12 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
-import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.FileInfo;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.ListTableSelectionForm;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.commons.SubmissionService;
 import org.iatoki.judgels.sandalphon.ClientService;
@@ -18,40 +19,29 @@ import org.iatoki.judgels.gabriel.commons.Submission;
 import org.iatoki.judgels.gabriel.commons.SubmissionException;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.gabriel.commons.SubmissionAdapters;
-import org.iatoki.judgels.commons.views.html.layouts.baseLayout;
-import org.iatoki.judgels.commons.views.html.layouts.breadcrumbsLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headerFooterLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
-import org.iatoki.judgels.commons.views.html.layouts.sidebarLayout;
-import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
 import org.iatoki.judgels.gabriel.GradingSource;
-import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
-import org.iatoki.judgels.sandalphon.commons.Problem;
+import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestrictionAdapter;
-import org.iatoki.judgels.sandalphon.commons.programming.ProgrammingProblem;
+import org.iatoki.judgels.sandalphon.programming.ProgrammingProblem;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapter;
 import org.iatoki.judgels.sandalphon.programming.adapters.ConfigurableWithAutoPopulation;
 import org.iatoki.judgels.sandalphon.programming.adapters.ConfigurableWithTokilibFormat;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemService;
-import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.UploadFileForm;
 import org.iatoki.judgels.sandalphon.forms.programming.ProgrammingUpsertForm;
-import org.iatoki.judgels.sandalphon.views.html.listView;
-import org.iatoki.judgels.sandalphon.views.html.listStatementMediaFilesView;
-import org.iatoki.judgels.sandalphon.views.html.updateClientProblemsView;
-import org.iatoki.judgels.sandalphon.views.html.viewClientProblemView;
 import org.iatoki.judgels.sandalphon.views.html.programming.createView;
 import org.iatoki.judgels.sandalphon.views.html.programming.listGradingTestDataFilesView;
 import org.iatoki.judgels.sandalphon.views.html.programming.listGradingHelperFilesView;
@@ -73,6 +63,8 @@ import play.twirl.api.Html;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -119,9 +111,12 @@ public final class ProgrammingProblemController extends Controller {
             ProgrammingUpsertForm data = form.get();
 
             LanguageRestriction languageRestriction = LanguageRestrictionAdapter.createLanguageRestrictionFromForm(data.allowedLanguageNames, data.isAllowedAll);
-            ProgrammingProblem programmingProblem = programmingProblemService.createProgrammingProblem(data.gradingEngine, data.additionalNote, languageRestriction);
 
-            Problem problem = problemService.createProblem(data.name, programmingProblem.getJid());
+            Problem problem = problemService.createProblem(ProblemType.PROGRAMMING, data.name, data.additionalNote);
+            programmingProblemService.createProgrammingProblem(problem.getJid());
+
+            programmingProblemService.updateGradingEngine(problem.getJid(), data.gradingEngine);
+            programmingProblemService.updateLanguageRestriction(problem.getJid(), languageRestriction);
 
             return redirect(routes.ProgrammingProblemController.viewStatement(problem.getId()));
         }
@@ -156,13 +151,12 @@ public final class ProgrammingProblemController extends Controller {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-
-
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result viewGeneral(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid(), problem);
+        ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid());
+
         LazyHtml content = new LazyHtml(viewGeneralView.render(programmingProblem));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewGeneral(problemId)),
@@ -207,9 +201,10 @@ public final class ProgrammingProblemController extends Controller {
             return showUpdateGeneral(form, problem);
         } else {
             ProgrammingUpsertForm data = form.get();
+            problemService.updateProblem(problem.getId(), data.name, data.additionalNote);
+            programmingProblemService.updateGradingEngine(problem.getJid(), data.gradingEngine);
             LanguageRestriction languageRestriction = LanguageRestrictionAdapter.createLanguageRestrictionFromForm(data.allowedLanguageNames, data.isAllowedAll);
-            problemService.updateProblem(problem.getId(), data.name);
-            programmingProblemService.updateProgrammingProblem(problem.getJid(), data.gradingEngine, data.additionalNote, languageRestriction);
+            programmingProblemService.updateLanguageRestriction(problem.getJid(), languageRestriction);
             return redirect(routes.ProgrammingProblemController.updateGeneral(problem.getId()));
         }
     }
@@ -248,7 +243,7 @@ public final class ProgrammingProblemController extends Controller {
         ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid());
         Submission submission = submissionService.findSubmissionById(submissionId);
 
-        GradingSource source = SubmissionAdapters.fromGradingEngine(programmingProblem.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseProgrammingSubmissionDir(), submission.getJid());
+        GradingSource source = SubmissionAdapters.fromGradingEngine(programmingProblem.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(programmingProblem.getGradingEngine()).renderViewSubmission(submission, source, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
 
@@ -268,7 +263,7 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result regradeSubmission(long problemId, long submissionId, long pageIndex, String orderBy, String orderDir) {
         Submission submission = submissionService.findSubmissionById(submissionId);
-        GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseProgrammingSubmissionDir(), submission.getJid());
+        GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
         submissionService.regrade(submission.getJid(), source);
 
         return redirect(routes.ProgrammingProblemController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
@@ -292,7 +287,7 @@ public final class ProgrammingProblemController extends Controller {
         }
 
         for (Submission submission : submissions) {
-            GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseProgrammingSubmissionDir(), submission.getJid());
+            GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
             submissionService.regrade(submission.getJid(), source);
         }
 
@@ -318,10 +313,10 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateGradingConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid(), problem);
+        ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid());
         GradingConfig config = programmingProblemService.getGradingConfig(problem.getJid());
-        List<File> testDataFiles = programmingProblemService.getTestDataFiles(problem.getJid());
-        List<File> helperFiles = programmingProblemService.getHelperFiles(problem.getJid());
+        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
+        List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(problem.getJid());
 
         Form<?> form = GradingConfigAdapters.fromGradingType(programmingProblem.getGradingEngine()).createFormFromConfig(config);
 
@@ -333,12 +328,12 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result postUpdateGradingConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid(), problem);
+        ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid());
         Form<?> form = GradingConfigAdapters.fromGradingType(programmingProblem.getGradingEngine()).createEmptyForm().bindFromRequest(request());
 
         if (form.hasErrors() || form.hasGlobalErrors()) {
-            List<File> testDataFiles = programmingProblemService.getTestDataFiles(problem.getJid());
-            List<File> helperFiles = programmingProblemService.getHelperFiles(problem.getJid());
+            List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
+            List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(problem.getJid());
             return showUpdateGradingConfig(form, programmingProblem, testDataFiles, helperFiles);
         } else {
             GradingConfig config = GradingConfigAdapters.fromGradingType(programmingProblem.getGradingEngine()).createConfigFromForm(form);
@@ -353,7 +348,7 @@ public final class ProgrammingProblemController extends Controller {
     public Result updateGradingConfigByTokilibFormat(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid());
-        List<File> testDataFiles = programmingProblemService.getTestDataFiles(problem.getJid());
+        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
         GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(programmingProblem.getGradingEngine());
 
         if (! (adapter instanceof ConfigurableWithTokilibFormat)) {
@@ -373,7 +368,7 @@ public final class ProgrammingProblemController extends Controller {
     public Result updateGradingConfigByAutoPopulation(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         ProgrammingProblem programmingProblem = programmingProblemService.findProgrammingProblemByJid(problem.getJid());
-        List<File> testDataFiles = programmingProblemService.getTestDataFiles(problem.getJid());
+        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
         GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(programmingProblem.getGradingEngine());
 
         if (! (adapter instanceof ConfigurableWithAutoPopulation)) {
@@ -394,7 +389,7 @@ public final class ProgrammingProblemController extends Controller {
     public Result listGradingTestDataFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-        List<File> testDataFiles = programmingProblemService.getTestDataFiles(problem.getJid());
+        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
 
         return showListGradingTestDataFiles(form, problem, testDataFiles);
     }
@@ -410,14 +405,14 @@ public final class ProgrammingProblemController extends Controller {
         file = body.getFile("file");
         if (file != null) {
             File testDataFile = file.getFile();
-            programmingProblemService.uploadTestDataFile(problem.getJid(), testDataFile, file.getFilename());
+            programmingProblemService.uploadGradingTestDataFile(problem.getJid(), testDataFile, file.getFilename());
             return redirect(routes.ProgrammingProblemController.listGradingTestDataFiles(problem.getId()));
         }
 
         file = body.getFile("fileZipped");
         if (file != null) {
             File testDataFile = file.getFile();
-            programmingProblemService.uploadTestDataFileZipped(problem.getJid(), testDataFile);
+            programmingProblemService.uploadGradingTestDataFileZipped(problem.getJid(), testDataFile);
             return redirect(routes.ProgrammingProblemController.listGradingTestDataFiles(problem.getId()));
         }
 
@@ -430,7 +425,7 @@ public final class ProgrammingProblemController extends Controller {
     public Result listGradingHelperFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-        List<File> helperFiles = programmingProblemService.getHelperFiles(problem.getJid());
+        List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(problem.getJid());
 
         return showListGradingHelperFiles(form, problem, helperFiles);
     }
@@ -446,14 +441,14 @@ public final class ProgrammingProblemController extends Controller {
         file = body.getFile("file");
         if (file != null) {
             File helperFile = file.getFile();
-            programmingProblemService.uploadHelperFile(problem.getJid(), helperFile, file.getFilename());
+            programmingProblemService.uploadGradingHelperFile(problem.getJid(), helperFile, file.getFilename());
             return redirect(routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId()));
         }
 
         file = body.getFile("fileZipped");
         if (file != null) {
             File helperFile = file.getFile();
-            programmingProblemService.uploadHelperFileZipped(problem.getJid(), helperFile);
+            programmingProblemService.uploadGradingHelperFileZipped(problem.getJid(), helperFile);
             return redirect(routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId()));
         }
 
@@ -475,7 +470,7 @@ public final class ProgrammingProblemController extends Controller {
         try {
             GradingSource source = SubmissionAdapters.fromGradingEngine(programmingProblem.getGradingEngine()).createGradingSourceFromNewSubmission(body);
             String submissionJid = submissionService.submit(problem.getJid(), null, programmingProblem.getGradingEngine(), gradingLanguage, allowedLanguageNames, source);
-            SubmissionAdapters.fromGradingEngine(programmingProblem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getBaseProgrammingSubmissionDir(), submissionJid, source);
+            SubmissionAdapters.fromGradingEngine(programmingProblem.getGradingEngine()).storeSubmissionFiles(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submissionJid, source);
         } catch (SubmissionException e) {
             flash("submissionError", e.getMessage());
             return redirect(routes.ProgrammingProblemController.viewStatement(problem.getId()));
@@ -488,11 +483,13 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result downloadGradingTestDataFile(long id, String filename) {
         Problem problem = problemService.findProblemById(id);
-        File file = programmingProblemService.getTestDataFile(problem.getJid(), filename);
-        if (file.exists()) {
-            return downloadFile(file);
-        } else {
-            return notFound();
+        String testDataURL = programmingProblemService.getGradingTestDataFileURL(problem.getJid(), filename);
+        try {
+            new URL(testDataURL);
+            return redirect(testDataURL);
+        } catch (MalformedURLException e) {
+            File testDataFile = new File(testDataURL);
+            return downloadFile(testDataFile);
         }
     }
 
@@ -500,11 +497,13 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result downloadGradingHelperFile(long id, String filename) {
         Problem problem = problemService.findProblemById(id);
-        File file = programmingProblemService.getHelperFile(problem.getJid(), filename);
-        if (file.exists()) {
-            return downloadFile(file);
-        } else {
-            return notFound();
+        String helperURL = programmingProblemService.getGradingHelperFileURL(problem.getJid(), filename);
+        try {
+            new URL(helperURL);
+            return redirect(helperURL);
+        } catch (MalformedURLException e) {
+            File helperFile = new File(helperURL);
+            return downloadFile(helperFile);
         }
     }
 
@@ -609,7 +608,7 @@ public final class ProgrammingProblemController extends Controller {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateGradingConfig(Form<?> form, ProgrammingProblem problem, List<File> testDataFiles, List<File> helperFiles) {
+    private Result showUpdateGradingConfig(Form<?> form, ProgrammingProblem problem, List<FileInfo> testDataFiles, List<FileInfo> helperFiles) {
         GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(problem.getGradingEngine());
         LazyHtml content = new LazyHtml(adapter.renderUpdateGradingConfig(form, problem, testDataFiles, helperFiles));
 
@@ -637,7 +636,7 @@ public final class ProgrammingProblemController extends Controller {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showListGradingTestDataFiles(Form<UploadFileForm> form, Problem problem, List<File> testDataFiles) {
+    private Result showListGradingTestDataFiles(Form<UploadFileForm> form, Problem problem, List<FileInfo> testDataFiles) {
         LazyHtml content = new LazyHtml(listGradingTestDataFilesView.render(form, problem.getId(), testDataFiles));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemController.updateGradingConfig(problem.getId())),
@@ -656,7 +655,7 @@ public final class ProgrammingProblemController extends Controller {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showListGradingHelperFiles(Form<UploadFileForm> form, Problem problem, List<File> helperFiles) {
+    private Result showListGradingHelperFiles(Form<UploadFileForm> form, Problem problem, List<FileInfo> helperFiles) {
         LazyHtml content = new LazyHtml(listGradingHelperFilesView.render(form, problem.getId(), helperFiles));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemController.updateGradingConfig(problem.getId())),

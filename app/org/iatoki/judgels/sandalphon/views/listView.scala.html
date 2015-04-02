@@ -1,4 +1,4 @@
-@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.commons.Problem], orderBy: String, orderDir: String, filterString: String)
+@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.Problem], orderBy: String, orderDir: String, filterString: String)
 
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.sandalphon.JidCacheService
@@ -29,7 +29,7 @@
                 <td>@problem.getId</td>
                 <td>@problem.getName</td>
                 <td>@displayNamesMap.get(problem.getAuthorJid)</td>
-                <td>@JudgelsUtils.formatDate(problem.getLastUpdate)</td>
+                <td>@JudgelsUtils.formatDate(problem.getLastUpdateTime)</td>
                 <td class="text-center">
                     <a href="@routes.ProgrammingProblemController.viewStatement(problem.getId)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
                 </td>

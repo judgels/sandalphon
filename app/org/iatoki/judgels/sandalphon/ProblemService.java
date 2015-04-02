@@ -1,14 +1,14 @@
 package org.iatoki.judgels.sandalphon;
 
+import org.iatoki.judgels.commons.FileInfo;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.sandalphon.commons.Problem;
 
 import java.io.File;
 import java.util.List;
 
 public interface ProblemService {
 
-    Problem createProblem(String name, String childJid);
+    Problem createProblem(ProblemType type, String name, String additionalNote);
 
     boolean problemExistsByJid(String problemJid);
 
@@ -16,19 +16,19 @@ public interface ProblemService {
 
     Problem findProblemByJid(String problemJid);
 
-    void updateProblem(long problemId, String name);
+    void updateProblem(long problemId, String name, String additionalNote);
 
     Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    void updateStatement(long problemId, String statement);
-
     String getStatement(String problemJid);
+
+    void updateStatement(long problemId, String statement);
 
     void uploadStatementMediaFile(long problemId, File mediaFile, String filename);
 
     void uploadStatementMediaFileZipped(long problemId, File mediaFileZipped);
 
-    List<File> getStatementMediaFiles(String problemJid);
+    List<FileInfo> getStatementMediaFiles(String problemJid);
 
-    File getStatementMediaFile(String problemJid, String filename);
+    String getStatementMediaFileURL(String problemJid, String filename);
 }

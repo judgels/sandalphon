@@ -2,37 +2,38 @@ package org.iatoki.judgels.sandalphon;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.FileUtils;
+import org.iatoki.judgels.commons.FileInfo;
+import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.JidService;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.sandalphon.commons.Problem;
-import org.iatoki.judgels.sandalphon.commons.ProblemType;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.domains.ProblemModel;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public final class ProblemServiceImpl implements ProblemService {
 
     private final ProblemDao problemDao;
+    private final FileSystemProvider fileSystemProvider;
 
-    public ProblemServiceImpl(ProblemDao problemDao) {
+    public ProblemServiceImpl(ProblemDao problemDao, FileSystemProvider fileSystemProvider) {
         this.problemDao = problemDao;
+        this.fileSystemProvider = fileSystemProvider;
     }
 
     @Override
-    public Problem createProblem(String name, String childJid) {
+    public Problem createProblem(ProblemType type, String name, String additionalNote) {
         ProblemModel problemModel = new ProblemModel();
         problemModel.name = name;
+        problemModel.additionalNote = additionalNote;
 
-        problemDao.persist(problemModel, childJid, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        problemDao.persist(problemModel, type.ordinal(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        initStatement(problemModel.jid);
-        initMedia(problemModel.jid);
+        initStatements(problemModel.jid);
 
         return createProblemFromModel(problemModel);
     }
@@ -55,9 +56,10 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void updateProblem(long problemId, String name) {
+    public void updateProblem(long problemId, String name, String additionalNote) {
         ProblemModel problemModel = problemDao.findById(problemId);
         problemModel.name = name;
+        problemModel.additionalNote = additionalNote;
 
         problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -72,41 +74,25 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
+    public String getStatement(String problemJid) {
+        List<String> statementFilePath = appendPath(getStatementsDirPath(problemJid), "statement.html");
+        return fileSystemProvider.readFromFile(statementFilePath);
+    }
+
+    @Override
     public void updateStatement(long problemId, String statement) {
         ProblemModel problemModel = problemDao.findById(problemId);
-        File statementDir = SandalphonProperties.getInstance().getProblemStatementDir(problemModel.jid);
-
-        try {
-            FileUtils.writeStringToFile(new File(statementDir, "statement.html"), statement);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        List<String> statementFilePath = appendPath(getStatementsDirPath(problemModel.jid), "statement.html");
+        fileSystemProvider.writeToFile(statementFilePath, statement);
 
         problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
-    public String getStatement(String problemJid) {
-        File statementDir = SandalphonProperties.getInstance().getProblemStatementDir(problemJid);
-        String statement;
-        try {
-            statement = FileUtils.readFileToString(new File(statementDir, "statement.html"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return statement;
-    }
-
-    @Override
     public void uploadStatementMediaFile(long id, File mediaFile, String filename) {
         ProblemModel problemModel = problemDao.findById(id);
-        File problemMediaDir = SandalphonProperties.getInstance().getProblemMediaDir(problemModel.jid);
-        try {
-            FileUtils.copyFile(mediaFile, new File(problemMediaDir, filename));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        List<String> mediaDirPath = getStatementMediaDirPath(problemModel.jid);
+        fileSystemProvider.uploadFile(mediaDirPath, mediaFile, filename);
 
         problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -114,25 +100,22 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public void uploadStatementMediaFileZipped(long id, File mediaFileZipped) {
         ProblemModel problemModel = problemDao.findById(id);
-        File problemMediaDir = SandalphonProperties.getInstance().getProblemMediaDir(problemModel.jid);
-
-        SandalphonUtils.uploadZippedFiles(problemMediaDir, mediaFileZipped);
+        List<String> mediaDirPath = getStatementMediaDirPath(problemModel.jid);
+        fileSystemProvider.uploadZippedFiles(mediaDirPath, mediaFileZipped);
 
         problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
-    public List<File> getStatementMediaFiles(String problemJid) {
-        File mediaDir = SandalphonProperties.getInstance().getProblemMediaDir(problemJid);
-
-        return SandalphonUtils.getSortedFilesInDir(mediaDir);
+    public List<FileInfo> getStatementMediaFiles(String problemJid) {
+        List<String> mediaDirPath = getStatementMediaDirPath(problemJid);
+        return fileSystemProvider.listFilesInDirectory(mediaDirPath);
     }
 
     @Override
-    public File getStatementMediaFile(String problemJid, String filename) {
-        File mediaDir = SandalphonProperties.getInstance().getProblemMediaDir(problemJid);
-
-        return new File(mediaDir, filename);
+    public String getStatementMediaFileURL(String problemJid, String filename) {
+        List<String> mediaFilePath = appendPath(getStatementMediaDirPath(problemJid), filename);
+        return fileSystemProvider.getURL(mediaFilePath);
     }
 
     private ProblemType getProblemType(ProblemModel problemModel) {
@@ -145,56 +128,63 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     private Problem createProblemFromModel(ProblemModel problemModel) {
-        return new Problem(problemModel.id, problemModel.jid, problemModel.name, problemModel.userCreate, new Date(problemModel.timeUpdate), getProblemType(problemModel));
+        return new Problem(problemModel.id, problemModel.jid, problemModel.name, problemModel.userCreate, problemModel.additionalNote, new Date(problemModel.timeUpdate), getProblemType(problemModel));
     }
 
-    private void initStatement(String problemJid) {
-        File statementDir = SandalphonProperties.getInstance().getProblemStatementDir(problemJid);
+    private void initStatements(String problemJid) {
+        List<String> statementsDirPath = getStatementsDirPath(problemJid);
+        fileSystemProvider.createDirectory(statementsDirPath);
 
-        try {
-            FileUtils.forceMkdir(statementDir);
-            FileUtils.writeStringToFile(new File(statementDir, "statement.html"),
+        List<String> mediaDirPath = getStatementMediaDirPath(problemJid);
+        fileSystemProvider.createDirectory(mediaDirPath);
 
-                    "<h3>Deskripsi</h3>\n" +
-                            "\n" +
-                            "<p>Blabla.</p>\n" +
-                            "\n" +
-                            "<h3>Format Masukan</h3>\n" +
-                            "\n" +
-                            "<p>Blabla.</p>\n" +
-                            "\n" +
-                            "<h3>Format Keluaran</h3>\n" +
-                            "\n" +
-                            "<p>Blabla.</p>\n" +
-                            "\n" +
-                            "<h3>Contoh Masukan</h3>\n" +
-                            "\n" +
-                            "<pre>\n" +
-                            "Blabla.</pre>\n" +
-                            "\n" +
-                            "<h3>Contoh Keluaran</h3>\n" +
-                            "\n" +
-                            "<pre>\n" +
-                            "Blabla.</pre>\n" +
-                            "\n" +
-                            "<h3>Batasan/Subsoal</h3>\n" +
-                            "\n" +
-                            "<ul>\n" +
-                            "\t<li>Blabla</li>\n" +
-                            "</ul>\n"
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ArrayList<String> statementFilePath = getStatementsDirPath(problemJid);
+        statementFilePath.add("statement.html");
+        fileSystemProvider.writeToFile(statementFilePath,
+                "<h3>Deskripsi</h3>\n" +
+                        "\n" +
+                        "<p>Blabla.</p>\n" +
+                        "\n" +
+                        "<h3>Format Masukan</h3>\n" +
+                        "\n" +
+                        "<p>Blabla.</p>\n" +
+                        "\n" +
+                        "<h3>Format Keluaran</h3>\n" +
+                        "\n" +
+                        "<p>Blabla.</p>\n" +
+                        "\n" +
+                        "<h3>Contoh Masukan</h3>\n" +
+                        "\n" +
+                        "<pre>\n" +
+                        "Blabla.</pre>\n" +
+                        "\n" +
+                        "<h3>Contoh Keluaran</h3>\n" +
+                        "\n" +
+                        "<pre>\n" +
+                        "Blabla.</pre>\n" +
+                        "\n" +
+                        "<h3>Batasan/Subsoal</h3>\n" +
+                        "\n" +
+                        "<ul>\n" +
+                        "\t<li>Blabla</li>\n" +
+                        "</ul>\n"
+        );
     }
 
-    private void initMedia(String problemJid) {
-        File mediaDir = SandalphonProperties.getInstance().getProblemMediaDir(problemJid);
+    private ArrayList<String> getRootDirPath(String problemJid) {
+        return Lists.newArrayList(SandalphonProperties.getInstance().getBaseProblemsDirKey(), problemJid);
+    }
 
-        try {
-            FileUtils.forceMkdir(mediaDir);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private ArrayList<String> getStatementsDirPath(String problemJid) {
+        return appendPath(getRootDirPath(problemJid), "statements");
+    }
+
+    private ArrayList<String> getStatementMediaDirPath(String problemJid) {
+        return appendPath(getStatementsDirPath(problemJid), "media");
+    }
+
+    private ArrayList<String> appendPath(ArrayList<String> parentPath, String child) {
+        parentPath.add(child);
+        return parentPath;
     }
 }

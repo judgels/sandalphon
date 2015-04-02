@@ -1,275 +1,195 @@
 package org.iatoki.judgels.sandalphon.programming;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import org.apache.commons.io.FileUtils;
-import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.FileInfo;
+import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
-import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.commons.Problem;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
-import org.iatoki.judgels.sandalphon.commons.programming.ProgrammingProblem;
-import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.ProgrammingProblemDao;
-import org.iatoki.judgels.sandalphon.models.domains.programming.ProgrammingProblemModel;
+import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemDao;
+import org.iatoki.judgels.sandalphon.models.domains.ProblemModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public final class ProgrammingProblemServiceImpl implements ProgrammingProblemService {
 
-    private final ProgrammingProblemDao problemDao;
+    private final ProblemDao problemDao;
+    private final FileSystemProvider fileSystemProvider;
 
-    public ProgrammingProblemServiceImpl(ProgrammingProblemDao problemDao) {
+    public ProgrammingProblemServiceImpl(ProblemDao problemDao, FileSystemProvider fileSystemProvider) {
         this.problemDao = problemDao;
+        this.fileSystemProvider = fileSystemProvider;
     }
 
     @Override
     public ProgrammingProblem findProgrammingProblemByJid(String problemJid) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-        return createProgrammingProblemFromModel(problemModel);
+        ProblemModel problemModel = problemDao.findByJid(problemJid);
+        return new ProgrammingProblem(problemModel.id, problemJid, problemModel.name, problemModel.userCreate, problemModel.additionalNote, new Date(problemModel.timeUpdate), getGradingEngine(problemJid), getLanguageRestriction(problemJid));
     }
 
     @Override
-    public ProgrammingProblem findProgrammingProblemByJid(String problemJid, Problem problemPart) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-        return createProgrammingProblemFromModel(problemModel, problemPart);
-    }
-
-    @Override
-    public ProgrammingProblem createProgrammingProblem(String gradingEngine, String additionalNote, LanguageRestriction languageRestriction) {
-        ProgrammingProblemModel problemModel = new ProgrammingProblemModel();
-        problemModel.gradingEngine = gradingEngine;
-        problemModel.additionalNote = additionalNote;
-        problemModel.languageRestriction = new Gson().toJson(languageRestriction);
-
-        problemDao.persist(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
-        initGrading(problemModel);
-
-        return createProgrammingProblemFromModel(problemModel);
-    }
-
-    @Override
-    public void updateProgrammingProblem(String problemJid, String gradingEngine, String additionalNote, LanguageRestriction languageRestriction) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-
-        if (!gradingEngine.equals(problemModel.gradingEngine)) {
-            updateGradingConfig(problemJid, GradingEngineRegistry.getInstance().getEngine(gradingEngine).createDefaultGradingConfig());
-        }
-
-        problemModel.gradingEngine = gradingEngine;
-        problemModel.additionalNote = additionalNote;
-        problemModel.languageRestriction = new Gson().toJson(languageRestriction);
-
-        updateProblemModel(problemModel);
-    }
-
-    @Override
-    public GradingConfig getGradingConfig(String problemJid) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-        File gradingDir = SandalphonProperties.getInstance().getProgrammingGradingDir(problemJid);
-        String json;
-        try {
-            json = FileUtils.readFileToString(new File(gradingDir, "config.json"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return GradingEngineRegistry.getInstance().getEngine(problemModel.gradingEngine).createGradingConfigFromJson(json);
+    public void createProgrammingProblem(String problemJid) {
+        initGrading(problemJid);
     }
 
     @Override
     public Date getGradingLastUpdateTime(String problemJid) {
-        File lastUpdateTimeFile = new File(SandalphonProperties.getInstance().getProgrammingGradingDir(problemJid), "lastUpdateTime.txt");
-        try {
-            return new Date(Long.parseLong(FileUtils.readFileToString(lastUpdateTimeFile)));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String lastUpdateTime = fileSystemProvider.readFromFile(getGradingLastUpdateTimeFilePath(problemJid));
+        return new Date(Long.parseLong(lastUpdateTime));
     }
 
     @Override
-    public void uploadTestDataFile(String problemJid, File testDataFile, String filename) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-        File testDataDir = SandalphonProperties.getInstance().getProgrammingGradingTestDataDir(problemJid);
-        try {
-            FileUtils.copyFile(testDataFile, new File(testDataDir, filename));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public GradingConfig getGradingConfig(String problemJid) {
+        String gradingEngine = fileSystemProvider.readFromFile(getGradingEngineFilePath(problemJid));
+        String gradingConfig = fileSystemProvider.readFromFile(getGradingConfigFilePath(problemJid));
 
-        updateProblemModel(problemModel);
+        return GradingEngineRegistry.getInstance().getEngine(gradingEngine).createGradingConfigFromJson(gradingConfig);
     }
 
     @Override
-    public void uploadTestDataFileZipped(String problemJid, File testDataFileZipped) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-        File testDataDir = SandalphonProperties.getInstance().getProgrammingGradingTestDataDir(problemJid);
+    public void updateGradingConfig(String problemJid, GradingConfig gradingConfig) {
+        fileSystemProvider.writeToFile(getGradingConfigFilePath(problemJid), new Gson().toJson(gradingConfig));
 
-        SandalphonUtils.uploadZippedFiles(testDataDir, testDataFileZipped);
-
-        updateProblemModel(problemModel);
+        updateGradingLastUpdateTime(problemJid);
     }
 
     @Override
-    public void uploadHelperFile(String problemJid, File helperFile, String filename) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-        File helperDir = SandalphonProperties.getInstance().getProgrammingGradingHelperDir(problemJid);
-        try {
-            FileUtils.copyFile(helperFile, new File(helperDir, filename));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        updateProblemModel(problemModel);
+    public String getGradingEngine(String problemJid) {
+        return fileSystemProvider.readFromFile(getGradingEngineFilePath(problemJid));
     }
 
     @Override
-    public void uploadHelperFileZipped(String problemJid, File testDataFileZipped) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-        File helperDir = SandalphonProperties.getInstance().getProgrammingGradingHelperDir(problemJid);
+    public void updateGradingEngine(String problemJid, String gradingEngine) {
+        fileSystemProvider.writeToFile(getGradingEngineFilePath(problemJid), gradingEngine);
 
-        SandalphonUtils.uploadZippedFiles(helperDir, testDataFileZipped);
-
-        updateProblemModel(problemModel);
+        updateGradingLastUpdateTime(problemJid);
     }
 
     @Override
-    public void updateGradingConfig(String problemJid, GradingConfig config) {
-        ProgrammingProblemModel problemModel = problemDao.findByJid(problemJid);
-        File gradingDir = SandalphonProperties.getInstance().getProgrammingGradingDir(problemJid);
-        try {
-            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), new Gson().toJson(config));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        updateProblemModel(problemModel);
+    public LanguageRestriction getLanguageRestriction(String problemJid) {
+        String languageRestriction = fileSystemProvider.readFromFile(getLanguageRestrictionFilePath(problemJid));
+        return new Gson().fromJson(languageRestriction, LanguageRestriction.class);
     }
 
     @Override
-    public List<File> getTestDataFiles(String problemJid) {
-        File testDataDir = SandalphonProperties.getInstance().getProgrammingGradingTestDataDir(problemJid);
-        return SandalphonUtils.getSortedFilesInDir(testDataDir);
+    public void updateLanguageRestriction(String problemJid, LanguageRestriction languageRestriction) {
+        fileSystemProvider.writeToFile(getLanguageRestrictionFilePath(problemJid), new Gson().toJson(languageRestriction));
+
+        updateGradingLastUpdateTime(problemJid);
     }
 
     @Override
-    public List<File> getHelperFiles(String problemJid) {
-        File helperDir = SandalphonProperties.getInstance().getProgrammingGradingHelperDir(problemJid);
-        return SandalphonUtils.getSortedFilesInDir(helperDir);
+    public void uploadGradingTestDataFile(String problemJid, File testDataFile, String filename) {
+        fileSystemProvider.uploadFile(getGradingTestDataDirPath(problemJid), testDataFile, filename);
+
+        updateGradingLastUpdateTime(problemJid);
     }
 
     @Override
-    public File getTestDataFile(String problemJid, String filename) {
-        File testDataDir = SandalphonProperties.getInstance().getProgrammingGradingTestDataDir(problemJid);
-        return new File(testDataDir, filename);
+    public void uploadGradingTestDataFileZipped(String problemJid, File testDataFileZipped) {
+        fileSystemProvider.uploadZippedFiles(getGradingTestDataDirPath(problemJid), testDataFileZipped);
+
+        updateGradingLastUpdateTime(problemJid);
+    }
+
+    @Override
+    public void uploadGradingHelperFile(String problemJid, File helperFile, String filename) {
+        fileSystemProvider.uploadFile(getGradingHelpersDirPath(problemJid), helperFile, filename);
+
+        updateGradingLastUpdateTime(problemJid);
+    }
+
+    @Override
+    public void uploadGradingHelperFileZipped(String problemJid, File helperFileZipped) {
+        fileSystemProvider.uploadZippedFiles(getGradingHelpersDirPath(problemJid), helperFileZipped);
+
+        updateGradingLastUpdateTime(problemJid);
+    }
+
+    @Override
+    public List<FileInfo> getGradingTestDataFiles(String problemJid) {
+        return fileSystemProvider.listFilesInDirectory(getGradingTestDataDirPath(problemJid));
+    }
+
+    @Override
+    public List<FileInfo> getGradingHelperFiles(String problemJid) {
+        return fileSystemProvider.listFilesInDirectory(getGradingHelpersDirPath(problemJid));
+    }
+
+    @Override
+    public String getGradingTestDataFileURL(String problemJid, String filename) {
+        return fileSystemProvider.getURL(appendPath(getGradingTestDataDirPath(problemJid), filename));
     }
 
 
     @Override
-    public File getHelperFile(String problemJid, String filename) {
-        File helperDir = SandalphonProperties.getInstance().getProgrammingGradingHelperDir(problemJid);
-        return new File(helperDir, filename);
+    public String getGradingHelperFileURL(String problemJid, String filename) {
+        return fileSystemProvider.getURL(appendPath(getGradingHelpersDirPath(problemJid), filename));
     }
 
     @Override
     public ByteArrayOutputStream getZippedGradingFilesStream(String problemJid) {
-        List<File> files = getGradingFiles(problemJid);
-
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        byte[] buffer = new byte[1024];
-
-        try {
-            ZipOutputStream zos = new ZipOutputStream(os);
-            for (File file : files) {
-                int beginIndex = file.getAbsolutePath().indexOf(problemJid) + problemJid.length() + 1 + "grading".length() + 1;
-                ZipEntry ze = new ZipEntry(file.getAbsolutePath().substring(beginIndex));
-                zos.putNextEntry(ze);
-
-                try (FileInputStream fin = new FileInputStream(file)) {
-                    int len;
-                    while ((len = fin.read(buffer)) > 0) {
-                        zos.write(buffer, 0, len);
-                    }
-                }
-            }
-
-            zos.closeEntry();
-            zos.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return os;
+        return fileSystemProvider.getZippedFilesInDirectory(getGradingDirPath(problemJid));
     }
 
-    private List<File> getGradingFiles(String problemJid) {
-        File gradingDir = SandalphonProperties.getInstance().getProgrammingGradingDir(problemJid);
-
-        ImmutableList.Builder<File> files = ImmutableList.builder();
-        populateGradingFiles(gradingDir, files);
-        return files.build();
+    private void updateGradingLastUpdateTime(String problemJid) {
+        fileSystemProvider.writeToFile(getGradingLastUpdateTimeFilePath(problemJid), "" + System.currentTimeMillis());
     }
 
-    private void populateGradingFiles(File node, ImmutableList.Builder<File> files) {
-        if (node.isFile()) {
-            files.add(node);
-        } else {
-            File[] newNodes = node.listFiles();
-            if (newNodes != null) {
-                for (File newNode : newNodes) {
-                    populateGradingFiles(newNode, files);
-                }
-            }
-        }
+    private void initGrading(String problemJid) {
+        fileSystemProvider.createDirectory(getGradingDirPath(problemJid));
+        fileSystemProvider.createDirectory(getGradingTestDataDirPath(problemJid));
+        fileSystemProvider.createDirectory(getGradingHelpersDirPath(problemJid));
+
+        String engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+        fileSystemProvider.writeToFile(getGradingEngineFilePath(problemJid), engine);
+
+        GradingConfig config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
+        fileSystemProvider.writeToFile(getGradingConfigFilePath(problemJid), new Gson().toJson(config));
+
+        updateGradingLastUpdateTime(problemJid);
     }
 
-    private void updateProblemModel(ProgrammingProblemModel problemModel) {
-        problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
-        File lastUpdateTimeFile = new File(SandalphonProperties.getInstance().getProgrammingGradingDir(problemModel.jid), "lastUpdateTime.txt");
-
-        try {
-            FileUtils.forceDelete(lastUpdateTimeFile);
-            FileUtils.writeStringToFile(lastUpdateTimeFile, "" + problemModel.timeUpdate);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private ArrayList<String> getRootDirPath(String problemJid) {
+        return Lists.newArrayList(SandalphonProperties.getInstance().getBaseProblemsDirKey(), problemJid);
     }
 
-    private ProgrammingProblem createProgrammingProblemFromModel(ProgrammingProblemModel problemModel) {
-        return new ProgrammingProblem(problemModel.jid, problemModel.gradingEngine, problemModel.additionalNote, new Gson().fromJson(problemModel.languageRestriction, LanguageRestriction.class));
+    private ArrayList<String> getGradingDirPath(String problemJid) {
+        return appendPath(getRootDirPath(problemJid), "grading");
     }
 
-    private ProgrammingProblem createProgrammingProblemFromModel(ProgrammingProblemModel problemModel, Problem problemPart) {
-        return new ProgrammingProblem(problemPart.getId(), problemModel.jid, problemPart.getName(), problemPart.getAuthorJid(), problemPart.getLastUpdate(), problemModel.gradingEngine, problemModel.additionalNote, new Gson().fromJson(problemModel.languageRestriction, LanguageRestriction.class));
+    private ArrayList<String> getGradingTestDataDirPath(String problemJid) {
+        return appendPath(getGradingDirPath(problemJid), "testdata");
     }
 
-    private void initGrading(ProgrammingProblemModel problemModel) {
-        File gradingDir = SandalphonProperties.getInstance().getProgrammingGradingDir(problemModel.jid);
-        File testDataDir = SandalphonProperties.getInstance().getProgrammingGradingTestDataDir(problemModel.jid);
-        File helperDir = SandalphonProperties.getInstance().getProgrammingGradingHelperDir(problemModel.jid);
+    private ArrayList<String> getGradingHelpersDirPath(String problemJid) {
+        return appendPath(getGradingDirPath(problemJid), "helpers");
+    }
 
-        try {
-            FileUtils.forceMkdir(gradingDir);
-            FileUtils.forceMkdir(testDataDir);
-            FileUtils.forceMkdir(helperDir);
+    private ArrayList<String> getGradingConfigFilePath(String problemJid) {
+        return appendPath(getGradingDirPath(problemJid), "config.json");
+    }
 
-            GradingConfig config = GradingEngineRegistry.getInstance().getEngine(problemModel.gradingEngine).createDefaultGradingConfig();
+    private ArrayList<String> getGradingEngineFilePath(String problemJid) {
+        return appendPath(getGradingDirPath(problemJid), "engine.txt");
+    }
 
-            FileUtils.writeStringToFile(new File(gradingDir, "config.json"), new Gson().toJson(config));
-            FileUtils.writeStringToFile(new File(gradingDir, "lastUpdateTime.txt"), "" + problemModel.timeCreate);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private ArrayList<String> getLanguageRestrictionFilePath(String problemJid) {
+        return appendPath(getGradingDirPath(problemJid), "languageRestriction.txt");
+    }
+
+    private ArrayList<String> getGradingLastUpdateTimeFilePath(String problemJid) {
+        return appendPath(getGradingDirPath(problemJid), "lastUpdateTime.txt");
+    }
+
+    private ArrayList<String> appendPath(ArrayList<String> parentPath, String child) {
+        parentPath.add(child);
+        return parentPath;
     }
 }

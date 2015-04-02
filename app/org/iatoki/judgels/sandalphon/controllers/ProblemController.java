@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FilenameUtils;
+import org.iatoki.judgels.commons.FileInfo;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
@@ -12,8 +13,8 @@ import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
 import org.iatoki.judgels.sandalphon.ProblemService;
-import org.iatoki.judgels.sandalphon.commons.Problem;
-import org.iatoki.judgels.sandalphon.commons.ProblemType;
+import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
@@ -40,11 +41,12 @@ import org.iatoki.judgels.sandalphon.views.html.updateClientProblemsView;
 import org.iatoki.judgels.sandalphon.views.html.viewClientProblemView;
 
 import javax.imageio.ImageIO;
-import javax.naming.ldap.Control;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -166,7 +168,7 @@ public final class ProblemController extends Controller {
     public Result listStatementMediaFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-        List<File> mediaFiles = problemService.getStatementMediaFiles(problem.getJid());
+        List<FileInfo> mediaFiles = problemService.getStatementMediaFiles(problem.getJid());
 
         return showListStatementMediaFiles(form, problem, mediaFiles);
     }
@@ -200,35 +202,46 @@ public final class ProblemController extends Controller {
     @Authorized("writer")
     public Result downloadStatementMediaFile(long id, String filename) {
         Problem problem = problemService.findProblemById(id);
-        File file = problemService.getStatementMediaFile(problem.getJid(), filename);
-        if (file.exists()) {
-            return downloadFile(file);
-        } else {
-            return notFound();
+        String mediaURL = problemService.getStatementMediaFileURL(problem.getJid(), filename);
+
+        try {
+            new URL(mediaURL);
+            return redirect(mediaURL);
+        } catch (MalformedURLException e) {
+            File mediaFile = new File(mediaURL);
+            return downloadFile(mediaFile);
         }
     }
 
 
     public Result renderMediaByJid(String problemJid, String imageFilename) {
-        File image = problemService.getStatementMediaFile(problemJid, imageFilename);
-        if (!image.exists()) {
-            return notFound();
-        }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-        response().setHeader("Cache-Control", "no-transform,public,max-age=300,s-maxage=900");
-        response().setHeader("Last-Modified", sdf.format(new Date(image.lastModified())));
+        String mediaURL = problemService.getStatementMediaFileURL(problemJid, imageFilename);
 
         try {
-            BufferedImage in = ImageIO.read(image);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            new URL(mediaURL);
+            return redirect(mediaURL);
+        } catch (MalformedURLException e) {
+            File image = new File(mediaURL);
 
-            String type = FilenameUtils.getExtension(image.getAbsolutePath());
+            if (!image.exists()) {
+                return notFound();
+            }
 
-            ImageIO.write(in, type, baos);
-            return ok(baos.toByteArray()).as("image/" + type);
-        } catch (IOException e) {
-            return internalServerError();
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+            response().setHeader("Cache-Control", "no-transform,public,max-age=300,s-maxage=900");
+            response().setHeader("Last-Modified", sdf.format(new Date(image.lastModified())));
+
+            try {
+                BufferedImage in = ImageIO.read(image);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                String type = FilenameUtils.getExtension(image.getAbsolutePath());
+
+                ImageIO.write(in, type, baos);
+                return ok(baos.toByteArray()).as("image/" + type);
+            } catch (IOException e2) {
+                return internalServerError();
+            }
         }
     }
 
@@ -330,7 +343,7 @@ public final class ProblemController extends Controller {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showListStatementMediaFiles(Form<UploadFileForm> form, Problem problem, List<File> mediaFiles) {
+    private Result showListStatementMediaFiles(Form<UploadFileForm> form, Problem problem, List<FileInfo> mediaFiles) {
         LazyHtml content = new LazyHtml(listStatementMediaFilesView.render(form, problem.getId(), mediaFiles));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewStatement(problem.getId())),
@@ -352,6 +365,7 @@ public final class ProblemController extends Controller {
     private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> form, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
         LazyHtml content = new LazyHtml(updateClientProblemsView.render(form, problem.getId(), clients, clientProblems));
         ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.client"), routes.ProblemController.jumpToClients(problem.getId())),
@@ -363,6 +377,9 @@ public final class ProblemController extends Controller {
     }
 
     private Result downloadFile(File file) {
+        if (!file.exists()) {
+            return notFound();
+        }
         response().setContentType("application/x-download");
         response().setHeader("Content-disposition", "attachment; filename=" + file.getName());
         return ok(file);

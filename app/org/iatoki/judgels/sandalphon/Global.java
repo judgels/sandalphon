@@ -3,6 +3,8 @@ package org.iatoki.judgels.sandalphon;
 import akka.actor.Scheduler;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.iatoki.judgels.commons.FileSystemProvider;
+import org.iatoki.judgels.commons.LocalFileSystemProvider;
 import org.iatoki.judgels.gabriel.commons.GradingResponsePoller;
 import org.iatoki.judgels.gabriel.commons.SubmissionService;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;
@@ -28,11 +30,9 @@ import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemServiceImpl;
 import org.iatoki.judgels.sandalphon.programming.SubmissionServiceImpl;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.programming.GradingHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.JidCacheHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.hibernate.programming.ProgrammingProblemHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.programming.ProgrammingSubmissionHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.GradingDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.JidCacheDao;
-import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.ProgrammingProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.ProgrammingSubmissionDao;
 import org.iatoki.judgels.sealtiel.client.Sealtiel;
 import play.Application;
@@ -40,12 +40,13 @@ import play.libs.Akka;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.duration.Duration;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 public final class Global extends org.iatoki.judgels.commons.Global {
 
+    private final FileSystemProvider fileSystemProvider;
     private final ProblemDao problemDao;
-    private final ProgrammingProblemDao programmingProblemDao;
     private final ProgrammingSubmissionDao submissionDao;
     private final GradingDao gradingDao;
     private final ClientDao clientDao;
@@ -64,8 +65,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     public Global() {
         Config playConfig = ConfigFactory.load();
 
+        this.fileSystemProvider = new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir")));
         this.problemDao = new ProblemHibernateDao();
-        this.programmingProblemDao = new ProgrammingProblemHibernateDao();
         this.submissionDao = new ProgrammingSubmissionHibernateDao();
         this.gradingDao = new GradingHibernateDao();
         this.clientDao = new ClientHibernateDao();
@@ -74,8 +75,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.userRoleDao = new UserRoleHibernateDao();
         this.sealtiel = new Sealtiel(playConfig.getString("sealtiel.clientJid"), playConfig.getString("sealtiel.clientSecret"), playConfig.getString("sealtiel.baseUrl"));
         this.jidCacheDao = new JidCacheHibernateDao();
-        this.problemService = new ProblemServiceImpl(problemDao);
-        this.programmingProblemService = new ProgrammingProblemServiceImpl(programmingProblemDao);
+        this.problemService = new ProblemServiceImpl(problemDao, fileSystemProvider);
+        this.programmingProblemService = new ProgrammingProblemServiceImpl(problemDao, fileSystemProvider);
         this.submissionService = new SubmissionServiceImpl(submissionDao, gradingDao, sealtiel, playConfig.getString("sealtiel.gabrielClientJid"));
         this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);
         this.graderService = new GraderServiceImpl(graderDao);

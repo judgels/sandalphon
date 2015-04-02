@@ -1,9 +1,8 @@
 package org.iatoki.judgels.sandalphon.programming;
 
+import org.iatoki.judgels.commons.FileInfo;
 import org.iatoki.judgels.gabriel.GradingConfig;
-import org.iatoki.judgels.sandalphon.commons.Problem;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
-import org.iatoki.judgels.sandalphon.commons.programming.ProgrammingProblem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -14,33 +13,37 @@ public interface ProgrammingProblemService {
 
     ProgrammingProblem findProgrammingProblemByJid(String problemJid);
 
-    ProgrammingProblem findProgrammingProblemByJid(String problemJid, Problem problemPart);
-
-    ProgrammingProblem createProgrammingProblem(String gradingEngine, String additionalNote, LanguageRestriction languageRestriction);
-
-    void updateProgrammingProblem(String problemJid, String gradingEngine, String additionalNote, LanguageRestriction languageRestriction);
+    void createProgrammingProblem(String problemJid);
 
     GradingConfig getGradingConfig(String problemJid);
 
+    void updateGradingConfig(String problemJid, GradingConfig gradingConfig);
+
     Date getGradingLastUpdateTime(String problemJid);
 
-    void uploadTestDataFile(String problemJid, File testDataFile, String filename);
+    String getGradingEngine(String problemJid);
 
-    void uploadTestDataFileZipped(String problemJid, File testDataFileZipped);
+    void updateGradingEngine(String problemJid, String gradingEngine);
 
-    void uploadHelperFile(String problemJid, File helperFile, String filename);
+    LanguageRestriction getLanguageRestriction(String problemJid);
 
-    void uploadHelperFileZipped(String problemJid, File helperFileZipped);
+    void updateLanguageRestriction(String problemJid, LanguageRestriction languageRestriction);
 
-    void updateGradingConfig(String problemJid, GradingConfig config);
+    void uploadGradingTestDataFile(String problemJid, File testDataFile, String filename);
 
-    List<File> getTestDataFiles(String problemJid);
+    void uploadGradingTestDataFileZipped(String problemJid, File testDataFileZipped);
 
-    List<File> getHelperFiles(String problemJid);
+    void uploadGradingHelperFile(String problemJid, File helperFile, String filename);
 
-    File getTestDataFile(String problemJid, String filename);
+    void uploadGradingHelperFileZipped(String problemJid, File helperFileZipped);
 
-    File getHelperFile(String problemJid, String filename);
+    List<FileInfo> getGradingTestDataFiles(String problemJid);
+
+    List<FileInfo> getGradingHelperFiles(String problemJid);
+
+    String getGradingTestDataFileURL(String problemJid, String filename);
+
+    String getGradingHelperFileURL(String problemJid, String filename);
 
     ByteArrayOutputStream getZippedGradingFilesStream(String problemJid);
 }

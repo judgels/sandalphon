@@ -5,7 +5,7 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
-import org.iatoki.judgels.sandalphon.commons.Problem;
+import org.iatoki.judgels.sandalphon.Problem;
 import play.i18n.Messages;
 
 public final class ProgrammingProblemControllerUtils {

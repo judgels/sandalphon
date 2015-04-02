@@ -1,8 +1,8 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.commons.LazyHtml;
-import org.iatoki.judgels.sandalphon.commons.Problem;
-import org.iatoki.judgels.sandalphon.commons.ProblemType;
+import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemType;
 
 public final class ProblemControllerUtils {
     private static final ProblemControllerUtils INSTANCE = new ProblemControllerUtils();

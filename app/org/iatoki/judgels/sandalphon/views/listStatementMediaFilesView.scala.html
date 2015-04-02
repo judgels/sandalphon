@@ -1,4 +1,4 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.UploadFileForm], problemId: Long, mediaFiles: List[java.io.File])
+@(form: Form[org.iatoki.judgels.sandalphon.forms.UploadFileForm], problemId: Long, mediaFiles: List[org.iatoki.judgels.commons.FileInfo])
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
@@ -42,8 +42,8 @@
     @for(file <- mediaFiles) {
         <tr>
             <td>@file.getName</td>
-            <td>@JudgelsUtils.formatDate(file.lastModified)</td>
-            <td>@JudgelsUtils.formatBytesCount(file.length)</td>
+            <td>@JudgelsUtils.formatDate(file.getLastModifiedTime)</td>
+            <td>@JudgelsUtils.formatBytesCount(file.getSize)</td>
             <td class="text-center"><a href="@routes.ProblemController.downloadStatementMediaFile(problemId, file.getName)"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
         </tr>
     }
