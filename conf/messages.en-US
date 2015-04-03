@@ -37,12 +37,16 @@ problem.programming.allowedLanguages=Allowed Languages
 problem.programming.allowAll=Allow all
 
 problem.programming.grading=Grading
+problem.programming.grading.engine=Engine
+problem.programming.grading.engine.update=Update Engine
 problem.programming.grading.config=Config
 problem.programming.grading.config.update=Update Config
 problem.programming.grading.testData=Test Data
 problem.programming.grading.testData.list=Test Data Files
 problem.programming.grading.helper=Helpers
 problem.programming.grading.helper.list=Helper Files
+problem.programming.grading.languageRestriction=Language Restriction
+problem.programming.grading.languageRestriction.update=Update Language Restriction
 
 problem.programming.submission=Submissions
 problem.programming.submission.list=Submissions
@@ -52,6 +56,8 @@ problem.programming.submission.time=Time
 problem.programming.submission.gradingLanguage=Language
 problem.programming.submission.verdict=Verdict
 problem.programming.submission.score=Score
+
+problem.programming.help.changeGradingEngine=Changing grading engine will reset grading config
 
 problem.client=Clients
 problem.client.list=Clients

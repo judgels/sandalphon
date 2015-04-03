@@ -61,6 +61,8 @@ GET         /problems/programming/:pId/submissions/:sId/regrade                 
 
 POST        /problems/programming/:pId/submissions/regrade                      @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.regradeSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
 
+GET         /problems/programming/:pId/grading/engine/update                    @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGradingEngine(pId: Long)
+POST        /problems/programming/:pId/grading/engine/update                    @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateGradingEngine(pId: Long)
 GET         /problems/programming/:pId/grading/config/update                    @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGradingConfig(pId: Long)
 POST        /problems/programming/:pId/grading/config/update                    @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateGradingConfig(pId: Long)
 GET         /problems/programming/:pId/grading/config/tokilib                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateGradingConfigByTokilibFormat(pId: Long)
@@ -69,6 +71,8 @@ GET         /problems/programming/:pId/grading/testdata/view/                   
 POST        /problems/programming/:pId/grading/testdata                         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUploadGradingTestDataFiles(pId: Long)
 GET         /problems/programming/:pId/grading/helper/view/                     @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.listGradingHelperFiles(pId: Long)
 POST        /problems/programming/:pId/grading/helper                           @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUploadGradingHelperFiles(pId: Long)
+GET         /problems/programming/:pId/grading/languageRestriction/update       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.updateLanguageRestriction(pId: Long)
+POST        /problems/programming/:pId/grading/languageRestriction/update       @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postUpdateLanguageRestriction(pId: Long)
 
 POST        /problems/programming/:pId/submit                                   @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.postSubmit(pId: Long)
 
