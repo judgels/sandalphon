@@ -1,0 +1,16 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.ProblemCreateForm])
+
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import play.i18n.Messages
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
+
+@b3.form(routes.ProblemController.postCreateProblem()) {
+    @helper.CSRF.formField
+
+    @b3.select(form("type"), Seq("PROGRAMMING" -> "Programming"), '_label -> Messages.get("problem.type"))
+    @b3.text(form("name"), '_label -> Messages.get("problem.name"))
+    @b3.textarea(form("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.next") }
+}

@@ -1,6 +1,7 @@
 problem.problems=Problems
 problem.list=Problems
 
+problem.type=Type
 problem.name=Name
 problem.additionalNote=Additional Note
 problem.author=Author
@@ -8,11 +9,12 @@ problem.lastUpdateTime=Last Update Time
 problem.jid=JID
 problem.secret=Problem Secret
 
-problem.general=General
-problem.general.view=View General
-problem.general.update=Update General
+problem.create=Create Problem
+problem.view=View Problem
+problem.update=Update Problem
+problem.enter=Enter Problem
 
-problem.statement=Statement
+problem.statement=Statements
 problem.statement.view=View Statement
 problem.statement.update=Update Statement
 problem.statement.media=Media

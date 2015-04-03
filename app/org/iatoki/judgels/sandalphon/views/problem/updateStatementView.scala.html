@@ -12,11 +12,11 @@ To insert image, add the image as a media file and then insert it as "render/&lt
 @b3.form(routes.ProblemController.postUpdateStatement(problemId)) {
     @helper.CSRF.formField
 
-    @b3.input(form("statement"), '_label -> None) { (id, name, value, args) =>
-        <textarea class="ckeditor" id="@id" name="@name">
-            @value
+    <div class="form-group">
+        <textarea class="ckeditor" name="statement">
+            @form("statement").value
         </textarea>
-    }
+    </div>
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
 }

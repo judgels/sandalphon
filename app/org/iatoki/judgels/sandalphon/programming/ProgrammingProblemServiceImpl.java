@@ -19,23 +19,25 @@ import java.util.List;
 
 public final class ProgrammingProblemServiceImpl implements ProgrammingProblemService {
 
-    private final ProblemDao problemDao;
     private final FileSystemProvider fileSystemProvider;
 
-    public ProgrammingProblemServiceImpl(ProblemDao problemDao, FileSystemProvider fileSystemProvider) {
-        this.problemDao = problemDao;
+    public ProgrammingProblemServiceImpl(FileSystemProvider fileSystemProvider) {
         this.fileSystemProvider = fileSystemProvider;
     }
 
     @Override
-    public ProgrammingProblem findProgrammingProblemByJid(String problemJid) {
-        ProblemModel problemModel = problemDao.findByJid(problemJid);
-        return new ProgrammingProblem(problemModel.id, problemJid, problemModel.name, problemModel.userCreate, problemModel.additionalNote, new Date(problemModel.timeUpdate), getGradingEngine(problemJid), getLanguageRestriction(problemJid));
-    }
+    public void initProgrammingProblem(String problemJid, String gradingEngine) {
+        fileSystemProvider.createDirectory(getGradingDirPath(problemJid));
+        fileSystemProvider.createDirectory(getGradingTestDataDirPath(problemJid));
+        fileSystemProvider.createDirectory(getGradingHelpersDirPath(problemJid));
 
-    @Override
-    public void createProgrammingProblem(String problemJid) {
-        initGrading(problemJid);
+        fileSystemProvider.writeToFile(getGradingEngineFilePath(problemJid), gradingEngine);
+        fileSystemProvider.writeToFile(getLanguageRestrictionFilePath(problemJid), new Gson().toJson(LanguageRestriction.defaultRestriction()));
+
+        GradingConfig config = GradingEngineRegistry.getInstance().getEngine(gradingEngine).createDefaultGradingConfig();
+        fileSystemProvider.writeToFile(getGradingConfigFilePath(problemJid), new Gson().toJson(config));
+
+        updateGradingLastUpdateTime(problemJid);
     }
 
     @Override
@@ -140,20 +142,6 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
 
     private void updateGradingLastUpdateTime(String problemJid) {
         fileSystemProvider.writeToFile(getGradingLastUpdateTimeFilePath(problemJid), "" + System.currentTimeMillis());
-    }
-
-    private void initGrading(String problemJid) {
-        fileSystemProvider.createDirectory(getGradingDirPath(problemJid));
-        fileSystemProvider.createDirectory(getGradingTestDataDirPath(problemJid));
-        fileSystemProvider.createDirectory(getGradingHelpersDirPath(problemJid));
-
-        String engine = GradingEngineRegistry.getInstance().getDefaultEngine();
-        fileSystemProvider.writeToFile(getGradingEngineFilePath(problemJid), engine);
-
-        GradingConfig config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
-        fileSystemProvider.writeToFile(getGradingConfigFilePath(problemJid), new Gson().toJson(config));
-
-        updateGradingLastUpdateTime(problemJid);
     }
 
     private ArrayList<String> getRootDirPath(String problemJid) {

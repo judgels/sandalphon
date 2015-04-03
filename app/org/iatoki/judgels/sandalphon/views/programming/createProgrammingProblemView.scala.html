@@ -1,0 +1,20 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.ProgrammingProblemInitForm], problemName: String, problemAdditionalNote: String)
+
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.gabriel.GradingEngineRegistry
+@import scala.collection.JavaConverters._
+@import play.i18n.Messages
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
+
+@b3.form(routes.ProgrammingProblemController.postCreateProgrammingProblem()) {
+    @helper.CSRF.formField
+
+    @b3.static(Messages.get("problem.name")) { @problemName }
+
+    @b3.static(Messages.get("problem.additionalNote")) { @problemAdditionalNote }
+
+    @b3.select(form("gradingEngineName"), GradingEngineRegistry.getInstance().getGradingEngines.asScala.toSeq, '_label -> Messages.get("problem.programming.gradingEngine"))
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.create") }
+}

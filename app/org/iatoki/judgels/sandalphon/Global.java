@@ -76,7 +76,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.sealtiel = new Sealtiel(playConfig.getString("sealtiel.clientJid"), playConfig.getString("sealtiel.clientSecret"), playConfig.getString("sealtiel.baseUrl"));
         this.jidCacheDao = new JidCacheHibernateDao();
         this.problemService = new ProblemServiceImpl(problemDao, fileSystemProvider);
-        this.programmingProblemService = new ProgrammingProblemServiceImpl(problemDao, fileSystemProvider);
+        this.programmingProblemService = new ProgrammingProblemServiceImpl(fileSystemProvider);
         this.submissionService = new SubmissionServiceImpl(submissionDao, gradingDao, sealtiel, playConfig.getString("sealtiel.gabrielClientJid"));
         this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);
         this.graderService = new GraderServiceImpl(graderDao);

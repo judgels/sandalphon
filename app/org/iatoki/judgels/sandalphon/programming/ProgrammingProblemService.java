@@ -11,9 +11,7 @@ import java.util.List;
 
 public interface ProgrammingProblemService {
 
-    ProgrammingProblem findProgrammingProblemByJid(String problemJid);
-
-    void createProgrammingProblem(String problemJid);
+    void initProgrammingProblem(String problemJid, String gradingEngine);
 
     GradingConfig getGradingConfig(String problemJid);
 
