@@ -11,6 +11,7 @@ import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
+import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.forms.ProblemCreateForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
@@ -43,6 +44,7 @@ import org.iatoki.judgels.sandalphon.views.html.problem.viewProblemView;
 import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView;
 import org.iatoki.judgels.sandalphon.views.html.problem.updateStatementView;
 import org.iatoki.judgels.sandalphon.views.html.problem.listStatementMediaFilesView;
+import org.iatoki.judgels.sandalphon.views.html.problem.listStatementLanguagesView;
 import org.iatoki.judgels.sandalphon.views.html.problem.updateClientProblemsView;
 import org.iatoki.judgels.sandalphon.views.html.problem.viewClientProblemView;
 
@@ -56,6 +58,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Transactional
 public final class ProblemController extends Controller {
@@ -115,9 +119,7 @@ public final class ProblemController extends Controller {
             ProblemCreateForm data = form.get();
 
             if (data.type.equals(ProblemType.PROGRAMMING.name())) {
-                session("problemName", data.name);
-                session("problemAdditionalNote", data.additionalNote);
-
+                ProblemControllerUtils.setJustCreatedProblem(data.name, data.additionalNote, data.initLanguageCode);
                 return redirect(routes.ProgrammingProblemController.createProgrammingProblem());
             }
 
@@ -134,7 +136,7 @@ public final class ProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result jumpToStatement(long problemId) {
-        return redirect(routes.ProblemController.updateStatement(problemId));
+        return redirect(routes.ProblemController.viewStatement(problemId));
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -201,34 +203,64 @@ public final class ProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
 
         if (problem.getType() == ProblemType.PROGRAMMING) {
-            return redirect(routes.ProgrammingProblemController.viewStatement(problemId));
+            return redirect(routes.ProgrammingProblemController.viewStatement(problem.getId()));
         } else {
             return badRequest();
         }
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result viewStatementSwitchLanguage(long problemId) {
+        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
+        ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
+
+        return redirect(routes.ProblemController.viewStatement(problemId));
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result updateStatementSwitchLanguage(long problemId) {
+        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
+        ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
+
+        return redirect(routes.ProblemController.updateStatement(problemId));
     }
 
     @AddCSRFToken
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result updateStatement(long problemId) {
+        ProblemControllerUtils.establishStatementLanguage(problemService, problemId);
+
         Problem problem = problemService.findProblemById(problemId);
-        String statement = problemService.getStatement(problem.getJid());
+        String statement = problemService.getStatement(problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
+
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
         form = form.bind(ImmutableMap.of("statement", statement));
 
-        return showUpdateStatement(form, problem);
+        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
+        List<String> allowedLanguages = availableLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toList());
+
+
+        return showUpdateStatement(form, problem, allowedLanguages);
     }
 
     @RequireCSRFCheck
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result postUpdateStatement(long problemId) {
+        ProblemControllerUtils.establishStatementLanguage(problemService, problemId);
+
         Problem problem = problemService.findProblemById(problemId);
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
         if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showUpdateStatement(form, problem);
+            Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
+            List<String> allowedLanguages = availableLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toList());
+
+            return showUpdateStatement(form, problem, allowedLanguages);
         } else {
-            problemService.updateStatement(problemId, form.get().statement);
+            problemService.updateStatement(problemId, ProblemControllerUtils.getCurrentStatementLanguage(), form.get().statement);
             return redirect(routes.ProblemController.updateStatement(problem.getId()));
         }
     }
@@ -289,6 +321,72 @@ public final class ProblemController extends Controller {
         }
     }
 
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result listStatementLanguages(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+
+        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
+        String defaultLanguage = problemService.getDefaultLanguage(problem.getJid());
+        LazyHtml content = new LazyHtml(listStatementLanguagesView.render(availableLanguages, defaultLanguage, problem.getId()));
+
+        content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewStatement(problem.getId())),
+                new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.language"), routes.ProblemController.listStatementLanguages(problem.getId()))
+        ), c));
+        ProblemControllerUtils.appendTabsLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
+                new InternalLink(problem.getName(), routes.ProblemController.viewProblem(problem.getId())),
+                new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.language.list"), routes.ProblemController.listStatementLanguages(problem.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Statement Languages");
+
+        return ControllerUtils.getInstance().lazyOk(content);
+    }
+
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result postAddStatementLanguage(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
+        problemService.addLanguage(problem.getJid(), languageCode);
+        return redirect(routes.ProblemController.listStatementLanguages(problem.getId()));
+    }
+
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result enableStatementLanguage(long problemId, String languageCode) {
+        Problem problem = problemService.findProblemById(problemId);
+        problemService.enableLanguage(problem.getJid(), languageCode);
+        return redirect(routes.ProblemController.listStatementLanguages(problem.getId()));
+    }
+
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result disableStatementLanguage(long problemId, String languageCode) {
+        Problem problem = problemService.findProblemById(problemId);
+        problemService.disableLanguage(problem.getJid(), languageCode);
+        if (ProblemControllerUtils.getCurrentStatementLanguage().equals(languageCode)) {
+            ProblemControllerUtils.setCurrentStatementLanguage(problemService.getDefaultLanguage(problem.getJid()));
+        }
+        return redirect(routes.ProblemController.listStatementLanguages(problem.getId()));
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result makeDefaultStatementLanguage(long problemId, String languageCode) {
+        Problem problem = problemService.findProblemById(problemId);
+        problemService.makeDefaultLanguage(problem.getJid(), languageCode);
+        return redirect(routes.ProblemController.listStatementLanguages(problem.getId()));
+    }
 
     public Result renderMediaByJid(String problemJid, String imageFilename) {
         String mediaURL = problemService.getStatementMediaFileURL(problemJid, imageFilename);
@@ -365,7 +463,7 @@ public final class ProblemController extends Controller {
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
         if (clientProblem.getProblemJid().equals(problem.getJid())) {
             LazyHtml content = new LazyHtml(viewClientProblemView.render(problem, clientProblem));
-            ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+            ProblemControllerUtils.appendTabsLayout(content, problem);
             ControllerUtils.getInstance().appendSidebarLayout(content);
             ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                     new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -431,14 +529,16 @@ public final class ProblemController extends Controller {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateStatement(Form<UpdateStatementForm> form, Problem problem) {
+    private Result showUpdateStatement(Form<UpdateStatementForm> form, Problem problem, List<String> allowedLanguages) {
         LazyHtml content = new LazyHtml(updateStatementView.render(form, problem.getId()));
+        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemController.updateStatementSwitchLanguage(problem.getId()));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewStatement(problem.getId())),
                 new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problem.getId())),
-                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problem.getId()))
+                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.language"), routes.ProblemController.listStatementLanguages(problem.getId()))
         ), c));
-        ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -456,15 +556,16 @@ public final class ProblemController extends Controller {
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewStatement(problem.getId())),
                 new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problem.getId())),
-                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problem.getId()))
-                ), c));
-        ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.language"), routes.ProblemController.listStatementLanguages(problem.getId()))
+        ), c));
+        ProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(problem.getName(), routes.ProblemController.viewProblem(problem.getId())),
                 new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())),
-                new InternalLink(Messages.get("problem.statement.media.list"), routes.ProblemController.listStatementMediaFiles(problem.getId()))
+                new InternalLink(Messages.get("problem.statement.language.list"), routes.ProblemController.listStatementMediaFiles(problem.getId()))
         ));
         ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
@@ -473,7 +574,7 @@ public final class ProblemController extends Controller {
 
     private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> form, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
         LazyHtml content = new LazyHtml(updateClientProblemsView.render(form, problem.getId(), clients, clientProblems));
-        ProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),

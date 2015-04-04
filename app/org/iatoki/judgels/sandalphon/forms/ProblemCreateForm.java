@@ -10,4 +10,7 @@ public class ProblemCreateForm {
     public String name;
 
     public String additionalNote;
+
+    @Constraints.Required
+    public String initLanguageCode;
 }

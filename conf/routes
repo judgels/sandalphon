@@ -30,13 +30,20 @@ GET         /problems/:pId/enter                                                
 GET         /problems/:pId/statements                                           @org.iatoki.judgels.sandalphon.controllers.ProblemController.jumpToStatement(pId: Long)
 GET         /problems/:pId/clients                                              @org.iatoki.judgels.sandalphon.controllers.ProblemController.jumpToClients(pId: Long)
 
-GET         /problems/:pId/statements/view                                      @org.iatoki.judgels.sandalphon.controllers.ProblemController.viewStatement(pId: Long)
+GET         /problems/:pId/statements/view/                                     @org.iatoki.judgels.sandalphon.controllers.ProblemController.viewStatement(pId: Long)
+POST        /problems/:pId/statements/view/switchLanguage                       @org.iatoki.judgels.sandalphon.controllers.ProblemController.viewStatementSwitchLanguage(pId: Long)
 GET         /problems/:pId/statements/update                                    @org.iatoki.judgels.sandalphon.controllers.ProblemController.updateStatement(pId: Long)
-POST        /problems/:pId/statements/update                                    @org.iatoki.judgels.sandalphon.controllers.ProblemController.postUpdateStatement(pId: Long)
+POST        /problems/:pId/statements/update/                                   @org.iatoki.judgels.sandalphon.controllers.ProblemController.postUpdateStatement(pId: Long)
+POST        /problems/:pId/statements/update/switchLanguage                     @org.iatoki.judgels.sandalphon.controllers.ProblemController.updateStatementSwitchLanguage(pId: Long)
 GET         /problems/:pId/statements/render/:filename                          @org.iatoki.judgels.sandalphon.controllers.ProblemController.renderMediaById(pId: Long, filename: String)
 GET         /problems/:pId/statements/media/view/                               @org.iatoki.judgels.sandalphon.controllers.ProblemController.listStatementMediaFiles(pId: Long)
 POST        /problems/:pId/statements/media                                     @org.iatoki.judgels.sandalphon.controllers.ProblemController.postUploadStatementMediaFiles(pId: Long)
 GET         /problems/:pId/statements/media/:filename/download                  @org.iatoki.judgels.sandalphon.controllers.ProblemController.downloadStatementMediaFile(pId: Long, filename: String)
+GET         /problems/:pId/statements/languages/update                          @org.iatoki.judgels.sandalphon.controllers.ProblemController.listStatementLanguages(pId: Long)
+POST        /problems/:pId/statements/languages/add                             @org.iatoki.judgels.sandalphon.controllers.ProblemController.postAddStatementLanguage(pId: Long)
+GET         /problems/:pId/statements/languages/:lang/enable                    @org.iatoki.judgels.sandalphon.controllers.ProblemController.enableStatementLanguage(pId: Long, lang: String)
+GET         /problems/:pId/statements/languages/:lang/disable                   @org.iatoki.judgels.sandalphon.controllers.ProblemController.disableStatementLanguage(pId: Long, lang: String)
+GET         /problems/:pId/statements/languages/:lang/makeDefault               @org.iatoki.judgels.sandalphon.controllers.ProblemController.makeDefaultStatementLanguage(pId: Long, lang: String)
 
 GET         /problems/:pJid/render/:filename                                    @org.iatoki.judgels.sandalphon.controllers.ProblemController.renderMediaByJid(pJid: String, filename: String)
 GET         /verifyProblem                                                      @org.iatoki.judgels.sandalphon.controllers.ProblemController.verifyProblem()
@@ -51,8 +58,8 @@ POST        /problems/programming/create                                        
 GET         /problems/programming/:pId/grading                                  @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.jumpToGrading(pId: Long)
 GET         /problems/programming/:pId/submissions                              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.jumpToSubmissions(pId: Long)
 
-GET         /problems/programming/:pId/statement/view                           @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewStatement(pId: Long)
-GET         /problems/programming/:pId/statement/render/:filename               @org.iatoki.judgels.sandalphon.controllers.ProblemController.renderMediaById(pId: Long, filename: String)
+GET         /problems/programming/:pId/statements/view                          @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewStatement(pId: Long)
+GET         /problems/programming/:pId/statements/render/:filename              @org.iatoki.judgels.sandalphon.controllers.ProblemController.renderMediaById(pId: Long, filename: String)
 
 GET         /problems/programming/:pId/submissions/view                         @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewSubmissions(pId: Long)
 GET         /problems/programming/:pId/submissions/view/                        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.listSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
@@ -83,7 +90,7 @@ POST        /problems/programming/download/grading                              
 
 POST        /problems/programming/getGradingLastUpdateTime                      @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.getGradingLastUpdateTime()
 
-POST        /totp/:cJid/:pJid/statement/:TOTP/:lang/:postSubmitUri              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewProblemStatementTOTP(cJid: String, pJid: String, TOTP: Int, lang: String, postSubmitUri: String)
+POST        /totp/:cJid/:pJid/statement/:TOTP/:lang/:postSubmitUri/:switchLanguageUri              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemController.viewProblemStatementTOTP(cJid: String, pJid: String, TOTP: Int, lang: String, postSubmitUri: String, switchLanguageUri: String)
 
 GET         /client                                                             @org.iatoki.judgels.sandalphon.controllers.ClientController.index()
 GET         /client/                                                            @org.iatoki.judgels.sandalphon.controllers.ClientController.list(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")

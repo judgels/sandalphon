@@ -1,5 +1,6 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.ProgrammingProblemInitForm], problemName: String, problemAdditionalNote: String)
+@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.ProgrammingProblemCreateForm], problemName: String, problemAdditionalNote: String, initLanguageCode: String)
 
+@import org.iatoki.judgels.sandalphon.commons.WorldLanguageRegistry
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.gabriel.GradingEngineRegistry
 @import scala.collection.JavaConverters._
@@ -13,6 +14,8 @@
     @b3.static(Messages.get("problem.name")) { @problemName }
 
     @b3.static(Messages.get("problem.additionalNote")) { @problemAdditionalNote }
+
+    @b3.static(Messages.get("problem.statement.language.initial")) { @WorldLanguageRegistry.getInstance.getDisplayLanguage(initLanguageCode) }
 
     @b3.select(form("gradingEngineName"), GradingEngineRegistry.getInstance().getGradingEngines.asScala.toSeq, '_label -> Messages.get("problem.programming.gradingEngine"))
 

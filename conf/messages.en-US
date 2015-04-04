@@ -19,6 +19,14 @@ problem.statement.view=View Statement
 problem.statement.update=Update Statement
 problem.statement.media=Media
 problem.statement.media.list=Media Files
+problem.statement.language=Languages
+problem.statement.language.list=Statement Languages
+problem.statement.language.add=Add Language
+problem.statement.language.available=Available Languages
+
+problem.statement.language.language=Language
+problem.statement.language.status=Status
+problem.statement.language.initial=Initial Language
 
 problem.file=Files
 problem.file.uploadNew=Upload New

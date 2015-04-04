@@ -5,10 +5,11 @@ import org.iatoki.judgels.commons.Page;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 public interface ProblemService {
 
-    Problem createProblem(ProblemType type, String name, String additionalNote);
+    Problem createProblem(ProblemType type, String name, String additionalNote, String initialLanguageCode);
 
     boolean problemExistsByJid(String problemJid);
 
@@ -20,9 +21,21 @@ public interface ProblemService {
 
     Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    String getStatement(String problemJid);
+    Map<String, StatementLanguageStatus> getAvailableLanguages(String problemJid);
 
-    void updateStatement(long problemId, String statement);
+    void addLanguage(String problemJid, String languageCode);
+
+    void enableLanguage(String problemJid, String languageCode);
+
+    void disableLanguage(String problemJid, String languageCode);
+
+    void makeDefaultLanguage(String problemJid, String languageCode);
+
+    String getDefaultLanguage(String problemJid);
+
+    String getStatement(String problemJid, String languageCode);
+
+    void updateStatement(long problemId, String languageCode, String statement);
 
     void uploadStatementMediaFile(long problemId, File mediaFile, String filename);
 

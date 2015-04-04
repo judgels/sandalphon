@@ -8,8 +8,6 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
-import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemDao;
-import org.iatoki.judgels.sandalphon.models.domains.ProblemModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,7 +16,6 @@ import java.util.Date;
 import java.util.List;
 
 public final class ProgrammingProblemServiceImpl implements ProgrammingProblemService {
-
     private final FileSystemProvider fileSystemProvider;
 
     public ProgrammingProblemServiceImpl(FileSystemProvider fileSystemProvider) {

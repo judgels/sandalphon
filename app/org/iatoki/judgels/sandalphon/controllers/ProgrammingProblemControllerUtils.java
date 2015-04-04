@@ -9,9 +9,11 @@ import org.iatoki.judgels.sandalphon.Problem;
 import play.i18n.Messages;
 
 public final class ProgrammingProblemControllerUtils {
-    private static final ProgrammingProblemControllerUtils INSTANCE = new ProgrammingProblemControllerUtils();
+    private ProgrammingProblemControllerUtils() {
+        // prevent instantiation
+    }
 
-    public void appendTabsLayout(LazyHtml content, Problem problem) {
+    public static void appendTabsLayout(LazyHtml content, Problem problem) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problem.getId())),
@@ -20,9 +22,5 @@ public final class ProgrammingProblemControllerUtils {
         ), c));
 
         content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.update"), routes.ProblemController.updateProblem(problem.getId())), c));
-    }
-
-    static ProgrammingProblemControllerUtils getInstance() {
-        return INSTANCE;
     }
 }

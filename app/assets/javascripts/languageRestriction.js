@@ -14,7 +14,7 @@ require(["jquery"], function( __jquery__ ) {
 
     $(document).ready(function () {
         checkState();
-        
+
         $('#isAllowedAll').on('click', function () {
             checkState();
         });

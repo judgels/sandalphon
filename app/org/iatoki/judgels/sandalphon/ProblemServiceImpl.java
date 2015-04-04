@@ -2,6 +2,8 @@ package org.iatoki.judgels.sandalphon;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import org.iatoki.judgels.commons.FileInfo;
 import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.commons.IdentityUtils;
@@ -14,9 +16,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public final class ProblemServiceImpl implements ProblemService {
-
     private final ProblemDao problemDao;
     private final FileSystemProvider fileSystemProvider;
 
@@ -26,14 +28,14 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Problem createProblem(ProblemType type, String name, String additionalNote) {
+    public Problem createProblem(ProblemType type, String name, String additionalNote, String initialLanguageCode) {
         ProblemModel problemModel = new ProblemModel();
         problemModel.name = name;
         problemModel.additionalNote = additionalNote;
 
         problemDao.persist(problemModel, type.ordinal(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        initStatements(problemModel.jid);
+        initStatements(problemModel.jid, initialLanguageCode);
 
         return createProblemFromModel(problemModel);
     }
@@ -74,16 +76,62 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public String getStatement(String problemJid) {
-        List<String> statementFilePath = appendPath(getStatementsDirPath(problemJid), "statement.html");
-        return fileSystemProvider.readFromFile(statementFilePath);
+    public Map<String, StatementLanguageStatus> getAvailableLanguages(String problemJid) {
+        String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(problemJid));
+        return new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>(){}.getType());
     }
 
     @Override
-    public void updateStatement(long problemId, String statement) {
+    public void addLanguage(String problemJid, String languageCode) {
+        String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(problemJid));
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>(){}.getType());
+
+        availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
+
+        String defaultLanguageStatement = fileSystemProvider.readFromFile(getStatementFilePath(problemJid, getDefaultLanguage(problemJid)));
+        fileSystemProvider.writeToFile(getStatementFilePath(problemJid, languageCode), defaultLanguageStatement);
+        fileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(problemJid), new Gson().toJson(availableLanguages));
+    }
+
+    @Override
+    public void enableLanguage(String problemJid, String languageCode) {
+        String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(problemJid));
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>(){}.getType());
+
+        availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
+
+        fileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(problemJid), new Gson().toJson(availableLanguages));
+    }
+
+    @Override
+    public void disableLanguage(String problemJid, String languageCode) {
+        String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(problemJid));
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>(){}.getType());
+
+        availableLanguages.put(languageCode, StatementLanguageStatus.DISABLED);
+
+        fileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(problemJid), new Gson().toJson(availableLanguages));
+    }
+
+    @Override
+    public void makeDefaultLanguage(String problemJid, String languageCode) {
+        fileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(problemJid), languageCode);
+    }
+
+    @Override
+    public String getDefaultLanguage(String problemJid) {
+        return fileSystemProvider.readFromFile(getStatementDefaultLanguageFilePath(problemJid));
+    }
+
+    @Override
+    public String getStatement(String problemJid, String languageCode) {
+        return fileSystemProvider.readFromFile(getStatementFilePath(problemJid, languageCode));
+    }
+
+    @Override
+    public void updateStatement(long problemId, String languageCode, String statement) {
         ProblemModel problemModel = problemDao.findById(problemId);
-        List<String> statementFilePath = appendPath(getStatementsDirPath(problemModel.jid), "statement.html");
-        fileSystemProvider.writeToFile(statementFilePath, statement);
+        fileSystemProvider.writeToFile(getStatementFilePath(problemModel.jid, languageCode), statement);
 
         problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -131,44 +179,18 @@ public final class ProblemServiceImpl implements ProblemService {
         return new Problem(problemModel.id, problemModel.jid, problemModel.name, problemModel.userCreate, problemModel.additionalNote, new Date(problemModel.timeUpdate), getProblemType(problemModel));
     }
 
-    private void initStatements(String problemJid) {
+    private void initStatements(String problemJid, String initialLanguageCode) {
         List<String> statementsDirPath = getStatementsDirPath(problemJid);
         fileSystemProvider.createDirectory(statementsDirPath);
 
         List<String> mediaDirPath = getStatementMediaDirPath(problemJid);
         fileSystemProvider.createDirectory(mediaDirPath);
 
-        ArrayList<String> statementFilePath = getStatementsDirPath(problemJid);
-        statementFilePath.add("statement.html");
-        fileSystemProvider.writeToFile(statementFilePath,
-                "<h3>Deskripsi</h3>\n" +
-                        "\n" +
-                        "<p>Blabla.</p>\n" +
-                        "\n" +
-                        "<h3>Format Masukan</h3>\n" +
-                        "\n" +
-                        "<p>Blabla.</p>\n" +
-                        "\n" +
-                        "<h3>Format Keluaran</h3>\n" +
-                        "\n" +
-                        "<p>Blabla.</p>\n" +
-                        "\n" +
-                        "<h3>Contoh Masukan</h3>\n" +
-                        "\n" +
-                        "<pre>\n" +
-                        "Blabla.</pre>\n" +
-                        "\n" +
-                        "<h3>Contoh Keluaran</h3>\n" +
-                        "\n" +
-                        "<pre>\n" +
-                        "Blabla.</pre>\n" +
-                        "\n" +
-                        "<h3>Batasan/Subsoal</h3>\n" +
-                        "\n" +
-                        "<ul>\n" +
-                        "\t<li>Blabla</li>\n" +
-                        "</ul>\n"
-        );
+        fileSystemProvider.createFile(getStatementFilePath(problemJid, initialLanguageCode));
+        fileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(problemJid), initialLanguageCode);
+
+        Map<String, StatementLanguageStatus> initialLanguage = ImmutableMap.of(initialLanguageCode, StatementLanguageStatus.ENABLED);
+        fileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(problemJid), new Gson().toJson(initialLanguage));
     }
 
     private ArrayList<String> getRootDirPath(String problemJid) {
@@ -177,6 +199,18 @@ public final class ProblemServiceImpl implements ProblemService {
 
     private ArrayList<String> getStatementsDirPath(String problemJid) {
         return appendPath(getRootDirPath(problemJid), "statements");
+    }
+
+    private ArrayList<String> getStatementFilePath(String problemJid, String languageCode) {
+        return appendPath(getStatementsDirPath(problemJid), languageCode + ".html");
+    }
+
+    private ArrayList<String> getStatementDefaultLanguageFilePath(String problemJid) {
+        return appendPath(getStatementsDirPath(problemJid), "defaultLanguage.txt");
+    }
+
+    private ArrayList<String> getStatementAvailableLanguagesFilePath(String problemJid) {
+        return appendPath(getStatementsDirPath(problemJid), "availableLanguages.txt");
     }
 
     private ArrayList<String> getStatementMediaDirPath(String problemJid) {

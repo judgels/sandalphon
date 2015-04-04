@@ -24,6 +24,8 @@ import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.sandalphon.ProblemType;
+import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
+import org.iatoki.judgels.sandalphon.commons.WorldLanguageRegistry;
 import org.iatoki.judgels.sandalphon.forms.programming.GradingEngineUpdateForm;
 import org.iatoki.judgels.sandalphon.forms.programming.LanguageRestrictionUpdateForm;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
@@ -34,6 +36,7 @@ import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.controllers.security.Authorized;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapter;
+import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.programming.adapters.ConfigurableWithAutoPopulation;
 import org.iatoki.judgels.sandalphon.programming.adapters.ConfigurableWithTokilibFormat;
 import org.iatoki.judgels.sandalphon.programming.GradingConfigAdapters;
@@ -42,7 +45,7 @@ import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.UploadFileForm;
-import org.iatoki.judgels.sandalphon.forms.programming.ProgrammingProblemInitForm;
+import org.iatoki.judgels.sandalphon.forms.programming.ProgrammingProblemCreateForm;
 import org.iatoki.judgels.sandalphon.views.html.programming.createProgrammingProblemView;
 import org.iatoki.judgels.sandalphon.views.html.programming.updateGradingEngineView;
 import org.iatoki.judgels.sandalphon.views.html.programming.listGradingTestDataFilesView;
@@ -70,6 +73,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Transactional
 public final class ProgrammingProblemController extends Controller {
@@ -96,11 +100,11 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result createProgrammingProblem() {
-        if (!hasProblemPart()) {
+        if (!ProblemControllerUtils.wasProblemJustCreated()) {
             return badRequest();
         }
 
-        Form<ProgrammingProblemInitForm> form = Form.form(ProgrammingProblemInitForm.class);
+        Form<ProgrammingProblemCreateForm> form = Form.form(ProgrammingProblemCreateForm.class);
         return showCreateProgrammingProblem(form);
     }
 
@@ -108,22 +112,23 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result postCreateProgrammingProblem() {
-        if (!hasProblemPart()) {
+        if (!ProblemControllerUtils.wasProblemJustCreated()) {
             return badRequest();
         }
 
-        Form<ProgrammingProblemInitForm> form = Form.form(ProgrammingProblemInitForm.class).bindFromRequest();
+        Form<ProgrammingProblemCreateForm> form = Form.form(ProgrammingProblemCreateForm.class).bindFromRequest();
 
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showCreateProgrammingProblem(form);
         } else {
-            ProgrammingProblemInitForm data = form.get();
+            ProgrammingProblemCreateForm data = form.get();
 
-            Problem problem = problemService.createProblem(ProblemType.PROGRAMMING, session("problemName"), session("problemAdditionalNote"));
+            Problem problem = problemService.createProblem(ProblemType.PROGRAMMING, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
+            problemService.updateStatement(problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), ProgrammingProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
             programmingProblemService.initProgrammingProblem(problem.getJid(), data.gradingEngineName);
 
-            session().remove("problemName");
-            session().remove("problemAdditionalNote");
+            ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
+            ProblemControllerUtils.removeJustCreatedProblem();
             return redirect(routes.ProblemController.enterProblem(problem.getId()));
         }
     }
@@ -131,21 +136,30 @@ public final class ProgrammingProblemController extends Controller {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
     public Result viewStatement(long problemId) {
+        ProblemControllerUtils.establishStatementLanguage(problemService, problemId);
+
         Problem problem = problemService.findProblemById(problemId);
 
-        String statement = problemService.getStatement(problem.getJid());
+        String statement = problemService.getStatement(problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
+
         GradingConfig config = programmingProblemService.getGradingConfig(problem.getJid());
         String engine = programmingProblemService.getGradingEngine(problem.getJid());
         LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(problem.getJid());
         Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(languageRestriction));
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, engine, allowedLanguageNames));
+
+        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
+        List<String> allowedLanguages = availableLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toList());
+
+        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemController.viewStatementSwitchLanguage(problem.getId()));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewStatement(problemId)),
-                new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problemId)),
-                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problemId))
+                new InternalLink(Messages.get("commons.view"), routes.ProgrammingProblemController.viewStatement(problem.getId())),
+                new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateStatement(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.media"), routes.ProblemController.listStatementMediaFiles(problem.getId())),
+                new InternalLink(Messages.get("problem.statement.language"), routes.ProblemController.listStatementLanguages(problem.getId()))
         ), c));
-        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -174,7 +188,7 @@ public final class ProgrammingProblemController extends Controller {
         Map<String, String> gradingLanguageToNameMap = GradingLanguageRegistry.getInstance().getGradingLanguages();
 
         LazyHtml content = new LazyHtml(listSubmissionsView.render(submissions, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir));
-        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -198,7 +212,7 @@ public final class ProgrammingProblemController extends Controller {
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewSubmission(submission, source, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
 
-        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -531,7 +545,7 @@ public final class ProgrammingProblemController extends Controller {
         }
     }
 
-    public Result viewProblemStatementTOTP(String clientJid, String problemJid, int TOTP, String lang, String postSubmitUri) {
+    public Result viewProblemStatementTOTP(String clientJid, String problemJid, int TOTP, String lang, String postSubmitUri, String switchLanguageUri) {
         response().setHeader("Access-Control-Allow-Origin", "*");
         if (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid)) {
             return notFound();
@@ -550,15 +564,25 @@ public final class ProgrammingProblemController extends Controller {
             return forbidden();
         }
 
-        String statement = problemService.getStatement(problemJid);
         Problem problem = problemService.findProblemByJid(problemJid);
         String engine = programmingProblemService.getGradingEngine(problem.getJid());
         LanguageRestriction problemLanguageRestriction = programmingProblemService.getLanguageRestriction(problem.getJid());
-        Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problemLanguageRestriction, languageRestriction));
+        Set<String> allowedGradingLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problemLanguageRestriction, languageRestriction));
 
         GradingConfig config = programmingProblemService.getGradingConfig(problem.getJid());
 
-        Html html = SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedLanguageNames);
+        Map<String, StatementLanguageStatus> availableStatementLanguages = problemService.getAvailableLanguages(problem.getJid());
+
+        if (!availableStatementLanguages.containsKey(lang) || availableStatementLanguages.get(lang) == StatementLanguageStatus.DISABLED) {
+            lang = problemService.getDefaultLanguage(problemJid);
+        }
+
+        String statement = problemService.getStatement(problemJid, lang);
+
+        List<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toList());
+
+        Html html = SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames);
+        html = SubmissionAdapters.fromGradingEngine(engine).renderStatementLanguageSelection(switchLanguageUri, allowedStatementLanguages, lang, html);
         return ok(html);
     }
 
@@ -595,21 +619,14 @@ public final class ProgrammingProblemController extends Controller {
         return ok("" + gradingLastUpdateTime.getTime());
     }
 
-    private boolean hasProblemPart() {
-        String problemName = session("problemName");
-        String problemAdditionalNote = session("problemAdditionalNote");
-
-        return problemName != null && problemAdditionalNote != null;
-    }
-
     private Result downloadFile(File file) {
         response().setContentType("application/x-download");
         response().setHeader("Content-disposition", "attachment; filename=" + file.getName());
         return ok(file);
     }
 
-    private Result showCreateProgrammingProblem(Form<ProgrammingProblemInitForm> form) {
-        LazyHtml content = new LazyHtml(createProgrammingProblemView.render(form, session("problemName"), session("problemAdditionalNote")));
+    private Result showCreateProgrammingProblem(Form<ProgrammingProblemCreateForm> form) {
+        LazyHtml content = new LazyHtml(createProgrammingProblemView.render(form, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
         content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
@@ -631,7 +648,7 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemController.updateLanguageRestriction(problem.getId()))
         ), c));
 
-        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -662,7 +679,7 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemController.updateLanguageRestriction(problem.getId()))
         ), c));
 
-        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -684,7 +701,7 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.grading.helper"), routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemController.updateLanguageRestriction(problem.getId()))
         ), c));
-        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -706,7 +723,7 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.grading.helper"), routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemController.updateLanguageRestriction(problem.getId()))
         ), c));
-        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -730,7 +747,7 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemController.updateLanguageRestriction(problem.getId()))
         ), c));
 
-        ProgrammingProblemControllerUtils.getInstance().appendTabsLayout(content, problem);
+        ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
