@@ -67,6 +67,29 @@ problem.programming.submission.score=Score
 
 problem.programming.help.changeGradingEngine=Changing grading engine will reset grading config
 
+problem.version=Versions
+problem.version.list=List Versions
+problem.version.history=History
+problem.version.local=Local Changes
+problem.version.local.hasUncommitted.youHave=Warning: you have
+problem.version.local.hasUncommitted.uncommitted=uncommitted changes
+problem.version.local.hasUncommitted.forThisProblem=for this problem!
+
+problem.version.commit=Commit
+problem.version.commit.perform=Commit Local Changes
+problem.version.commit.title=Title
+problem.version.commit.description=Description
+
+problem.version.restore=Restore
+
+problem.version.local.diff=Diff
+problem.version.local.clean=No local changes.
+problem.version.local.modify=Modify Local Changes
+problem.version.local.update=Update Working Copy with Other Users'' Changes
+problem.version.local.discard=Discard Local Changes
+problem.version.local.cantCommit=Your working copy has diverged from the master copy. Please update your working copy.
+problem.version.local.cantMerge=Your local changes conflict with the master copy. Please remember, discard, and then reapply your local changes.
+
 problem.client=Clients
 problem.client.list=Clients
 problem.client.client=Client

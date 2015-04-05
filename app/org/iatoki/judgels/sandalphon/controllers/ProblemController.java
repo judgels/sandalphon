@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FilenameUtils;
 import org.iatoki.judgels.commons.FileInfo;
+import org.iatoki.judgels.commons.GitCommit;
+import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
@@ -14,6 +16,7 @@ import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.forms.ProblemCreateForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm;
+import org.iatoki.judgels.sandalphon.forms.VersionCommitForm;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.Problem;
@@ -47,6 +50,8 @@ import org.iatoki.judgels.sandalphon.views.html.problem.listStatementMediaFilesV
 import org.iatoki.judgels.sandalphon.views.html.problem.listStatementLanguagesView;
 import org.iatoki.judgels.sandalphon.views.html.problem.updateClientProblemsView;
 import org.iatoki.judgels.sandalphon.views.html.problem.viewClientProblemView;
+import org.iatoki.judgels.sandalphon.views.html.problem.listVersionsView;
+import org.iatoki.judgels.sandalphon.views.html.problem.viewVersionLocalChangesView;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -141,6 +146,12 @@ public final class ProblemController extends Controller {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized("writer")
+    public Result jumpToVersions(long problemId) {
+        return redirect(routes.ProblemController.viewVersionLocalChanges(problemId));
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
     public Result jumpToClients(long problemId) {
         return redirect(routes.ProblemController.updateClientProblems(problemId));
     }
@@ -155,6 +166,7 @@ public final class ProblemController extends Controller {
                 new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewProblem(problem.getId())),
                 new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateProblem(problem.getId()))
         ), c));
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
@@ -191,6 +203,8 @@ public final class ProblemController extends Controller {
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showUpdateProblem(form, problem);
         } else {
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
             ProblemUpdateForm data = form.get();
             problemService.updateProblem(problemId, data.name, data.additionalNote);
             return redirect(routes.ProblemController.viewProblem(problem.getId()));
@@ -234,12 +248,13 @@ public final class ProblemController extends Controller {
         ProblemControllerUtils.establishStatementLanguage(problemService, problemId);
 
         Problem problem = problemService.findProblemById(problemId);
-        String statement = problemService.getStatement(problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
+
+        String statement = problemService.getStatement(IdentityUtils.getUserJid(), problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
 
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
         form = form.bind(ImmutableMap.of("statement", statement));
 
-        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
+        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(IdentityUtils.getUserJid(), problem.getJid());
         List<String> allowedLanguages = availableLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toList());
 
 
@@ -253,14 +268,16 @@ public final class ProblemController extends Controller {
         ProblemControllerUtils.establishStatementLanguage(problemService, problemId);
 
         Problem problem = problemService.findProblemById(problemId);
+
         Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
         if (form.hasErrors() || form.hasGlobalErrors()) {
-            Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
+            Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(IdentityUtils.getUserJid(), problem.getJid());
             List<String> allowedLanguages = availableLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toList());
-
             return showUpdateStatement(form, problem, allowedLanguages);
         } else {
-            problemService.updateStatement(problemId, ProblemControllerUtils.getCurrentStatementLanguage(), form.get().statement);
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+            problemService.updateStatement(IdentityUtils.getUserJid(), problemId, ProblemControllerUtils.getCurrentStatementLanguage(), form.get().statement);
             return redirect(routes.ProblemController.updateStatement(problem.getId()));
         }
     }
@@ -275,8 +292,9 @@ public final class ProblemController extends Controller {
     @Authorized("writer")
     public Result listStatementMediaFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
+
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-        List<FileInfo> mediaFiles = problemService.getStatementMediaFiles(problem.getJid());
+        List<FileInfo> mediaFiles = problemService.getStatementMediaFiles(IdentityUtils.getUserJid(), problem.getJid());
 
         return showListStatementMediaFiles(form, problem, mediaFiles);
     }
@@ -286,20 +304,27 @@ public final class ProblemController extends Controller {
     @Authorized("writer")
     public Result postUploadStatementMediaFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
+
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart file;
 
         file = body.getFile("file");
         if (file != null) {
             File mediaFile = file.getFile();
-            problemService.uploadStatementMediaFile(problem.getId(), mediaFile, file.getFilename());
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+            problemService.uploadStatementMediaFile(IdentityUtils.getUserJid(), problem.getId(), mediaFile, file.getFilename());
+
             return redirect(routes.ProblemController.listStatementMediaFiles(problem.getId()));
         }
 
         file = body.getFile("fileZipped");
         if (file != null) {
             File mediaFile = file.getFile();
-            problemService.uploadStatementMediaFileZipped(problem.getId(), mediaFile);
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+            problemService.uploadStatementMediaFileZipped(IdentityUtils.getUserJid(), problem.getId(), mediaFile);
+
             return redirect(routes.ProblemController.listStatementMediaFiles(problem.getId()));
         }
 
@@ -310,7 +335,7 @@ public final class ProblemController extends Controller {
     @Authorized("writer")
     public Result downloadStatementMediaFile(long id, String filename) {
         Problem problem = problemService.findProblemById(id);
-        String mediaURL = problemService.getStatementMediaFileURL(problem.getJid(), filename);
+        String mediaURL = problemService.getStatementMediaFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
 
         try {
             new URL(mediaURL);
@@ -326,8 +351,9 @@ public final class ProblemController extends Controller {
     public Result listStatementLanguages(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
 
-        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
-        String defaultLanguage = problemService.getDefaultLanguage(problem.getJid());
+        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(IdentityUtils.getUserJid(), problem.getJid());
+        String defaultLanguage = problemService.getDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid());
+
         LazyHtml content = new LazyHtml(listStatementLanguagesView.render(availableLanguages, defaultLanguage, problem.getId()));
 
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
@@ -337,6 +363,8 @@ public final class ProblemController extends Controller {
                 new InternalLink(Messages.get("problem.statement.language"), routes.ProblemController.listStatementLanguages(problem.getId()))
         ), c));
         ProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -354,8 +382,12 @@ public final class ProblemController extends Controller {
     @Authorized("writer")
     public Result postAddStatementLanguage(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
         String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
-        problemService.addLanguage(problem.getJid(), languageCode);
+        problemService.addLanguage(IdentityUtils.getUserJid(), problem.getJid(), languageCode);
+
         return redirect(routes.ProblemController.listStatementLanguages(problem.getId()));
     }
 
@@ -364,7 +396,11 @@ public final class ProblemController extends Controller {
     @Authorized("writer")
     public Result enableStatementLanguage(long problemId, String languageCode) {
         Problem problem = problemService.findProblemById(problemId);
-        problemService.enableLanguage(problem.getJid(), languageCode);
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        problemService.enableLanguage(IdentityUtils.getUserJid(), problem.getJid(), languageCode);
+
         return redirect(routes.ProblemController.listStatementLanguages(problem.getId()));
     }
 
@@ -373,9 +409,13 @@ public final class ProblemController extends Controller {
     @Authorized("writer")
     public Result disableStatementLanguage(long problemId, String languageCode) {
         Problem problem = problemService.findProblemById(problemId);
-        problemService.disableLanguage(problem.getJid(), languageCode);
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        problemService.disableLanguage(IdentityUtils.getUserJid(), problem.getJid(), languageCode);
+
         if (ProblemControllerUtils.getCurrentStatementLanguage().equals(languageCode)) {
-            ProblemControllerUtils.setCurrentStatementLanguage(problemService.getDefaultLanguage(problem.getJid()));
+            ProblemControllerUtils.setCurrentStatementLanguage(problemService.getDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid()));
         }
         return redirect(routes.ProblemController.listStatementLanguages(problem.getId()));
     }
@@ -384,12 +424,115 @@ public final class ProblemController extends Controller {
     @Authorized("writer")
     public Result makeDefaultStatementLanguage(long problemId, String languageCode) {
         Problem problem = problemService.findProblemById(problemId);
-        problemService.makeDefaultLanguage(problem.getJid(), languageCode);
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        problemService.makeDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid(), languageCode);
+
         return redirect(routes.ProblemController.listStatementLanguages(problem.getId()));
     }
 
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result listVersionHistory(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+
+        List<GitCommit> versions = problemService.getVersions(IdentityUtils.getUserJid(), problem.getJid());
+        boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+        LazyHtml content = new LazyHtml(listVersionsView.render(versions, problem.getId(), isClean));
+
+        content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.version.local"), routes.ProblemController.viewVersionLocalChanges(problem.getId())),
+                new InternalLink(Messages.get("problem.version.history"), routes.ProblemController.listVersionHistory(problem.getId()))
+        ), c));
+
+        ProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
+                new InternalLink(problem.getName(), routes.ProblemController.viewProblem(problem.getId())),
+                new InternalLink(Messages.get("problem.version"), routes.ProblemController.jumpToVersions(problem.getId())),
+                new InternalLink(Messages.get("problem.version.history"), routes.ProblemController.listVersionHistory(problem.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
+
+        return ControllerUtils.getInstance().lazyOk(content);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result restoreVersionHistory(long problemId, String hash) {
+        Problem problem = problemService.findProblemById(problemId);
+
+        boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        problemService.restore(problem.getJid(), hash);
+
+        return redirect(routes.ProblemController.listVersionHistory(problem.getId()));
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result viewVersionLocalChanges(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        Form<VersionCommitForm> form = Form.form(VersionCommitForm.class);
+
+        return showViewVersionLocalChanges(form, problem, isClean);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result postCommitVersionLocalChanges(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+
+        Form<VersionCommitForm> form = Form.form(VersionCommitForm.class).bindFromRequest();
+        if (form.hasErrors() || form.hasGlobalErrors()) {
+            boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+            return showViewVersionLocalChanges(form, problem, isClean);
+        }
+
+        VersionCommitForm data = form. get();
+
+        if (problemService.fetchUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
+            flash("localChangesError", Messages.get("problem.version.local.cantCommit"));
+        } else if (!problemService.commitThenMergeUserClone(IdentityUtils.getUserJid(), problem.getJid(), data.title, data.description)) {
+            flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
+        } else if (!problemService.pushUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
+            flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
+        } else {
+            problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+        }
+
+        return redirect(routes.ProblemController.viewVersionLocalChanges(problem.getId()));
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result updateVersionLocalChanges(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        problemService.fetchUserClone(IdentityUtils.getUserJid(), problem.getJid());
+
+        if (!problemService.updateUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
+            flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
+        }
+        return redirect(routes.ProblemController.viewVersionLocalChanges(problem.getId()));
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Authorized("writer")
+    public Result discardVersionLocalChanges(long problemId) {
+        Problem problem = problemService.findProblemById(problemId);
+        problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+
+        return redirect(routes.ProblemController.viewVersionLocalChanges(problem.getId()));
+    }
+
     public Result renderMediaByJid(String problemJid, String imageFilename) {
-        String mediaURL = problemService.getStatementMediaFileURL(problemJid, imageFilename);
+        String mediaURL = problemService.getStatementMediaFileURL(null, problemJid, imageFilename);
 
         try {
             new URL(mediaURL);
@@ -464,6 +607,8 @@ public final class ProblemController extends Controller {
         if (clientProblem.getProblemJid().equals(problem.getJid())) {
             LazyHtml content = new LazyHtml(viewClientProblemView.render(problem, clientProblem));
             ProblemControllerUtils.appendTabsLayout(content, problem);
+            ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+            ProblemControllerUtils.appendTitleLayout(content, problem);
             ControllerUtils.getInstance().appendSidebarLayout(content);
             ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                     new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -517,6 +662,7 @@ public final class ProblemController extends Controller {
                 new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewProblem(problem.getId())),
                 new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateProblem(problem.getId()))
                 ), c));
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
@@ -539,6 +685,8 @@ public final class ProblemController extends Controller {
                 new InternalLink(Messages.get("problem.statement.language"), routes.ProblemController.listStatementLanguages(problem.getId()))
         ), c));
         ProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -560,6 +708,8 @@ public final class ProblemController extends Controller {
                 new InternalLink(Messages.get("problem.statement.language"), routes.ProblemController.listStatementLanguages(problem.getId()))
         ), c));
         ProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -572,9 +722,34 @@ public final class ProblemController extends Controller {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
+    private Result showViewVersionLocalChanges(Form<VersionCommitForm> form, Problem problem, boolean isClean) {
+        LazyHtml content = new LazyHtml(viewVersionLocalChangesView.render(form, problem, isClean));
+
+        content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
+                new InternalLink(Messages.get("problem.version.local"), routes.ProblemController.viewVersionLocalChanges(problem.getId())),
+                new InternalLink(Messages.get("problem.version.history"), routes.ProblemController.listVersionHistory(problem.getId()))
+        ), c));
+
+        ProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
+                new InternalLink(problem.getName(), routes.ProblemController.viewProblem(problem.getId())),
+                new InternalLink(Messages.get("problem.version"), routes.ProblemController.jumpToVersions(problem.getId())),
+                new InternalLink(Messages.get("problem.version.local"), routes.ProblemController.viewVersionLocalChanges(problem.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - Local Changes");
+
+        return ControllerUtils.getInstance().lazyOk(content);
+    }
+
     private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> form, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
         LazyHtml content = new LazyHtml(updateClientProblemsView.render(form, problem.getId(), clients, clientProblems));
         ProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),

@@ -18,9 +18,8 @@ public final class ProgrammingProblemControllerUtils {
                 new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.submission"), routes.ProgrammingProblemController.jumpToSubmissions(problem.getId())),
+                new InternalLink(Messages.get("problem.version"), routes.ProblemController.jumpToVersions(problem.getId())),
                 new InternalLink(Messages.get("problem.client"), routes.ProblemController.jumpToClients(problem.getId()))
         ), c));
-
-        content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.update"), routes.ProblemController.updateProblem(problem.getId())), c));
     }
 }

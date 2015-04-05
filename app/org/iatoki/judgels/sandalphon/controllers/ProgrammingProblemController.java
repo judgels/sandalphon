@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.iatoki.judgels.commons.FileInfo;
+import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
@@ -25,7 +26,6 @@ import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.commons.WorldLanguageRegistry;
 import org.iatoki.judgels.sandalphon.forms.programming.GradingEngineUpdateForm;
 import org.iatoki.judgels.sandalphon.forms.programming.LanguageRestrictionUpdateForm;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
@@ -124,8 +124,9 @@ public final class ProgrammingProblemController extends Controller {
             ProgrammingProblemCreateForm data = form.get();
 
             Problem problem = problemService.createProblem(ProblemType.PROGRAMMING, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
-            problemService.updateStatement(problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), ProgrammingProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
+            problemService.updateStatement(null, problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), ProgrammingProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
             programmingProblemService.initProgrammingProblem(problem.getJid(), data.gradingEngineName);
+            problemService.initRepository(IdentityUtils.getUserJid(), problem.getJid());
 
             ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
             ProblemControllerUtils.removeJustCreatedProblem();
@@ -139,18 +140,19 @@ public final class ProgrammingProblemController extends Controller {
         ProblemControllerUtils.establishStatementLanguage(problemService, problemId);
 
         Problem problem = problemService.findProblemById(problemId);
+        String statement = problemService.getStatement(IdentityUtils.getUserJid(), problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
 
-        String statement = problemService.getStatement(problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
-
-        GradingConfig config = programmingProblemService.getGradingConfig(problem.getJid());
-        String engine = programmingProblemService.getGradingEngine(problem.getJid());
-        LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(problem.getJid());
+        GradingConfig config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+        String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+        LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid());
         Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(languageRestriction));
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(routes.ProgrammingProblemController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, engine, allowedLanguageNames));
 
-        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
+        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(IdentityUtils.getUserJid(), problem.getJid());
         List<String> allowedLanguages = availableLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toList());
+
+        
 
         ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemController.viewStatementSwitchLanguage(problem.getId()));
         content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
@@ -160,6 +162,8 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.statement.language"), routes.ProblemController.listStatementLanguages(problem.getId()))
         ), c));
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -189,6 +193,8 @@ public final class ProgrammingProblemController extends Controller {
 
         LazyHtml content = new LazyHtml(listSubmissionsView.render(submissions, gradingLanguageToNameMap, problemId, pageIndex, orderBy, orderDir));
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -207,12 +213,14 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
         Submission submission = submissionService.findSubmissionById(submissionId);
 
-        String engine = programmingProblemService.getGradingEngine(problem.getJid());
+        String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
         GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
 
         LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewSubmission(submission, source, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
 
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -280,7 +288,7 @@ public final class ProgrammingProblemController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
 
         GradingEngineUpdateForm data = new GradingEngineUpdateForm();
-        data.gradingEngineName = programmingProblemService.getGradingEngine(problem.getJid());
+        data.gradingEngineName = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
 
         Form<GradingEngineUpdateForm> form = Form.form(GradingEngineUpdateForm.class).fill(data);
 
@@ -298,15 +306,18 @@ public final class ProgrammingProblemController extends Controller {
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showUpdateGradingEngine(form, problem);
         } else {
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
             String gradingEngine = form.get().gradingEngineName;
-            String originalGradingEngine = programmingProblemService.getGradingEngine(problem.getJid());
+            String originalGradingEngine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
 
             if (!gradingEngine.equals(originalGradingEngine)) {
                 GradingConfig config = GradingEngineRegistry.getInstance().getEngine(gradingEngine).createDefaultGradingConfig();
-                programmingProblemService.updateGradingConfig(problem.getJid(), config);
+                programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), config);
             }
 
-            programmingProblemService.updateGradingEngine(problem.getJid(), gradingEngine);
+            programmingProblemService.updateGradingEngine(IdentityUtils.getUserJid(), problem.getJid(), gradingEngine);
+
             return redirect(routes.ProgrammingProblemController.updateGradingConfig(problem.getId()));
         }
     }
@@ -316,10 +327,11 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateGradingConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        String engine = programmingProblemService.getGradingEngine(problem.getJid());
-        GradingConfig config = programmingProblemService.getGradingConfig(problem.getJid());
-        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
-        List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(problem.getJid());
+
+        String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+        GradingConfig config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
+        List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
         Form<?> form = GradingConfigAdapters.fromGradingType(engine).createFormFromConfig(config);
 
@@ -331,16 +343,21 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result postUpdateGradingConfig(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        String engine = programmingProblemService.getGradingEngine(problem.getJid());
+
+        String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
         Form<?> form = GradingConfigAdapters.fromGradingType(engine).createEmptyForm().bindFromRequest(request());
 
         if (form.hasErrors() || form.hasGlobalErrors()) {
-            List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
-            List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(problem.getJid());
+            List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
+            List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
+            
             return showUpdateGradingConfig(form, problem, engine, testDataFiles, helperFiles);
         } else {
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
             GradingConfig config = GradingConfigAdapters.fromGradingType(engine).createConfigFromForm(form);
-            programmingProblemService.updateGradingConfig(problem.getJid(), config);
+            programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), config);
+            
             return redirect(routes.ProgrammingProblemController.updateGradingConfig(problem.getId()));
         }
     }
@@ -349,18 +366,23 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateGradingConfigByTokilibFormat(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        String engine = programmingProblemService.getGradingEngine(problem.getJid());
-        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+
         GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(engine);
 
         if (! (adapter instanceof ConfigurableWithTokilibFormat)) {
             return forbidden();
         }
 
-        GradingConfig config = programmingProblemService.getGradingConfig(problem.getJid());
+        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
+        GradingConfig config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+
         GradingConfig newConfig = ((ConfigurableWithTokilibFormat) adapter).updateConfigWithTokilibFormat(config, testDataFiles);
 
-        programmingProblemService.updateGradingConfig(problem.getJid(), newConfig);
+        programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
 
         return redirect(routes.ProgrammingProblemController.updateGradingConfig(problem.getId()));
     }
@@ -369,18 +391,21 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateGradingConfigByAutoPopulation(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        String engine = programmingProblemService.getGradingEngine(problem.getJid());
-        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
         GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(engine);
 
         if (! (adapter instanceof ConfigurableWithAutoPopulation)) {
             return forbidden();
         }
 
-        GradingConfig config = programmingProblemService.getGradingConfig(problem.getJid());
+        GradingConfig config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
         GradingConfig newConfig = ((ConfigurableWithAutoPopulation) adapter).updateConfigWithAutoPopulation(config, testDataFiles);
 
-        programmingProblemService.updateGradingConfig(problem.getJid(), newConfig);
+        programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
 
         return redirect(routes.ProgrammingProblemController.updateGradingConfig(problem.getId()));
     }
@@ -390,8 +415,9 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result listGradingTestDataFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
+
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(problem.getJid());
+        List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
 
         return showListGradingTestDataFiles(form, problem, testDataFiles);
     }
@@ -401,20 +427,27 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result postUploadGradingTestDataFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
+
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart file;
 
         file = body.getFile("file");
         if (file != null) {
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
             File testDataFile = file.getFile();
-            programmingProblemService.uploadGradingTestDataFile(problem.getJid(), testDataFile, file.getFilename());
+            programmingProblemService.uploadGradingTestDataFile(IdentityUtils.getUserJid(), problem.getJid(), testDataFile, file.getFilename());
+            
             return redirect(routes.ProgrammingProblemController.listGradingTestDataFiles(problem.getId()));
         }
 
         file = body.getFile("fileZipped");
         if (file != null) {
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
             File testDataFile = file.getFile();
-            programmingProblemService.uploadGradingTestDataFileZipped(problem.getJid(), testDataFile);
+            programmingProblemService.uploadGradingTestDataFileZipped(IdentityUtils.getUserJid(), problem.getJid(), testDataFile);
+            
             return redirect(routes.ProgrammingProblemController.listGradingTestDataFiles(problem.getId()));
         }
 
@@ -426,8 +459,9 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result listGradingHelperFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
+
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-        List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(problem.getJid());
+        List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
         return showListGradingHelperFiles(form, problem, helperFiles);
     }
@@ -437,20 +471,27 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result postUploadGradingHelperFiles(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
+
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart file;
 
         file = body.getFile("file");
         if (file != null) {
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
             File helperFile = file.getFile();
-            programmingProblemService.uploadGradingHelperFile(problem.getJid(), helperFile, file.getFilename());
+            programmingProblemService.uploadGradingHelperFile(IdentityUtils.getUserJid(), problem.getJid(), helperFile, file.getFilename());
+            
             return redirect(routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId()));
         }
 
         file = body.getFile("fileZipped");
         if (file != null) {
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
             File helperFile = file.getFile();
-            programmingProblemService.uploadGradingHelperFileZipped(problem.getJid(), helperFile);
+            programmingProblemService.uploadGradingHelperFileZipped(IdentityUtils.getUserJid(), problem.getJid(), helperFile);
+            
             return redirect(routes.ProgrammingProblemController.listGradingHelperFiles(problem.getId()));
         }
 
@@ -463,7 +504,8 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result updateLanguageRestriction(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(problem.getJid());
+
+        LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid());
 
         LanguageRestrictionUpdateForm data = new LanguageRestrictionUpdateForm();
         data.allowedLanguageNames = LanguageRestrictionAdapter.getFormAllowedLanguageNamesFromLanguageRestriction(languageRestriction);
@@ -485,10 +527,13 @@ public final class ProgrammingProblemController extends Controller {
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showUpdateLanguageRestriction(form, problem);
         } else {
+            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
             LanguageRestrictionUpdateForm data = form.get();
             LanguageRestriction languageRestriction = LanguageRestrictionAdapter.createLanguageRestrictionFromForm(data.allowedLanguageNames, data.isAllowedAll);
 
-            programmingProblemService.updateLanguageRestriction(problem.getJid(), languageRestriction);
+            programmingProblemService.updateLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid(), languageRestriction);
+
             return redirect(routes.ProgrammingProblemController.updateLanguageRestriction(problem.getId()));
         }
     }
@@ -497,12 +542,13 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result postSubmit(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
-        String engine = programmingProblemService.getGradingEngine(problem.getJid());
+
+        String engine = programmingProblemService.getGradingEngine(null, problem.getJid());
         Http.MultipartFormData body = request().body().asMultipartFormData();
 
         String gradingLanguage = body.asFormUrlEncoded().get("language")[0];
 
-        LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(problem.getJid());
+        LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(null, problem.getJid());
         Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(languageRestriction));
 
         try {
@@ -521,7 +567,8 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result downloadGradingTestDataFile(long id, String filename) {
         Problem problem = problemService.findProblemById(id);
-        String testDataURL = programmingProblemService.getGradingTestDataFileURL(problem.getJid(), filename);
+
+        String testDataURL = programmingProblemService.getGradingTestDataFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
         try {
             new URL(testDataURL);
             return redirect(testDataURL);
@@ -535,7 +582,8 @@ public final class ProgrammingProblemController extends Controller {
     @Authorized("writer")
     public Result downloadGradingHelperFile(long id, String filename) {
         Problem problem = problemService.findProblemById(id);
-        String helperURL = programmingProblemService.getGradingHelperFileURL(problem.getJid(), filename);
+
+        String helperURL = programmingProblemService.getGradingHelperFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
         try {
             new URL(helperURL);
             return redirect(helperURL);
@@ -565,19 +613,19 @@ public final class ProgrammingProblemController extends Controller {
         }
 
         Problem problem = problemService.findProblemByJid(problemJid);
-        String engine = programmingProblemService.getGradingEngine(problem.getJid());
-        LanguageRestriction problemLanguageRestriction = programmingProblemService.getLanguageRestriction(problem.getJid());
+        String engine = programmingProblemService.getGradingEngine(null, problem.getJid());
+        LanguageRestriction problemLanguageRestriction = programmingProblemService.getLanguageRestriction(null, problem.getJid());
         Set<String> allowedGradingLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problemLanguageRestriction, languageRestriction));
 
-        GradingConfig config = programmingProblemService.getGradingConfig(problem.getJid());
+        GradingConfig config = programmingProblemService.getGradingConfig(null, problem.getJid());
 
-        Map<String, StatementLanguageStatus> availableStatementLanguages = problemService.getAvailableLanguages(problem.getJid());
+        Map<String, StatementLanguageStatus> availableStatementLanguages = problemService.getAvailableLanguages(null, problem.getJid());
 
         if (!availableStatementLanguages.containsKey(lang) || availableStatementLanguages.get(lang) == StatementLanguageStatus.DISABLED) {
-            lang = problemService.getDefaultLanguage(problemJid);
+            lang = problemService.getDefaultLanguage(null, problemJid);
         }
 
-        String statement = problemService.getStatement(problemJid, lang);
+        String statement = problemService.getStatement(null, problemJid, lang);
 
         List<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toList());
 
@@ -614,7 +662,7 @@ public final class ProgrammingProblemController extends Controller {
             return forbidden();
         }
 
-        Date gradingLastUpdateTime = programmingProblemService.getGradingLastUpdateTime(problemJid);
+        Date gradingLastUpdateTime = programmingProblemService.getGradingLastUpdateTime(null, problemJid);
 
         return ok("" + gradingLastUpdateTime.getTime());
     }
@@ -649,6 +697,8 @@ public final class ProgrammingProblemController extends Controller {
         ), c));
 
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -680,6 +730,8 @@ public final class ProgrammingProblemController extends Controller {
         ), c));
 
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -702,6 +754,8 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemController.updateLanguageRestriction(problem.getId()))
         ), c));
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -724,6 +778,8 @@ public final class ProgrammingProblemController extends Controller {
                 new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemController.updateLanguageRestriction(problem.getId()))
         ), c));
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
@@ -748,6 +804,8 @@ public final class ProgrammingProblemController extends Controller {
         ), c));
 
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problem);
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),

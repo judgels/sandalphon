@@ -4,7 +4,9 @@ import akka.actor.Scheduler;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.iatoki.judgels.commons.FileSystemProvider;
+import org.iatoki.judgels.commons.GitProvider;
 import org.iatoki.judgels.commons.LocalFileSystemProvider;
+import org.iatoki.judgels.commons.LocalGitProvider;
 import org.iatoki.judgels.gabriel.commons.GradingResponsePoller;
 import org.iatoki.judgels.gabriel.commons.SubmissionService;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;
@@ -46,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 public final class Global extends org.iatoki.judgels.commons.Global {
 
     private final FileSystemProvider fileSystemProvider;
+    private final GitProvider gitProvider;
     private final ProblemDao problemDao;
     private final ProgrammingSubmissionDao submissionDao;
     private final GradingDao gradingDao;
@@ -66,6 +69,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         Config playConfig = ConfigFactory.load();
 
         this.fileSystemProvider = new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir")));
+        this.gitProvider = new LocalGitProvider(new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir"))));
         this.problemDao = new ProblemHibernateDao();
         this.submissionDao = new ProgrammingSubmissionHibernateDao();
         this.gradingDao = new GradingHibernateDao();
@@ -75,7 +79,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.userRoleDao = new UserRoleHibernateDao();
         this.sealtiel = new Sealtiel(playConfig.getString("sealtiel.clientJid"), playConfig.getString("sealtiel.clientSecret"), playConfig.getString("sealtiel.baseUrl"));
         this.jidCacheDao = new JidCacheHibernateDao();
-        this.problemService = new ProblemServiceImpl(problemDao, fileSystemProvider);
+        this.problemService = new ProblemServiceImpl(problemDao, fileSystemProvider, gitProvider);
         this.programmingProblemService = new ProgrammingProblemServiceImpl(fileSystemProvider);
         this.submissionService = new SubmissionServiceImpl(submissionDao, gradingDao, sealtiel, playConfig.getString("sealtiel.gabrielClientJid"));
         this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);

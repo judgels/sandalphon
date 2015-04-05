@@ -1,12 +1,17 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
+import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
 
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.commons.views.html.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.views.html.problem.versionLocalChangesWarningLayout;
+import play.i18n.Messages;
 import play.mvc.Call;
 import play.mvc.Controller;
 
@@ -21,17 +26,27 @@ public final class ProblemControllerUtils {
         }
     }
 
+    public static void appendTitleLayout(LazyHtml content, Problem problem) {
+        content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.update"), routes.ProblemController.updateProblem(problem.getId())), c));
+    }
+
     public static void appendStatementLanguageSelectionLayout(LazyHtml content, String currentLanguage, List<String> allowedLanguages, Call target) {
         content.appendLayout(c -> statementLanguageSelectionLayout.render(target.absoluteURL(Controller.request()), allowedLanguages, currentLanguage, c));
+    }
+
+    public static void appendVersionLocalChangesWarningLayout(LazyHtml content, ProblemService problemService, Problem problem) {
+        if (problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid())) {
+            content.appendLayout(c -> versionLocalChangesWarningLayout.render(problem.getId(), c));
+        }
     }
 
     public static void establishStatementLanguage(ProblemService problemService, long problemId) {
         String currentLanguage = getCurrentStatementLanguage();
         Problem problem = problemService.findProblemById(problemId);
-        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(problem.getJid());
+        Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(IdentityUtils.getUserJid(), problem.getJid());
 
         if (currentLanguage == null || !availableLanguages.containsKey(currentLanguage) || availableLanguages.get(currentLanguage) == StatementLanguageStatus.DISABLED) {
-            String languageCode = problemService.getDefaultLanguage(problem.getJid());
+            String languageCode = problemService.getDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid());
             Controller.session("currentStatementLanguage", languageCode);
         }
     }

@@ -26,6 +26,10 @@ public final class SandalphonProperties {
         return "problems";
     }
 
+    public String getBaseProblemClonesDirKey() {
+        return "problem-clones";
+    }
+
     public String getBaseDataDir() {
         return baseDataDir;
     }

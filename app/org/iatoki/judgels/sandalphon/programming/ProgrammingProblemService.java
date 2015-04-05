@@ -13,35 +13,35 @@ public interface ProgrammingProblemService {
 
     void initProgrammingProblem(String problemJid, String gradingEngine);
 
-    GradingConfig getGradingConfig(String problemJid);
+    GradingConfig getGradingConfig(String userJid, String problemJid);
 
-    void updateGradingConfig(String problemJid, GradingConfig gradingConfig);
+    void updateGradingConfig(String userJid, String problemJid, GradingConfig gradingConfig);
 
-    Date getGradingLastUpdateTime(String problemJid);
+    Date getGradingLastUpdateTime(String userJid, String problemJid);
 
-    String getGradingEngine(String problemJid);
+    String getGradingEngine(String userJid, String problemJid);
 
-    void updateGradingEngine(String problemJid, String gradingEngine);
+    void updateGradingEngine(String userJid, String problemJid, String gradingEngine);
 
-    LanguageRestriction getLanguageRestriction(String problemJid);
+    LanguageRestriction getLanguageRestriction(String userJid, String problemJid);
 
-    void updateLanguageRestriction(String problemJid, LanguageRestriction languageRestriction);
+    void updateLanguageRestriction(String userJid, String problemJid, LanguageRestriction languageRestriction);
 
-    void uploadGradingTestDataFile(String problemJid, File testDataFile, String filename);
+    void uploadGradingTestDataFile(String userJid, String problemJid, File testDataFile, String filename);
 
-    void uploadGradingTestDataFileZipped(String problemJid, File testDataFileZipped);
+    void uploadGradingTestDataFileZipped(String userJid, String problemJid, File testDataFileZipped);
 
-    void uploadGradingHelperFile(String problemJid, File helperFile, String filename);
+    void uploadGradingHelperFile(String userJid, String problemJid, File helperFile, String filename);
 
-    void uploadGradingHelperFileZipped(String problemJid, File helperFileZipped);
+    void uploadGradingHelperFileZipped(String userJid, String problemJid, File helperFileZipped);
 
-    List<FileInfo> getGradingTestDataFiles(String problemJid);
+    List<FileInfo> getGradingTestDataFiles(String userJid, String problemJid);
 
-    List<FileInfo> getGradingHelperFiles(String problemJid);
+    List<FileInfo> getGradingHelperFiles(String userJid, String problemJid);
 
-    String getGradingTestDataFileURL(String problemJid, String filename);
+    String getGradingTestDataFileURL(String userJid, String problemJid, String filename);
 
-    String getGradingHelperFileURL(String problemJid, String filename);
+    String getGradingHelperFileURL(String userJid, String problemJid, String filename);
 
     ByteArrayOutputStream getZippedGradingFilesStream(String problemJid);
 }

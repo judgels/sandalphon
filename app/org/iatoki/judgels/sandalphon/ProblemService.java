@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon;
 
 import org.iatoki.judgels.commons.FileInfo;
+import org.iatoki.judgels.commons.GitCommit;
 import org.iatoki.judgels.commons.Page;
 
 import java.io.File;
@@ -21,27 +22,47 @@ public interface ProblemService {
 
     Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    Map<String, StatementLanguageStatus> getAvailableLanguages(String problemJid);
+    Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String problemJid);
 
-    void addLanguage(String problemJid, String languageCode);
+    void addLanguage(String userJid, String problemJid, String languageCode);
 
-    void enableLanguage(String problemJid, String languageCode);
+    void enableLanguage(String userJid, String problemJid, String languageCode);
 
-    void disableLanguage(String problemJid, String languageCode);
+    void disableLanguage(String userJid, String problemJid, String languageCode);
 
-    void makeDefaultLanguage(String problemJid, String languageCode);
+    void makeDefaultLanguage(String userJid, String problemJid, String languageCode);
 
-    String getDefaultLanguage(String problemJid);
+    String getDefaultLanguage(String userJid, String problemJid);
 
-    String getStatement(String problemJid, String languageCode);
+    String getStatement(String userJid, String problemJid, String languageCode);
 
-    void updateStatement(long problemId, String languageCode, String statement);
+    void updateStatement(String userJid, long problemId, String languageCode, String statement);
 
-    void uploadStatementMediaFile(long problemId, File mediaFile, String filename);
+    void uploadStatementMediaFile(String userJid, long problemId, File mediaFile, String filename);
 
-    void uploadStatementMediaFileZipped(long problemId, File mediaFileZipped);
+    void uploadStatementMediaFileZipped(String userJid, long problemId, File mediaFileZipped);
 
-    List<FileInfo> getStatementMediaFiles(String problemJid);
+    List<FileInfo> getStatementMediaFiles(String userJid, String problemJid);
 
-    String getStatementMediaFileURL(String problemJid, String filename);
+    String getStatementMediaFileURL(String userJid, String problemJid, String filename);
+
+    List<GitCommit> getVersions(String userJid, String problemJid);
+
+    void initRepository(String userJid, String problemJid);
+
+    boolean userCloneExists(String userJid, String problemJid);
+
+    void createUserCloneIfNotExists(String userJid, String problemJid);
+
+    boolean commitThenMergeUserClone(String userJid, String problemJid, String title, String description);
+
+    boolean updateUserClone(String userJid, String problemJid);
+
+    boolean pushUserClone(String userJid, String problemJid);
+
+    boolean fetchUserClone(String userJid, String problemJid);
+
+    void discardUserClone(String userJid, String problemJid);
+
+    void restore(String problemJid, String hash);
 }

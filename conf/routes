@@ -28,6 +28,7 @@ POST        /problems/:pId/update                                               
 GET         /problems/:pId/enter                                                @org.iatoki.judgels.sandalphon.controllers.ProblemController.enterProblem(pId: Long)
 
 GET         /problems/:pId/statements                                           @org.iatoki.judgels.sandalphon.controllers.ProblemController.jumpToStatement(pId: Long)
+GET         /problems/:pId/versions                                             @org.iatoki.judgels.sandalphon.controllers.ProblemController.jumpToVersions(pId: Long)
 GET         /problems/:pId/clients                                              @org.iatoki.judgels.sandalphon.controllers.ProblemController.jumpToClients(pId: Long)
 
 GET         /problems/:pId/statements/view/                                     @org.iatoki.judgels.sandalphon.controllers.ProblemController.viewStatement(pId: Long)
@@ -47,6 +48,13 @@ GET         /problems/:pId/statements/languages/:lang/makeDefault               
 
 GET         /problems/:pJid/render/:filename                                    @org.iatoki.judgels.sandalphon.controllers.ProblemController.renderMediaByJid(pJid: String, filename: String)
 GET         /verifyProblem                                                      @org.iatoki.judgels.sandalphon.controllers.ProblemController.verifyProblem()
+
+GET         /problems/:pId/versions/history/view                                @org.iatoki.judgels.sandalphon.controllers.ProblemController.listVersionHistory(pId: Long)
+GET         /problems/:pId/versions/history/restore/:hash                       @org.iatoki.judgels.sandalphon.controllers.ProblemController.restoreVersionHistory(pId: Long, hash: String)
+GET         /problems/:pId/versions/local/view                                  @org.iatoki.judgels.sandalphon.controllers.ProblemController.viewVersionLocalChanges(pId: Long)
+POST        /problems/:pId/versions/local/view                                  @org.iatoki.judgels.sandalphon.controllers.ProblemController.postCommitVersionLocalChanges(pId: Long)
+GET         /problems/:pId/versions/local/rebase                                @org.iatoki.judgels.sandalphon.controllers.ProblemController.updateVersionLocalChanges(pId: Long)
+GET         /problems/:pId/versions/local/discard                               @org.iatoki.judgels.sandalphon.controllers.ProblemController.discardVersionLocalChanges(pId: Long)
 
 GET         /problems/:pId/clients/view/                                        @org.iatoki.judgels.sandalphon.controllers.ProblemController.updateClientProblems(pId: Long)
 POST        /problems/:pId/clients                                              @org.iatoki.judgels.sandalphon.controllers.ProblemController.postUpdateClientProblems(pId: Long)
