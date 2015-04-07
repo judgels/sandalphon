@@ -18,9 +18,21 @@ public interface ProblemService {
 
     Problem findProblemByJid(String problemJid);
 
+    boolean isProblemPartnerByUserJid(String problemJid, String userJid);
+
+    void createProblemPartner(long problemId, String userJid, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig);
+
+    void updateProblemPartner(long problemPartnerId, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig);
+
+    Page<ProblemPartner> pageProblemPartners(String problemJid, long pageIndex, long pageSize, String orderBy, String orderDir);
+
+    ProblemPartner findProblemPartnerByProblemPartnerId(long problemPartnerId);
+
+    ProblemPartner findProblemPartnerByProblemJidAndPartnerJid(String problemJid, String partnerJid);
+
     void updateProblem(long problemId, String name, String additionalNote);
 
-    Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
+    Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin);
 
     Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String problemJid);
 

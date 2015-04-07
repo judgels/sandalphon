@@ -36,6 +36,27 @@ problem.file.size=Size
 problem.file.filename=Filename
 problem.file.lastModified=Last Modified
 
+problem.partner=Partners
+problem.partner.name=Name
+problem.partner.username=Username
+problem.partner.list=Partners
+problem.partner.add=Add Partner
+problem.partner.update=Update Partner
+
+problem.partner.isAllowedToUpdateProblem=Allowed to update problem?
+problem.partner.isAllowedToUpdateStatement=Allowed to update statement?
+problem.partner.isAllowedToUploadStatementResources=Allowed to upload statement resources?
+problem.partner.allowedStatementLanguagesToView=Allowed statement languages to view
+problem.partner.allowedStatementLanguagesToUpdate=Allowed statement languages to update
+problem.partner.isAllowedToManageStatementLanguages=Allowed to manage statement languages?
+problem.partner.isAllowedToViewVersionHistory=Allowed to view version history?
+problem.partner.isAllowedToRestoreVersionHistory=Allowed to restore version history?
+problem.partner.isAllowedToManageProblemClients=Allowed to manage problem clients?
+problem.partner.leaveAllowAll=List of comma-separated language codes. Leave empty to allow all.
+
+problem.partner.usernameNotFound=Username not found
+problem.partner.already=This user is already a partner!
+
 problem.programming=Programming Problems
 problem.programming.create=Create Programming Problem
 
@@ -64,6 +85,9 @@ problem.programming.submission.time=Time
 problem.programming.submission.gradingLanguage=Language
 problem.programming.submission.verdict=Verdict
 problem.programming.submission.score=Score
+
+problem.programming.partner.isAllowedToSubmit=Allowed to submit?
+problem.programming.partner.isAllowedToManageGrading=Allowed to manage grading?
 
 problem.programming.help.changeGradingEngine=Changing grading engine will reset grading config
 
