@@ -179,7 +179,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
     private void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
-                .add(new InternalLink(Messages.get("problem.submission"), routes.ProgrammingProblemController.jumpToSubmissions(problem.getId())))
+                .add(new InternalLink(Messages.get("problem.programming.submission"), routes.ProgrammingProblemController.jumpToSubmissions(problem.getId())))
                         .add(lastLink)
                 .build()
         );
