@@ -175,6 +175,14 @@ public final class ProblemControllerUtils {
             return false;
         }
 
+        if (isAuthorOrAbove(problem)) {
+            return true;
+        }
+
+        if (!isPartner(problemService, problem)) {
+            return false;
+        }
+
         String language = getCurrentStatementLanguage();
 
         Set<String> allowedLanguages = getPartnerConfig(problemService, problem).getAllowedStatementLanguagesToUpdate();
