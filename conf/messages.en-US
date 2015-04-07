@@ -141,10 +141,10 @@ grader.update=Update Grader
 grader.name=Name
 grader.secret=Secret
 
-userRole.list=User Roles
-userRole.update=Update User Roles
+user.list=Users
+user.update=Update User
 
-userRole.userRoles=User Roles
-userRole.userJid=User JID
-userRole.name=Name
-userRole.roles=Roles
+user.users=Users
+user.userJid=User JID
+user.name=Name
+user.roles=Roles
