@@ -58,6 +58,8 @@ public final class ProgrammingProblemStatementController extends Controller {
             ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.view"), routes.ProblemStatementController.viewStatement(problemId)));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
+            ControllerUtils.getInstance().addActivityLog("View statement of programming problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return ControllerUtils.getInstance().lazyOk(content);
         } else {
             return notFound();

@@ -41,6 +41,8 @@ public final class ProblemClientController extends Controller {
         List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
         List<Client> clients = clientService.findAllClients();
 
+        ControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return showUpdateClientProblems(form, problem, clients, clientProblems);
     }
 
@@ -57,6 +59,9 @@ public final class ProblemClientController extends Controller {
             ClientProblemUpsertForm clientProblemUpsertForm = form.get();
             if ((clientService.existsByJid(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
                 clientService.createClientProblem(problem.getJid(), clientProblemUpsertForm.clientJid);
+
+                ControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertForm.clientJid + " to problem " + problem.getName() + ".");
+
                 return redirect(routes.ProblemClientController.updateClientProblems(problem.getId()));
             } else {
                 List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
@@ -77,6 +82,8 @@ public final class ProblemClientController extends Controller {
             ControllerUtils.getInstance().appendSidebarLayout(content);
             appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.client"), routes.ProblemClientController.viewClientProblem(problemId, clientProblemId)));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+            ControllerUtils.getInstance().addActivityLog("View client " + clientProblem.getClientName() + " to problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return ControllerUtils.getInstance().lazyOk(content);
         } else {

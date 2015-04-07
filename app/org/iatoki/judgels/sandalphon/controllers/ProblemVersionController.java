@@ -48,6 +48,8 @@ public final class ProblemVersionController extends Controller {
             appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.version.history"), routes.ProblemVersionController.listVersionHistory(problem.getId())));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
 
+            ControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return ControllerUtils.getInstance().lazyOk(content);
         } else {
             return notFound();
@@ -60,6 +62,8 @@ public final class ProblemVersionController extends Controller {
 
         if (isClean && ProblemControllerUtils.isAllowedToRestoreVersionHistory(problemService, problem)) {
             problemService.restore(problem.getJid(), hash);
+
+            ControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return redirect(routes.ProblemVersionController.listVersionHistory(problem.getId()));
         } else {
@@ -74,6 +78,8 @@ public final class ProblemVersionController extends Controller {
             boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
 
             Form<VersionCommitForm> form = Form.form(VersionCommitForm.class);
+
+            ControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return showViewVersionLocalChanges(form, problem, isClean);
         } else {
@@ -103,6 +109,8 @@ public final class ProblemVersionController extends Controller {
                 problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
             }
 
+            ControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } else {
             return notFound();
@@ -118,6 +126,9 @@ public final class ProblemVersionController extends Controller {
             if (!problemService.updateUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
                 flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
             }
+
+            ControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } else {
             return notFound();
@@ -129,6 +140,8 @@ public final class ProblemVersionController extends Controller {
 
         if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
             problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+
+            ControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } else {

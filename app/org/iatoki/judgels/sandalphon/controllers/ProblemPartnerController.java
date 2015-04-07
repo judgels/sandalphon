@@ -47,6 +47,8 @@ public class ProblemPartnerController extends Controller {
             ProblemPartnerControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.partner.list"), routes.ProblemPartnerController.viewPartners(problem.getId())));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Partners");
 
+            ControllerUtils.getInstance().addActivityLog("Open all partners <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return ControllerUtils.getInstance().lazyOk(content);
         } else {
             return notFound();

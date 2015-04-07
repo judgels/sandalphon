@@ -70,6 +70,8 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             Form<GradingEngineUpdateForm> form = Form.form(GradingEngineUpdateForm.class).fill(data);
 
+            ControllerUtils.getInstance().addActivityLog("Try to update grading engine of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return showUpdateGradingEngine(form, problem);
         } else {
             return notFound();
@@ -98,6 +100,8 @@ public final class ProgrammingProblemGradingController extends Controller {
 
                 programmingProblemService.updateGradingEngine(IdentityUtils.getUserJid(), problem.getJid(), gradingEngine);
 
+                ControllerUtils.getInstance().addActivityLog("Update grading engine of problem " + problem.getName() + ".");
+
                 return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
             }
         } else {
@@ -116,6 +120,8 @@ public final class ProgrammingProblemGradingController extends Controller {
             List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
             Form<?> form = GradingConfigAdapters.fromGradingType(engine).createFormFromConfig(config);
+
+            ControllerUtils.getInstance().addActivityLog("Try to update grading config of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return showUpdateGradingConfig(form, problem, engine, testDataFiles, helperFiles);
         } else {
@@ -141,6 +147,8 @@ public final class ProgrammingProblemGradingController extends Controller {
 
                 GradingConfig config = GradingConfigAdapters.fromGradingType(engine).createConfigFromForm(form);
                 programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), config);
+
+                ControllerUtils.getInstance().addActivityLog("Update grading config of problem " + problem.getName() + ".");
 
                 return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
             }
@@ -170,6 +178,8 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
 
+            ControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
         } else {
             return notFound();
@@ -195,6 +205,8 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
 
+            ControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
         } else {
             return notFound();
@@ -208,6 +220,8 @@ public final class ProgrammingProblemGradingController extends Controller {
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             Form<UploadFileForm> form = Form.form(UploadFileForm.class);
             List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
+
+            ControllerUtils.getInstance().addActivityLog("List grading test data files of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return showListGradingTestDataFiles(form, problem, testDataFiles);
         } else {
@@ -230,6 +244,8 @@ public final class ProgrammingProblemGradingController extends Controller {
                 File testDataFile = file.getFile();
                 programmingProblemService.uploadGradingTestDataFile(IdentityUtils.getUserJid(), problem.getJid(), testDataFile, file.getFilename());
 
+                ControllerUtils.getInstance().addActivityLog("Upload test data file of problem " + problem.getName() + ".");
+
                 return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
             }
 
@@ -239,6 +255,8 @@ public final class ProgrammingProblemGradingController extends Controller {
 
                 File testDataFile = file.getFile();
                 programmingProblemService.uploadGradingTestDataFileZipped(IdentityUtils.getUserJid(), problem.getJid(), testDataFile);
+
+                ControllerUtils.getInstance().addActivityLog("Upload zipped test data files of problem " + problem.getName() + ".");
 
                 return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
             }
@@ -256,6 +274,8 @@ public final class ProgrammingProblemGradingController extends Controller {
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             Form<UploadFileForm> form = Form.form(UploadFileForm.class);
             List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
+
+            ControllerUtils.getInstance().addActivityLog("List grading helper files of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return showListGradingHelperFiles(form, problem, helperFiles);
         } else {
@@ -278,6 +298,8 @@ public final class ProgrammingProblemGradingController extends Controller {
                 File helperFile = file.getFile();
                 programmingProblemService.uploadGradingHelperFile(IdentityUtils.getUserJid(), problem.getJid(), helperFile, file.getFilename());
 
+                ControllerUtils.getInstance().addActivityLog("Upload helper file of problem " + problem.getName() + ".");
+
                 return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
             }
 
@@ -287,6 +309,8 @@ public final class ProgrammingProblemGradingController extends Controller {
 
                 File helperFile = file.getFile();
                 programmingProblemService.uploadGradingHelperFileZipped(IdentityUtils.getUserJid(), problem.getJid(), helperFile);
+
+                ControllerUtils.getInstance().addActivityLog("Upload zipped helper files of problem " + problem.getName() + ".");
 
                 return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
             }
@@ -302,6 +326,9 @@ public final class ProgrammingProblemGradingController extends Controller {
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             String testDataURL = programmingProblemService.getGradingTestDataFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
+
+            ControllerUtils.getInstance().addActivityLog("Download test data file " + filename + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             try {
                 new URL(testDataURL);
                 return redirect(testDataURL);
@@ -319,6 +346,9 @@ public final class ProgrammingProblemGradingController extends Controller {
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             String helperURL = programmingProblemService.getGradingHelperFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
+
+            ControllerUtils.getInstance().addActivityLog("Download helper file " + filename + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             try {
                 new URL(helperURL);
                 return redirect(helperURL);
@@ -344,6 +374,8 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             Form<LanguageRestrictionUpdateForm> form = Form.form(LanguageRestrictionUpdateForm.class).fill(data);
 
+            ControllerUtils.getInstance().addActivityLog("Try to update language restriction of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return showUpdateLanguageRestriction(form, problem);
         } else {
             return notFound();
@@ -366,6 +398,8 @@ public final class ProgrammingProblemGradingController extends Controller {
                 LanguageRestriction languageRestriction = LanguageRestrictionAdapter.createLanguageRestrictionFromForm(data.allowedLanguageNames, data.isAllowedAll);
 
                 programmingProblemService.updateLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid(), languageRestriction);
+
+                ControllerUtils.getInstance().addActivityLog("Update language restriction of problem " + problem.getName() + ".");
 
                 return redirect(routes.ProgrammingProblemGradingController.updateLanguageRestriction(problem.getId()));
             }

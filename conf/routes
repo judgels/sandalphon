@@ -127,7 +127,7 @@ GET         /grader/:gId/update                                                 
 POST        /grader/:gId/update                                                 @org.iatoki.judgels.sandalphon.controllers.GraderController.postUpdate(gId: Long)
 
 
-GET         /userRole                                                           @org.iatoki.judgels.sandalphon.controllers.UserRoleController.index()
-GET         /userRole/                                                          @org.iatoki.judgels.sandalphon.controllers.UserRoleController.list(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
-GET         /userRole/:uId/update                                               @org.iatoki.judgels.sandalphon.controllers.UserRoleController.update(uId: Long)
-POST        /userRole/:uId/update                                               @org.iatoki.judgels.sandalphon.controllers.UserRoleController.postUpdate(uId: Long)
+GET         /users                                                              @org.iatoki.judgels.sandalphon.controllers.UserController.index()
+GET         /users/                                                             @org.iatoki.judgels.sandalphon.controllers.UserController.listUsers(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+GET         /users/:uId/update                                                  @org.iatoki.judgels.sandalphon.controllers.UserController.updateUser(uId: Long)
+POST        /users/:uId/update                                                  @org.iatoki.judgels.sandalphon.controllers.UserController.postUpdateUser(uId: Long)

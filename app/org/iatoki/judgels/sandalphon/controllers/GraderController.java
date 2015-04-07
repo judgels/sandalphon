@@ -67,6 +67,8 @@ public final class GraderController extends Controller {
     public Result create() {
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class);
 
+        ControllerUtils.getInstance().addActivityLog("Try to create grader <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return showCreate(form);
     }
 
@@ -80,6 +82,8 @@ public final class GraderController extends Controller {
             GraderUpsertForm clientUpsertForm = form.get();
             graderService.createGrader(clientUpsertForm.name);
 
+            ControllerUtils.getInstance().addActivityLog("Create grader.");
+
             return redirect(routes.GraderController.index());
         }
     }
@@ -90,11 +94,13 @@ public final class GraderController extends Controller {
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), new InternalLink(Messages.get("commons.update"), routes.GraderController.update(graderId)), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
-                new InternalLink(Messages.get("grader.view"), routes.GraderController.view(graderId))
+              new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
+              new InternalLink(Messages.get("grader.view"), routes.GraderController.view(graderId))
         ));
 
         ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - Vuew");
+
+        ControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -119,6 +125,8 @@ public final class GraderController extends Controller {
         clientUpsertForm.name = grader.getName();
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).fill(clientUpsertForm);
 
+        ControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return showUpdate(form, grader);
     }
 
@@ -132,6 +140,8 @@ public final class GraderController extends Controller {
             GraderUpsertForm clientUpsertForm = form.get();
             graderService.updateGrader(graderId, clientUpsertForm.name);
 
+            ControllerUtils.getInstance().addActivityLog("Update grader " + grader.getName() + ".");
+
             return redirect(routes.GraderController.index());
         }
     }
@@ -143,10 +153,12 @@ public final class GraderController extends Controller {
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.list"), new InternalLink(Messages.get("commons.create"), routes.GraderController.create()), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index())
+              new InternalLink(Messages.get("grader.graders"), routes.GraderController.index())
         ));
 
         ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - List");
+
+        ControllerUtils.getInstance().addActivityLog("Open graders <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }

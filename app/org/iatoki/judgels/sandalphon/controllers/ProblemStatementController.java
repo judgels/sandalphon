@@ -59,12 +59,16 @@ public class ProblemStatementController extends Controller {
         String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
         ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
 
+        ControllerUtils.getInstance().addActivityLog("Switch view statement to " + languageCode + " of problem " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return redirect(routes.ProblemStatementController.viewStatement(problemId));
     }
 
     public Result updateStatementSwitchLanguage(long problemId) {
         String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
         ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
+
+        ControllerUtils.getInstance().addActivityLog("Switch update statement to " + languageCode + " of problem " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return redirect(routes.ProblemStatementController.updateStatement(problemId));
     }
@@ -81,6 +85,8 @@ public class ProblemStatementController extends Controller {
             form = form.bind(ImmutableMap.of("statement", statement));
 
             Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToUpdate(problemService, problem);
+
+            ControllerUtils.getInstance().addActivityLog("Try to update statement of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return showUpdateStatement(form, problem, allowedLanguages);
         } else {
@@ -102,6 +108,9 @@ public class ProblemStatementController extends Controller {
                 problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
                 problemService.updateStatement(IdentityUtils.getUserJid(), problemId, ProblemControllerUtils.getCurrentStatementLanguage(), form.get().statement);
+
+                ControllerUtils.getInstance().addActivityLog("Update statement of problem " + problem.getName() + ".");
+
                 return redirect(routes.ProblemStatementController.updateStatement(problem.getId()));
             }
         } else {
@@ -119,6 +128,8 @@ public class ProblemStatementController extends Controller {
         boolean isAllowedToUploadMediaFiles = ProblemControllerUtils.isAllowedToUploadStatementResources(problemService, problem);
         
         List<FileInfo> mediaFiles = problemService.getStatementMediaFiles(IdentityUtils.getUserJid(), problem.getJid());
+
+        ControllerUtils.getInstance().addActivityLog("List statement media files of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return showListStatementMediaFiles(form, problem, mediaFiles, isAllowedToUploadMediaFiles);
     }
@@ -138,6 +149,8 @@ public class ProblemStatementController extends Controller {
 
                 problemService.uploadStatementMediaFile(IdentityUtils.getUserJid(), problem.getId(), mediaFile, file.getFilename());
 
+                ControllerUtils.getInstance().addActivityLog("Upload statement media file of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
                 return redirect(routes.ProblemStatementController.listStatementMediaFiles(problem.getId()));
             }
 
@@ -147,6 +160,8 @@ public class ProblemStatementController extends Controller {
                 problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
                 problemService.uploadStatementMediaFileZipped(IdentityUtils.getUserJid(), problem.getId(), mediaFile);
+
+                ControllerUtils.getInstance().addActivityLog("Upload statement zipped media files of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
                 return redirect(routes.ProblemStatementController.listStatementMediaFiles(problem.getId()));
             }
@@ -160,6 +175,8 @@ public class ProblemStatementController extends Controller {
     public Result downloadStatementMediaFile(long id, String filename) {
         Problem problem = problemService.findProblemById(id);
         String mediaURL = problemService.getStatementMediaFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
+
+        ControllerUtils.getInstance().addActivityLog("Download media file " + filename + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         try {
             new URL(mediaURL);
@@ -186,6 +203,8 @@ public class ProblemStatementController extends Controller {
             ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.language.list"), routes.ProblemStatementController.listStatementLanguages(problem.getId())));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Statement Languages");
 
+            ControllerUtils.getInstance().addActivityLog("List statement languages of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return ControllerUtils.getInstance().lazyOk(content);
         } return notFound();
     }
@@ -200,6 +219,8 @@ public class ProblemStatementController extends Controller {
             String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
             problemService.addLanguage(IdentityUtils.getUserJid(), problem.getJid(), languageCode);
 
+            ControllerUtils.getInstance().addActivityLog("Add statement language " + languageCode + " of problem " + problem.getName() + ".");
+
             return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
         } else {
             return notFound();
@@ -213,6 +234,8 @@ public class ProblemStatementController extends Controller {
             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
             problemService.enableLanguage(IdentityUtils.getUserJid(), problem.getJid(), languageCode);
+
+            ControllerUtils.getInstance().addActivityLog("Enable statement language " + languageCode + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
         } else {
@@ -232,6 +255,9 @@ public class ProblemStatementController extends Controller {
             if (ProblemControllerUtils.getCurrentStatementLanguage().equals(languageCode)) {
                 ProblemControllerUtils.setCurrentStatementLanguage(problemService.getDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid()));
             }
+
+            ControllerUtils.getInstance().addActivityLog("Disable statement language " + languageCode + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
         } else {
             return notFound();
@@ -245,6 +271,8 @@ public class ProblemStatementController extends Controller {
             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
             problemService.makeDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid(), languageCode);
+
+            ControllerUtils.getInstance().addActivityLog("Make statement language " + languageCode + " default of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
         } else {

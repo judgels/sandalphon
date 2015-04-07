@@ -53,9 +53,11 @@ public final class ProblemController extends Controller {
 
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
+              new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
         ));
         ControllerUtils.getInstance().appendTemplateLayout(content, "Problems");
+
+        ControllerUtils.getInstance().addActivityLog("Open allowed problems <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -63,6 +65,9 @@ public final class ProblemController extends Controller {
     @AddCSRFToken
     public Result createProblem() {
         Form<ProblemCreateForm> form = Form.form(ProblemCreateForm.class);
+
+        ControllerUtils.getInstance().addActivityLog("Try to create problem <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return showCreateProblem(form);
     }
 
@@ -77,6 +82,9 @@ public final class ProblemController extends Controller {
 
             if (data.type.equals(ProblemType.PROGRAMMING.name())) {
                 ProblemControllerUtils.setJustCreatedProblem(data.name, data.additionalNote, data.initLanguageCode);
+
+                ControllerUtils.getInstance().addActivityLog("Create problem " + data.name + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
                 return redirect(routes.ProgrammingProblemController.createProgrammingProblem());
             }
 
@@ -85,22 +93,32 @@ public final class ProblemController extends Controller {
     }
 
     public Result enterProblem(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Enter problem " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return redirect(routes.ProblemController.jumpToStatement(problemId));
     }
 
     public Result jumpToStatement(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Jump to problem statement " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return redirect(routes.ProblemStatementController.viewStatement(problemId));
     }
 
     public Result jumpToVersions(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Jump to problem version " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problemId));
     }
 
     public Result jumpToPartners(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Jump to problem partner " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return redirect(routes.ProblemPartnerController.viewPartners(problemId));
     }
 
     public Result jumpToClients(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Jump to problem client " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return redirect(routes.ProblemClientController.updateClientProblems(problemId));
     }
 
@@ -113,11 +131,13 @@ public final class ProblemController extends Controller {
         content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
-                ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
-                .add(new InternalLink(Messages.get("problem.view"), routes.ProblemController.viewProblem(problem.getId())))
-                .build()
+              ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
+                    .add(new InternalLink(Messages.get("problem.view"), routes.ProblemController.viewProblem(problem.getId())))
+                    .build()
         );
         ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View");
+
+        ControllerUtils.getInstance().addActivityLog("View problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -132,6 +152,9 @@ public final class ProblemController extends Controller {
             data.additionalNote = problem.getAdditionalNote();
 
             Form<ProblemUpdateForm> form = Form.form(ProblemUpdateForm.class).fill(data);
+
+            ControllerUtils.getInstance().addActivityLog("Try to update problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return showUpdateProblem(form, problem);
         } else {
             return redirect(routes.ProblemController.viewProblem(problem.getId()));
@@ -151,6 +174,9 @@ public final class ProblemController extends Controller {
 
                 ProblemUpdateForm data = form.get();
                 problemService.updateProblem(problemId, data.name, data.additionalNote);
+
+                ControllerUtils.getInstance().addActivityLog("Update problem " + problem.getName() + ".");
+
                 return redirect(routes.ProblemController.viewProblem(problem.getId()));
             }
         } else {

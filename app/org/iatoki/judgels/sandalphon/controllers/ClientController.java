@@ -65,6 +65,8 @@ public final class ClientController extends Controller {
     public Result create() {
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class);
 
+        ControllerUtils.getInstance().addActivityLog("Try to create client <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return showCreate(form);
     }
 
@@ -78,6 +80,8 @@ public final class ClientController extends Controller {
             ClientUpsertForm clientUpsertForm = form.get();
             clientService.createClient(clientUpsertForm.name);
 
+            ControllerUtils.getInstance().addActivityLog("Create client " + clientUpsertForm.name + ".");
+
             return redirect(routes.ClientController.index());
         }
     }
@@ -88,10 +92,12 @@ public final class ClientController extends Controller {
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), new InternalLink(Messages.get("commons.update"), routes.ClientController.update(clientId)), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
-                new InternalLink(Messages.get("client.view"), routes.ClientController.view(clientId))
+              new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
+              new InternalLink(Messages.get("client.view"), routes.ClientController.view(clientId))
         ));
         ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - View");
+
+        ControllerUtils.getInstance().addActivityLog("View client " + client.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -116,6 +122,8 @@ public final class ClientController extends Controller {
         clientUpsertForm.name = client.getName();
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).fill(clientUpsertForm);
 
+        ControllerUtils.getInstance().addActivityLog("Try to update client " + client.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return showUpdate(form, client);
     }
 
@@ -129,12 +137,17 @@ public final class ClientController extends Controller {
             ClientUpsertForm clientUpsertForm = form.get();
             clientService.updateClient(clientId, clientUpsertForm.name);
 
+            ControllerUtils.getInstance().addActivityLog("Update client " + client.getName() + ".");
+
             return redirect(routes.ClientController.index());
         }
     }
 
     public Result delete(long clientId) {
-        clientService.deleteClient(clientId);
+        Client client = clientService.findClientById(clientId);
+        clientService.deleteClient(client.getId());
+
+        ControllerUtils.getInstance().addActivityLog("Delete client " + client.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return redirect(routes.ClientController.index());
     }
@@ -146,10 +159,12 @@ public final class ClientController extends Controller {
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.list"), new InternalLink(Messages.get("commons.create"), routes.ClientController.create()), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("client.clients"), routes.ClientController.index())
+              new InternalLink(Messages.get("client.clients"), routes.ClientController.index())
         ));
 
         ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - List");
+
+        ControllerUtils.getInstance().addActivityLog("Open all clients <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }

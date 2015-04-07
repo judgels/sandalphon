@@ -9,6 +9,8 @@ import org.iatoki.judgels.commons.LocalFileSystemProvider;
 import org.iatoki.judgels.commons.LocalGitProvider;
 import org.iatoki.judgels.gabriel.commons.GradingResponsePoller;
 import org.iatoki.judgels.gabriel.commons.SubmissionService;
+import org.iatoki.judgels.jophiel.commons.UserActivityPusher;
+import org.iatoki.judgels.jophiel.commons.controllers.JophielClientController;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;
 import org.iatoki.judgels.sandalphon.controllers.ClientController;
 import org.iatoki.judgels.sandalphon.controllers.GraderController;
@@ -22,7 +24,7 @@ import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemGradingContro
 import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemPartnerController;
 import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemStatementController;
 import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemSubmissionController;
-import org.iatoki.judgels.sandalphon.controllers.UserRoleController;
+import org.iatoki.judgels.sandalphon.controllers.UserController;
 import org.iatoki.judgels.sandalphon.controllers.apis.ProblemAPIController;
 import org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ClientHibernateDao;
@@ -30,13 +32,13 @@ import org.iatoki.judgels.sandalphon.models.daos.hibernate.ClientProblemHibernat
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ProblemHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ProblemPartnerHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.programming.GraderHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.hibernate.UserRoleHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.hibernate.UserHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemPartnerDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.GraderDao;
-import org.iatoki.judgels.sandalphon.models.daos.interfaces.UserRoleDao;
+import org.iatoki.judgels.sandalphon.models.daos.interfaces.UserDao;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
 import org.iatoki.judgels.sandalphon.programming.GraderServiceImpl;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemService;
@@ -68,13 +70,13 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private final ClientDao clientDao;
     private final GraderDao graderDao;
     private final ClientProblemDao clientProblemDao;
-    private final UserRoleDao userRoleDao;
+    private final UserDao userDao;
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
     private final SubmissionService submissionService;
     private final ClientService clientService;
     private final GraderService graderService;
-    private final UserRoleService userRoleService;
+    private final UserService userService;
     private final Sealtiel sealtiel;
     private final JidCacheDao jidCacheDao;
 
@@ -90,7 +92,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.clientDao = new ClientHibernateDao();
         this.graderDao = new GraderHibernateDao();
         this.clientProblemDao = new ClientProblemHibernateDao();
-        this.userRoleDao = new UserRoleHibernateDao();
+        this.userDao = new UserHibernateDao();
         this.sealtiel = new Sealtiel(playConfig.getString("sealtiel.clientJid"), playConfig.getString("sealtiel.clientSecret"), playConfig.getString("sealtiel.baseUrl"));
         this.jidCacheDao = new JidCacheHibernateDao();
         this.problemService = new ProblemServiceImpl(problemDao, problemPartnerDao, fileSystemProvider, gitProvider);
@@ -98,7 +100,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         this.submissionService = new SubmissionServiceImpl(submissionDao, gradingDao, sealtiel, playConfig.getString("sealtiel.gabrielClientJid"));
         this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);
         this.graderService = new GraderServiceImpl(graderDao);
-        this.userRoleService = new UserRoleServiceImpl(userRoleDao);
+        this.userService = new UserServiceImpl(userDao);
 
         JidCacheService.getInstance().setDao(jidCacheDao);
     }
@@ -110,10 +112,12 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         SandalphonProperties.getInstance();
 
         GradingResponsePoller poller = new GradingResponsePoller(submissionService, sealtiel);
+        UserActivityPusher userActivityPusher = new UserActivityPusher(userService, UserActivityServiceImpl.getInstance());
 
         Scheduler scheduler = Akka.system().scheduler();
         ExecutionContextExecutor context = Akka.system().dispatcher();
         scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(3, TimeUnit.SECONDS), poller, context);
+        scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(1, TimeUnit.MINUTES), userActivityPusher, context);
     }
 
     @Override
@@ -148,9 +152,11 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         } else if (controllerClass.equals(GraderController.class)) {
             return (A) new GraderController(graderService);
         } else if (controllerClass.equals(ApplicationController.class)) {
-            return (A) new ApplicationController(userRoleService);
-        } else if (controllerClass.equals(UserRoleController.class)) {
-            return (A) new UserRoleController(userRoleService);
+            return (A) new ApplicationController(userService);
+        } else if (controllerClass.equals(UserController.class)) {
+            return (A) new UserController(userService);
+        } else if (controllerClass.equals(JophielClientController.class)) {
+            return (A) new JophielClientController(userService);
         } else {
             return controllerClass.newInstance();
         }

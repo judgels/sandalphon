@@ -42,6 +42,9 @@ public final class ProgrammingProblemController extends Controller {
         }
 
         Form<ProgrammingProblemCreateForm> form = Form.form(ProgrammingProblemCreateForm.class);
+
+        ControllerUtils.getInstance().addActivityLog("Try to create programming problem <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return showCreateProgrammingProblem(form);
     }
 
@@ -65,6 +68,9 @@ public final class ProgrammingProblemController extends Controller {
 
             ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
             ProblemControllerUtils.removeJustCreatedProblem();
+
+            ControllerUtils.getInstance().addActivityLog("Create programming problem " +problem.getName()  + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return redirect(routes.ProblemController.enterProblem(problem.getId()));
         }
     }
@@ -82,10 +88,14 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     public Result jumpToGrading(long id) {
+        ControllerUtils.getInstance().addActivityLog("Jump to programming problem grading " + id + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(id));
     }
 
     public Result jumpToSubmissions(long id) {
+        ControllerUtils.getInstance().addActivityLog("Jump to programming problem submissions " + id + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
         return redirect(routes.ProgrammingProblemSubmissionController.viewSubmissions(id));
     }
 }

@@ -3,11 +3,10 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
-import org.iatoki.judgels.jophiel.commons.JophielUtils;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.UserRole;
-import org.iatoki.judgels.sandalphon.UserRoleService;
+import org.iatoki.judgels.sandalphon.User;
+import org.iatoki.judgels.sandalphon.UserService;
 import play.db.jpa.Transactional;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -16,9 +15,9 @@ import play.mvc.Result;
 @Transactional
 public final class ApplicationController extends Controller {
 
-    private UserRoleService userRoleService;
+    private UserService userRoleService;
 
-    public ApplicationController(UserRoleService userRoleService) {
+    public ApplicationController(UserService userRoleService) {
         this.userRoleService = userRoleService;
     }
 
@@ -51,11 +50,11 @@ public final class ApplicationController extends Controller {
         } else {
             String userRoleJid = IdentityUtils.getUserJid();
             if (userRoleService.existsByUserJid(userRoleJid)) {
-                UserRole userRole = userRoleService.findUserRoleByUserJid(userRoleJid);
+                User userRole = userRoleService.findUserByUserJid(userRoleJid);
                 SandalphonUtils.saveRoleInSession(userRole.getRoles());
                 return redirect(returnUri);
             } else {
-                userRoleService.createUserRole(userRoleJid, SandalphonUtils.getDefaultRole());
+                userRoleService.createUser(userRoleJid, SandalphonUtils.getDefaultRole());
                 SandalphonUtils.saveRoleInSession(SandalphonUtils.getDefaultRole());
                 return redirect(returnUri);
             }

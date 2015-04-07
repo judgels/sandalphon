@@ -1,15 +1,15 @@
 package org.iatoki.judgels.sandalphon.models.daos.interfaces;
 
 import org.iatoki.judgels.commons.models.daos.interfaces.Dao;
-import org.iatoki.judgels.sandalphon.models.domains.UserRoleModel;
+import org.iatoki.judgels.sandalphon.models.domains.UserModel;
 
 import java.util.List;
 
-public interface UserRoleDao extends Dao<Long, UserRoleModel> {
+public interface UserDao extends Dao<Long, UserModel> {
 
     boolean existsByUserJid(String userJid);
 
-    UserRoleModel findByUserJid(String userJid);
+    UserModel findByUserJid(String userJid);
 
     List<String> findUserJidByFilter(String filterString);
 }

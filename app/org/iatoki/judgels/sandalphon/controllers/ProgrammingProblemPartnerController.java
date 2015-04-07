@@ -56,6 +56,9 @@ public final class ProgrammingProblemPartnerController extends Controller {
             Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class);
             Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class);
             Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class);
+
+            ControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+
             return showAddPartner(usernameForm, problemForm, programmingForm, problem);
         } else {
             return notFound();
@@ -93,7 +96,7 @@ public final class ProgrammingProblemPartnerController extends Controller {
                 return showAddPartner(usernameForm, problemForm, programmingForm, problem);
             }
 
-            User user = JophielUtils.getUserByJid(userJid);
+            User user = JophielUtils.getUserByUserJid(userJid);
             JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
             if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
@@ -119,6 +122,8 @@ public final class ProgrammingProblemPartnerController extends Controller {
                     .build();
 
             problemService.createProblemPartner(problem.getId(), userJid, problemConfig, programmingConfig);
+
+            ControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
 
             return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
         } else {
@@ -155,6 +160,8 @@ public final class ProgrammingProblemPartnerController extends Controller {
             programmingData.isAllowedToManageGrading = programmingConfig.isAllowedToManageGrading();
 
             Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).fill(programmingData);
+
+            ControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
 
             return showUpdatePartner(problemForm, programmingForm, problem, problemPartner);
         } else {
@@ -199,6 +206,8 @@ public final class ProgrammingProblemPartnerController extends Controller {
 
 
             problemService.updateProblemPartner(partnerId, problemConfig, programmingConfig);
+
+            ControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + ".");
 
             return redirect(routes.ProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId()));
         } else {
