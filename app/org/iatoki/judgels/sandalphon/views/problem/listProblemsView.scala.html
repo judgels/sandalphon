@@ -30,7 +30,7 @@
                 <td>@problem.getId</td>
                 <td>@problem.getName</td>
                 <td>@problem.getType</td>
-                <td>@displayNamesMap.get(problem.getAuthorJid)</td>
+                <td>@JudgelsUtils.getOnlyUsername(displayNamesMap.get(problem.getAuthorJid))</td>
                 <td>@JudgelsUtils.formatDate(problem.getLastUpdateTime)</td>
                 <td class="text-center">
                     <a href="@routes.ProblemController.viewProblem(problem.getId)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
