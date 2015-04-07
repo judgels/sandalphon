@@ -4,7 +4,7 @@ mv problem problems
 mv submission submissions
 mkdir problem-clones
 
-awk '{print "(cd problems/"$1"/grading; echo -n "$2" > engine.txt)"}' ../sandalphon_problem.csv | sh
+awk '{print "(cd problems/"$1"/grading; echo -n "$2" > engine.txt)"}' sandalphon_problem.csv | sh
 
 pushd problems
 for f in `ls`;
