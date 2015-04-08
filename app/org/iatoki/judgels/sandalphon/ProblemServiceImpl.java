@@ -359,8 +359,9 @@ public final class ProblemServiceImpl implements ProblemService {
         List<String> statementsDirPath = getStatementsDirPath(null, problemJid);
         fileSystemProvider.createDirectory(statementsDirPath);
 
-        List<String> mediaDirPath = getStatementMediaDirPath(null, problemJid);
+        ArrayList<String> mediaDirPath = getStatementMediaDirPath(null, problemJid);
         fileSystemProvider.createDirectory(mediaDirPath);
+        fileSystemProvider.createFile(appendPath(mediaDirPath, ".gitkeep"));
 
         fileSystemProvider.createFile(getStatementFilePath(null, problemJid, initialLanguageCode));
         fileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(null, problemJid), initialLanguageCode);

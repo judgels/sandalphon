@@ -25,8 +25,12 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
     @Override
     public void initProgrammingProblem(String problemJid, String gradingEngine) {
         fileSystemProvider.createDirectory(getGradingDirPath(null, problemJid));
+
         fileSystemProvider.createDirectory(getGradingTestDataDirPath(null, problemJid));
+        fileSystemProvider.createFile(appendPath(getGradingTestDataDirPath(null, problemJid), ".gitkeep"));
+
         fileSystemProvider.createDirectory(getGradingHelpersDirPath(null, problemJid));
+        fileSystemProvider.createFile(appendPath(getGradingHelpersDirPath(null, problemJid), ".gitkeep"));
 
         fileSystemProvider.writeToFile(getGradingEngineFilePath(null, problemJid), gradingEngine);
         fileSystemProvider.writeToFile(getLanguageRestrictionFilePath(null, problemJid), new Gson().toJson(LanguageRestriction.defaultRestriction()));
