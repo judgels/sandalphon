@@ -269,7 +269,7 @@ public final class ProblemServiceImpl implements ProblemService {
     public boolean userCloneExists(String userJid, String problemJid) {
         List<String> root = getCloneDirPath(userJid, problemJid);
 
-        return fileSystemProvider.fileExists(root);
+        return fileSystemProvider.directoryExists(root);
     }
 
     @Override
@@ -277,7 +277,7 @@ public final class ProblemServiceImpl implements ProblemService {
         List<String> origin = getOriginDirPath(problemJid);
         List<String> root = getCloneDirPath(userJid, problemJid);
 
-        if (!fileSystemProvider.fileExists(root)) {
+        if (!fileSystemProvider.directoryExists(root)) {
             gitProvider.clone(origin, root);
         }
     }
@@ -386,7 +386,7 @@ public final class ProblemServiceImpl implements ProblemService {
         ArrayList<String> origin =  getOriginDirPath(problemJid);
         ArrayList<String> root = getCloneDirPath(userJid, problemJid);
 
-        if (userJid == null || !fileSystemProvider.fileExists(root)) {
+        if (userJid == null || !fileSystemProvider.directoryExists(root)) {
             return origin;
         } else {
             return root;
