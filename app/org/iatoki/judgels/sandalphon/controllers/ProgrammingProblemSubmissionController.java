@@ -52,7 +52,8 @@ public final class ProgrammingProblemSubmissionController extends Controller {
     public Result postSubmit(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
+        boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+        if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem) || !isClean) {
             String engine = programmingProblemService.getGradingEngine(null, problem.getJid());
             Http.MultipartFormData body = request().body().asMultipartFormData();
 

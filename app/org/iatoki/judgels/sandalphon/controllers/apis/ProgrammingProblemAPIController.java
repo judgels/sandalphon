@@ -112,7 +112,7 @@ public final class ProgrammingProblemAPIController extends Controller {
 
         Set<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toSet());
 
-        Html html = SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames);
+        Html html = SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames, true);
         html = SubmissionAdapters.fromGradingEngine(engine).renderStatementLanguageSelection(switchLanguageUri, allowedStatementLanguages, lang, html);
         return ok(html);
     }

@@ -86,6 +86,9 @@ problem.programming.submission.gradingLanguage=Language
 problem.programming.submission.verdict=Verdict
 problem.programming.submission.score=Score
 
+problem.programming.cantSubmitNotClean=Submission not allowed if there are local changes.
+problem.programming.cantSubmit=You are not allowed to submit.
+
 problem.programming.partner.isAllowedToSubmit=Allowed to submit?
 problem.programming.partner.isAllowedToManageGrading=Allowed to manage grading?
 

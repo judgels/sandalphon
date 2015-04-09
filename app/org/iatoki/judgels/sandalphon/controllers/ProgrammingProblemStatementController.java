@@ -44,7 +44,20 @@ public final class ProgrammingProblemStatementController extends Controller {
             LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid());
             Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(languageRestriction));
 
-            LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(routes.ProgrammingProblemSubmissionController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, engine, allowedLanguageNames));
+            boolean isAllowedToSubmitByPartner = ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem);
+            boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+
+            boolean isAllowedToSubmit = true;
+
+            if (!isAllowedToSubmitByPartner) {
+                isAllowedToSubmit = false;
+                flash("submissionInfo", Messages.get("problem.programming.cantSubmit"));
+            } else if (!isClean) {
+                isAllowedToSubmit = false;
+                flash("submissionInfo", Messages.get("problem.programming.cantSubmitNotClean"));
+            }
+
+            LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(routes.ProgrammingProblemSubmissionController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, engine, allowedLanguageNames, isAllowedToSubmit));
 
             Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToView(problemService, problem);
 
