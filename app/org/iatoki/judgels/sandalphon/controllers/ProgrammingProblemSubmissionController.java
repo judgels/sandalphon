@@ -71,7 +71,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
                 return redirect(routes.ProgrammingProblemStatementController.viewStatement(problem.getId()));
             }
 
-            ControllerUtils.getInstance().addActivityLog("Submit to programming problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Submit to programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProgrammingProblemSubmissionController.viewSubmissions(problem.getId()));
         } else {
@@ -98,7 +98,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
             appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.submission.list"), routes.ProgrammingProblemSubmissionController.viewSubmissions(problemId)));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Submissions");
 
-            ControllerUtils.getInstance().addActivityLog("List submissions of programming problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("List submissions of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return ControllerUtils.getInstance().lazyOk(content);
         } else {
@@ -124,7 +124,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
             appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.submission.view"), routes.ProgrammingProblemSubmissionController.viewSubmission(problemId, submissionId)));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View Submission");
 
-            ControllerUtils.getInstance().addActivityLog("View submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("View submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return ControllerUtils.getInstance().lazyOk(content);
         } else {
@@ -140,7 +140,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
             GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
             submissionService.regrade(submission.getJid(), source);
 
-            ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProgrammingProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
         } else {
@@ -169,7 +169,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
                 submissionService.regrade(submission.getJid(), source);
             }
 
-            ControllerUtils.getInstance().addActivityLog("Regrade submissions of programming problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Regrade submissions of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProgrammingProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
         } else {

@@ -67,7 +67,7 @@ public final class GraderController extends Controller {
     public Result create() {
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("Try to create grader <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Try to create grader <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreate(form);
     }
@@ -100,7 +100,7 @@ public final class GraderController extends Controller {
 
         ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - Vuew");
 
-        ControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -125,7 +125,7 @@ public final class GraderController extends Controller {
         clientUpsertForm.name = grader.getName();
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).fill(clientUpsertForm);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdate(form, grader);
     }
@@ -158,7 +158,7 @@ public final class GraderController extends Controller {
 
         ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - List");
 
-        ControllerUtils.getInstance().addActivityLog("Open graders <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Open graders <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }

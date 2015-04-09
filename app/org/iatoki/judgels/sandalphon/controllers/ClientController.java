@@ -65,7 +65,7 @@ public final class ClientController extends Controller {
     public Result create() {
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("Try to create client <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Try to create client <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreate(form);
     }
@@ -97,7 +97,7 @@ public final class ClientController extends Controller {
         ));
         ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - View");
 
-        ControllerUtils.getInstance().addActivityLog("View client " + client.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("View client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -122,7 +122,7 @@ public final class ClientController extends Controller {
         clientUpsertForm.name = client.getName();
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).fill(clientUpsertForm);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update client " + client.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Try to update client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdate(form, client);
     }
@@ -147,7 +147,7 @@ public final class ClientController extends Controller {
         Client client = clientService.findClientById(clientId);
         clientService.deleteClient(client.getId());
 
-        ControllerUtils.getInstance().addActivityLog("Delete client " + client.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Delete client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ClientController.index());
     }
@@ -164,7 +164,7 @@ public final class ClientController extends Controller {
 
         ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - List");
 
-        ControllerUtils.getInstance().addActivityLog("Open all clients <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Open all clients <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }

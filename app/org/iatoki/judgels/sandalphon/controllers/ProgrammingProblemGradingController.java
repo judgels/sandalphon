@@ -70,7 +70,7 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             Form<GradingEngineUpdateForm> form = Form.form(GradingEngineUpdateForm.class).fill(data);
 
-            ControllerUtils.getInstance().addActivityLog("Try to update grading engine of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Try to update grading engine of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return showUpdateGradingEngine(form, problem);
         } else {
@@ -121,7 +121,7 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             Form<?> form = GradingConfigAdapters.fromGradingType(engine).createFormFromConfig(config);
 
-            ControllerUtils.getInstance().addActivityLog("Try to update grading config of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Try to update grading config of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return showUpdateGradingConfig(form, problem, engine, testDataFiles, helperFiles);
         } else {
@@ -178,7 +178,7 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
 
-            ControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
         } else {
@@ -205,7 +205,7 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
 
-            ControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
         } else {
@@ -221,7 +221,7 @@ public final class ProgrammingProblemGradingController extends Controller {
             Form<UploadFileForm> form = Form.form(UploadFileForm.class);
             List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
 
-            ControllerUtils.getInstance().addActivityLog("List grading test data files of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("List grading test data files of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return showListGradingTestDataFiles(form, problem, testDataFiles);
         } else {
@@ -275,7 +275,7 @@ public final class ProgrammingProblemGradingController extends Controller {
             Form<UploadFileForm> form = Form.form(UploadFileForm.class);
             List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
-            ControllerUtils.getInstance().addActivityLog("List grading helper files of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("List grading helper files of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return showListGradingHelperFiles(form, problem, helperFiles);
         } else {
@@ -327,7 +327,7 @@ public final class ProgrammingProblemGradingController extends Controller {
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             String testDataURL = programmingProblemService.getGradingTestDataFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
 
-            ControllerUtils.getInstance().addActivityLog("Download test data file " + filename + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Download test data file " + filename + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             try {
                 new URL(testDataURL);
@@ -347,7 +347,7 @@ public final class ProgrammingProblemGradingController extends Controller {
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             String helperURL = programmingProblemService.getGradingHelperFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
 
-            ControllerUtils.getInstance().addActivityLog("Download helper file " + filename + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Download helper file " + filename + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             try {
                 new URL(helperURL);
@@ -374,7 +374,7 @@ public final class ProgrammingProblemGradingController extends Controller {
 
             Form<LanguageRestrictionUpdateForm> form = Form.form(LanguageRestrictionUpdateForm.class).fill(data);
 
-            ControllerUtils.getInstance().addActivityLog("Try to update language restriction of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Try to update language restriction of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return showUpdateLanguageRestriction(form, problem);
         } else {

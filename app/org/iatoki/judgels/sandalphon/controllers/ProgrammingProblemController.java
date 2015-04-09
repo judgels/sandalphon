@@ -5,15 +5,15 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
-import org.iatoki.judgels.sandalphon.ProblemType;
-import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.Problem;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemService;
+import org.iatoki.judgels.sandalphon.ProblemService;
+import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.programming.ProgrammingProblemCreateForm;
+import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemService;
+import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.views.html.programming.createProgrammingProblemView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -21,6 +21,7 @@ import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 @Transactional
@@ -43,7 +44,7 @@ public final class ProgrammingProblemController extends Controller {
 
         Form<ProgrammingProblemCreateForm> form = Form.form(ProgrammingProblemCreateForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("Try to create programming problem <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Try to create programming problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreateProgrammingProblem(form);
     }
@@ -69,7 +70,7 @@ public final class ProgrammingProblemController extends Controller {
             ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
             ProblemControllerUtils.removeJustCreatedProblem();
 
-            ControllerUtils.getInstance().addActivityLog("Create programming problem " +problem.getName()  + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Create programming problem " +problem.getName()  + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemController.enterProblem(problem.getId()));
         }
@@ -88,13 +89,13 @@ public final class ProgrammingProblemController extends Controller {
     }
 
     public Result jumpToGrading(long id) {
-        ControllerUtils.getInstance().addActivityLog("Jump to programming problem grading " + id + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Jump to programming problem grading " + id + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(id));
     }
 
     public Result jumpToSubmissions(long id) {
-        ControllerUtils.getInstance().addActivityLog("Jump to programming problem submissions " + id + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Jump to programming problem submissions " + id + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemSubmissionController.viewSubmissions(id));
     }

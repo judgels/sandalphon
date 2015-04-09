@@ -17,6 +17,7 @@ import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemService;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import java.util.Set;
@@ -71,7 +72,7 @@ public final class ProgrammingProblemStatementController extends Controller {
             ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.view"), routes.ProblemStatementController.viewStatement(problemId)));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
-            ControllerUtils.getInstance().addActivityLog("View statement of programming problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("View statement of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return ControllerUtils.getInstance().lazyOk(content);
         } else {

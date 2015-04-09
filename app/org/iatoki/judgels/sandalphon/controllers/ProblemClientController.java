@@ -19,6 +19,7 @@ import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public final class ProblemClientController extends Controller {
         List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
         List<Client> clients = clientService.findAllClients();
 
-        ControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateClientProblems(form, problem, clients, clientProblems);
     }
@@ -83,7 +84,7 @@ public final class ProblemClientController extends Controller {
             appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.client"), routes.ProblemClientController.viewClientProblem(problemId, clientProblemId)));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
-            ControllerUtils.getInstance().addActivityLog("View client " + clientProblem.getClientName() + " to problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("View client " + clientProblem.getClientName() + " to problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return ControllerUtils.getInstance().lazyOk(content);
         } else {

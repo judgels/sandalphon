@@ -5,30 +5,29 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
-import org.iatoki.judgels.sandalphon.forms.ProblemCreateForm;
-import org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm;
-import org.iatoki.judgels.sandalphon.ProblemService;
+import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
+import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
+import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
+import org.iatoki.judgels.sandalphon.forms.ProblemCreateForm;
+import org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm;
+import org.iatoki.judgels.sandalphon.views.html.problem.createProblemView;
+import org.iatoki.judgels.sandalphon.views.html.problem.listProblemsView;
+import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView;
+import org.iatoki.judgels.sandalphon.views.html.problem.viewProblemView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
-
-import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
-import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
-
-import org.iatoki.judgels.sandalphon.views.html.problem.listProblemsView;
-import org.iatoki.judgels.sandalphon.views.html.problem.createProblemView;
-import org.iatoki.judgels.sandalphon.views.html.problem.viewProblemView;
-import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -57,7 +56,7 @@ public final class ProblemController extends Controller {
         ));
         ControllerUtils.getInstance().appendTemplateLayout(content, "Problems");
 
-        ControllerUtils.getInstance().addActivityLog("Open allowed problems <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Open allowed problems <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -66,7 +65,7 @@ public final class ProblemController extends Controller {
     public Result createProblem() {
         Form<ProblemCreateForm> form = Form.form(ProblemCreateForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("Try to create problem <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Try to create problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreateProblem(form);
     }
@@ -83,7 +82,7 @@ public final class ProblemController extends Controller {
             if (data.type.equals(ProblemType.PROGRAMMING.name())) {
                 ProblemControllerUtils.setJustCreatedProblem(data.name, data.additionalNote, data.initLanguageCode);
 
-                ControllerUtils.getInstance().addActivityLog("Create problem " + data.name + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+                ControllerUtils.getInstance().addActivityLog("Create problem " + data.name + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
                 return redirect(routes.ProgrammingProblemController.createProgrammingProblem());
             }
@@ -93,31 +92,31 @@ public final class ProblemController extends Controller {
     }
 
     public Result enterProblem(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Enter problem " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Enter problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemController.jumpToStatement(problemId));
     }
 
     public Result jumpToStatement(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to problem statement " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Jump to problem statement " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemStatementController.viewStatement(problemId));
     }
 
     public Result jumpToVersions(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to problem version " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Jump to problem version " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problemId));
     }
 
     public Result jumpToPartners(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to problem partner " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Jump to problem partner " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemPartnerController.viewPartners(problemId));
     }
 
     public Result jumpToClients(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to problem client " + problemId + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("Jump to problem client " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemClientController.updateClientProblems(problemId));
     }
@@ -137,7 +136,7 @@ public final class ProblemController extends Controller {
         );
         ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View");
 
-        ControllerUtils.getInstance().addActivityLog("View problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("View problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -153,7 +152,7 @@ public final class ProblemController extends Controller {
 
             Form<ProblemUpdateForm> form = Form.form(ProblemUpdateForm.class).fill(data);
 
-            ControllerUtils.getInstance().addActivityLog("Try to update problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Try to update problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return showUpdateProblem(form, problem);
         } else {

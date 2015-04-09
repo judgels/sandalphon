@@ -18,6 +18,7 @@ import play.data.Form;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public final class ProblemVersionController extends Controller {
             appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.version.history"), routes.ProblemVersionController.listVersionHistory(problem.getId())));
             ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
 
-            ControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return ControllerUtils.getInstance().lazyOk(content);
         } else {
@@ -63,7 +64,7 @@ public final class ProblemVersionController extends Controller {
         if (isClean && ProblemControllerUtils.isAllowedToRestoreVersionHistory(problemService, problem)) {
             problemService.restore(problem.getJid(), hash);
 
-            ControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemVersionController.listVersionHistory(problem.getId()));
         } else {
@@ -79,7 +80,7 @@ public final class ProblemVersionController extends Controller {
 
             Form<VersionCommitForm> form = Form.form(VersionCommitForm.class);
 
-            ControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return showViewVersionLocalChanges(form, problem, isClean);
         } else {
@@ -109,7 +110,7 @@ public final class ProblemVersionController extends Controller {
                 problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
             }
 
-            ControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } else {
@@ -127,7 +128,7 @@ public final class ProblemVersionController extends Controller {
                 flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
             }
 
-            ControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } else {
@@ -141,7 +142,7 @@ public final class ProblemVersionController extends Controller {
         if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
             problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
 
-            ControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"\" + \"http://\" + Http.Context.current().request().host() + Http.Context.current().request().uri() + \"\">link</a>.");
+            ControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } else {
