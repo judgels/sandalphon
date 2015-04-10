@@ -44,7 +44,7 @@ public final class ProblemControllerUtils {
     }
 
     static void appendStatementLanguageSelectionLayout(LazyHtml content, String currentLanguage, Set<String> allowedLanguages, Call target) {
-        content.appendLayout(c -> statementLanguageSelectionLayout.render(target.absoluteURL(Controller.request()), allowedLanguages, currentLanguage, c));
+        content.appendLayout(c -> statementLanguageSelectionLayout.render(target.absoluteURL(Controller.request(), Controller.request().secure()), allowedLanguages, currentLanguage, c));
     }
 
     static void appendVersionLocalChangesWarningLayout(LazyHtml content, ProblemService problemService, Problem problem) {

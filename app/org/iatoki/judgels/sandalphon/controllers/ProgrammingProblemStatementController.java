@@ -56,7 +56,7 @@ public final class ProgrammingProblemStatementController extends Controller {
                 reasonNotAllowedToSubmit = Messages.get("problem.programming.cantSubmitNotClean");
             }
 
-            LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(routes.ProgrammingProblemSubmissionController.postSubmit(problemId).absoluteURL(request()), problem.getName(), statement, config, engine, allowedLanguageNames, reasonNotAllowedToSubmit));
+            LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(routes.ProgrammingProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, config, engine, allowedLanguageNames, reasonNotAllowedToSubmit));
 
             Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToView(problemService, problem);
 
