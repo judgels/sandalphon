@@ -169,8 +169,6 @@ public final class ProblemController extends Controller {
             if (form.hasErrors() || form.hasGlobalErrors()) {
                 return showUpdateProblem(form, problem);
             } else {
-                problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
-
                 ProblemUpdateForm data = form.get();
                 problemService.updateProblem(problemId, data.name, data.additionalNote);
 
