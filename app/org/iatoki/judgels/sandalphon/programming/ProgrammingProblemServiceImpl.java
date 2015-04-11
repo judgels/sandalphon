@@ -161,7 +161,7 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
         ArrayList<String> origin =  getOriginDirPath(problemJid);
         ArrayList<String> root = getCloneDirPath(userJid, problemJid);
 
-        if (userJid == null || !fileSystemProvider.fileExists(root)) {
+        if (userJid == null || !fileSystemProvider.directoryExists(root)) {
             return origin;
         } else {
             return root;
