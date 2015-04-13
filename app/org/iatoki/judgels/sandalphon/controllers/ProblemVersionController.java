@@ -16,6 +16,8 @@ import org.iatoki.judgels.sandalphon.views.html.problem.version.listVersionsView
 import org.iatoki.judgels.sandalphon.views.html.problem.version.viewVersionLocalChangesView;
 import play.data.Form;
 import play.db.jpa.Transactional;
+import play.filters.csrf.AddCSRFToken;
+import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -72,6 +74,7 @@ public final class ProblemVersionController extends Controller {
         }
     }
 
+    @AddCSRFToken
     public Result viewVersionLocalChanges(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -88,6 +91,7 @@ public final class ProblemVersionController extends Controller {
         }
     }
 
+    @RequireCSRFCheck
     public Result postCommitVersionLocalChanges(long problemId) {
         Problem problem = problemService.findProblemById(problemId);
 
