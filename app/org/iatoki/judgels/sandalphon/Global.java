@@ -53,54 +53,28 @@ import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.Programm
 import org.iatoki.judgels.sealtiel.client.Sealtiel;
 import play.Application;
 import play.libs.Akka;
+import play.mvc.Controller;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.duration.Duration;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public final class Global extends org.iatoki.judgels.commons.Global {
 
-    private final FileSystemProvider fileSystemProvider;
-    private final GitProvider gitProvider;
-    private final ProblemDao problemDao;
-    private final ProblemPartnerDao problemPartnerDao;
-    private final ProgrammingSubmissionDao submissionDao;
-    private final GradingDao gradingDao;
-    private final ClientDao clientDao;
-    private final GraderDao graderDao;
-    private final ClientProblemDao clientProblemDao;
-    private final UserDao userDao;
-    private final ProblemService problemService;
-    private final ProgrammingProblemService programmingProblemService;
-    private final SubmissionService submissionService;
-    private final ClientService clientService;
-    private final GraderService graderService;
-    private final UserService userService;
-    private final Sealtiel sealtiel;
+    private final Map<Class, Controller> cache;
+
     private final JidCacheDao jidCacheDao;
 
-    public Global() {
-        Config playConfig = ConfigFactory.load();
+    private final Config playConfig;
 
-        this.fileSystemProvider = new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir")));
-        this.gitProvider = new LocalGitProvider(new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir"))));
-        this.problemDao = new ProblemHibernateDao();
-        this.problemPartnerDao = new ProblemPartnerHibernateDao();
-        this.submissionDao = new ProgrammingSubmissionHibernateDao();
-        this.gradingDao = new GradingHibernateDao();
-        this.clientDao = new ClientHibernateDao();
-        this.graderDao = new GraderHibernateDao();
-        this.clientProblemDao = new ClientProblemHibernateDao();
-        this.userDao = new UserHibernateDao();
-        this.sealtiel = new Sealtiel(playConfig.getString("sealtiel.clientJid"), playConfig.getString("sealtiel.clientSecret"), playConfig.getString("sealtiel.baseUrl"));
+    public Global() {
+        this.playConfig = ConfigFactory.load();
+
+        this.cache = new HashMap<>();
         this.jidCacheDao = new JidCacheHibernateDao();
-        this.problemService = new ProblemServiceImpl(problemDao, problemPartnerDao, fileSystemProvider, gitProvider);
-        this.programmingProblemService = new ProgrammingProblemServiceImpl(fileSystemProvider);
-        this.submissionService = new SubmissionServiceImpl(submissionDao, gradingDao, sealtiel, playConfig.getString("sealtiel.gabrielClientJid"));
-        this.clientService = new ClientServiceImpl(clientDao, clientProblemDao);
-        this.graderService = new GraderServiceImpl(graderDao);
-        this.userService = new UserServiceImpl(userDao);
 
         JidCacheService.getInstance().setDao(jidCacheDao);
     }
@@ -111,8 +85,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
 
         SandalphonProperties.getInstance();
 
-        GradingResponsePoller poller = new GradingResponsePoller(submissionService, sealtiel);
-        UserActivityPusher userActivityPusher = new UserActivityPusher(userService, UserActivityServiceImpl.getInstance());
+        GradingResponsePoller poller = new GradingResponsePoller(createSubmissionService(), createSealtiel());
+        UserActivityPusher userActivityPusher = new UserActivityPusher(createUserService(), UserActivityServiceImpl.getInstance());
 
         Scheduler scheduler = Akka.system().scheduler();
         ExecutionContextExecutor context = Akka.system().dispatcher();
@@ -123,42 +97,88 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     @Override
     @SuppressWarnings("unchecked")
     public <A> A getControllerInstance(Class<A> controllerClass) throws Exception {
-        if (controllerClass.equals(ProblemController.class)) {
-            return (A) new ProblemController(problemService);
-        } else if (controllerClass.equals(ProblemAPIController.class)) {
-            return (A) new ProblemAPIController(problemService, clientService);
-        } else if (controllerClass.equals(ProgrammingProblemAPIController.class)) {
-            return (A) new ProgrammingProblemAPIController(problemService, programmingProblemService, clientService, graderService);
-        } else if (controllerClass.equals(ProgrammingProblemController.class)) {
-            return (A) new ProgrammingProblemController(problemService, programmingProblemService);
-        } else if (controllerClass.equals(ProblemPartnerController.class)) {
-            return (A) new ProblemPartnerController(problemService);
-        } else if (controllerClass.equals(ProblemStatementController.class)) {
-            return (A) new ProblemStatementController(problemService);
-        } else if (controllerClass.equals(ProblemVersionController.class)) {
-            return (A) new ProblemVersionController(problemService);
-        } else if (controllerClass.equals(ProblemClientController.class)) {
-            return (A) new ProblemClientController(problemService, clientService);
-        } else if (controllerClass.equals(ProgrammingProblemGradingController.class)) {
-            return (A) new ProgrammingProblemGradingController(problemService, programmingProblemService);
-        } else if (controllerClass.equals(ProgrammingProblemPartnerController.class)) {
-            return (A) new ProgrammingProblemPartnerController(problemService, programmingProblemService);
-        } else if (controllerClass.equals(ProgrammingProblemStatementController.class)) {
-            return (A) new ProgrammingProblemStatementController(problemService, programmingProblemService);
-        } else if (controllerClass.equals(ProgrammingProblemSubmissionController.class)) {
-            return (A) new ProgrammingProblemSubmissionController(problemService, programmingProblemService, submissionService);
-        } else if (controllerClass.equals(ClientController.class)) {
-            return (A) new ClientController(clientService);
-        } else if (controllerClass.equals(GraderController.class)) {
-            return (A) new GraderController(graderService);
-        } else if (controllerClass.equals(ApplicationController.class)) {
-            return (A) new ApplicationController(userService);
-        } else if (controllerClass.equals(UserController.class)) {
-            return (A) new UserController(userService);
-        } else if (controllerClass.equals(JophielClientController.class)) {
-            return (A) new JophielClientController(userService);
-        } else {
-            return controllerClass.newInstance();
+        if (!cache.containsKey(controllerClass)) {
+            if (controllerClass.equals(ProblemController.class)) {
+                cache.put(controllerClass, new ProblemController(createProblemService()));
+            } else if (controllerClass.equals(ProblemAPIController.class)) {
+                cache.put(controllerClass, new ProblemAPIController(createProblemService(), createClientService()));
+            } else if (controllerClass.equals(ProgrammingProblemAPIController.class)) {
+                cache.put(controllerClass, new ProgrammingProblemAPIController(createProblemService(), createProgrammingProblemService(), createClientService(), createGraderService()));
+            } else if (controllerClass.equals(ProgrammingProblemController.class)) {
+                cache.put(controllerClass, new ProgrammingProblemController(createProblemService(), createProgrammingProblemService()));
+            } else if (controllerClass.equals(ProblemPartnerController.class)) {
+                cache.put(controllerClass, new ProblemPartnerController(createProblemService()));
+            } else if (controllerClass.equals(ProblemStatementController.class)) {
+                cache.put(controllerClass, new ProblemStatementController(createProblemService()));
+            } else if (controllerClass.equals(ProblemVersionController.class)) {
+                cache.put(controllerClass, new ProblemVersionController(createProblemService()));
+            } else if (controllerClass.equals(ProblemClientController.class)) {
+                cache.put(controllerClass, new ProblemClientController(createProblemService(), createClientService()));
+            } else if (controllerClass.equals(ProgrammingProblemGradingController.class)) {
+                cache.put(controllerClass, new ProgrammingProblemGradingController(createProblemService(), createProgrammingProblemService()));
+            } else if (controllerClass.equals(ProgrammingProblemPartnerController.class)) {
+                cache.put(controllerClass, new ProgrammingProblemPartnerController(createProblemService(), createProgrammingProblemService()));
+            } else if (controllerClass.equals(ProgrammingProblemStatementController.class)) {
+                cache.put(controllerClass, new ProgrammingProblemStatementController(createProblemService(), createProgrammingProblemService()));
+            } else if (controllerClass.equals(ProgrammingProblemSubmissionController.class)) {
+                cache.put(controllerClass, new ProgrammingProblemSubmissionController(createProblemService(), createProgrammingProblemService(), createSubmissionService()));
+            } else if (controllerClass.equals(ClientController.class)) {
+                cache.put(controllerClass, new ClientController(createClientService()));
+            } else if (controllerClass.equals(GraderController.class)) {
+                cache.put(controllerClass, new GraderController(createGraderService()));
+            } else if (controllerClass.equals(ApplicationController.class)) {
+                cache.put(controllerClass, new ApplicationController(createUserService()));
+            } else if (controllerClass.equals(UserController.class)) {
+                cache.put(controllerClass, new UserController(createUserService()));
+            } else if (controllerClass.equals(JophielClientController.class)) {
+                cache.put(controllerClass, new JophielClientController(createUserService()));
+            }
         }
+        return controllerClass.cast(cache.get(controllerClass));
+    }
+
+    private ProblemService createProblemService() {
+        FileSystemProvider problemFileSystemProvider = new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir")));
+        GitProvider problemGitProvider = new LocalGitProvider(new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir"))));
+        ProblemDao problemDao = new ProblemHibernateDao();
+        ProblemPartnerDao problemPartnerDao = new ProblemPartnerHibernateDao();
+
+        return new ProblemServiceImpl(problemDao, problemPartnerDao, problemFileSystemProvider, problemGitProvider);
+    }
+
+    private ProgrammingProblemService createProgrammingProblemService() {
+        FileSystemProvider programmingProblemFSProvider = new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir")));
+        return new ProgrammingProblemServiceImpl(programmingProblemFSProvider);
+    }
+
+    private SubmissionService createSubmissionService() {
+        ProgrammingSubmissionDao submissionDao = new ProgrammingSubmissionHibernateDao();
+        GradingDao gradingDao = new GradingHibernateDao();
+        Sealtiel sealtiel = createSealtiel();
+
+        return new SubmissionServiceImpl(submissionDao, gradingDao, sealtiel, playConfig.getString("sealtiel.gabrielClientJid"));
+    }
+
+    private ClientService createClientService() {
+        ClientDao clientDao = new ClientHibernateDao();
+        ClientProblemDao clientProblemDao = new ClientProblemHibernateDao();
+
+        return new ClientServiceImpl(clientDao, clientProblemDao);
+    }
+
+    private GraderService createGraderService() {
+        GraderDao graderDao = new GraderHibernateDao();
+
+        return new GraderServiceImpl(graderDao);
+    }
+
+    private UserService createUserService() {
+        UserDao userDao = new UserHibernateDao();
+
+        return new UserServiceImpl(userDao);
+    }
+
+    private Sealtiel createSealtiel() {
+        return new Sealtiel(playConfig.getString("sealtiel.clientJid"), playConfig.getString("sealtiel.clientSecret"), playConfig.getString("sealtiel.baseUrl"));
     }
 }
