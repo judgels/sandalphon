@@ -37,7 +37,7 @@ public final class GraderController extends Controller {
 
     private static final long PAGE_SIZE = 20;
 
-    private GraderService graderService;
+    private final GraderService graderService;
 
     public GraderController(GraderService graderService) {
         this.graderService = graderService;

@@ -36,7 +36,7 @@ public final class ClientController extends Controller {
 
     private static final long PAGE_SIZE = 20;
 
-    private ClientService clientService;
+    private final ClientService clientService;
 
     public ClientController(ClientService clientService) {
         this.clientService = clientService;

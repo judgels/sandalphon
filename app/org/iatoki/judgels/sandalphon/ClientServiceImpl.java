@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 
 public final class ClientServiceImpl implements ClientService {
 
-    private ClientDao clientDao;
-    private ClientProblemDao clientProblemDao;
+    private final ClientDao clientDao;
+    private final ClientProblemDao clientProblemDao;
 
     public ClientServiceImpl(ClientDao clientDao, ClientProblemDao clientProblemDao) {
         this.clientDao = clientDao;

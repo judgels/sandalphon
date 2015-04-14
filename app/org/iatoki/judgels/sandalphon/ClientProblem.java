@@ -2,15 +2,15 @@ package org.iatoki.judgels.sandalphon;
 
 public final class ClientProblem {
 
-    private long id;
+    private final long id;
 
-    private String clientJid;
+    private final String clientJid;
 
-    private String clientName;
+    private final String clientName;
 
-    private String problemJid;
+    private final String problemJid;
 
-    private String secret;
+    private final String secret;
 
     public ClientProblem(long id, String clientJid, String clientName, String problemJid, String secret) {
         this.id = id;

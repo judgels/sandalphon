@@ -15,7 +15,7 @@ import play.mvc.Result;
 @Transactional
 public final class ApplicationController extends Controller {
 
-    private UserService userRoleService;
+    private final UserService userRoleService;
 
     public ApplicationController(UserService userRoleService) {
         this.userRoleService = userRoleService;

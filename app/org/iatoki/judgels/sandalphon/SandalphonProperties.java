@@ -1,18 +1,16 @@
 package org.iatoki.judgels.sandalphon;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.io.FileUtils;
 import play.Configuration;
 import play.Play;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public final class SandalphonProperties {
     private static SandalphonProperties INSTANCE;
 
-    private String baseDataDir;
+    private final String baseDataDir;
 
     private SandalphonProperties() {
         Configuration conf = Play.application().configuration();
