@@ -5,6 +5,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.commons.GitProvider;
+import org.iatoki.judgels.commons.JudgelsProperties;
 import org.iatoki.judgels.commons.LocalFileSystemProvider;
 import org.iatoki.judgels.commons.LocalGitProvider;
 import org.iatoki.judgels.gabriel.commons.GradingResponsePoller;
@@ -81,6 +82,9 @@ public final class Global extends org.iatoki.judgels.commons.Global {
 
     @Override
     public void onStart(Application application) {
+        org.iatoki.judgels.sandalphon.BuildInfo$ buildInfo = org.iatoki.judgels.sandalphon.BuildInfo$.MODULE$;
+        JudgelsProperties.buildInstance(buildInfo.name(), buildInfo.version());
+
         super.onStart(application);
 
         SandalphonProperties.getInstance();
