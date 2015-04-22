@@ -64,7 +64,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
 
             try {
                 GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromNewSubmission(body);
-                String submissionJid = submissionService.submit(problem.getJid(), null, engine, gradingLanguage, allowedLanguageNames, source);
+                String submissionJid = submissionService.submit(problem.getJid(), null, engine, gradingLanguage, allowedLanguageNames, source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
                 SubmissionAdapters.fromGradingEngine(engine).storeSubmissionFiles(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submissionJid, source);
             } catch (SubmissionException e) {
                 flash("submissionError", e.getMessage());
@@ -138,7 +138,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
             Submission submission = submissionService.findSubmissionById(submissionId);
             GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
-            submissionService.regrade(submission.getJid(), source);
+            submissionService.regrade(submission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
             ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -166,7 +166,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
 
             for (Submission submission : submissions) {
                 GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
-                submissionService.regrade(submission.getJid(), source);
+                submissionService.regrade(submission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
             }
 
             ControllerUtils.getInstance().addActivityLog("Regrade submissions of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
