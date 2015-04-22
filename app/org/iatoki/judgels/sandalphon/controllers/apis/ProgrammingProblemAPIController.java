@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.gabriel.commons.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientService;
@@ -22,8 +23,8 @@ import play.mvc.Result;
 import play.twirl.api.Html;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,10 +54,14 @@ public final class ProgrammingProblemAPIController extends Controller {
             return forbidden();
         }
 
-        ByteArrayOutputStream os = programmingProblemService.getZippedGradingFilesStream(problemJid);
-        response().setContentType("application/x-download");
-        response().setHeader("Content-disposition", "attachment; filename=" + problemJid + ".zip");
-        return ok(os.toByteArray()).as("application/zip");
+        try {
+            ByteArrayOutputStream os = programmingProblemService.getZippedGradingFilesStream(problemJid);
+            response().setContentType("application/x-download");
+            response().setHeader("Content-disposition", "attachment; filename=" + problemJid + ".zip");
+            return ok(os.toByteArray()).as("application/zip");
+        } catch (IOException e) {
+            return internalServerError();
+        }
     }
 
     public Result getGradingLastUpdateTime() {
@@ -70,9 +75,13 @@ public final class ProgrammingProblemAPIController extends Controller {
             return forbidden();
         }
 
-        Date gradingLastUpdateTime = programmingProblemService.getGradingLastUpdateTime(null, problemJid);
+        try {
+            Date gradingLastUpdateTime = programmingProblemService.getGradingLastUpdateTime(null, problemJid);
 
-        return ok("" + gradingLastUpdateTime.getTime());
+            return ok("" + gradingLastUpdateTime.getTime());
+        } catch (IOException e) {
+            return internalServerError();
+        }
     }
 
 
@@ -96,25 +105,44 @@ public final class ProgrammingProblemAPIController extends Controller {
         }
 
         Problem problem = problemService.findProblemByJid(problemJid);
-        String engine = programmingProblemService.getGradingEngine(null, problem.getJid());
-        LanguageRestriction problemLanguageRestriction = programmingProblemService.getLanguageRestriction(null, problem.getJid());
+        String engine;
+        try {
+            engine = programmingProblemService.getGradingEngine(null, problem.getJid());
+        } catch (IOException e) {
+            engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+        }
+        LanguageRestriction problemLanguageRestriction;
+        try {
+            problemLanguageRestriction = programmingProblemService.getLanguageRestriction(null, problem.getJid());
+        } catch (IOException e) {
+            problemLanguageRestriction = LanguageRestriction.defaultRestriction();
+        }
         Set<String> allowedGradingLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problemLanguageRestriction, languageRestriction));
 
-        GradingConfig config = programmingProblemService.getGradingConfig(null, problem.getJid());
-
-        Map<String, StatementLanguageStatus> availableStatementLanguages = problemService.getAvailableLanguages(null, problem.getJid());
-
-        if (!availableStatementLanguages.containsKey(lang) || availableStatementLanguages.get(lang) == StatementLanguageStatus.DISABLED) {
-            lang = problemService.getDefaultLanguage(null, problemJid);
+        GradingConfig config;
+        try {
+            config = programmingProblemService.getGradingConfig(null, problem.getJid());
+        } catch (IOException e) {
+            config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
         }
 
-        String statement = problemService.getStatement(null, problemJid, lang);
+        try {
+            Map<String, StatementLanguageStatus> availableStatementLanguages = problemService.getAvailableLanguages(null, problem.getJid());
 
-        Set<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toSet());
+            if (!availableStatementLanguages.containsKey(lang) || availableStatementLanguages.get(lang) == StatementLanguageStatus.DISABLED) {
+                lang = problemService.getDefaultLanguage(null, problemJid);
+            }
 
-        Html html = SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames, null);
-        html = SubmissionAdapters.fromGradingEngine(engine).renderStatementLanguageSelection(switchLanguageUri, allowedStatementLanguages, lang, html);
-        return ok(html);
+            String statement = problemService.getStatement(null, problemJid, lang);
+
+            Set<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toSet());
+
+            Html html = SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames, null);
+            html = SubmissionAdapters.fromGradingEngine(engine).renderStatementLanguageSelection(switchLanguageUri, allowedStatementLanguages, lang, html);
+            return ok(html);
+        } catch (IOException e) {
+            return notFound();
+        }
     }
 
 

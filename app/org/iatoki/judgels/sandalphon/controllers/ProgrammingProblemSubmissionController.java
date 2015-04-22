@@ -6,6 +6,7 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.ListTableSelectionForm;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.gabriel.commons.Submission;
@@ -30,6 +31,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,12 +56,22 @@ public final class ProgrammingProblemSubmissionController extends Controller {
 
         boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem) || !isClean) {
-            String engine = programmingProblemService.getGradingEngine(null, problem.getJid());
+            String engine;
+            try {
+                engine = programmingProblemService.getGradingEngine(null, problem.getJid());
+            } catch (IOException e) {
+                engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+            }
             Http.MultipartFormData body = request().body().asMultipartFormData();
 
             String gradingLanguage = body.asFormUrlEncoded().get("language")[0];
 
-            LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(null, problem.getJid());
+            LanguageRestriction languageRestriction;
+            try {
+                languageRestriction = programmingProblemService.getLanguageRestriction(null, problem.getJid());
+            } catch (IOException e) {
+                languageRestriction = LanguageRestriction.defaultRestriction();
+            }
             Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(languageRestriction));
 
             try {
@@ -112,7 +124,12 @@ public final class ProgrammingProblemSubmissionController extends Controller {
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
             Submission submission = submissionService.findSubmissionById(submissionId);
 
-            String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            String engine;
+            try {
+                engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+            }
             GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
 
             LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewSubmission(submission, source, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));

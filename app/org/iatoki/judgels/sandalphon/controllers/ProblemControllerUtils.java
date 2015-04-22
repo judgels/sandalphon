@@ -22,6 +22,7 @@ import play.mvc.Result;
 import play.mvc.Results;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +54,7 @@ public final class ProblemControllerUtils {
         }
     }
 
-    static void establishStatementLanguage(ProblemService problemService, Problem problem) {
+    static void establishStatementLanguage(ProblemService problemService, Problem problem) throws IOException {
         String currentLanguage = getCurrentStatementLanguage();
         Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(IdentityUtils.getUserJid(), problem.getJid());
 
@@ -154,15 +155,19 @@ public final class ProblemControllerUtils {
 
         String language = getCurrentStatementLanguage();
 
-        String defaultLanguage = problemService.getDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid());
-        Set<String> allowedLanguages = getPartnerConfig(problemService, problem).getAllowedStatementLanguagesToView();
+        try {
+            String defaultLanguage = problemService.getDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid());
+            Set<String> allowedLanguages = getPartnerConfig(problemService, problem).getAllowedStatementLanguagesToView();
 
-        if (allowedLanguages == null || allowedLanguages.contains(language) || language.equals(defaultLanguage)) {
+            if (allowedLanguages == null || allowedLanguages.contains(language) || language.equals(defaultLanguage)) {
+                return true;
+            }
+
+            setCurrentStatementLanguage(defaultLanguage);
             return true;
+        } catch (IOException e) {
+            return false;
         }
-
-        setCurrentStatementLanguage(defaultLanguage);
-        return true;
     }
 
 
@@ -217,7 +222,7 @@ public final class ProblemControllerUtils {
         return problemService.findProblemPartnerByProblemJidAndPartnerJid(problem.getJid(), IdentityUtils.getUserJid()).getBaseConfig();
     }
 
-    static Set<String> getAllowedLanguagesToView(ProblemService problemService, Problem problem) {
+    static Set<String> getAllowedLanguagesToView(ProblemService problemService, Problem problem) throws IOException {
         Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(IdentityUtils.getUserJid(), problem.getJid());
 
         Set<String> allowedLanguages = Sets.newTreeSet();
@@ -234,7 +239,7 @@ public final class ProblemControllerUtils {
         return ImmutableSet.copyOf(allowedLanguages);
     }
 
-    static Set<String> getAllowedLanguagesToUpdate(ProblemService problemService, Problem problem) {
+    static Set<String> getAllowedLanguagesToUpdate(ProblemService problemService, Problem problem) throws IOException {
         Map<String, StatementLanguageStatus> availableLanguages = problemService.getAvailableLanguages(IdentityUtils.getUserJid(), problem.getJid());
 
         Set<String> allowedLanguages = Sets.newTreeSet();

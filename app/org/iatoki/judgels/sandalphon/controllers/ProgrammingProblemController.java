@@ -24,6 +24,8 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import java.io.IOException;
+
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProgrammingProblemController extends Controller {
@@ -60,19 +62,24 @@ public final class ProgrammingProblemController extends Controller {
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showCreateProgrammingProblem(form);
         } else {
-            ProgrammingProblemCreateForm data = form.get();
+            try {
+                ProgrammingProblemCreateForm data = form.get();
 
-            Problem problem = problemService.createProblem(ProblemType.PROGRAMMING, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
-            problemService.updateStatement(null, problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), ProgrammingProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
-            programmingProblemService.initProgrammingProblem(problem.getJid(), data.gradingEngineName);
-            problemService.initRepository(IdentityUtils.getUserJid(), problem.getJid());
+                Problem problem = problemService.createProblem(ProblemType.PROGRAMMING, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
+                problemService.updateStatement(null, problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), ProgrammingProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
+                programmingProblemService.initProgrammingProblem(problem.getJid(), data.gradingEngineName);
+                problemService.initRepository(IdentityUtils.getUserJid(), problem.getJid());
 
-            ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
-            ProblemControllerUtils.removeJustCreatedProblem();
+                ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
+                ProblemControllerUtils.removeJustCreatedProblem();
 
-            ControllerUtils.getInstance().addActivityLog("Create programming problem " +problem.getName()  + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+                ControllerUtils.getInstance().addActivityLog("Create programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-            return redirect(routes.ProblemController.enterProblem(problem.getId()));
+                return redirect(routes.ProblemController.enterProblem(problem.getId()));
+            } catch (IOException e) {
+                form.reject("problem.programming.error.cantCreate");
+                return showCreateProgrammingProblem(form);
+            }
         }
     }
 

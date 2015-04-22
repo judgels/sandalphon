@@ -23,6 +23,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import java.io.IOException;
 import java.util.List;
 
 @Transactional
@@ -111,7 +112,11 @@ public final class ProblemVersionController extends Controller {
             } else if (!problemService.pushUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
                 flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
             } else {
-                problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+                try {
+                    problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+                } catch (IOException e) {
+                    // do nothing
+                }
             }
 
             ControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
@@ -144,11 +149,14 @@ public final class ProblemVersionController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
-            problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+            try {
+                problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+                ControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-            ControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
+                return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
+            } catch (IOException e) {
+                return notFound();
+            }
         } else {
             return notFound();
         }

@@ -6,34 +6,35 @@ import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
 public interface ProgrammingProblemService {
 
-    void initProgrammingProblem(String problemJid, String gradingEngine);
+    void initProgrammingProblem(String problemJid, String gradingEngine) throws IOException;
 
-    GradingConfig getGradingConfig(String userJid, String problemJid);
+    GradingConfig getGradingConfig(String userJid, String problemJid) throws IOException;
 
-    void updateGradingConfig(String userJid, String problemJid, GradingConfig gradingConfig);
+    void updateGradingConfig(String userJid, String problemJid, GradingConfig gradingConfig) throws IOException;
 
-    Date getGradingLastUpdateTime(String userJid, String problemJid);
+    Date getGradingLastUpdateTime(String userJid, String problemJid) throws IOException;
 
-    String getGradingEngine(String userJid, String problemJid);
+    String getGradingEngine(String userJid, String problemJid) throws IOException;
 
-    void updateGradingEngine(String userJid, String problemJid, String gradingEngine);
+    void updateGradingEngine(String userJid, String problemJid, String gradingEngine) throws IOException;
 
-    LanguageRestriction getLanguageRestriction(String userJid, String problemJid);
+    LanguageRestriction getLanguageRestriction(String userJid, String problemJid) throws IOException;
 
-    void updateLanguageRestriction(String userJid, String problemJid, LanguageRestriction languageRestriction);
+    void updateLanguageRestriction(String userJid, String problemJid, LanguageRestriction languageRestriction) throws IOException;
 
-    void uploadGradingTestDataFile(String userJid, String problemJid, File testDataFile, String filename);
+    void uploadGradingTestDataFile(String userJid, String problemJid, File testDataFile, String filename) throws IOException;
 
-    void uploadGradingTestDataFileZipped(String userJid, String problemJid, File testDataFileZipped);
+    void uploadGradingTestDataFileZipped(String userJid, String problemJid, File testDataFileZipped) throws IOException;
 
-    void uploadGradingHelperFile(String userJid, String problemJid, File helperFile, String filename);
+    void uploadGradingHelperFile(String userJid, String problemJid, File helperFile, String filename) throws IOException;
 
-    void uploadGradingHelperFileZipped(String userJid, String problemJid, File helperFileZipped);
+    void uploadGradingHelperFileZipped(String userJid, String problemJid, File helperFileZipped) throws IOException;
 
     List<FileInfo> getGradingTestDataFiles(String userJid, String problemJid);
 
@@ -43,5 +44,5 @@ public interface ProgrammingProblemService {
 
     String getGradingHelperFileURL(String userJid, String problemJid, String filename);
 
-    ByteArrayOutputStream getZippedGradingFilesStream(String problemJid);
+    ByteArrayOutputStream getZippedGradingFilesStream(String problemJid) throws IOException;
 }

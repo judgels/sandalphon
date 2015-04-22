@@ -5,12 +5,13 @@ import org.iatoki.judgels.commons.GitCommit;
 import org.iatoki.judgels.commons.Page;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public interface ProblemService {
 
-    Problem createProblem(ProblemType type, String name, String additionalNote, String initialLanguageCode);
+    Problem createProblem(ProblemType type, String name, String additionalNote, String initialLanguageCode) throws IOException;
 
     boolean problemExistsByJid(String problemJid);
 
@@ -34,25 +35,25 @@ public interface ProblemService {
 
     Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin);
 
-    Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String problemJid);
+    Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String problemJid) throws IOException;
 
-    void addLanguage(String userJid, String problemJid, String languageCode);
+    void addLanguage(String userJid, String problemJid, String languageCode) throws IOException;
 
-    void enableLanguage(String userJid, String problemJid, String languageCode);
+    void enableLanguage(String userJid, String problemJid, String languageCode) throws IOException;
 
-    void disableLanguage(String userJid, String problemJid, String languageCode);
+    void disableLanguage(String userJid, String problemJid, String languageCode) throws IOException;
 
-    void makeDefaultLanguage(String userJid, String problemJid, String languageCode);
+    void makeDefaultLanguage(String userJid, String problemJid, String languageCode) throws IOException;
 
-    String getDefaultLanguage(String userJid, String problemJid);
+    String getDefaultLanguage(String userJid, String problemJid) throws IOException;
 
-    String getStatement(String userJid, String problemJid, String languageCode);
+    String getStatement(String userJid, String problemJid, String languageCode) throws IOException;
 
-    void updateStatement(String userJid, long problemId, String languageCode, String statement);
+    void updateStatement(String userJid, long problemId, String languageCode, String statement) throws IOException;
 
-    void uploadStatementMediaFile(String userJid, long problemId, File mediaFile, String filename);
+    void uploadStatementMediaFile(String userJid, long problemId, File mediaFile, String filename) throws IOException;
 
-    void uploadStatementMediaFileZipped(String userJid, long problemId, File mediaFileZipped);
+    void uploadStatementMediaFileZipped(String userJid, long problemId, File mediaFileZipped) throws IOException;
 
     List<FileInfo> getStatementMediaFiles(String userJid, String problemJid);
 
@@ -74,7 +75,7 @@ public interface ProblemService {
 
     boolean fetchUserClone(String userJid, String problemJid);
 
-    void discardUserClone(String userJid, String problemJid);
+    void discardUserClone(String userJid, String problemJid) throws IOException;
 
     void restore(String problemJid, String hash);
 }

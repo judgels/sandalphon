@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.jophiel.commons.JophielUtils;
 import org.iatoki.judgels.jophiel.commons.UserTokens;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.UserDao;
 import org.iatoki.judgels.sandalphon.models.domains.UserModel;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -114,18 +116,20 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public void upsertUserFromJophielUserJid(String userJid) {
-        org.iatoki.judgels.jophiel.User user = JophielUtils.getUserByUserJid(userJid);
+        try {
+            org.iatoki.judgels.jophiel.User user = JophielUtils.getUserByUserJid(userJid);
 
-        if (userDao.existsByUserJid(userJid)) {
-            UserModel userRoleModel = userDao.findByUserJid(userJid);
+            if (!userDao.existsByUserJid(userJid)) {
+                UserModel userRoleModel = new UserModel();
+                userRoleModel.userJid = user.getJid();
+                userRoleModel.roles = "user";
 
-            userDao.persist(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-        } else {
-            UserModel userRoleModel = new UserModel();
-            userRoleModel.userJid = user.getJid();
-            userRoleModel.roles = "user";
+                userDao.persist(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            }
 
-            userDao.edit(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        } catch (IOException e) {
+            // do nothing
         }
     }
 

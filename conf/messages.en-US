@@ -28,6 +28,10 @@ problem.statement.language.language=Language
 problem.statement.language.status=Status
 problem.statement.language.initial=Initial Language
 
+problem.statement.error.cantUpload=Statement can't be uploaded into system
+problem.statement.error.cantUploadMedia=Statement media can't be uploaded into system
+problem.statement.error.cantUploadMediaZipped=Statement zipped media can't be uploaded into system
+
 problem.file=Files
 problem.file.uploadNew=Upload New
 problem.file.asSingleFile=As single file
@@ -60,10 +64,14 @@ problem.partner.already=This user is already a partner!
 problem.programming=Programming Problems
 problem.programming.create=Create Programming Problem
 
+problem.programming.error.cantCreate=Can't create Programming Problem
+
 problem.programming.additionalNote=Additional Note
 problem.programming.gradingEngine=Grading Engine
 problem.programming.allowedLanguages=Allowed Languages
 problem.programming.allowAll=Allow all
+
+problem.programming.language.error.cantUpdate=Language restriction can't be uploaded into system
 
 problem.programming.grading=Grading
 problem.programming.grading.engine=Engine
@@ -76,6 +84,13 @@ problem.programming.grading.helper=Helpers
 problem.programming.grading.helper.list=Helper Files
 problem.programming.grading.languageRestriction=Language Restriction
 problem.programming.grading.languageRestriction.update=Update Language Restriction
+
+problem.programming.grading.engine.error.cantUpdate=Grading Engine can't be updated into system
+problem.programming.grading.config.error.cantUpdate=Grading Config can't be updated into system
+problem.programming.grading.error.cantUploadTestData=Test data can't be uploaded into system
+problem.programming.grading.error.cantUploadTestDataZipped=Zipped Test data can't be uploaded into system
+problem.programming.grading.error.cantUploadHelper=Helper can't be uploaded into system
+problem.programming.grading.error.cantUploadHelperZipped=Zipped Helper can't be uploaded into system
 
 problem.programming.submission=Submissions
 problem.programming.submission.list=Submissions

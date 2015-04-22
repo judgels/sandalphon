@@ -35,6 +35,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import java.io.IOException;
 import java.util.Set;
 
 @Transactional
@@ -96,36 +97,40 @@ public final class ProgrammingProblemPartnerController extends Controller {
                 return showAddPartner(usernameForm, problemForm, programmingForm, problem);
             }
 
-            User user = JophielUtils.getUserByUserJid(userJid);
-            JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            try {
+                User user = JophielUtils.getUserByUserJid(userJid);
+                JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-            if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
-                usernameForm.reject("username", Messages.get("problem.partner.already"));
-                return showAddPartner(usernameForm, problemForm, programmingForm, problem);
+                if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
+                    usernameForm.reject("username", Messages.get("problem.partner.already"));
+                    return showAddPartner(usernameForm, problemForm, programmingForm, problem);
+                }
+
+                ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
+                      .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
+                      .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
+                      .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
+                      .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
+                      .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
+                      .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
+                      .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
+                      .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
+                      .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
+                      .build();
+
+                ProgrammingProblemPartnerConfig programmingConfig = new ProgrammingProblemPartnerConfigBuilder()
+                      .setIsAllowedToSubmit(programmingData.isAllowedToSubmit)
+                      .setIsAllowedToManageGrading(programmingData.isAllowedToManageGrading)
+                      .build();
+
+                problemService.createProblemPartner(problem.getId(), userJid, problemConfig, programmingConfig);
+
+                ControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
+
+                return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
+            } catch (IOException e) {
+                return notFound();
             }
-
-            ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
-                    .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
-                    .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
-                    .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
-                    .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
-                    .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
-                    .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
-                    .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
-                    .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
-                    .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
-                    .build();
-
-            ProgrammingProblemPartnerConfig programmingConfig = new ProgrammingProblemPartnerConfigBuilder()
-                    .setIsAllowedToSubmit(programmingData.isAllowedToSubmit)
-                    .setIsAllowedToManageGrading(programmingData.isAllowedToManageGrading)
-                    .build();
-
-            problemService.createProblemPartner(problem.getId(), userJid, problemConfig, programmingConfig);
-
-            ControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
-
-            return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
         } else {
             return notFound();
         }

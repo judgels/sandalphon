@@ -8,6 +8,7 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.gabriel.GradingEngine;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemService;
@@ -44,6 +45,7 @@ import play.mvc.Result;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -66,7 +68,11 @@ public final class ProgrammingProblemGradingController extends Controller {
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             GradingEngineUpdateForm data = new GradingEngineUpdateForm();
-            data.gradingEngineName = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            try  {
+                data.gradingEngineName = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            } catch(IOException e) {
+                data.gradingEngineName = GradingEngineRegistry.getInstance().getDefaultEngine();
+            }
 
             Form<GradingEngineUpdateForm> form = Form.form(GradingEngineUpdateForm.class).fill(data);
 
@@ -91,18 +97,28 @@ public final class ProgrammingProblemGradingController extends Controller {
                 problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
                 String gradingEngine = form.get().gradingEngineName;
-                String originalGradingEngine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
-
-                if (!gradingEngine.equals(originalGradingEngine)) {
-                    GradingConfig config = GradingEngineRegistry.getInstance().getEngine(gradingEngine).createDefaultGradingConfig();
-                    programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), config);
+                String originalGradingEngine;
+                try {
+                    originalGradingEngine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+                } catch (IOException e) {
+                    originalGradingEngine = GradingEngineRegistry.getInstance().getDefaultEngine();
                 }
 
-                programmingProblemService.updateGradingEngine(IdentityUtils.getUserJid(), problem.getJid(), gradingEngine);
+                try {
+                    if (!gradingEngine.equals(originalGradingEngine)) {
+                        GradingConfig config = GradingEngineRegistry.getInstance().getEngine(gradingEngine).createDefaultGradingConfig();
+                        programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), config);
+                    }
 
-                ControllerUtils.getInstance().addActivityLog("Update grading engine of problem " + problem.getName() + ".");
+                    programmingProblemService.updateGradingEngine(IdentityUtils.getUserJid(), problem.getJid(), gradingEngine);
 
-                return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+                    ControllerUtils.getInstance().addActivityLog("Update grading engine of problem " + problem.getName() + ".");
+
+                    return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+                } catch (IOException e) {
+                    form.reject("problem.programming.grading.engine.error.cantUpdate");
+                    return showUpdateGradingEngine(form, problem);
+                }
             }
         } else {
             return notFound();
@@ -114,8 +130,18 @@ public final class ProgrammingProblemGradingController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
-            String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
-            GradingConfig config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+            String engine;
+            try {
+                engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+            }
+            GradingConfig config;
+            try {
+                config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
+            }
             List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
             List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
@@ -134,7 +160,12 @@ public final class ProgrammingProblemGradingController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
         
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
-            String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            String engine;
+            try {
+                engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+            }
             Form<?> form = GradingConfigAdapters.fromGradingType(engine).createEmptyForm().bindFromRequest(request());
 
             if (form.hasErrors() || form.hasGlobalErrors()) {
@@ -145,12 +176,20 @@ public final class ProgrammingProblemGradingController extends Controller {
             } else {
                 problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
-                GradingConfig config = GradingConfigAdapters.fromGradingType(engine).createConfigFromForm(form);
-                programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), config);
+                try {
+                    GradingConfig config = GradingConfigAdapters.fromGradingType(engine).createConfigFromForm(form);
+                    programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), config);
 
-                ControllerUtils.getInstance().addActivityLog("Update grading config of problem " + problem.getName() + ".");
+                    ControllerUtils.getInstance().addActivityLog("Update grading config of problem " + problem.getName() + ".");
 
-                return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+                    return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+                } catch (IOException e) {
+                    form.reject("problem.programming.grading.config.error.cantUpdate");
+                    List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
+                    List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
+
+                    return showUpdateGradingConfig(form, problem, engine, testDataFiles, helperFiles);
+                }
             }
         } else {
             return notFound();
@@ -163,7 +202,12 @@ public final class ProgrammingProblemGradingController extends Controller {
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
-            String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            String engine;
+            try {
+                engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+            }
 
             GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(engine);
 
@@ -172,15 +216,23 @@ public final class ProgrammingProblemGradingController extends Controller {
             }
 
             List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
-            GradingConfig config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+            GradingConfig config;
+            try {
+                config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
+            }
 
-            GradingConfig newConfig = ((ConfigurableWithTokilibFormat) adapter).updateConfigWithTokilibFormat(config, testDataFiles);
+            try {
+                GradingConfig newConfig = ((ConfigurableWithTokilibFormat) adapter).updateConfigWithTokilibFormat(config, testDataFiles);
+                programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
 
-            programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
+                ControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-            ControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+                return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+            } catch (IOException e) {
+                throw new IllegalStateException("Can't update grading config using tokilib format", e);
+            }
         } else {
             return notFound();
         }
@@ -192,7 +244,12 @@ public final class ProgrammingProblemGradingController extends Controller {
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
-            String engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            String engine;
+            try {
+                engine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+            }
             List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
             GradingConfigAdapter adapter = GradingConfigAdapters.fromGradingType(engine);
 
@@ -200,14 +257,23 @@ public final class ProgrammingProblemGradingController extends Controller {
                 return forbidden();
             }
 
-            GradingConfig config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+            GradingConfig config;
+            try {
+                config = programmingProblemService.getGradingConfig(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
+            }
             GradingConfig newConfig = ((ConfigurableWithAutoPopulation) adapter).updateConfigWithAutoPopulation(config, testDataFiles);
 
-            programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
+            try {
+                programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), newConfig);
 
-            ControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+                ControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-            return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+                return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+            } catch (IOException e) {
+                throw new IllegalStateException("Can't update grading config using auto population", e);
+            }
         } else {
             return notFound();
         }
@@ -242,11 +308,19 @@ public final class ProgrammingProblemGradingController extends Controller {
                 problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
                 File testDataFile = file.getFile();
-                programmingProblemService.uploadGradingTestDataFile(IdentityUtils.getUserJid(), problem.getJid(), testDataFile, file.getFilename());
+                try {
+                    programmingProblemService.uploadGradingTestDataFile(IdentityUtils.getUserJid(), problem.getJid(), testDataFile, file.getFilename());
 
-                ControllerUtils.getInstance().addActivityLog("Upload test data file of problem " + problem.getName() + ".");
+                    ControllerUtils.getInstance().addActivityLog("Upload test data file of problem " + problem.getName() + ".");
 
-                return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
+                    return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
+                } catch (IOException e){
+                    Form<UploadFileForm> form = Form.form(UploadFileForm.class);
+                    List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
+                    form.reject("problem.programming.grading.error.cantUploadTestData");
+
+                    return showListGradingTestDataFiles(form, problem, testDataFiles);
+                }
             }
 
             file = body.getFile("fileZipped");
@@ -254,11 +328,19 @@ public final class ProgrammingProblemGradingController extends Controller {
                 problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
                 File testDataFile = file.getFile();
-                programmingProblemService.uploadGradingTestDataFileZipped(IdentityUtils.getUserJid(), problem.getJid(), testDataFile);
+                try {
+                    programmingProblemService.uploadGradingTestDataFileZipped(IdentityUtils.getUserJid(), problem.getJid(), testDataFile);
 
-                ControllerUtils.getInstance().addActivityLog("Upload zipped test data files of problem " + problem.getName() + ".");
+                    ControllerUtils.getInstance().addActivityLog("Upload zipped test data files of problem " + problem.getName() + ".");
 
-                return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
+                    return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
+                } catch (IOException e) {
+                    Form<UploadFileForm> form = Form.form(UploadFileForm.class);
+                    List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
+                    form.reject("problem.programming.grading.error.cantUploadTestDataZipped");
+
+                    return showListGradingTestDataFiles(form, problem, testDataFiles);
+                }
             }
 
             return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
@@ -296,11 +378,19 @@ public final class ProgrammingProblemGradingController extends Controller {
                 problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
                 File helperFile = file.getFile();
-                programmingProblemService.uploadGradingHelperFile(IdentityUtils.getUserJid(), problem.getJid(), helperFile, file.getFilename());
+                try {
+                    programmingProblemService.uploadGradingHelperFile(IdentityUtils.getUserJid(), problem.getJid(), helperFile, file.getFilename());
 
-                ControllerUtils.getInstance().addActivityLog("Upload helper file of problem " + problem.getName() + ".");
+                    ControllerUtils.getInstance().addActivityLog("Upload helper file of problem " + problem.getName() + ".");
 
-                return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
+                    return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
+                } catch (IOException e) {
+                    Form<UploadFileForm> form = Form.form(UploadFileForm.class);
+                    List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
+                    form.reject("problem.programming.grading.error.cantUploadHelper");
+
+                    return showListGradingHelperFiles(form, problem, helperFiles);
+                }
             }
 
             file = body.getFile("fileZipped");
@@ -308,11 +398,19 @@ public final class ProgrammingProblemGradingController extends Controller {
                 problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
                 File helperFile = file.getFile();
-                programmingProblemService.uploadGradingHelperFileZipped(IdentityUtils.getUserJid(), problem.getJid(), helperFile);
+                try {
+                    programmingProblemService.uploadGradingHelperFileZipped(IdentityUtils.getUserJid(), problem.getJid(), helperFile);
 
-                ControllerUtils.getInstance().addActivityLog("Upload zipped helper files of problem " + problem.getName() + ".");
+                    ControllerUtils.getInstance().addActivityLog("Upload zipped helper files of problem " + problem.getName() + ".");
 
-                return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
+                    return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
+                } catch (IOException e) {
+                    Form<UploadFileForm> form = Form.form(UploadFileForm.class);
+                    List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
+                    form.reject("problem.programming.grading.error.cantUploadHelperZipped");
+
+                    return showListGradingHelperFiles(form, problem, helperFiles);
+                }
             }
 
             return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
@@ -366,7 +464,12 @@ public final class ProgrammingProblemGradingController extends Controller {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
-            LanguageRestriction languageRestriction = programmingProblemService.getLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid());
+            LanguageRestriction languageRestriction;
+            try {
+                languageRestriction = programmingProblemService.getLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                languageRestriction = LanguageRestriction.defaultRestriction();
+            }
 
             LanguageRestrictionUpdateForm data = new LanguageRestrictionUpdateForm();
             data.allowedLanguageNames = LanguageRestrictionAdapter.getFormAllowedLanguageNamesFromLanguageRestriction(languageRestriction);
@@ -397,11 +500,16 @@ public final class ProgrammingProblemGradingController extends Controller {
                 LanguageRestrictionUpdateForm data = form.get();
                 LanguageRestriction languageRestriction = LanguageRestrictionAdapter.createLanguageRestrictionFromForm(data.allowedLanguageNames, data.isAllowedAll);
 
-                programmingProblemService.updateLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid(), languageRestriction);
+                try {
+                    programmingProblemService.updateLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid(), languageRestriction);
 
-                ControllerUtils.getInstance().addActivityLog("Update language restriction of problem " + problem.getName() + ".");
+                    ControllerUtils.getInstance().addActivityLog("Update language restriction of problem " + problem.getName() + ".");
 
-                return redirect(routes.ProgrammingProblemGradingController.updateLanguageRestriction(problem.getId()));
+                    return redirect(routes.ProgrammingProblemGradingController.updateLanguageRestriction(problem.getId()));
+                } catch (IOException e) {
+                    form.reject("problem.programming.language.error.cantUpdate");
+                    return showUpdateLanguageRestriction(form, problem);
+                }
             }
         } else {
             return notFound();

@@ -19,6 +19,7 @@ import org.iatoki.judgels.sandalphon.models.domains.ProblemModel_;
 import org.iatoki.judgels.sandalphon.models.domains.ProblemPartnerModel;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,7 +40,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Problem createProblem(ProblemType type, String name, String additionalNote, String initialLanguageCode) {
+    public Problem createProblem(ProblemType type, String name, String additionalNote, String initialLanguageCode) throws IOException {
         ProblemModel problemModel = new ProblemModel();
         problemModel.name = name;
         problemModel.additionalNote = additionalNote;
@@ -157,14 +158,14 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String problemJid) {
+    public Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String problemJid) throws IOException {
         String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, problemJid));
         return new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {
         }.getType());
     }
 
     @Override
-    public void addLanguage(String userJid, String problemJid, String languageCode) {
+    public void addLanguage(String userJid, String problemJid, String languageCode) throws IOException {
         String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, problemJid));
         Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
 
@@ -176,7 +177,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void enableLanguage(String userJid, String problemJid, String languageCode) {
+    public void enableLanguage(String userJid, String problemJid, String languageCode) throws IOException {
         String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, problemJid));
         Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {
         }.getType());
@@ -187,7 +188,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void disableLanguage(String userJid, String problemJid, String languageCode) {
+    public void disableLanguage(String userJid, String problemJid, String languageCode) throws IOException {
         String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, problemJid));
         Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {
         }.getType());
@@ -198,22 +199,22 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void makeDefaultLanguage(String userJid, String problemJid, String languageCode) {
+    public void makeDefaultLanguage(String userJid, String problemJid, String languageCode) throws IOException {
         fileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(userJid, problemJid), languageCode);
     }
 
     @Override
-    public String getDefaultLanguage(String userJid, String problemJid) {
+    public String getDefaultLanguage(String userJid, String problemJid) throws IOException {
         return fileSystemProvider.readFromFile(getStatementDefaultLanguageFilePath(userJid, problemJid));
     }
 
     @Override
-    public String getStatement(String userJid, String problemJid, String languageCode) {
+    public String getStatement(String userJid, String problemJid, String languageCode) throws IOException {
         return fileSystemProvider.readFromFile(getStatementFilePath(userJid, problemJid, languageCode));
     }
 
     @Override
-    public void updateStatement(String userJid, long problemId, String languageCode, String statement) {
+    public void updateStatement(String userJid, long problemId, String languageCode, String statement) throws IOException {
         ProblemModel problemModel = problemDao.findById(problemId);
         fileSystemProvider.writeToFile(getStatementFilePath(userJid, problemModel.jid, languageCode), statement);
 
@@ -221,7 +222,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void uploadStatementMediaFile(String userJid, long id, File mediaFile, String filename) {
+    public void uploadStatementMediaFile(String userJid, long id, File mediaFile, String filename) throws IOException {
         ProblemModel problemModel = problemDao.findById(id);
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, problemModel.jid);
         fileSystemProvider.uploadFile(mediaDirPath, mediaFile, filename);
@@ -230,10 +231,10 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void uploadStatementMediaFileZipped(String userJid, long id, File mediaFileZipped) {
+    public void uploadStatementMediaFileZipped(String userJid, long id, File mediaFileZipped) throws IOException {
         ProblemModel problemModel = problemDao.findById(id);
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, problemModel.jid);
-        fileSystemProvider.uploadZippedFiles(mediaDirPath, mediaFileZipped);
+        fileSystemProvider.uploadZippedFiles(mediaDirPath, mediaFileZipped, false);
 
         problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -329,7 +330,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void discardUserClone(String userJid, String problemJid) {
+    public void discardUserClone(String userJid, String problemJid) throws IOException {
         List<String> root = getRootDirPath(userJid, problemJid);
 
         fileSystemProvider.removeFile(root);
@@ -355,7 +356,7 @@ public final class ProblemServiceImpl implements ProblemService {
         return new Problem(problemModel.id, problemModel.jid, problemModel.name, problemModel.userCreate, problemModel.additionalNote, new Date(problemModel.timeUpdate), getProblemType(problemModel));
     }
 
-    private void initStatements(String problemJid, String initialLanguageCode) {
+    private void initStatements(String problemJid, String initialLanguageCode) throws IOException {
         List<String> statementsDirPath = getStatementsDirPath(null, problemJid);
         fileSystemProvider.createDirectory(statementsDirPath);
 

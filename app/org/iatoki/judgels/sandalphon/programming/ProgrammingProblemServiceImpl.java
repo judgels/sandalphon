@@ -11,6 +11,7 @@ import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,7 +24,7 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
     }
 
     @Override
-    public void initProgrammingProblem(String problemJid, String gradingEngine) {
+    public void initProgrammingProblem(String problemJid, String gradingEngine) throws IOException {
         fileSystemProvider.createDirectory(getGradingDirPath(null, problemJid));
 
         fileSystemProvider.createDirectory(getGradingTestDataDirPath(null, problemJid));
@@ -42,13 +43,13 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
     }
 
     @Override
-    public Date getGradingLastUpdateTime(String userJid, String problemJid) {
+    public Date getGradingLastUpdateTime(String userJid, String problemJid) throws IOException {
         String lastUpdateTime = fileSystemProvider.readFromFile(getGradingLastUpdateTimeFilePath(userJid, problemJid));
         return new Date(Long.parseLong(lastUpdateTime));
     }
 
     @Override
-    public GradingConfig getGradingConfig(String userJid, String problemJid) {
+    public GradingConfig getGradingConfig(String userJid, String problemJid) throws IOException {
         String gradingEngine = fileSystemProvider.readFromFile(getGradingEngineFilePath(userJid, problemJid));
         String gradingConfig = fileSystemProvider.readFromFile(getGradingConfigFilePath(userJid, problemJid));
 
@@ -56,61 +57,61 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
     }
 
     @Override
-    public void updateGradingConfig(String userJid, String problemJid, GradingConfig gradingConfig) {
+    public void updateGradingConfig(String userJid, String problemJid, GradingConfig gradingConfig) throws IOException {
         fileSystemProvider.writeToFile(getGradingConfigFilePath(userJid, problemJid), new Gson().toJson(gradingConfig));
 
         updateGradingLastUpdateTime(userJid, problemJid);
     }
 
     @Override
-    public String getGradingEngine(String userJid, String problemJid) {
+    public String getGradingEngine(String userJid, String problemJid) throws IOException {
         return fileSystemProvider.readFromFile(getGradingEngineFilePath(userJid, problemJid));
     }
 
     @Override
-    public void updateGradingEngine(String userJid, String problemJid, String gradingEngine) {
+    public void updateGradingEngine(String userJid, String problemJid, String gradingEngine) throws IOException {
         fileSystemProvider.writeToFile(getGradingEngineFilePath(userJid, problemJid), gradingEngine);
 
         updateGradingLastUpdateTime(userJid, problemJid);
     }
 
     @Override
-    public LanguageRestriction getLanguageRestriction(String userJid, String problemJid) {
+    public LanguageRestriction getLanguageRestriction(String userJid, String problemJid) throws IOException {
         String languageRestriction = fileSystemProvider.readFromFile(getLanguageRestrictionFilePath(userJid, problemJid));
         return new Gson().fromJson(languageRestriction, LanguageRestriction.class);
     }
 
     @Override
-    public void updateLanguageRestriction(String userJid, String problemJid, LanguageRestriction languageRestriction) {
+    public void updateLanguageRestriction(String userJid, String problemJid, LanguageRestriction languageRestriction) throws IOException {
         fileSystemProvider.writeToFile(getLanguageRestrictionFilePath(userJid, problemJid), new Gson().toJson(languageRestriction));
 
         updateGradingLastUpdateTime(userJid, problemJid);
     }
 
     @Override
-    public void uploadGradingTestDataFile(String userJid, String problemJid, File testDataFile, String filename) {
+    public void uploadGradingTestDataFile(String userJid, String problemJid, File testDataFile, String filename) throws IOException {
         fileSystemProvider.uploadFile(getGradingTestDataDirPath(userJid, problemJid), testDataFile, filename);
 
         updateGradingLastUpdateTime(userJid, problemJid);
     }
 
     @Override
-    public void uploadGradingTestDataFileZipped(String userJid, String problemJid, File testDataFileZipped) {
-        fileSystemProvider.uploadZippedFiles(getGradingTestDataDirPath(userJid, problemJid), testDataFileZipped);
+    public void uploadGradingTestDataFileZipped(String userJid, String problemJid, File testDataFileZipped) throws IOException {
+        fileSystemProvider.uploadZippedFiles(getGradingTestDataDirPath(userJid, problemJid), testDataFileZipped, false);
 
         updateGradingLastUpdateTime(userJid, problemJid);
     }
 
     @Override
-    public void uploadGradingHelperFile(String userJid, String problemJid, File helperFile, String filename) {
+    public void uploadGradingHelperFile(String userJid, String problemJid, File helperFile, String filename) throws IOException {
         fileSystemProvider.uploadFile(getGradingHelpersDirPath(userJid, problemJid), helperFile, filename);
 
         updateGradingLastUpdateTime(userJid, problemJid);
     }
 
     @Override
-    public void uploadGradingHelperFileZipped(String userJid, String problemJid, File helperFileZipped) {
-        fileSystemProvider.uploadZippedFiles(getGradingHelpersDirPath(userJid, problemJid), helperFileZipped);
+    public void uploadGradingHelperFileZipped(String userJid, String problemJid, File helperFileZipped) throws IOException {
+        fileSystemProvider.uploadZippedFiles(getGradingHelpersDirPath(userJid, problemJid), helperFileZipped, false);
 
         updateGradingLastUpdateTime(userJid, problemJid);
     }
@@ -137,11 +138,11 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
     }
 
     @Override
-    public ByteArrayOutputStream getZippedGradingFilesStream(String problemJid) {
+    public ByteArrayOutputStream getZippedGradingFilesStream(String problemJid) throws IOException {
         return fileSystemProvider.getZippedFilesInDirectory(getGradingDirPath(null, problemJid));
     }
 
-    private void updateGradingLastUpdateTime(String userJid, String problemJid) {
+    private void updateGradingLastUpdateTime(String userJid, String problemJid) throws IOException {
         fileSystemProvider.writeToFile(getGradingLastUpdateTimeFilePath(userJid, problemJid), "" + System.currentTimeMillis());
     }
 
