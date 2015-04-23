@@ -9,7 +9,7 @@ lazy val sandalphon = (project in file("."))
     .aggregate(frontendcommons)
     .settings(
         name := "sandalphon",
-        version := IO.read(file("version.properties")),
+        version := IO.read(file("version.properties")).trim,
         scalaVersion := "2.11.1"
     )
     .settings(TestNGPlugin.testNGSettings: _*)
