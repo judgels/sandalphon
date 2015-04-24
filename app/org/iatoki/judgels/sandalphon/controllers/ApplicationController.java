@@ -4,6 +4,7 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.controllers.BaseController;
+import org.iatoki.judgels.jophiel.commons.JophielUtils;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.User;
@@ -40,7 +41,7 @@ public final class ApplicationController extends BaseController {
         } else if (session().containsKey("username")) {
             return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
-            returnUri = org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
+            returnUri = org.iatoki.judgels.uriel.controllers.routes.ApplicationController.afterLogin(routes.ApplicationController.authRole(returnUri).absoluteURL(request(), request().secure())).absoluteURL(request(), request().secure());
             return redirect(org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.login(returnUri));
         }
     }
@@ -59,6 +60,15 @@ public final class ApplicationController extends BaseController {
                 SandalphonUtils.saveRoleInSession(SandalphonUtils.getDefaultRole());
                 return redirect(returnUri);
             }
+        }
+    }
+
+    public Result refreshAuth() {
+        if (JophielUtils.checkSession(Http.Context.current()) != null) {
+            return ok("");
+        } else {
+            String returnUri = routes.ApplicationController.refreshAuth().absoluteURL(request(), request().secure());
+            return redirect(routes.ApplicationController.auth(returnUri));
         }
     }
 
