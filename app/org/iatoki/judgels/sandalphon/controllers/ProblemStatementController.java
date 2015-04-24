@@ -5,7 +5,9 @@ import org.iatoki.judgels.commons.FileInfo;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
@@ -39,14 +41,14 @@ import java.util.Set;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public class ProblemStatementController extends Controller {
+public class ProblemStatementController extends BaseController {
     private final ProblemService problemService;
 
     public ProblemStatementController(ProblemService problemService) {
         this.problemService = problemService;
     }
 
-    public Result viewStatement(long problemId) {
+    public Result viewStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (problem.getType() == ProblemType.PROGRAMMING) {
@@ -75,7 +77,7 @@ public class ProblemStatementController extends Controller {
     }
 
     @AddCSRFToken
-    public Result updateStatement(long problemId) {
+    public Result updateStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         try {
             ProblemControllerUtils.establishStatementLanguage(problemService, problem);
@@ -113,7 +115,7 @@ public class ProblemStatementController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUpdateStatement(long problemId) {
+    public Result postUpdateStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         try {
             ProblemControllerUtils.establishStatementLanguage(problemService, problem);
@@ -156,7 +158,7 @@ public class ProblemStatementController extends Controller {
 
 
     @AddCSRFToken
-    public Result listStatementMediaFiles(long problemId) {
+    public Result listStatementMediaFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
@@ -171,7 +173,7 @@ public class ProblemStatementController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUploadStatementMediaFiles(long problemId) {
+    public Result postUploadStatementMediaFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToUploadStatementResources(problemService, problem)) {
@@ -226,7 +228,7 @@ public class ProblemStatementController extends Controller {
         }
     }
 
-    public Result downloadStatementMediaFile(long id, String filename) {
+    public Result downloadStatementMediaFile(long id, String filename) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(id);
         String mediaURL = problemService.getStatementMediaFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
 
@@ -241,7 +243,7 @@ public class ProblemStatementController extends Controller {
         }
     }
 
-    public Result listStatementLanguages(long problemId) {
+    public Result listStatementLanguages(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToManageStatementLanguages(problemService, problem)) {
@@ -270,7 +272,7 @@ public class ProblemStatementController extends Controller {
     }
 
 
-    public Result postAddStatementLanguage(long problemId) {
+    public Result postAddStatementLanguage(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToManageStatementLanguages(problemService, problem)) {
@@ -297,7 +299,7 @@ public class ProblemStatementController extends Controller {
         }
     }
 
-    public Result enableStatementLanguage(long problemId, String languageCode) {
+    public Result enableStatementLanguage(long problemId, String languageCode) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToManageStatementLanguages(problemService, problem)) {
@@ -323,7 +325,7 @@ public class ProblemStatementController extends Controller {
     }
 
 
-    public Result disableStatementLanguage(long problemId, String languageCode) {
+    public Result disableStatementLanguage(long problemId, String languageCode) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToManageStatementLanguages(problemService, problem)) {
@@ -352,7 +354,7 @@ public class ProblemStatementController extends Controller {
         }
     }
 
-    public Result makeDefaultStatementLanguage(long problemId, String languageCode) {
+    public Result makeDefaultStatementLanguage(long problemId, String languageCode) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToManageStatementLanguages(problemService, problem)) {

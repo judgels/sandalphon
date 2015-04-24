@@ -5,8 +5,10 @@ import org.iatoki.judgels.commons.GitCommit;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
@@ -28,14 +30,14 @@ import java.util.List;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public final class ProblemVersionController extends Controller {
+public final class ProblemVersionController extends BaseController {
     private final ProblemService problemService;
 
     public ProblemVersionController(ProblemService problemService) {
         this.problemService = problemService;
     }
 
-    public Result listVersionHistory(long problemId) {
+    public Result listVersionHistory(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToViewVersionHistory(problemService, problem)) {
@@ -60,7 +62,7 @@ public final class ProblemVersionController extends Controller {
         }
     }
 
-    public Result restoreVersionHistory(long problemId, String hash) {
+    public Result restoreVersionHistory(long problemId, String hash) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
 
@@ -76,7 +78,7 @@ public final class ProblemVersionController extends Controller {
     }
 
     @AddCSRFToken
-    public Result viewVersionLocalChanges(long problemId) {
+    public Result viewVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
@@ -93,7 +95,7 @@ public final class ProblemVersionController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postCommitVersionLocalChanges(long problemId) {
+    public Result postCommitVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
@@ -127,7 +129,7 @@ public final class ProblemVersionController extends Controller {
         }
     }
 
-    public Result updateVersionLocalChanges(long problemId) {
+    public Result updateVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
@@ -145,7 +147,7 @@ public final class ProblemVersionController extends Controller {
         }
     }
 
-    public Result discardVersionLocalChanges(long problemId) {
+    public Result discardVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {

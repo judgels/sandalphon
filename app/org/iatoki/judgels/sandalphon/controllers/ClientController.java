@@ -5,9 +5,11 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.Client;
+import org.iatoki.judgels.sandalphon.ClientNotFoundException;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.ClientUpsertForm;
 import org.iatoki.judgels.sandalphon.JidCacheService;
@@ -32,7 +34,7 @@ import play.mvc.Result;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
 @Transactional
-public final class ClientController extends Controller {
+public final class ClientController extends BaseController {
 
     private static final long PAGE_SIZE = 20;
 
@@ -86,7 +88,7 @@ public final class ClientController extends Controller {
         }
     }
 
-    public Result view(long clientId) {
+    public Result view(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
         LazyHtml content = new LazyHtml(viewView.render(client));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), new InternalLink(Messages.get("commons.update"), routes.ClientController.update(clientId)), c));
@@ -116,7 +118,7 @@ public final class ClientController extends Controller {
     }
 
     @AddCSRFToken
-    public Result update(long clientId) {
+    public Result update(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
         ClientUpsertForm clientUpsertForm = new ClientUpsertForm();
         clientUpsertForm.name = client.getName();
@@ -127,7 +129,7 @@ public final class ClientController extends Controller {
         return showUpdate(form, client);
     }
 
-    public Result postUpdate(long clientId) {
+    public Result postUpdate(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
         Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).bindFromRequest();
 
@@ -143,7 +145,7 @@ public final class ClientController extends Controller {
         }
     }
 
-    public Result delete(long clientId) {
+    public Result delete(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
         clientService.deleteClient(client.getId());
 

@@ -6,14 +6,17 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.heading3Layout;
 import org.iatoki.judgels.jophiel.User;
 import org.iatoki.judgels.jophiel.commons.JophielUtils;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemPartner;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfigBuilder;
+import org.iatoki.judgels.sandalphon.ProblemPartnerNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
@@ -40,7 +43,7 @@ import java.util.Set;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public final class ProgrammingProblemPartnerController extends Controller {
+public final class ProgrammingProblemPartnerController extends BaseController {
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
 
@@ -50,7 +53,7 @@ public final class ProgrammingProblemPartnerController extends Controller {
     }
 
     @AddCSRFToken
-    public Result addPartner(long problemId) {
+    public Result addPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
@@ -67,7 +70,7 @@ public final class ProgrammingProblemPartnerController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postAddPartner(long problemId) {
+    public Result postAddPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
@@ -137,7 +140,7 @@ public final class ProgrammingProblemPartnerController extends Controller {
     }
 
     @AddCSRFToken
-    public Result updatePartner(long problemId, long partnerId) {
+    public Result updatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
@@ -175,7 +178,7 @@ public final class ProgrammingProblemPartnerController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUpdatePartner(long problemId, long partnerId) {
+    public Result postUpdatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {

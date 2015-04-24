@@ -87,7 +87,7 @@ public final class ProgrammingProblemAPIController extends Controller {
 
     public Result viewProblemStatementTOTP(String clientJid, String problemJid, int TOTP, String lang, String postSubmitUri, String switchLanguageUri) {
         response().setHeader("Access-Control-Allow-Origin", "*");
-        if (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid)) {
+        if ((!clientService.clientExistsByClientJid(clientJid)) && (!problemService.problemExistsByJid(problemJid)) && (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid))) {
             return notFound();
         }
 

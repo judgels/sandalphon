@@ -5,12 +5,14 @@ import org.iatoki.judgels.commons.FileInfo;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngine;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestrictionAdapter;
@@ -53,7 +55,7 @@ import java.util.List;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public final class ProgrammingProblemGradingController extends Controller {
+public final class ProgrammingProblemGradingController extends BaseController {
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
 
@@ -63,7 +65,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @AddCSRFToken
-    public Result updateGradingEngine(long problemId) {
+    public Result updateGradingEngine(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -85,7 +87,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUpdateGradingEngine(long problemId) {
+    public Result postUpdateGradingEngine(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -126,7 +128,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @AddCSRFToken
-    public Result updateGradingConfig(long problemId) {
+    public Result updateGradingConfig(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -156,7 +158,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUpdateGradingConfig(long problemId) {
+    public Result postUpdateGradingConfig(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -196,7 +198,7 @@ public final class ProgrammingProblemGradingController extends Controller {
         }
     }
 
-    public Result updateGradingConfigByTokilibFormat(long problemId) {
+    public Result updateGradingConfigByTokilibFormat(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -238,7 +240,7 @@ public final class ProgrammingProblemGradingController extends Controller {
         }
     }
 
-    public Result updateGradingConfigByAutoPopulation(long problemId) {
+    public Result updateGradingConfigByAutoPopulation(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -280,7 +282,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @AddCSRFToken
-    public Result listGradingTestDataFiles(long problemId) {
+    public Result listGradingTestDataFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -296,7 +298,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUploadGradingTestDataFiles(long problemId) {
+    public Result postUploadGradingTestDataFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -350,7 +352,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @AddCSRFToken
-    public Result listGradingHelperFiles(long problemId) {
+    public Result listGradingHelperFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -366,7 +368,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUploadGradingHelperFiles(long problemId) {
+    public Result postUploadGradingHelperFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -419,7 +421,7 @@ public final class ProgrammingProblemGradingController extends Controller {
         }
     }
 
-    public Result downloadGradingTestDataFile(long id, String filename) {
+    public Result downloadGradingTestDataFile(long id, String filename) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(id);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -439,7 +441,7 @@ public final class ProgrammingProblemGradingController extends Controller {
         }
     }
 
-    public Result downloadGradingHelperFile(long id, String filename) {
+    public Result downloadGradingHelperFile(long id, String filename) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(id);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -460,7 +462,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @AddCSRFToken
-    public Result updateLanguageRestriction(long problemId) {
+    public Result updateLanguageRestriction(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -486,7 +488,7 @@ public final class ProgrammingProblemGradingController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUpdateLanguageRestriction(long problemId) {
+    public Result postUpdateLanguageRestriction(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {

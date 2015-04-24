@@ -6,7 +6,7 @@ public interface GraderService {
 
     boolean existsByJid(String graderJid);
 
-    Grader findGraderById(long graderId);
+    Grader findGraderById(long graderId) throws GraderNotFoundException;
 
     Grader findGraderByJid(String graderJid);
 

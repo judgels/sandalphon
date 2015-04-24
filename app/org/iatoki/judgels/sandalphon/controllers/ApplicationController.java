@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.User;
@@ -13,7 +14,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 @Transactional
-public final class ApplicationController extends Controller {
+public final class ApplicationController extends BaseController {
 
     private final UserService userRoleService;
 

@@ -5,9 +5,11 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.programming.Grader;
+import org.iatoki.judgels.sandalphon.programming.GraderNotFoundException;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
 import org.iatoki.judgels.sandalphon.programming.GraderUpsertForm;
 import org.iatoki.judgels.sandalphon.JidCacheService;
@@ -33,7 +35,7 @@ import javax.naming.ldap.Control;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
 @Transactional
-public final class GraderController extends Controller {
+public final class GraderController extends BaseController {
 
     private static final long PAGE_SIZE = 20;
 
@@ -88,7 +90,7 @@ public final class GraderController extends Controller {
         }
     }
 
-    public Result view(long graderId) {
+    public Result view(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
         LazyHtml content = new LazyHtml(viewView.render(grader));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), new InternalLink(Messages.get("commons.update"), routes.GraderController.update(graderId)), c));
@@ -119,7 +121,7 @@ public final class GraderController extends Controller {
     }
 
     @AddCSRFToken
-    public Result update(long graderId) {
+    public Result update(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
         GraderUpsertForm clientUpsertForm = new GraderUpsertForm();
         clientUpsertForm.name = grader.getName();
@@ -130,7 +132,7 @@ public final class GraderController extends Controller {
         return showUpdate(form, grader);
     }
 
-    public Result postUpdate(long graderId) {
+    public Result postUpdate(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).bindFromRequest();
 

@@ -2,11 +2,13 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
@@ -18,7 +20,6 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -26,7 +27,7 @@ import java.util.List;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public final class ProblemClientController extends Controller {
+public final class ProblemClientController extends BaseController {
     private final ProblemService problemService;
     private final ClientService clientService;
 
@@ -36,7 +37,7 @@ public final class ProblemClientController extends Controller {
     }
 
     @AddCSRFToken
-    public Result updateClientProblems(long problemId) {
+    public Result updateClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class);
         List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
@@ -48,7 +49,7 @@ public final class ProblemClientController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUpdateClientProblems(long problemId) {
+    public Result postUpdateClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
 
@@ -58,7 +59,7 @@ public final class ProblemClientController extends Controller {
             return showUpdateClientProblems(form, problem, clients, clientProblems);
         } else {
             ClientProblemUpsertForm clientProblemUpsertForm = form.get();
-            if ((clientService.existsByJid(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
+            if ((clientService.clientExistsByClientJid(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
                 clientService.createClientProblem(problem.getJid(), clientProblemUpsertForm.clientJid);
 
                 ControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertForm.clientJid + " to problem " + problem.getName() + ".");
@@ -72,7 +73,7 @@ public final class ProblemClientController extends Controller {
         }
     }
 
-    public Result viewClientProblem(long problemId, long clientProblemId) {
+    public Result viewClientProblem(long problemId, long clientProblemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
         if (clientProblem.getProblemJid().equals(problem.getJid())) {

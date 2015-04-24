@@ -59,9 +59,13 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public final Problem findProblemById(long problemId) {
+    public final Problem findProblemById(long problemId) throws ProblemNotFoundException {
         ProblemModel problemModel = problemDao.findById(problemId);
-        return createProblemFromModel(problemModel);
+        if (problemModel != null) {
+            return createProblemFromModel(problemModel);
+        } else {
+            throw new ProblemNotFoundException("Problem not found.");
+        }
     }
 
     @Override
@@ -108,10 +112,13 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public ProblemPartner findProblemPartnerByProblemPartnerId(long problemPartnerId) {
+    public ProblemPartner findProblemPartnerByProblemPartnerId(long problemPartnerId) throws ProblemPartnerNotFoundException {
         ProblemPartnerModel problemPartnerModel = problemPartnerDao.findById(problemPartnerId);
-
-        return createProblemPartnerFromModel(problemPartnerModel);
+        if (problemPartnerModel != null) {
+            return createProblemPartnerFromModel(problemPartnerModel);
+        } else {
+            throw new ProblemPartnerNotFoundException("Problem partner not found.");
+        }
     }
 
     @Override

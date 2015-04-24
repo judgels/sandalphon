@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface ClientService {
 
-    boolean existsByJid(String clientJid);
+    boolean clientExistsByClientJid(String clientJid);
 
     List<Client> findAllClients();
 
-    Client findClientById(long clientId);
+    Client findClientById(long clientId) throws ClientNotFoundException;
 
     Client findClientByJid(String clientJid);
 

@@ -6,6 +6,7 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.User;
@@ -31,7 +32,7 @@ import java.util.Arrays;
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
-public final class UserController extends Controller {
+public final class UserController extends BaseController {
 
     private static final long PAGE_SIZE = 20;
     private final UserService userService;

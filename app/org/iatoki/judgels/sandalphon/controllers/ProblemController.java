@@ -5,10 +5,12 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
@@ -31,7 +33,7 @@ import play.mvc.Result;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public final class ProblemController extends Controller {
+public final class ProblemController extends BaseController {
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
@@ -121,7 +123,7 @@ public final class ProblemController extends Controller {
         return redirect(routes.ProblemClientController.updateClientProblems(problemId));
     }
 
-    public Result viewProblem(long problemId) {
+    public Result viewProblem(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         LazyHtml content = new LazyHtml(viewProblemView.render(problem));
@@ -142,7 +144,7 @@ public final class ProblemController extends Controller {
     }
 
     @AddCSRFToken
-    public Result updateProblem(long problemId) {
+    public Result updateProblem(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToUpdateProblem(problemService, problem)) {
@@ -161,7 +163,7 @@ public final class ProblemController extends Controller {
     }
 
     @RequireCSRFCheck
-    public Result postUpdateProblem(long problemId) {
+    public Result postUpdateProblem(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAllowedToUpdateProblem(problemService, problem)) {

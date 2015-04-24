@@ -25,7 +25,7 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public boolean existsByJid(String clientJid) {
+    public boolean clientExistsByClientJid(String clientJid) {
         return clientDao.existsByJid(clientJid);
     }
 
@@ -37,10 +37,13 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Client findClientById(long clientId) {
+    public Client findClientById(long clientId) throws ClientNotFoundException {
         ClientModel clientModel = clientDao.findById(clientId);
-
-        return createClientFromModel(clientModel);
+        if (clientModel != null) {
+            return createClientFromModel(clientModel);
+        } else {
+            throw new ClientNotFoundException("Client not found.");
+        }
     }
 
 

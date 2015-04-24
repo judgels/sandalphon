@@ -3,8 +3,10 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.heading3WithActionLayout;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemPartner;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
@@ -20,7 +22,7 @@ import play.mvc.Result;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public class ProblemPartnerController extends Controller {
+public class ProblemPartnerController extends BaseController {
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
@@ -29,11 +31,11 @@ public class ProblemPartnerController extends Controller {
         this.problemService = problemService;
     }
 
-    public Result viewPartners(long problemId) {
+    public Result viewPartners(long problemId) throws ProblemNotFoundException {
         return listPartners(problemId, 0, "id", "desc");
     }
 
-    public Result listPartners(long problemId, long pageIndex, String orderBy, String orderDir) {
+    public Result listPartners(long problemId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
@@ -56,7 +58,7 @@ public class ProblemPartnerController extends Controller {
         }
     }
 
-    public Result addPartner(long problemId) {
+    public Result addPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
@@ -70,7 +72,7 @@ public class ProblemPartnerController extends Controller {
         }
     }
 
-    public Result updatePartner(long problemId, long partnerId) {
+    public Result updatePartner(long problemId, long partnerId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {

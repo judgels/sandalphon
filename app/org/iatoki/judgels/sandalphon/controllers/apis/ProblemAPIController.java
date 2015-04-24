@@ -5,6 +5,7 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
@@ -31,7 +32,7 @@ public final class ProblemAPIController extends Controller {
         this.clientService = clientService;
     }
 
-    public Result renderMediaById(long problemId, String imageFilename) {
+    public Result renderMediaById(long problemId, String imageFilename) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         String mediaURL = problemService.getStatementMediaFileURL(IdentityUtils.getUserJid(), problem.getJid(), imageFilename);
 
@@ -98,7 +99,7 @@ public final class ProblemAPIController extends Controller {
         DynamicForm form = DynamicForm.form().bindFromRequest();
         String clientJid = form.get("clientJid");
         String clientSecret = form.get("clientSecret");
-        if (clientService.existsByJid(clientJid)) {
+        if (clientService.clientExistsByClientJid(clientJid)) {
             Client client = clientService.findClientByJid(clientJid);
             if (client.getSecret().equals(clientSecret)) {
                 String problemJid = form.get("problemJid");

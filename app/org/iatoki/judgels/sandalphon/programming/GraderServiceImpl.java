@@ -24,9 +24,13 @@ public final class GraderServiceImpl implements GraderService {
     }
 
     @Override
-    public Grader findGraderById(long graderId) {
+    public Grader findGraderById(long graderId) throws GraderNotFoundException {
         GraderModel graderModel = graderDao.findById(graderId);
-        return createGraderFromModel(graderModel);
+        if (graderModel != null) {
+            return createGraderFromModel(graderModel);
+        } else {
+            throw new GraderNotFoundException("Grader not found.");
+        }
     }
 
     @Override

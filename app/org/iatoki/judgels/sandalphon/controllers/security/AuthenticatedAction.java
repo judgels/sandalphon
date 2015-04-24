@@ -29,7 +29,7 @@ public final class AuthenticatedAction extends Action<Authenticated> {
         } catch (RuntimeException var10) {
             throw var10;
         } catch (Throwable var11) {
-            throw new RuntimeException(var11);
+            throw var11;
         }
     }
 }

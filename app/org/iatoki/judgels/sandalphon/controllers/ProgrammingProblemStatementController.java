@@ -4,10 +4,12 @@ import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.gabriel.commons.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestrictionAdapter;
@@ -27,7 +29,7 @@ import java.util.Set;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public final class ProgrammingProblemStatementController extends Controller {
+public final class ProgrammingProblemStatementController extends BaseController {
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
 
@@ -36,7 +38,7 @@ public final class ProgrammingProblemStatementController extends Controller {
         this.programmingProblemService = programmingProblemService;
     }
 
-    public Result viewStatement(long problemId) {
+    public Result viewStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         try {
             ProblemControllerUtils.establishStatementLanguage(problemService, problem);

@@ -6,15 +6,18 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.ListTableSelectionForm;
 import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.gabriel.commons.Submission;
 import org.iatoki.judgels.gabriel.commons.SubmissionAdapters;
 import org.iatoki.judgels.gabriel.commons.SubmissionException;
+import org.iatoki.judgels.gabriel.commons.SubmissionNotFoundException;
 import org.iatoki.judgels.gabriel.commons.SubmissionService;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
@@ -38,7 +41,7 @@ import java.util.Set;
 
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
-public final class ProgrammingProblemSubmissionController extends Controller {
+public final class ProgrammingProblemSubmissionController extends BaseController {
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
@@ -51,7 +54,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
         this.submissionService = submissionService;
     }
 
-    public Result postSubmit(long problemId) {
+    public Result postSubmit(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
@@ -91,11 +94,11 @@ public final class ProgrammingProblemSubmissionController extends Controller {
         }
     }
 
-    public Result viewSubmissions(long problemId) {
+    public Result viewSubmissions(long problemId) throws ProblemNotFoundException  {
         return listSubmissions(problemId, 0, "id", "desc");
     }
 
-    public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
+    public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
@@ -118,7 +121,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
         }
     }
 
-    public Result viewSubmission(long problemId, long submissionId) {
+    public Result viewSubmission(long problemId, long submissionId) throws ProblemNotFoundException, SubmissionNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
@@ -149,7 +152,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
         }
     }
 
-    public Result regradeSubmission(long problemId, long submissionId, long pageIndex, String orderBy, String orderDir) {
+    public Result regradeSubmission(long problemId, long submissionId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException, SubmissionNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
@@ -165,7 +168,7 @@ public final class ProgrammingProblemSubmissionController extends Controller {
         }
     }
 
-    public Result regradeSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) {
+    public Result regradeSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {

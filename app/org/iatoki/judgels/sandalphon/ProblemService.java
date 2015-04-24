@@ -15,7 +15,7 @@ public interface ProblemService {
 
     boolean problemExistsByJid(String problemJid);
 
-    Problem findProblemById(long problemId);
+    Problem findProblemById(long problemId) throws ProblemNotFoundException;
 
     Problem findProblemByJid(String problemJid);
 
@@ -27,7 +27,7 @@ public interface ProblemService {
 
     Page<ProblemPartner> pageProblemPartners(String problemJid, long pageIndex, long pageSize, String orderBy, String orderDir);
 
-    ProblemPartner findProblemPartnerByProblemPartnerId(long problemPartnerId);
+    ProblemPartner findProblemPartnerByProblemPartnerId(long problemPartnerId) throws ProblemPartnerNotFoundException;
 
     ProblemPartner findProblemPartnerByProblemJidAndPartnerJid(String problemJid, String partnerJid);
 
