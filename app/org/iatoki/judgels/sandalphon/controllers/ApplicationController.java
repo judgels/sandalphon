@@ -28,7 +28,7 @@ public final class ApplicationController extends BaseController {
             return redirect(routes.ProblemController.index());
         } else if (session().containsKey("username")) {
             String returnUri = routes.ProblemController.index().absoluteURL(request(), request().secure());
-            return redirect(routes.ApplicationController.auth(returnUri));
+            return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
             String returnUri = routes.ProblemController.index().absoluteURL(request(), request().secure());
             return redirect(routes.ApplicationController.auth(returnUri));
@@ -37,7 +37,7 @@ public final class ApplicationController extends BaseController {
 
     public Result auth(String returnUri) {
         if ((session().containsKey("username")) && (session().containsKey("role"))) {
-            return redirect(routes.ProblemController.index());
+            return redirect(returnUri);
         } else if (session().containsKey("username")) {
             return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
@@ -48,7 +48,7 @@ public final class ApplicationController extends BaseController {
 
     public Result authRole(String returnUri) {
         if ((session().containsKey("username")) && (session().containsKey("role"))) {
-            return redirect(routes.ProblemController.index());
+            return redirect(returnUri);
         } else {
             String userRoleJid = IdentityUtils.getUserJid();
             if (userRoleService.existsByUserJid(userRoleJid)) {
