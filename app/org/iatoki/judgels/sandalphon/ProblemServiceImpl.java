@@ -296,10 +296,10 @@ public final class ProblemServiceImpl implements ProblemService {
 
         gitProvider.addAll(root);
         gitProvider.commit(root, userJid, "no@email.com", title, description);
-        boolean success = gitProvider.merge(root);
+        boolean success = gitProvider.rebase(root);
 
         if (!success) {
-            gitProvider.resetSoftToParent(root);
+            gitProvider.resetToParent(root);
         }
 
         return success;
@@ -311,9 +311,10 @@ public final class ProblemServiceImpl implements ProblemService {
 
         gitProvider.addAll(root);
         gitProvider.commit(root, userJid, "no@email.com", "dummy", "dummy");
-        boolean success = gitProvider.merge(root);
+        boolean success = gitProvider.rebase(root);
 
-        gitProvider.resetSoftToParent(root);
+        gitProvider.resetToParent(root);
+
         return success;
     }
 
