@@ -9,18 +9,24 @@ import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.User;
 import org.iatoki.judgels.sandalphon.UserService;
+import org.iatoki.judgels.sandalphon.UserViewpointForm;
+import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
+import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
+import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
+import play.data.Form;
 import play.db.jpa.Transactional;
-import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+
+import java.io.IOException;
 
 @Transactional
 public final class ApplicationController extends BaseController {
 
-    private final UserService userRoleService;
+    private final UserService userService;
 
-    public ApplicationController(UserService userRoleService) {
-        this.userRoleService = userRoleService;
+    public ApplicationController(UserService userService) {
+        this.userService = userService;
     }
 
     public Result index() {
@@ -51,13 +57,13 @@ public final class ApplicationController extends BaseController {
             return redirect(returnUri);
         } else {
             String userRoleJid = IdentityUtils.getUserJid();
-            if (userRoleService.existsByUserJid(userRoleJid)) {
-                User userRole = userRoleService.findUserByUserJid(userRoleJid);
-                SandalphonUtils.saveRoleInSession(userRole.getRoles());
+            if (userService.existsByUserJid(userRoleJid)) {
+                User userRole = userService.findUserByUserJid(userRoleJid);
+                SandalphonUtils.saveRolesInSession(userRole.getRoles());
                 return redirect(returnUri);
             } else {
-                userRoleService.createUser(userRoleJid, SandalphonUtils.getDefaultRole());
-                SandalphonUtils.saveRoleInSession(SandalphonUtils.getDefaultRole());
+                userService.createUser(userRoleJid, SandalphonUtils.getDefaultRoles());
+                SandalphonUtils.saveRolesInSession(SandalphonUtils.getDefaultRoles());
                 return redirect(returnUri);
             }
         }
@@ -65,12 +71,57 @@ public final class ApplicationController extends BaseController {
 
     public Result afterLogin(String returnUri) {
         JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
+
+        if (SandalphonUtils.hasViewPoint()) {
+            try {
+                SandalphonUtils.backupSession();
+                SandalphonUtils.setUserSession(JophielUtils.getUserByUserJid(SandalphonUtils.getViewPoint()), userService.findUserByUserJid(SandalphonUtils.getViewPoint()));
+            } catch (IOException e) {
+                SandalphonUtils.removeViewPoint();
+                SandalphonUtils.restoreSession();
+            }
+        }
         return redirect(returnUri);
     }
 
     public Result afterProfile(String returnUri) {
         JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
         return redirect(returnUri);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result postViewAs() {
+        Form<UserViewpointForm> form = Form.form(UserViewpointForm.class).bindFromRequest();
+
+        if ((!(form.hasErrors() || form.hasGlobalErrors())) && (SandalphonUtils.trullyHasRole("admin"))) {
+            UserViewpointForm userViewpointForm = form.get();
+            String userJid = JophielUtils.verifyUsername(userViewpointForm.username);
+            if (userJid != null) {
+                try {
+                    userService.upsertUserFromJophielUserJid(userJid);
+                    if (!SandalphonUtils.hasViewPoint()) {
+                        SandalphonUtils.backupSession();
+                    }
+                    SandalphonUtils.setViewPointInSession(userJid);
+                    SandalphonUtils.setUserSession(JophielUtils.getUserByUserJid(userJid), userService.findUserByUserJid(userJid));
+
+                    ControllerUtils.getInstance().addActivityLog("View as user " + userViewpointForm.username + ".");
+
+                } catch (IOException e) {
+                    SandalphonUtils.removeViewPoint();
+                    SandalphonUtils.restoreSession();
+                }
+            }
+        }
+        return redirect(request().getHeader("Referer"));
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    public Result resetViewAs() {
+        SandalphonUtils.removeViewPoint();
+        SandalphonUtils.restoreSession();
+
+        return redirect(request().getHeader("Referer"));
     }
 
     private Result getResult(LazyHtml content, int statusCode) {

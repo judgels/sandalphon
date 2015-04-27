@@ -1,41 +1,95 @@
 package org.iatoki.judgels.sandalphon;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.mvc.Http;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public final class SandalphonUtils {
     private SandalphonUtils() {
         // prevent instantiation
     }
 
-
-    public static List<String> getDefaultRole() {
+    public static List<String> getDefaultRoles() {
         return ImmutableList.of("user");
     }
 
-    public static void saveRoleInSession(List<String> roles) {
-        Http.Context.current().session().put("role", StringUtils.join(roles, ","));
+    public static String getRolesFromSession() {
+        return getFromSession("role");
+    }
+
+    public static void saveRolesInSession(List<String> roles) {
+        putInSession("role", StringUtils.join(roles, ","));
     }
 
     public static boolean hasRole(String role) {
-        return Arrays.asList(Http.Context.current().session().get("role").split(",")).contains(role);
+        return Arrays.asList(getFromSession("role").split(",")).contains(role);
+    }
+
+    public static boolean hasViewPoint() {
+        return Http.Context.current().session().containsKey("viewpoint");
+    }
+
+    public static String getViewPoint() {
+        return getFromSession("viewpoint");
+    }
+
+    public static void setViewPointInSession(String userJid) {
+        putInSession("viewpoint", userJid);
+    }
+
+    public static void removeViewPoint() {
+        Http.Context.current().session().remove("viewpoint");
+    }
+
+    public static void backupSession() {
+        putInSession("realUserJid", getFromSession("userJid"));
+        putInSession("realName", getFromSession("name"));
+        putInSession("realUsername", getFromSession("username"));
+        putInSession("realRole", getFromSession("role"));
+        putInSession("realAvatar", getFromSession("avatar"));
+        putInSession("realEmail", getFromSession("email"));
+    }
+
+    public static void setUserSession(org.iatoki.judgels.jophiel.User user, User urielUser) {
+        putInSession("userJid", user.getJid());
+        putInSession("name", user.getName());
+        putInSession("username", user.getUsername());
+        saveRolesInSession(urielUser.getRoles());
+        putInSession("avatar", user.getProfilePictureUrl().toString());
+        putInSession("email", user.getEmail());
+    }
+
+    public static void restoreSession() {
+        putInSession("userJid", getFromSession("realUserJid"));
+        Http.Context.current().session().remove("realUserJid");
+        putInSession("name", getFromSession("realName"));
+        Http.Context.current().session().remove("realName");
+        putInSession("username", getFromSession("realUsername"));
+        Http.Context.current().session().remove("realUsername");
+        putInSession("role", getFromSession("realRole"));
+        Http.Context.current().session().remove("realRole");
+        putInSession("avatar", getFromSession("realAvatar"));
+        Http.Context.current().session().remove("realAvatar");
+        putInSession("email", getFromSession("realEmail"));
+        Http.Context.current().session().remove("realEmail");
+    }
+
+    public static boolean trullyHasRole(String role) {
+        if (Http.Context.current().session().containsKey("realRole")) {
+            return Arrays.asList(getFromSession("realRole").split(",")).contains(role);
+        } else {
+            return hasRole(role);
+        }
+    }
+
+    private static void putInSession(String key, String value) {
+        Http.Context.current().session().put(key, value);
+    }
+
+    private static String getFromSession(String key) {
+        return Http.Context.current().session().get(key);
     }
 }
