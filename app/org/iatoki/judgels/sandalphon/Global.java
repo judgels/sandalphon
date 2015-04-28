@@ -125,7 +125,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
             } else if (controllerClass.equals(ProgrammingProblemStatementController.class)) {
                 cache.put(controllerClass, new ProgrammingProblemStatementController(createProblemService(), createProgrammingProblemService()));
             } else if (controllerClass.equals(ProgrammingProblemSubmissionController.class)) {
-                cache.put(controllerClass, new ProgrammingProblemSubmissionController(createProblemService(), createProgrammingProblemService(), createSubmissionService()));
+                cache.put(controllerClass, new ProgrammingProblemSubmissionController(createProblemService(), createProgrammingProblemService(), createSubmissionService(), new LocalFileSystemProvider(SandalphonProperties.getInstance().getBaseSubmissionsDir())));
             } else if (controllerClass.equals(ClientController.class)) {
                 cache.put(controllerClass, new ClientController(createClientService()));
             } else if (controllerClass.equals(GraderController.class)) {

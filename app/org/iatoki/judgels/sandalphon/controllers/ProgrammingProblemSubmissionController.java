@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
@@ -47,11 +48,13 @@ public final class ProgrammingProblemSubmissionController extends BaseController
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
     private final SubmissionService submissionService;
+    private final FileSystemProvider submissionFileProvider;
 
-    public ProgrammingProblemSubmissionController(ProblemService problemService, ProgrammingProblemService programmingProblemService, SubmissionService submissionService) {
+    public ProgrammingProblemSubmissionController(ProblemService problemService, ProgrammingProblemService programmingProblemService, SubmissionService submissionService, FileSystemProvider submissionFileProvider) {
         this.problemService = problemService;
         this.programmingProblemService = programmingProblemService;
         this.submissionService = submissionService;
+        this.submissionFileProvider = submissionFileProvider;
     }
 
     public Result postSubmit(long problemId) throws ProblemNotFoundException {
@@ -80,7 +83,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
             try {
                 GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromNewSubmission(body);
                 String submissionJid = submissionService.submit(problem.getJid(), null, engine, gradingLanguage, allowedLanguageNames, source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-                SubmissionAdapters.fromGradingEngine(engine).storeSubmissionFiles(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submissionJid, source);
+                SubmissionAdapters.fromGradingEngine(engine).storeSubmissionFiles(submissionFileProvider, submissionJid, source);
             } catch (SubmissionException e) {
                 flash("submissionError", e.getMessage());
                 return redirect(routes.ProgrammingProblemStatementController.viewStatement(problem.getId()));
@@ -133,7 +136,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
             } catch (IOException e) {
                 engine = GradingEngineRegistry.getInstance().getDefaultEngine();
             }
-            GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
+            GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromPastSubmission(submissionFileProvider, submission.getJid());
 
             LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewSubmission(submission, source, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
 
@@ -157,7 +160,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
 
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
             Submission submission = submissionService.findSubmissionById(submissionId);
-            GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
+            GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileProvider, submission.getJid());
             submissionService.regrade(submission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
             ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
@@ -185,7 +188,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
             }
 
             for (Submission submission : submissions) {
-                GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(SandalphonProperties.getInstance().getBaseSubmissionsDir(), submission.getJid());
+                GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileProvider, submission.getJid());
                 submissionService.regrade(submission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
             }
 
