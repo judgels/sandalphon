@@ -47,7 +47,7 @@ public final class ApplicationController extends BaseController {
         } else if (session().containsKey("username")) {
             return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
-            returnUri = org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterLogin(routes.ApplicationController.authRole(returnUri).absoluteURL(request(), request().secure())).absoluteURL(request(), request().secure());
+            returnUri = org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
             return redirect(org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.login(returnUri));
         }
     }
@@ -70,18 +70,23 @@ public final class ApplicationController extends BaseController {
     }
 
     public Result afterLogin(String returnUri) {
-        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
+        if (session().containsKey("role")) {
+            JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
 
-        if (SandalphonUtils.hasViewPoint()) {
-            try {
-                SandalphonUtils.backupSession();
-                SandalphonUtils.setUserSession(JophielUtils.getUserByUserJid(SandalphonUtils.getViewPoint()), userService.findUserByUserJid(SandalphonUtils.getViewPoint()));
-            } catch (IOException e) {
-                SandalphonUtils.removeViewPoint();
-                SandalphonUtils.restoreSession();
+            if (SandalphonUtils.hasViewPoint()) {
+                try {
+                    SandalphonUtils.backupSession();
+                    SandalphonUtils.setUserSession(JophielUtils.getUserByUserJid(SandalphonUtils.getViewPoint()), userService.findUserByUserJid(SandalphonUtils.getViewPoint()));
+                } catch (IOException e) {
+                    SandalphonUtils.removeViewPoint();
+                    SandalphonUtils.restoreSession();
+                }
             }
+            return redirect(returnUri);
+        } else {
+            returnUri = org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
+            return redirect(routes.ApplicationController.authRole(returnUri));
         }
-        return redirect(returnUri);
     }
 
     public Result afterProfile(String returnUri) {
