@@ -1,8 +1,7 @@
 package org.iatoki.judgels.sandalphon;
 
 import akka.actor.Scheduler;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
+import com.google.common.collect.ImmutableMap;
 import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.commons.GitProvider;
 import org.iatoki.judgels.commons.JudgelsProperties;
@@ -53,136 +52,141 @@ import org.iatoki.judgels.sandalphon.models.daos.interfaces.JidCacheDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.ProgrammingSubmissionDao;
 import org.iatoki.judgels.sealtiel.client.Sealtiel;
 import play.Application;
+import play.Play;
 import play.libs.Akka;
 import play.mvc.Controller;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.duration.Duration;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public final class Global extends org.iatoki.judgels.commons.Global {
+    private static final String CONF_LOCATION = "conf/application.conf";
 
-    private final Map<Class, Controller> cache;
+    private ClientDao clientDao;
+    private ClientProblemDao clientProblemDao;
+    private JidCacheDao jidCacheDao;
+    private ProblemDao problemDao;
+    private ProblemPartnerDao problemPartnerDao;
+    private UserDao userDao;
+    private GraderDao graderDao;
+    private GradingDao gradingDao;
+    private ProgrammingSubmissionDao programmingSubmissionDao;
 
-    private final JidCacheDao jidCacheDao;
+    private SandalphonProperties sandalphonProps;
 
-    private final Config playConfig;
+    private Sealtiel sealtiel;
 
-    public Global() {
-        this.playConfig = ConfigFactory.load();
+    private LocalFileSystemProvider problemFileSystemProvider;
+    private FileSystemProvider submissionFileSystemProvider;
 
-        this.cache = new HashMap<>();
-        this.jidCacheDao = new JidCacheHibernateDao();
+    private GitProvider problemGitProvider;
+
+    private ClientService clientService;
+    private GraderService graderService;
+    private UserService userService;
+    private ProblemService problemService;
+    private ProgrammingProblemService programmingProblemService;
+    private SubmissionService submissionService;
+
+    private Map<Class<?>, Controller> controllersCache;
+
+    @Override
+    public void onStart(Application application) {
+        buildDaos();
+        buildProperties();
+        buildSealtiel();
+        buildFileProviders();
+        buildGitProviders();
+        buildServices();
+        buildControllers();
+        scheduleThreads();
+    }
+
+    @Override
+    public <A> A getControllerInstance(Class<A> controllerClass) throws Exception {
+        @SuppressWarnings("unchecked")
+        A controller = (A) controllersCache.get(controllerClass);
+
+        return controller;
+    }
+
+    private void buildDaos() {
+        clientDao = new ClientHibernateDao();
+        clientProblemDao = new ClientProblemHibernateDao();
+        jidCacheDao = new JidCacheHibernateDao();
+        problemDao = new ProblemHibernateDao();
+        problemPartnerDao = new ProblemPartnerHibernateDao();
+        userDao = new UserHibernateDao();
+        graderDao = new GraderHibernateDao();
+        gradingDao = new GradingHibernateDao();
+        programmingSubmissionDao = new ProgrammingSubmissionHibernateDao();
+    }
+
+    private void buildProperties() {
+        org.iatoki.judgels.sandalphon.BuildInfo$ buildInfo = org.iatoki.judgels.sandalphon.BuildInfo$.MODULE$;
+        JudgelsProperties.buildInstance(buildInfo.name(), buildInfo.version(), Play.application().configuration(), CONF_LOCATION);
+
+        SandalphonProperties.buildInstance(Play.application().configuration(), CONF_LOCATION);
+        sandalphonProps = SandalphonProperties.getInstance();
+    }
+
+    private void buildSealtiel() {
+        sealtiel = new Sealtiel(sandalphonProps.getSealtielClientJid(), sandalphonProps.getSealtielClientSecret(), sandalphonProps.getSealtielBaseUrl());
+    }
+
+    private void buildFileProviders() {
+        problemFileSystemProvider = new LocalFileSystemProvider(sandalphonProps.getProblemLocalDir());
+        submissionFileSystemProvider = new LocalFileSystemProvider(sandalphonProps.getSubmissionLocalDir());
+    }
+
+    private void buildGitProviders() {
+        problemGitProvider = new LocalGitProvider(problemFileSystemProvider);
+    }
+
+    private void buildServices() {
+        clientService = new ClientServiceImpl(clientDao, clientProblemDao);
+        graderService = new GraderServiceImpl(graderDao);
+        userService = new UserServiceImpl(userDao);
+        problemService = new ProblemServiceImpl(problemDao, problemPartnerDao, problemFileSystemProvider, problemGitProvider);
+        programmingProblemService = new ProgrammingProblemServiceImpl(problemFileSystemProvider);
+        submissionService = new SubmissionServiceImpl(programmingSubmissionDao, gradingDao, sealtiel, SandalphonProperties.getInstance().getSealtielGabrielClientJid());
 
         JidCacheService.getInstance().setDao(jidCacheDao);
     }
 
-    @Override
-    public void onStart(Application application) {
-        org.iatoki.judgels.sandalphon.BuildInfo$ buildInfo = org.iatoki.judgels.sandalphon.BuildInfo$.MODULE$;
-        JudgelsProperties.buildInstance(buildInfo.name(), buildInfo.version());
+    private void buildControllers() {
+        controllersCache = ImmutableMap.<Class<?>, Controller> builder()
+                .put(ApplicationController.class, new ApplicationController(userService))
+                .put(JophielClientController.class, new JophielClientController(userService))
+                .put(ClientController.class, new ClientController(clientService))
+                .put(GraderController.class, new GraderController(graderService))
+                .put(ProblemClientController.class, new ProblemClientController(problemService, clientService))
+                .put(ProblemController.class, new ProblemController(problemService))
+                .put(ProblemPartnerController.class, new ProblemPartnerController(problemService))
+                .put(ProblemStatementController.class, new ProblemStatementController(problemService))
+                .put(ProblemVersionController.class, new ProblemVersionController(problemService))
+                .put(ProgrammingProblemController.class, new ProgrammingProblemController(problemService, programmingProblemService))
+                .put(ProgrammingProblemGradingController.class, new ProgrammingProblemGradingController(problemService, programmingProblemService))
+                .put(ProgrammingProblemPartnerController.class, new ProgrammingProblemPartnerController(problemService, programmingProblemService))
+                .put(ProgrammingProblemStatementController.class, new ProgrammingProblemStatementController(problemService, programmingProblemService))
+                .put(ProgrammingProblemSubmissionController.class, new ProgrammingProblemSubmissionController(problemService, programmingProblemService, submissionService, submissionFileSystemProvider))
+                .put(ProblemAPIController.class, new ProblemAPIController(problemService, clientService))
+                .put(ProgrammingProblemAPIController.class, new ProgrammingProblemAPIController(problemService, programmingProblemService, clientService, graderService))
+                .put(UserController.class, new UserController(userService))
+                .build();
+    }
 
-        super.onStart(application);
-
-        SandalphonProperties.getInstance();
-
-        GradingResponsePoller poller = new GradingResponsePoller(createSubmissionService(), createSealtiel(), TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS));
-        UserActivityPusher userActivityPusher = new UserActivityPusher(createUserService(), UserActivityServiceImpl.getInstance());
+    private void scheduleThreads() {
+        GradingResponsePoller poller = new GradingResponsePoller(submissionService, sealtiel, TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS));
+        UserActivityPusher userActivityPusher = new UserActivityPusher(userService, UserActivityServiceImpl.getInstance());
 
         Scheduler scheduler = Akka.system().scheduler();
         ExecutionContextExecutor context = Akka.system().dispatcher();
+
         scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(3, TimeUnit.SECONDS), poller, context);
         scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(1, TimeUnit.MINUTES), userActivityPusher, context);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <A> A getControllerInstance(Class<A> controllerClass) throws Exception {
-        if (!cache.containsKey(controllerClass)) {
-            if (controllerClass.equals(ProblemController.class)) {
-                cache.put(controllerClass, new ProblemController(createProblemService()));
-            } else if (controllerClass.equals(ProblemAPIController.class)) {
-                cache.put(controllerClass, new ProblemAPIController(createProblemService(), createClientService()));
-            } else if (controllerClass.equals(ProgrammingProblemAPIController.class)) {
-                cache.put(controllerClass, new ProgrammingProblemAPIController(createProblemService(), createProgrammingProblemService(), createClientService(), createGraderService()));
-            } else if (controllerClass.equals(ProgrammingProblemController.class)) {
-                cache.put(controllerClass, new ProgrammingProblemController(createProblemService(), createProgrammingProblemService()));
-            } else if (controllerClass.equals(ProblemPartnerController.class)) {
-                cache.put(controllerClass, new ProblemPartnerController(createProblemService()));
-            } else if (controllerClass.equals(ProblemStatementController.class)) {
-                cache.put(controllerClass, new ProblemStatementController(createProblemService()));
-            } else if (controllerClass.equals(ProblemVersionController.class)) {
-                cache.put(controllerClass, new ProblemVersionController(createProblemService()));
-            } else if (controllerClass.equals(ProblemClientController.class)) {
-                cache.put(controllerClass, new ProblemClientController(createProblemService(), createClientService()));
-            } else if (controllerClass.equals(ProgrammingProblemGradingController.class)) {
-                cache.put(controllerClass, new ProgrammingProblemGradingController(createProblemService(), createProgrammingProblemService()));
-            } else if (controllerClass.equals(ProgrammingProblemPartnerController.class)) {
-                cache.put(controllerClass, new ProgrammingProblemPartnerController(createProblemService(), createProgrammingProblemService()));
-            } else if (controllerClass.equals(ProgrammingProblemStatementController.class)) {
-                cache.put(controllerClass, new ProgrammingProblemStatementController(createProblemService(), createProgrammingProblemService()));
-            } else if (controllerClass.equals(ProgrammingProblemSubmissionController.class)) {
-                cache.put(controllerClass, new ProgrammingProblemSubmissionController(createProblemService(), createProgrammingProblemService(), createSubmissionService(), new LocalFileSystemProvider(SandalphonProperties.getInstance().getBaseSubmissionsDir())));
-            } else if (controllerClass.equals(ClientController.class)) {
-                cache.put(controllerClass, new ClientController(createClientService()));
-            } else if (controllerClass.equals(GraderController.class)) {
-                cache.put(controllerClass, new GraderController(createGraderService()));
-            } else if (controllerClass.equals(ApplicationController.class)) {
-                cache.put(controllerClass, new ApplicationController(createUserService()));
-            } else if (controllerClass.equals(UserController.class)) {
-                cache.put(controllerClass, new UserController(createUserService()));
-            } else if (controllerClass.equals(JophielClientController.class)) {
-                cache.put(controllerClass, new JophielClientController(createUserService()));
-            }
-        }
-        return controllerClass.cast(cache.get(controllerClass));
-    }
-
-    private ProblemService createProblemService() {
-        FileSystemProvider problemFileSystemProvider = new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir")));
-        GitProvider problemGitProvider = new LocalGitProvider(new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir"))));
-        ProblemDao problemDao = new ProblemHibernateDao();
-        ProblemPartnerDao problemPartnerDao = new ProblemPartnerHibernateDao();
-
-        return new ProblemServiceImpl(problemDao, problemPartnerDao, problemFileSystemProvider, problemGitProvider);
-    }
-
-    private ProgrammingProblemService createProgrammingProblemService() {
-        FileSystemProvider programmingProblemFSProvider = new LocalFileSystemProvider(new File(playConfig.getString("sandalphon.baseDataDir")));
-        return new ProgrammingProblemServiceImpl(programmingProblemFSProvider);
-    }
-
-    private SubmissionService createSubmissionService() {
-        ProgrammingSubmissionDao submissionDao = new ProgrammingSubmissionHibernateDao();
-        GradingDao gradingDao = new GradingHibernateDao();
-        Sealtiel sealtiel = createSealtiel();
-
-        return new SubmissionServiceImpl(submissionDao, gradingDao, sealtiel, playConfig.getString("sealtiel.gabrielClientJid"));
-    }
-
-    private ClientService createClientService() {
-        ClientDao clientDao = new ClientHibernateDao();
-        ClientProblemDao clientProblemDao = new ClientProblemHibernateDao();
-
-        return new ClientServiceImpl(clientDao, clientProblemDao);
-    }
-
-    private GraderService createGraderService() {
-        GraderDao graderDao = new GraderHibernateDao();
-
-        return new GraderServiceImpl(graderDao);
-    }
-
-    private UserService createUserService() {
-        UserDao userDao = new UserHibernateDao();
-
-        return new UserServiceImpl(userDao);
-    }
-
-    private Sealtiel createSealtiel() {
-        return new Sealtiel(playConfig.getString("sealtiel.clientJid"), playConfig.getString("sealtiel.clientSecret"), playConfig.getString("sealtiel.baseUrl"));
     }
 }

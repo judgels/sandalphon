@@ -42,8 +42,6 @@ public final class ClientController extends BaseController {
 
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
-
-        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
     }
 
     public Result index() {

@@ -1,23 +1,85 @@
 package org.iatoki.judgels.sandalphon;
 
-import com.google.common.collect.ImmutableList;
+import org.apache.commons.io.FileUtils;
 import play.Configuration;
-import play.Play;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
 
 public final class SandalphonProperties {
     private static SandalphonProperties INSTANCE;
 
-    private final String baseDataDir;
+    private final Configuration conf;
+    private final String confLocation;
 
-    private SandalphonProperties() {
-        Configuration conf = Play.application().configuration();
+    private File sandalphonBaseDataDir;
+    private File submissionLocalDir;
 
-        verifyConfiguration(conf);
 
-        this.baseDataDir = conf.getString("sandalphon.baseDataDir").replaceAll("\"", "");
+    private String jophielBaseUrl;
+    private String jophielClientJid;
+    private String jophielClientSecret;
+
+    private String sealtielBaseUrl;
+    private String sealtielClientJid;
+    private String sealtielClientSecret;
+    private String sealtielGabrielClientJid;
+
+    private SandalphonProperties(Configuration conf, String confLocation) {
+        this.conf = conf;
+        this.confLocation = confLocation;
+    }
+
+    public static synchronized void buildInstance(Configuration conf, String confLocation) {
+        if (INSTANCE != null) {
+            throw new UnsupportedOperationException("SandalphonProperties instance has already been built");
+        }
+
+        INSTANCE = new SandalphonProperties(conf, confLocation);
+        INSTANCE.build();
+    }
+
+    public static SandalphonProperties getInstance() {
+        if (INSTANCE == null) {
+            throw new UnsupportedOperationException("SandalphonProperties instance has not been built");
+        }
+        return INSTANCE;
+    }
+
+    public String getJophielBaseUrl() {
+        return jophielBaseUrl;
+    }
+
+    public String getJophielClientJid() {
+        return jophielClientJid;
+    }
+
+    public String getJophielClientSecret() {
+        return jophielClientSecret;
+    }
+
+    public String getSealtielBaseUrl() {
+        return sealtielBaseUrl;
+    }
+
+    public String getSealtielClientJid() {
+        return sealtielClientJid;
+    }
+
+    public String getSealtielClientSecret() {
+        return sealtielClientSecret;
+    }
+
+    public String getSealtielGabrielClientJid() {
+        return sealtielGabrielClientJid;
+    }
+
+    public File getSubmissionLocalDir() {
+        return submissionLocalDir;
+    }
+
+    public File getProblemLocalDir() {
+        return sandalphonBaseDataDir;
     }
 
     public String getBaseProblemsDirKey() {
@@ -28,37 +90,45 @@ public final class SandalphonProperties {
         return "problem-clones";
     }
 
-    public String getBaseDataDir() {
-        return baseDataDir;
-    }
+    private void build() {
+        sandalphonBaseDataDir = requireDirectoryValue("sandalphon.baseDataDir");
 
-    public File getBaseSubmissionsDir() {
-        return new File(baseDataDir, "submissions");
-    }
-
-    public static SandalphonProperties getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new SandalphonProperties();
+        try {
+            submissionLocalDir = new File(sandalphonBaseDataDir, "submissions");
+            FileUtils.forceMkdir(submissionLocalDir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return INSTANCE;
+
+        jophielBaseUrl = requireStringValue("jophiel.baseUrl");
+        jophielClientJid = requireStringValue("jophiel.clientJid");
+        jophielClientSecret = requireStringValue("jophiel.clientSecret");
+
+        sealtielBaseUrl = requireStringValue("sealtiel.baseUrl");
+        sealtielClientJid = requireStringValue("sealtiel.clientJid");
+        sealtielClientSecret = requireStringValue("sealtiel.clientSecret");
+        sealtielGabrielClientJid = requireStringValue("sealtiel.gabrielClientJid");
     }
 
-    private static void verifyConfiguration(Configuration configuration) {
-        List<String> requiredKeys = ImmutableList.of(
-                "jophiel.baseUrl",
-                "jophiel.clientJid",
-                "jophiel.clientSecret",
-                "sealtiel.baseUrl",
-                "sealtiel.clientJid",
-                "sealtiel.clientSecret",
-                "sandalphon.baseDataDir",
-                "sealtiel.gabrielClientJid"
-        );
+    private String getStringValue(String key) {
+        return conf.getString(key);
+    }
 
-        for (String key : requiredKeys) {
-            if (configuration.getString(key) == null) {
-                throw new RuntimeException("Missing " + key + " property in conf/application.conf");
-            }
+    private String requireStringValue(String key) {
+        String value = getStringValue(key);
+        if (value == null) {
+            throw new RuntimeException("Missing " + key + " property in " + confLocation);
         }
+        return value;
+    }
+
+    private File requireDirectoryValue(String key) {
+        String filename = getStringValue(key);
+
+        File dir = new File(filename);
+        if (!dir.isDirectory()) {
+            throw new RuntimeException("Directory " + dir.getAbsolutePath() + " does not exist");
+        }
+        return dir;
     }
 }

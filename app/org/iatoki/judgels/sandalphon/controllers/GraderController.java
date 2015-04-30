@@ -43,8 +43,6 @@ public final class GraderController extends BaseController {
 
     public GraderController(GraderService graderService) {
         this.graderService = graderService;
-
-        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
     }
 
     public Result index() {

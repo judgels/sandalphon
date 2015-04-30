@@ -39,8 +39,6 @@ public final class UserController extends BaseController {
 
     public UserController(UserService userService) {
         this.userService = userService;
-
-        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
     }
 
     public Result index() {
