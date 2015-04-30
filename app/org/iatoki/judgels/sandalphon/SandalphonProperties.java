@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon;
 
+import com.typesafe.config.Config;
 import org.apache.commons.io.FileUtils;
-import play.Configuration;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,8 +9,7 @@ import java.io.IOException;
 public final class SandalphonProperties {
     private static SandalphonProperties INSTANCE;
 
-    private final Configuration conf;
-    private final String confLocation;
+    private final Config config;
 
     private File sandalphonBaseDataDir;
     private File submissionLocalDir;
@@ -25,17 +24,16 @@ public final class SandalphonProperties {
     private String sealtielClientSecret;
     private String sealtielGabrielClientJid;
 
-    private SandalphonProperties(Configuration conf, String confLocation) {
-        this.conf = conf;
-        this.confLocation = confLocation;
+    private SandalphonProperties(Config config) {
+        this.config = config;
     }
 
-    public static synchronized void buildInstance(Configuration conf, String confLocation) {
+    public static synchronized void buildInstance(Config config) {
         if (INSTANCE != null) {
             throw new UnsupportedOperationException("SandalphonProperties instance has already been built");
         }
 
-        INSTANCE = new SandalphonProperties(conf, confLocation);
+        INSTANCE = new SandalphonProperties(config);
         INSTANCE.build();
     }
 
@@ -111,19 +109,18 @@ public final class SandalphonProperties {
     }
 
     private String getStringValue(String key) {
-        return conf.getString(key);
+        if (!config.hasPath(key)) {
+            return null;
+        }
+        return config.getString(key);
     }
 
     private String requireStringValue(String key) {
-        String value = getStringValue(key);
-        if (value == null) {
-            throw new RuntimeException("Missing " + key + " property in " + confLocation);
-        }
-        return value;
+        return config.getString(key);
     }
 
     private File requireDirectoryValue(String key) {
-        String filename = getStringValue(key);
+        String filename = config.getString(key);
 
         File dir = new File(filename);
         if (!dir.isDirectory()) {

@@ -2,6 +2,8 @@ package org.iatoki.judgels.sandalphon;
 
 import akka.actor.Scheduler;
 import com.google.common.collect.ImmutableMap;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.commons.GitProvider;
 import org.iatoki.judgels.commons.JudgelsProperties;
@@ -52,19 +54,15 @@ import org.iatoki.judgels.sandalphon.models.daos.interfaces.JidCacheDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.ProgrammingSubmissionDao;
 import org.iatoki.judgels.sealtiel.client.Sealtiel;
 import play.Application;
-import play.Play;
 import play.libs.Akka;
 import play.mvc.Controller;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.duration.Duration;
 
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public final class Global extends org.iatoki.judgels.commons.Global {
-    private static final String CONF_LOCATION = "conf/application.conf";
-
     private ClientDao clientDao;
     private ClientProblemDao clientProblemDao;
     private JidCacheDao jidCacheDao;
@@ -91,7 +89,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private ProgrammingProblemService programmingProblemService;
     private SubmissionService submissionService;
 
-    private Map<Class<?>, Controller> controllersCache;
+    private Map<Class<?>, Controller> controllersRegistry;
 
     @Override
     public void onStart(Application application) {
@@ -107,10 +105,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
 
     @Override
     public <A> A getControllerInstance(Class<A> controllerClass) throws Exception {
-        @SuppressWarnings("unchecked")
-        A controller = (A) controllersCache.get(controllerClass);
-
-        return controller;
+        return controllerClass.cast(controllersRegistry.get(controllerClass));
     }
 
     private void buildDaos() {
@@ -126,10 +121,12 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     }
 
     private void buildProperties() {
-        org.iatoki.judgels.sandalphon.BuildInfo$ buildInfo = org.iatoki.judgels.sandalphon.BuildInfo$.MODULE$;
-        JudgelsProperties.buildInstance(buildInfo.name(), buildInfo.version(), Play.application().configuration(), CONF_LOCATION);
+        Config config = ConfigFactory.load();
 
-        SandalphonProperties.buildInstance(Play.application().configuration(), CONF_LOCATION);
+        org.iatoki.judgels.sandalphon.BuildInfo$ buildInfo = org.iatoki.judgels.sandalphon.BuildInfo$.MODULE$;
+        JudgelsProperties.buildInstance(buildInfo.name(), buildInfo.version(), config);
+
+        SandalphonProperties.buildInstance(config);
         sandalphonProps = SandalphonProperties.getInstance();
     }
 
@@ -158,7 +155,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     }
 
     private void buildControllers() {
-        controllersCache = ImmutableMap.<Class<?>, Controller> builder()
+        controllersRegistry = ImmutableMap.<Class<?>, Controller> builder()
                 .put(ApplicationController.class, new ApplicationController(userService))
                 .put(JophielClientController.class, new JophielClientController(userService))
                 .put(ClientController.class, new ClientController(clientService))
