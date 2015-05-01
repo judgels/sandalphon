@@ -33,6 +33,6 @@ public final class ProblemHibernateDao extends AbstractJudgelsHibernateDao<Probl
 
     @Override
     protected List<SingularAttribute<ProblemModel, String>> getColumnsFilterableByString() {
-        return ImmutableList.of(ProblemModel_.name);
+        return ImmutableList.of(ProblemModel_.name, ProblemModel_.additionalNote);
     }
 }
