@@ -83,7 +83,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
             try {
                 GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromNewSubmission(body);
                 String submissionJid = submissionService.submit(problem.getJid(), null, engine, gradingLanguage, allowedLanguageNames, source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-                SubmissionAdapters.fromGradingEngine(engine).storeSubmissionFiles(submissionFileProvider, submissionJid, source);
+                SubmissionAdapters.fromGradingEngine(engine).storeSubmissionFiles(submissionFileProvider, null, submissionJid, source);
             } catch (SubmissionException e) {
                 flash("submissionError", e.getMessage());
                 return redirect(routes.ProgrammingProblemStatementController.viewStatement(problem.getId()));
@@ -136,7 +136,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
             } catch (IOException e) {
                 engine = GradingEngineRegistry.getInstance().getDefaultEngine();
             }
-            GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromPastSubmission(submissionFileProvider, submission.getJid());
+            GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromPastSubmission(submissionFileProvider, null, submission.getJid());
 
             LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewSubmission(submission, source, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
 
@@ -160,7 +160,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
 
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
             Submission submission = submissionService.findSubmissionById(submissionId);
-            GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileProvider, submission.getJid());
+            GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileProvider, null, submission.getJid());
             submissionService.regrade(submission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
             ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
@@ -188,7 +188,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
             }
 
             for (Submission submission : submissions) {
-                GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileProvider, submission.getJid());
+                GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileProvider, null, submission.getJid());
                 submissionService.regrade(submission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
             }
 
