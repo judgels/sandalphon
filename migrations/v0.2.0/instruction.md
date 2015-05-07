@@ -16,6 +16,7 @@ Migrating database
 - Drop column gradingEngine in sandalphon_problem
 - Rename sandalphon_programming_submission to sandalphon_submission_programming
 - Rename sandalphon_user_role to sandalphon_user
+- Change the type of additionalNote in sandalphon_problem to TEXT
 
 Migrating data
 --------------
