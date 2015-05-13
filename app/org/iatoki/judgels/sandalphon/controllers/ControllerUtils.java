@@ -3,16 +3,18 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.ViewpointForm;
 import org.iatoki.judgels.commons.controllers.AbstractControllerUtils;
 import org.iatoki.judgels.commons.views.html.layouts.menusLayout;
 import org.iatoki.judgels.commons.views.html.layouts.profileView;
 import org.iatoki.judgels.commons.views.html.layouts.sidebarLayout;
-import org.iatoki.judgels.sandalphon.views.html.layouts.viewAsLayout;
+import org.iatoki.judgels.commons.views.html.layouts.viewAsLayout;
+import org.iatoki.judgels.jophiel.commons.JophielUtils;
 import org.iatoki.judgels.jophiel.commons.UserActivity;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.UserActivityServiceImpl;
-import org.iatoki.judgels.sandalphon.UserViewpointForm;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;
@@ -39,13 +41,13 @@ public final class ControllerUtils extends AbstractControllerUtils {
               org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())
         ));
         if (SandalphonUtils.trullyHasRole("admin")) {
-            Form<UserViewpointForm> form = Form.form(UserViewpointForm.class);
-            if (SandalphonUtils.hasViewPoint()) {
-                UserViewpointForm userViewpointForm = new UserViewpointForm();
-                userViewpointForm.username = IdentityUtils.getUsername();
-                form.fill(userViewpointForm);
+            Form<ViewpointForm> form = Form.form(ViewpointForm.class);
+            if (JudgelsUtils.hasViewPoint()) {
+                ViewpointForm viewpointForm = new ViewpointForm();
+                viewpointForm.username = IdentityUtils.getUsername();
+                form.fill(viewpointForm);
             }
-            sidebarContent.appendLayout(c -> viewAsLayout.render(form, c));
+            sidebarContent.appendLayout(c -> viewAsLayout.render(form, JophielUtils.getAutoCompleteEndPoint(), "javascripts/userAutoComplete.js", org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.postViewAs(), org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.resetViewAs(), c));
         }
         sidebarContent.appendLayout(c -> menusLayout.render(internalLinkBuilder.build(), c));
         content.appendLayout(c -> sidebarLayout.render(sidebarContent.render(), c));

@@ -3,13 +3,13 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
+import org.iatoki.judgels.commons.ViewpointForm;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.jophiel.commons.JophielUtils;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.User;
 import org.iatoki.judgels.sandalphon.UserService;
-import org.iatoki.judgels.sandalphon.UserViewpointForm;
 import org.iatoki.judgels.sandalphon.controllers.security.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
@@ -73,12 +73,12 @@ public final class ApplicationController extends BaseController {
         if (session().containsKey("role")) {
             JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
 
-            if (SandalphonUtils.hasViewPoint()) {
+            if (JudgelsUtils.hasViewPoint()) {
                 try {
                     SandalphonUtils.backupSession();
-                    SandalphonUtils.setUserSession(JophielUtils.getUserByUserJid(SandalphonUtils.getViewPoint()), userService.findUserByUserJid(SandalphonUtils.getViewPoint()));
+                    SandalphonUtils.setUserSession(JophielUtils.getUserByUserJid(JudgelsUtils.getViewPoint()), userService.findUserByUserJid(JudgelsUtils.getViewPoint()));
                 } catch (IOException e) {
-                    SandalphonUtils.removeViewPoint();
+                    JudgelsUtils.removeViewPoint();
                     SandalphonUtils.restoreSession();
                 }
             }
@@ -96,24 +96,24 @@ public final class ApplicationController extends BaseController {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result postViewAs() {
-        Form<UserViewpointForm> form = Form.form(UserViewpointForm.class).bindFromRequest();
+        Form<ViewpointForm> form = Form.form(ViewpointForm.class).bindFromRequest();
 
         if ((!(form.hasErrors() || form.hasGlobalErrors())) && (SandalphonUtils.trullyHasRole("admin"))) {
-            UserViewpointForm userViewpointForm = form.get();
-            String userJid = JophielUtils.verifyUsername(userViewpointForm.username);
+            ViewpointForm viewpointForm = form.get();
+            String userJid = JophielUtils.verifyUsername(viewpointForm.username);
             if (userJid != null) {
                 try {
                     userService.upsertUserFromJophielUserJid(userJid);
-                    if (!SandalphonUtils.hasViewPoint()) {
+                    if (!JudgelsUtils.hasViewPoint()) {
                         SandalphonUtils.backupSession();
                     }
-                    SandalphonUtils.setViewPointInSession(userJid);
+                    JudgelsUtils.setViewPointInSession(userJid);
                     SandalphonUtils.setUserSession(JophielUtils.getUserByUserJid(userJid), userService.findUserByUserJid(userJid));
 
-                    ControllerUtils.getInstance().addActivityLog("View as user " + userViewpointForm.username + ".");
+                    ControllerUtils.getInstance().addActivityLog("View as user " + viewpointForm.username + ".");
 
                 } catch (IOException e) {
-                    SandalphonUtils.removeViewPoint();
+                    JudgelsUtils.removeViewPoint();
                     SandalphonUtils.restoreSession();
                 }
             }
@@ -123,7 +123,7 @@ public final class ApplicationController extends BaseController {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result resetViewAs() {
-        SandalphonUtils.removeViewPoint();
+        JudgelsUtils.removeViewPoint();
         SandalphonUtils.restoreSession();
 
         return redirect(request().getHeader("Referer"));
