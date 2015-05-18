@@ -1,0 +1,15 @@
+@(bundleItem: org.iatoki.judgels.sandalphon.bundle.BundleItem, conf: org.iatoki.judgels.sandalphon.bundle.ItemMultipleChoiceConf)
+
+@import play.i18n.Messages
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        @Html(conf.statement)
+        <hr />
+        @for(choice <- conf.choices) {
+            <div class="radio">
+                <label><input type="radio" name="@bundleItem.getJid" value="@choice.getContent">@choice.getContent</label>
+            </div>
+        }
+    </div>
+</div>

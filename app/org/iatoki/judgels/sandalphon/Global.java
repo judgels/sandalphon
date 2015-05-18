@@ -13,7 +13,18 @@ import org.iatoki.judgels.gabriel.commons.GradingResponsePoller;
 import org.iatoki.judgels.gabriel.commons.SubmissionService;
 import org.iatoki.judgels.jophiel.commons.UserActivityPusher;
 import org.iatoki.judgels.jophiel.commons.controllers.JophielClientController;
+import org.iatoki.judgels.sandalphon.bundle.BundleItemService;
+import org.iatoki.judgels.sandalphon.bundle.BundleItemServiceImpl;
+import org.iatoki.judgels.sandalphon.bundle.BundleProblemService;
+import org.iatoki.judgels.sandalphon.bundle.BundleProblemServiceImpl;
+import org.iatoki.judgels.sandalphon.bundle.BundleSubmissionServiceImpl;
+import org.iatoki.judgels.sandalphon.commons.BundleSubmissionService;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;
+import org.iatoki.judgels.sandalphon.controllers.BundleItemController;
+import org.iatoki.judgels.sandalphon.controllers.BundleProblemController;
+import org.iatoki.judgels.sandalphon.controllers.BundleProblemPartnerController;
+import org.iatoki.judgels.sandalphon.controllers.BundleProblemStatementController;
+import org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController;
 import org.iatoki.judgels.sandalphon.controllers.ClientController;
 import org.iatoki.judgels.sandalphon.controllers.GraderController;
 import org.iatoki.judgels.sandalphon.controllers.ProblemClientController;
@@ -33,12 +44,16 @@ import org.iatoki.judgels.sandalphon.models.daos.hibernate.ClientHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ClientProblemHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ProblemHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.ProblemPartnerHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.hibernate.bundle.BundleGradingHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.hibernate.bundle.BundleSubmissionHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.programming.GraderHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.hibernate.UserHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemPartnerDao;
+import org.iatoki.judgels.sandalphon.models.daos.interfaces.bundle.BundleGradingDao;
+import org.iatoki.judgels.sandalphon.models.daos.interfaces.bundle.BundleSubmissionDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.GraderDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.UserDao;
 import org.iatoki.judgels.sandalphon.programming.GraderService;
@@ -69,6 +84,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private ProblemDao problemDao;
     private ProblemPartnerDao problemPartnerDao;
     private UserDao userDao;
+    private BundleGradingDao bundleGradingDao;
+    private BundleSubmissionDao bundleSubmissionDao;
     private GraderDao graderDao;
     private GradingDao gradingDao;
     private ProgrammingSubmissionDao programmingSubmissionDao;
@@ -86,6 +103,9 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private GraderService graderService;
     private UserService userService;
     private ProblemService problemService;
+    private BundleProblemService bundleProblemService;
+    private BundleItemService bundleItemService;
+    private BundleSubmissionService bundleSubmissionService;
     private ProgrammingProblemService programmingProblemService;
     private SubmissionService submissionService;
 
@@ -115,6 +135,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         problemDao = new ProblemHibernateDao();
         problemPartnerDao = new ProblemPartnerHibernateDao();
         userDao = new UserHibernateDao();
+        bundleGradingDao = new BundleGradingHibernateDao();
+        bundleSubmissionDao = new BundleSubmissionHibernateDao();
         graderDao = new GraderHibernateDao();
         gradingDao = new GradingHibernateDao();
         programmingSubmissionDao = new ProgrammingSubmissionHibernateDao();
@@ -148,6 +170,9 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         graderService = new GraderServiceImpl(graderDao);
         userService = new UserServiceImpl(userDao);
         problemService = new ProblemServiceImpl(problemDao, problemPartnerDao, problemFileSystemProvider, problemGitProvider);
+        bundleProblemService = new BundleProblemServiceImpl(problemFileSystemProvider);
+        bundleItemService = new BundleItemServiceImpl(problemFileSystemProvider);
+        bundleSubmissionService = new BundleSubmissionServiceImpl(bundleSubmissionDao, bundleGradingDao, new BundleProblemGraderImpl(bundleItemService));
         programmingProblemService = new ProgrammingProblemServiceImpl(problemFileSystemProvider);
         submissionService = new SubmissionServiceImpl(programmingSubmissionDao, gradingDao, sealtiel, SandalphonProperties.getInstance().getSealtielGabrielClientJid());
 
@@ -170,6 +195,11 @@ public final class Global extends org.iatoki.judgels.commons.Global {
                 .put(ProgrammingProblemPartnerController.class, new ProgrammingProblemPartnerController(problemService, programmingProblemService))
                 .put(ProgrammingProblemStatementController.class, new ProgrammingProblemStatementController(problemService, programmingProblemService))
                 .put(ProgrammingProblemSubmissionController.class, new ProgrammingProblemSubmissionController(problemService, programmingProblemService, submissionService, submissionFileSystemProvider))
+                .put(BundleProblemController.class, new BundleProblemController(problemService, bundleProblemService))
+                .put(BundleProblemStatementController.class, new BundleProblemStatementController(problemService, bundleProblemService, bundleItemService))
+                .put(BundleItemController.class, new BundleItemController(problemService, bundleProblemService, bundleItemService))
+                .put(BundleProblemPartnerController.class, new BundleProblemPartnerController(problemService, bundleProblemService))
+                .put(BundleProblemSubmissionController.class, new BundleProblemSubmissionController(problemService, bundleProblemService, bundleSubmissionService, submissionFileSystemProvider))
                 .put(ProblemAPIController.class, new ProblemAPIController(problemService, clientService))
                 .put(ProgrammingProblemAPIController.class, new ProgrammingProblemAPIController(problemService, programmingProblemService, clientService, graderService))
                 .put(UserController.class, new UserController(userService))

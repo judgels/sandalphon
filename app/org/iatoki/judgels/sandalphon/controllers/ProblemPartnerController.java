@@ -62,10 +62,16 @@ public class ProblemPartnerController extends BaseController {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            if (problem.getType() == ProblemType.PROGRAMMING) {
-                return redirect(routes.ProgrammingProblemPartnerController.addPartner(problem.getId()));
-            } else {
-                return badRequest();
+            switch (problem.getType()) {
+                case PROGRAMMING: {
+                    return redirect(routes.ProgrammingProblemPartnerController.addPartner(problem.getId()));
+                }
+                case BUNDLE: {
+                    return redirect(routes.BundleProblemPartnerController.addPartner(problem.getId()));
+                }
+                default: {
+                    return badRequest();
+                }
             }
         } else {
             return notFound();
@@ -76,10 +82,16 @@ public class ProblemPartnerController extends BaseController {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            if (problem.getType() == ProblemType.PROGRAMMING) {
-                return redirect(routes.ProgrammingProblemPartnerController.updatePartner(problem.getId(), partnerId));
-            } else {
-                return badRequest();
+            switch (problem.getType()) {
+                case PROGRAMMING: {
+                    return redirect(routes.ProgrammingProblemPartnerController.updatePartner(problem.getId(), partnerId));
+                }
+                case BUNDLE: {
+                    return redirect(routes.BundleProblemPartnerController.updatePartner(problem.getId(), partnerId));
+                }
+                default: {
+                    return badRequest();
+                }
             }
         } else {
             return notFound();

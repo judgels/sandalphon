@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "sandalphon_problem")
-@JidChildPrefixes({"PROG"})
+@JidChildPrefixes({"PROG", "BUND"})
 public final class ProblemModel extends AbstractJudgelsModel {
     public String name;
 

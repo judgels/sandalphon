@@ -1,6 +1,7 @@
 @(form: Form[org.iatoki.judgels.sandalphon.forms.ProblemCreateForm])
 
 @import org.iatoki.judgels.sandalphon.commons.WorldLanguageRegistry
+@import org.iatoki.judgels.sandalphon.ProblemType
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import scala.collection.JavaConverters._
 @import play.i18n.Messages
@@ -10,7 +11,7 @@
 @b3.form(routes.ProblemController.postCreateProblem()) {
     @helper.CSRF.formField
 
-    @b3.select(form("type"), Seq("PROGRAMMING" -> "Programming"), '_label -> Messages.get("problem.type"))
+    @b3.select(form("type"), ProblemType.values.map(e => (e.name() -> e.name())).toSeq, '_label -> Messages.get("problem.type"), 'class -> "form-control selectpicker")
     @b3.text(form("name"), '_label -> Messages.get("problem.name"))
     @b3.textarea(form("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
 

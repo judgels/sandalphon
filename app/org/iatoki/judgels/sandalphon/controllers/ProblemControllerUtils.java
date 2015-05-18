@@ -31,8 +31,10 @@ import java.util.stream.Collectors;
 public final class ProblemControllerUtils {
 
     static void appendTabsLayout(LazyHtml content, ProblemService problemService, Problem problem) {
-        if (problem.getType() == ProblemType.PROGRAMMING) {
+        if (problem.getType().equals(ProblemType.PROGRAMMING)) {
             ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
+        } else if (problem.getType().equals(ProblemType.BUNDLE)) {
+            BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         }
     }
 
@@ -62,6 +64,10 @@ public final class ProblemControllerUtils {
             String languageCode = problemService.getDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid());
             setCurrentStatementLanguage(languageCode);
         }
+    }
+
+    static String getDefaultStatementLanguage(ProblemService problemService, Problem problem) throws IOException {
+        return problemService.getDefaultLanguage(IdentityUtils.getUserJid(), problem.getJid());
     }
 
     static void setCurrentStatementLanguage(String languageCode) {

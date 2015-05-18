@@ -1,18 +1,16 @@
 package org.iatoki.judgels.sandalphon.programming;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.iatoki.judgels.commons.FileInfo;
 import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
-import org.iatoki.judgels.sandalphon.SandalphonProperties;
+import org.iatoki.judgels.sandalphon.ProblemServiceUtils;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,10 +26,10 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
         fileSystemProvider.createDirectory(getGradingDirPath(null, problemJid));
 
         fileSystemProvider.createDirectory(getGradingTestDataDirPath(null, problemJid));
-        fileSystemProvider.createFile(appendPath(getGradingTestDataDirPath(null, problemJid), ".gitkeep"));
+        fileSystemProvider.createFile(ProblemServiceUtils.appendPath(getGradingTestDataDirPath(null, problemJid), ".gitkeep"));
 
         fileSystemProvider.createDirectory(getGradingHelpersDirPath(null, problemJid));
-        fileSystemProvider.createFile(appendPath(getGradingHelpersDirPath(null, problemJid), ".gitkeep"));
+        fileSystemProvider.createFile(ProblemServiceUtils.appendPath(getGradingHelpersDirPath(null, problemJid), ".gitkeep"));
 
         fileSystemProvider.writeToFile(getGradingEngineFilePath(null, problemJid), gradingEngine);
         fileSystemProvider.writeToFile(getLanguageRestrictionFilePath(null, problemJid), new Gson().toJson(LanguageRestriction.defaultRestriction()));
@@ -128,13 +126,13 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
 
     @Override
     public String getGradingTestDataFileURL(String userJid, String problemJid, String filename) {
-        return fileSystemProvider.getURL(appendPath(getGradingTestDataDirPath(userJid, problemJid), filename));
+        return fileSystemProvider.getURL(ProblemServiceUtils.appendPath(getGradingTestDataDirPath(userJid, problemJid), filename));
     }
 
 
     @Override
     public String getGradingHelperFileURL(String userJid, String problemJid, String filename) {
-        return fileSystemProvider.getURL(appendPath(getGradingHelpersDirPath(userJid, problemJid), filename));
+        return fileSystemProvider.getURL(ProblemServiceUtils.appendPath(getGradingHelpersDirPath(userJid, problemJid), filename));
     }
 
     @Override
@@ -146,59 +144,31 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
         fileSystemProvider.writeToFile(getGradingLastUpdateTimeFilePath(userJid, problemJid), "" + System.currentTimeMillis());
     }
 
-    private ArrayList<String> getOriginDirPath(String problemJid) {
-        return Lists.newArrayList(SandalphonProperties.getInstance().getBaseProblemsDirKey(), problemJid);
+    private List<String> getGradingDirPath(String userJid, String problemJid) {
+        return ProblemServiceUtils.appendPath(ProblemServiceUtils.getRootDirPath(fileSystemProvider, userJid, problemJid), "grading");
     }
 
-    private ArrayList<String> getClonesDirPath(String problemJid) {
-        return Lists.newArrayList(SandalphonProperties.getInstance().getBaseProblemClonesDirKey(), problemJid);
+    private List<String> getGradingTestDataDirPath(String userJid, String problemJid) {
+        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "testdata");
     }
 
-    private ArrayList<String> getCloneDirPath(String userJid, String problemJid) {
-        return appendPath(getClonesDirPath(problemJid), userJid);
+    private List<String> getGradingHelpersDirPath(String userJid, String problemJid) {
+        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "helpers");
     }
 
-    private ArrayList<String> getRootDirPath(String userJid, String problemJid) {
-        ArrayList<String> origin =  getOriginDirPath(problemJid);
-        ArrayList<String> root = getCloneDirPath(userJid, problemJid);
-
-        if (userJid == null || !fileSystemProvider.directoryExists(root)) {
-            return origin;
-        } else {
-            return root;
-        }
+    private List<String> getGradingConfigFilePath(String userJid, String problemJid) {
+        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "config.json");
     }
 
-    private ArrayList<String> getGradingDirPath(String userJid, String problemJid) {
-        return appendPath(getRootDirPath(userJid, problemJid), "grading");
+    private List<String> getGradingEngineFilePath(String userJid, String problemJid) {
+        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "engine.txt");
     }
 
-    private ArrayList<String> getGradingTestDataDirPath(String userJid, String problemJid) {
-        return appendPath(getGradingDirPath(userJid, problemJid), "testdata");
+    private List<String> getLanguageRestrictionFilePath(String userJid, String problemJid) {
+        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "languageRestriction.txt");
     }
 
-    private ArrayList<String> getGradingHelpersDirPath(String userJid, String problemJid) {
-        return appendPath(getGradingDirPath(userJid, problemJid), "helpers");
-    }
-
-    private ArrayList<String> getGradingConfigFilePath(String userJid, String problemJid) {
-        return appendPath(getGradingDirPath(userJid, problemJid), "config.json");
-    }
-
-    private ArrayList<String> getGradingEngineFilePath(String userJid, String problemJid) {
-        return appendPath(getGradingDirPath(userJid, problemJid), "engine.txt");
-    }
-
-    private ArrayList<String> getLanguageRestrictionFilePath(String userJid, String problemJid) {
-        return appendPath(getGradingDirPath(userJid, problemJid), "languageRestriction.txt");
-    }
-
-    private ArrayList<String> getGradingLastUpdateTimeFilePath(String userJid, String problemJid) {
-        return appendPath(getGradingDirPath(userJid, problemJid), "lastUpdateTime.txt");
-    }
-
-    private ArrayList<String> appendPath(ArrayList<String> parentPath, String child) {
-        parentPath.add(child);
-        return parentPath;
+    private List<String> getGradingLastUpdateTimeFilePath(String userJid, String problemJid) {
+        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "lastUpdateTime.txt");
     }
 }

@@ -33,6 +33,7 @@ GET         /problems/$pId<[0-9]{1,18}>/statements                              
 GET         /problems/$pId<[0-9]{1,18}>/versions                                                    @org.iatoki.judgels.sandalphon.controllers.ProblemController.jumpToVersions(pId: Long)
 GET         /problems/$pId<[0-9]{1,18}>/partners                                                    @org.iatoki.judgels.sandalphon.controllers.ProblemController.jumpToPartners(pId: Long)
 GET         /problems/$pId<[0-9]{1,18}>/clients                                                     @org.iatoki.judgels.sandalphon.controllers.ProblemController.jumpToClients(pId: Long)
+POST        /problems/$pId<[0-9]{1,18}>/switchLanguage                                              @org.iatoki.judgels.sandalphon.controllers.ProblemController.switchLanguage(pId: Long)
 
 GET         /problems/$pId<[0-9]{1,18}>/statements/view/                                            @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.viewStatement(pId: Long)
 POST        /problems/$pId<[0-9]{1,18}>/statements/view/switchLanguage                              @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.viewStatementSwitchLanguage(pId: Long)
@@ -107,6 +108,35 @@ POST        /problems/programming/$pId<[0-9]{1,18}>/grading/languageRestriction/
 
 GET         /problems/programming/$pId<[0-9]{1,18}>/grading/testdata/:filename/download             @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemGradingController.downloadGradingTestDataFile(pId: Long, filename: String)
 GET         /problems/programming/$pId<[0-9]{1,18}>/grading/helper/:filename/download               @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemGradingController.downloadGradingHelperFile(pId: Long, filename: String)
+
+GET         /problems/bundle/create                                                                 @org.iatoki.judgels.sandalphon.controllers.BundleProblemController.createBundleProblem()
+
+GET         /problems/bundle/$pId<[0-9]{1,18}>/items                                                @org.iatoki.judgels.sandalphon.controllers.BundleProblemController.jumpToItems(pId: Long)
+GET         /problems/bundle/$pId<[0-9]{1,18}>/submissions                                          @org.iatoki.judgels.sandalphon.controllers.BundleProblemController.jumpToSubmissions(pId: Long)
+
+GET         /problems/bundle/$pId<[0-9]{1,18}>/items/view                                           @org.iatoki.judgels.sandalphon.controllers.BundleItemController.viewItems(pId: Long)
+GET         /problems/bundle/$pId<[0-9]{1,18}>/items/view/                                          @org.iatoki.judgels.sandalphon.controllers.BundleItemController.listCreateItems(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc", filterString ?= "")
+GET         /problems/bundle/$pId<[0-9]{1,18}>/items/create                                         @org.iatoki.judgels.sandalphon.controllers.BundleItemController.createItem(pId: Long, itemType: String, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc", filterString ?= "")
+POST        /problems/bundle/$pId<[0-9]{1,18}>/items/create                                         @org.iatoki.judgels.sandalphon.controllers.BundleItemController.postCreateItem(pId: Long, itemType: String, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc", filterString ?= "")
+GET         /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/update                                   @org.iatoki.judgels.sandalphon.controllers.BundleItemController.updateItem(pId: Long, iJid: String)
+POST        /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/update                                   @org.iatoki.judgels.sandalphon.controllers.BundleItemController.postUpdateItem(pId: Long, iJid: String)
+GET         /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/up                                       @org.iatoki.judgels.sandalphon.controllers.BundleItemController.moveItemUp(pId: Long, iJid: String)
+GET         /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/down                                     @org.iatoki.judgels.sandalphon.controllers.BundleItemController.moveItemDown(pId: Long, iJid: String)
+
+GET         /problems/bundle/$pId<[0-9]{1,18}>/statements/view                                      @org.iatoki.judgels.sandalphon.controllers.BundleProblemStatementController.viewStatement(pId: Long)
+
+GET         /problems/bundle/$pId<[0-9]{1,18}>/partners/add                                         @org.iatoki.judgels.sandalphon.controllers.BundleProblemPartnerController.addPartner(pId: Long)
+POST        /problems/bundle/$pId<[0-9]{1,18}>/partners/add                                         @org.iatoki.judgels.sandalphon.controllers.BundleProblemPartnerController.postAddPartner(pId: Long)
+GET         /problems/bundle/$pId<[0-9]{1,18}>/partners/$p2Id<[0-9]{1,18}>/update                   @org.iatoki.judgels.sandalphon.controllers.BundleProblemPartnerController.updatePartner(pId: Long, p2Id: Long)
+POST        /problems/bundle/$pId<[0-9]{1,18}>/partners/$p2Id<[0-9]{1,18}>/update                   @org.iatoki.judgels.sandalphon.controllers.BundleProblemPartnerController.postUpdatePartner(pId: Long, p2Id: Long)
+
+GET         /problems/bundle/$pId<[0-9]{1,18}>/submissions/view                                     @org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController.viewSubmissions(pId: Long)
+GET         /problems/bundle/$pId<[0-9]{1,18}>/submissions/view/                                    @org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController.listSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
+GET         /problems/bundle/$pId<[0-9]{1,18}>/submissions/$sId<[0-9]{1,18}>/view                   @org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController.viewSubmission(pId: Long, sId: Long)
+GET         /problems/bundle/$pId<[0-9]{1,18}>/submissions/$sId<[0-9]{1,18}>/regrade                @org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController.regradeSubmission(pId: Long, sId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
+POST        /problems/bundle/$pId<[0-9]{1,18}>/submissions/regrade                                  @org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController.regradeSubmissions(pId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
+POST        /problems/bundle/$pId<[0-9]{1,18}>/submit                                               @org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController.postSubmit(pId: Long)
+
 
 POST        /problem/programming/download/grading                                                   @org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController.downloadGradingFiles()
 POST        /problem/programming/getGradingLastUpdateTime                                           @org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController.getGradingLastUpdateTime()

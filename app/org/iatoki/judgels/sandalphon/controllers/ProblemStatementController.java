@@ -51,8 +51,10 @@ public class ProblemStatementController extends BaseController {
     public Result viewStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (problem.getType() == ProblemType.PROGRAMMING) {
+        if (problem.getType().equals(ProblemType.PROGRAMMING)) {
             return redirect(routes.ProgrammingProblemStatementController.viewStatement(problem.getId()));
+        } else if (problem.getType().equals(ProblemType.BUNDLE)) {
+            return redirect(routes.BundleProblemStatementController.viewStatement(problem.getId()));
         } else {
             return badRequest();
         }

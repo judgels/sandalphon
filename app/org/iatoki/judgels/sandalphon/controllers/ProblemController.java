@@ -22,6 +22,7 @@ import org.iatoki.judgels.sandalphon.views.html.problem.createProblemView;
 import org.iatoki.judgels.sandalphon.views.html.problem.listProblemsView;
 import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView;
 import org.iatoki.judgels.sandalphon.views.html.problem.viewProblemView;
+import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -80,13 +81,14 @@ public final class ProblemController extends BaseController {
             return showCreateProblem(form);
         } else {
             ProblemCreateForm data = form.get();
+            ProblemControllerUtils.setJustCreatedProblem(data.name, data.additionalNote, data.initLanguageCode);
 
             if (data.type.equals(ProblemType.PROGRAMMING.name())) {
-                ProblemControllerUtils.setJustCreatedProblem(data.name, data.additionalNote, data.initLanguageCode);
-
                 ControllerUtils.getInstance().addActivityLog("Create problem " + data.name + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
                 return redirect(routes.ProgrammingProblemController.createProgrammingProblem());
+            } else if (data.type.equals(ProblemType.BUNDLE.name())) {
+                return redirect(routes.BundleProblemController.createBundleProblem());
             }
 
             return internalServerError();
@@ -181,6 +183,15 @@ public final class ProblemController extends BaseController {
         } else {
             return notFound();
         }
+    }
+
+    public Result switchLanguage(long problemId) {
+        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
+        ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
+
+        ControllerUtils.getInstance().addActivityLog("Switch language to " + languageCode + " of problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(request().getHeader("Referer"));
     }
 
     private Result showCreateProblem(Form<ProblemCreateForm> form) {

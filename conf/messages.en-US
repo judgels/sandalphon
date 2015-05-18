@@ -109,6 +109,38 @@ problem.programming.partner.isAllowedToManageGrading=Allowed to manage grading?
 
 problem.programming.help.changeGradingEngine=Changing grading engine will reset grading config
 
+problem.bundle.item=Items
+problem.bundle.item.order=Order
+problem.bundle.item.type=Type
+problem.bundle.item.meta=Meta
+
+problem.bundle.item.statement.statement=Statement
+
+problem.bundle.item.multipleChoice.statement=Statement
+problem.bundle.item.multipleChoice.choices=Choices
+problem.bundle.item.multipleChoice.content=Content
+problem.bundle.item.multipleChoice.isCorrect=Correct?
+problem.bundle.item.multipleChoice.score=Score
+problem.bundle.item.multipleChoice.penalty=Penalty
+
+problem.bundle.item.list=Items
+problem.bundle.item.create=Create Item
+problem.bundle.item.update=Update Item
+problem.bundle.item.multipleChoice.addChoice=Add Choice
+
+problem.bundle.submission=Submissions
+problem.bundle.submission.list=Submissions
+problem.bundle.submission.view=View Submission
+problem.bundle.submission.author=Author
+problem.bundle.submission.time=Time
+problem.bundle.submission.gradingLanguage=Language
+problem.bundle.submission.score=Score
+
+problem.bundle.partner.isAllowedToSubmit=Allowed to submit?
+problem.bundle.partner.isAllowedToManageItems=Allowed to manage bundle items?
+
+error.problem.bundle.item.undefined=Item undefined.
+
 problem.version=Versions
 problem.version.list=List Versions
 problem.version.history=History
