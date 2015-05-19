@@ -28,6 +28,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
             itemForm.penalty = itemConf.penalty;
         }
         for (ItemChoice itemChoice : itemConf.choices) {
+            itemForm.choiceAliases.add(itemChoice.getAlias());
             itemForm.choiceContents.add(itemChoice.getContent());
             itemForm.isCorrects.add(itemChoice.isCorrect());
         }
@@ -67,7 +68,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
             if ((itemForm.isCorrects.size() > i) && (itemForm.isCorrects.get(i) != null)) {
                 isCorrect = itemForm.isCorrects.get(i);
             }
-            itemChoiceBuilder.add(new ItemChoice(itemForm.choiceContents.get(i), isCorrect));
+            itemChoiceBuilder.add(new ItemChoice(itemForm.choiceAliases.get(i), itemForm.choiceContents.get(i), isCorrect));
         }
         itemConf.choices = itemChoiceBuilder.build();
 

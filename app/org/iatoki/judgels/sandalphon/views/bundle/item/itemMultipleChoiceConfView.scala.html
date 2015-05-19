@@ -21,13 +21,16 @@
 
                 var container = choiceTemplate.clone().removeAttr('id');
                 var removeButton = container.find('a').first();
-                var content = container.find('input[type="text"]');
+                var alias = container.find('input[type="text"]').first();
+                alias.prop('name', 'choiceAliases[' + choiceNo + ']');
+                var content = container.find('input[type="text"]').eq(1);
                 content.prop('name', 'choiceContents[' + choiceNo + ']');
                 var checkBox = container.find('input[type="checkbox"]');
                 checkBox.prop('name', 'isCorrects[' + choiceNo + ']');
 
                 var choice =  {
                     container: container,
+                    alias: alias,
                     content: content,
                     checkBox: checkBox,
                     removeButton: removeButton
@@ -41,6 +44,7 @@
             }
 
             function refreshChoice(choice, choiceNo) {
+                choice.alias.prop('name', 'choiceAliases[' + choiceNo + ']');
                 choice.content.prop('name', 'choiceContents[' + choiceNo + ']');
                 choice.checkBox.prop('name', 'isCorrects[' + choiceNo + ']');
 
@@ -68,16 +72,17 @@
                 addNewChoice();
             });
 
-            function fillChoice(choiceNo, content, isCorrect) {
+            function fillChoice(choiceNo, alias, content, isCorrect) {
+                choices[choiceNo].alias.val(alias);
                 choices[choiceNo].content.val(content);
                 if (isCorrect) {
                     choices[choiceNo].checkBox.attr("checked", "checked");
                 }
             }
 
-            @for(i <- 0 until form.get.choiceContents.size) {
+            @for(i <- 0 until form.get.choiceAliases.size) {
                 addNewChoice();
-                fillChoice(@i, '@form.get.choiceContents.get(i)', @form.get.isCorrects.get(i));
+                fillChoice(@i, '@form.get.choiceAliases.get(i)', '@form.get.choiceContents.get(i)', @form.get.isCorrects.get(i));
             }
 
         });
@@ -105,6 +110,7 @@
                     <table class="table table-condensed">
                         <thead>
                             <tr>
+                                <th>@Messages.get("problem.bundle.item.multipleChoice.alias")</th>
                                 <th>@Messages.get("problem.bundle.item.multipleChoice.content")</th>
                                 <th>@Messages.get("problem.bundle.item.multipleChoice.isCorrect")</th>
                                 <th></th>
@@ -115,6 +121,7 @@
                                 <td class="text-center">
                                     <a id="choice-add" href="#" class="btn btn-primary">@Messages.get("problem.bundle.item.multipleChoice.addChoice")</a>
                                 </td>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                             </tr>
@@ -130,6 +137,9 @@
 
 <table class="hidden">
     <tr id="choice-template">
+        <td>
+            <input class="form-control input-sm" type="text" />
+        </td>
         <td>
             <input class="form-control input-sm" type="text" />
         </td>

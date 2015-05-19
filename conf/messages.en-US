@@ -118,6 +118,7 @@ problem.bundle.item.statement.statement=Statement
 
 problem.bundle.item.multipleChoice.statement=Statement
 problem.bundle.item.multipleChoice.choices=Choices
+problem.bundle.item.multipleChoice.alias=Alias
 problem.bundle.item.multipleChoice.content=Content
 problem.bundle.item.multipleChoice.isCorrect=Correct?
 problem.bundle.item.multipleChoice.score=Score

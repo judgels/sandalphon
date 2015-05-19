@@ -8,6 +8,7 @@ import java.util.List;
 public final class ItemMultipleChoiceConfForm {
 
     public ItemMultipleChoiceConfForm() {
+        choiceAliases = Lists.newArrayList();
         choiceContents = Lists.newArrayList();
         isCorrects = Lists.newArrayList();
         score = 1.0;
@@ -25,6 +26,8 @@ public final class ItemMultipleChoiceConfForm {
 
     @Constraints.Required
     public Double penalty;
+
+    public List<String> choiceAliases;
 
     public List<String> choiceContents;
 

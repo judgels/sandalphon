@@ -15,7 +15,7 @@ public final class ItemMultipleChoiceAdapter implements BundleItemAdapter, Bundl
     public double calculateScore(BundleItemConf conf, String answer) {
         ItemMultipleChoiceConf realConf = (ItemMultipleChoiceConf) conf;
         for (ItemChoice itemChoice : realConf.choices) {
-            if (itemChoice.getContent().equals(answer)) {
+            if (itemChoice.getAlias().equals(answer)) {
                 if (itemChoice.isCorrect()) {
                     return realConf.score;
                 } else {

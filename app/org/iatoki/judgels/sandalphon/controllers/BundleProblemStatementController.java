@@ -62,7 +62,12 @@ public final class BundleProblemStatementController extends BaseController {
                 ImmutableList.Builder<Html> htmlBuilder = ImmutableList.builder();
                 for (BundleItem bundleItem : bundleItemList) {
                     BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
-                    htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage())));
+                    try {
+                        htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage())));
+                    } catch (IOException e) {
+                        ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem));
+                        htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage())));
+                    }
                 }
 
                 LazyHtml content = new LazyHtml(bundleStatementView.render(routes.BundleProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, htmlBuilder.build()));
