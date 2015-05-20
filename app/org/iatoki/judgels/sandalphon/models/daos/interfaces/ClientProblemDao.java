@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ClientProblemDao extends Dao<Long, ClientProblemModel> {
 
-    boolean existsByProblemJidAndClientJid(String problemJid, String clientJid);
+    boolean existsByClientJidAndProblemJid(String clientJid, String problemJid);
 
     ClientProblemModel findByClientJidAndProblemJid(String clientJid, String problemJid);
 

@@ -142,6 +142,62 @@ POST        /problem/programming/download/grading                               
 POST        /problem/programming/getGradingLastUpdateTime                                           @org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController.getGradingLastUpdateTime()
 POST        /totp/:cJid/:pJid/statement/:TOTP/:lang/:postSubmitUri/:switchLanguageUri               @org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController.viewProblemStatementTOTP(cJid: String, pJid: String, TOTP: Int, lang: String, postSubmitUri: String, switchLanguageUri: String)
 
+
+GET         /lessons                                                                                @org.iatoki.judgels.sandalphon.controllers.LessonController.index()
+GET         /lessons/view/                                                                          @org.iatoki.judgels.sandalphon.controllers.LessonController.listLessons(pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+
+GET         /lessons/create                                                                         @org.iatoki.judgels.sandalphon.controllers.LessonController.createLesson()
+POST        /lessons/create                                                                         @org.iatoki.judgels.sandalphon.controllers.LessonController.postCreateLesson()
+
+GET         /lessons/$lId<[0-9]{1,18}>/view                                                         @org.iatoki.judgels.sandalphon.controllers.LessonController.viewLesson(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/update                                                       @org.iatoki.judgels.sandalphon.controllers.LessonController.updateLesson(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/update                                                       @org.iatoki.judgels.sandalphon.controllers.LessonController.postUpdateLesson(lId: Long)
+
+GET         /lessons/$lId<[0-9]{1,18}>/enter                                                        @org.iatoki.judgels.sandalphon.controllers.LessonController.enterLesson(lId: Long)
+
+GET         /lessons/$lId<[0-9]{1,18}>/statements                                                   @org.iatoki.judgels.sandalphon.controllers.LessonController.jumpToStatement(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/versions                                                     @org.iatoki.judgels.sandalphon.controllers.LessonController.jumpToVersions(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/partners                                                     @org.iatoki.judgels.sandalphon.controllers.LessonController.jumpToPartners(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/clients                                                      @org.iatoki.judgels.sandalphon.controllers.LessonController.jumpToClients(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/switchLanguage                                               @org.iatoki.judgels.sandalphon.controllers.LessonController.switchLanguage(lId: Long)
+
+GET         /lessons/$lId<[0-9]{1,18}>/statements/view                                             @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.viewStatement(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/statements/view/switchLanguage                               @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.viewStatementSwitchLanguage(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/statements/update                                            @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.updateStatement(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/statements/update/                                           @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.postUpdateStatement(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/statements/update/switchLanguage                             @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.updateStatementSwitchLanguage(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/statements/media/view/                                       @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.listStatementMediaFiles(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/statements/media                                             @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.postUploadStatementMediaFiles(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/statements/media/:filename/download                          @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.downloadStatementMediaFile(lId: Long, filename: String)
+GET         /lessons/$lId<[0-9]{1,18}>/statements/languages/update                                  @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.listStatementLanguages(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/statements/languages/add                                     @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.postAddStatementLanguage(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/statements/languages/:lang/enable                            @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.enableStatementLanguage(lId: Long, lang: String)
+GET         /lessons/$lId<[0-9]{1,18}>/statements/languages/:lang/disable                           @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.disableStatementLanguage(lId: Long, lang: String)
+GET         /lessons/$lId<[0-9]{1,18}>/statements/languages/:lang/makeDefault                       @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.makeDefaultStatementLanguage(lId: Long, lang: String)
+
+GET         /lessons/$lId<[0-9]{1,18}>/statements/render/:filename                                  @org.iatoki.judgels.sandalphon.controllers.apis.LessonAPIController.renderMediaById(lId: Long, filename: String)
+GET         /lessons/:lJid/render/:filename                                                         @org.iatoki.judgels.sandalphon.controllers.apis.LessonAPIController.renderMediaByJid(lJid: String, filename: String)
+GET         /verifyLesson                                                                           @org.iatoki.judgels.sandalphon.controllers.apis.LessonAPIController.verifyLesson()
+
+GET         /lessons/$lId<[0-9]{1,18}>/partners/view                                                @org.iatoki.judgels.sandalphon.controllers.LessonPartnerController.viewPartners(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/partners/view/                                               @org.iatoki.judgels.sandalphon.controllers.LessonPartnerController.listPartners(lId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "desc")
+GET         /lessons/$lId<[0-9]{1,18}>/partners/add                                                 @org.iatoki.judgels.sandalphon.controllers.LessonPartnerController.addPartner(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/partners/add                                                 @org.iatoki.judgels.sandalphon.controllers.LessonPartnerController.postAddPartner(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/partners/$pId<[0-9]{1,18}>/update                            @org.iatoki.judgels.sandalphon.controllers.LessonPartnerController.updatePartner(lId: Long, pId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/partners/$pId<[0-9]{1,18}>/update                            @org.iatoki.judgels.sandalphon.controllers.LessonPartnerController.postUpdatePartner(lId: Long, pId: Long)
+
+GET         /lessons/$lId<[0-9]{1,18}>/versions/history/view                                        @org.iatoki.judgels.sandalphon.controllers.LessonVersionController.listVersionHistory(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/versions/history/restore/:hash                               @org.iatoki.judgels.sandalphon.controllers.LessonVersionController.restoreVersionHistory(lId: Long, hash: String)
+GET         /lessons/$lId<[0-9]{1,18}>/versions/local/view                                          @org.iatoki.judgels.sandalphon.controllers.LessonVersionController.viewVersionLocalChanges(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/versions/local/view                                          @org.iatoki.judgels.sandalphon.controllers.LessonVersionController.postCommitVersionLocalChanges(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/versions/local/rebase                                        @org.iatoki.judgels.sandalphon.controllers.LessonVersionController.updateVersionLocalChanges(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/versions/local/discard                                       @org.iatoki.judgels.sandalphon.controllers.LessonVersionController.discardVersionLocalChanges(lId: Long)
+
+GET         /lessons/$lId<[0-9]{1,18}>/clients/view/                                                @org.iatoki.judgels.sandalphon.controllers.LessonClientController.updateClientLessons(lId: Long)
+POST        /lessons/$lId<[0-9]{1,18}>/clients                                                      @org.iatoki.judgels.sandalphon.controllers.LessonClientController.postUpdateClientLessons(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/clients/:clId                                                @org.iatoki.judgels.sandalphon.controllers.LessonClientController.viewClientLesson(lId: Long, clId: Long)
+
+
 GET         /client                                                                                 @org.iatoki.judgels.sandalphon.controllers.ClientController.index()
 GET         /client/                                                                                @org.iatoki.judgels.sandalphon.controllers.ClientController.list(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
 GET         /client/create                                                                          @org.iatoki.judgels.sandalphon.controllers.ClientController.create()

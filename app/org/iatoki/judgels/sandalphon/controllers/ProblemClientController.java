@@ -39,37 +39,47 @@ public final class ProblemClientController extends BaseController {
     @AddCSRFToken
     public Result updateClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
-        Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class);
-        List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
-        List<Client> clients = clientService.findAllClients();
 
-        ControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        if (ProblemControllerUtils.isAllowedToManageClients(problemService, problem)) {
+            Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class);
+            List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemJid(problem.getJid());
+            List<Client> clients = clientService.findAllClients();
 
-        return showUpdateClientProblems(form, problem, clients, clientProblems);
+            ControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+            return showUpdateClientProblems(form, problem, clients, clientProblems);
+        } else {
+            return notFound();
+        }
     }
 
     @RequireCSRFCheck
     public Result postUpdateClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
-        Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
 
-        if (form.hasErrors() || form.hasGlobalErrors()) {
-            List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
-            List<Client> clients = clientService.findAllClients();
-            return showUpdateClientProblems(form, problem, clients, clientProblems);
-        } else {
-            ClientProblemUpsertForm clientProblemUpsertForm = form.get();
-            if ((clientService.clientExistsByClientJid(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
-                clientService.createClientProblem(problem.getJid(), clientProblemUpsertForm.clientJid);
+        if (ProblemControllerUtils.isAllowedToManageClients(problemService, problem)) {
+            Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
 
-                ControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertForm.clientJid + " to problem " + problem.getName() + ".");
-
-                return redirect(routes.ProblemClientController.updateClientProblems(problem.getId()));
-            } else {
-                List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemId(problem.getJid());
+            if (form.hasErrors() || form.hasGlobalErrors()) {
+                List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemJid(problem.getJid());
                 List<Client> clients = clientService.findAllClients();
                 return showUpdateClientProblems(form, problem, clients, clientProblems);
+            } else {
+                ClientProblemUpsertForm clientProblemUpsertForm = form.get();
+                if ((clientService.clientExistsByClientJid(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
+                    clientService.createClientProblem(problem.getJid(), clientProblemUpsertForm.clientJid);
+
+                    ControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertForm.clientJid + " to problem " + problem.getName() + ".");
+
+                    return redirect(routes.ProblemClientController.updateClientProblems(problem.getId()));
+                } else {
+                    List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemJid(problem.getJid());
+                    List<Client> clients = clientService.findAllClients();
+                    return showUpdateClientProblems(form, problem, clients, clientProblems);
+                }
             }
+        } else {
+            return notFound();
         }
     }
 

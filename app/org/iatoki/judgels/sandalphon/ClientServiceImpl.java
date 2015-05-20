@@ -7,7 +7,9 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientDao;
+import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientLessonDao;
 import org.iatoki.judgels.sandalphon.models.daos.interfaces.ClientProblemDao;
+import org.iatoki.judgels.sandalphon.models.domains.ClientLessonModel;
 import org.iatoki.judgels.sandalphon.models.domains.ClientModel;
 import org.iatoki.judgels.sandalphon.models.domains.ClientProblemModel;
 
@@ -18,10 +20,12 @@ public final class ClientServiceImpl implements ClientService {
 
     private final ClientDao clientDao;
     private final ClientProblemDao clientProblemDao;
+    private final ClientLessonDao clientLessonDao;
 
-    public ClientServiceImpl(ClientDao clientDao, ClientProblemDao clientProblemDao) {
+    public ClientServiceImpl(ClientDao clientDao, ClientProblemDao clientProblemDao, ClientLessonDao clientLessonDao) {
         this.clientDao = clientDao;
         this.clientProblemDao = clientProblemDao;
+        this.clientLessonDao = clientLessonDao;
     }
 
     @Override
@@ -90,7 +94,7 @@ public final class ClientServiceImpl implements ClientService {
 
     @Override
     public boolean isClientProblemInProblemByClientJid(String problemJid, String clientJid) {
-        return clientProblemDao.existsByProblemJidAndClientJid(problemJid, clientJid);
+        return clientProblemDao.existsByClientJidAndProblemJid(clientJid, problemJid);
     }
 
     @Override
@@ -110,7 +114,7 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public List<ClientProblem> findAllClientProblemByProblemId(String problemJid) {
+    public List<ClientProblem> findAllClientProblemByProblemJid(String problemJid) {
         List<ClientProblemModel> clientProblemModels = clientProblemDao.findByProblemJid(problemJid);
         ImmutableList.Builder<ClientProblem> clientProblemBuilder = ImmutableList.builder();
 
@@ -136,6 +140,56 @@ public final class ClientServiceImpl implements ClientService {
     public void deleteClientProblem(long clientProblemId) {
         ClientProblemModel clientProblemModel = clientProblemDao.findById(clientProblemId);
         clientProblemDao.remove(clientProblemModel);
+    }
+
+    @Override
+    public boolean isClientLessonInLessonByClientJid(String lessonJid, String clientJid) {
+        return clientLessonDao.existsByClientJidAndLessonJid(clientJid, lessonJid);
+    }
+
+    @Override
+    public ClientLesson findClientLessonByClientJidAndLessonJid(String clientJid, String lessonJid) {
+        ClientLessonModel clientLessonModel = clientLessonDao.findByClientJidAndLessonJid(clientJid, lessonJid);
+        ClientModel clientModel = clientDao.findByJid(clientLessonModel.clientJid);
+
+        return new ClientLesson(clientLessonModel.id, clientLessonModel.clientJid, clientModel.name, clientLessonModel.lessonJid, clientLessonModel.secret);
+    }
+
+    @Override
+    public ClientLesson findClientLessonByClientLessonId(long clientLessonId) {
+        ClientLessonModel clientLessonModel = clientLessonDao.findById(clientLessonId);
+        ClientModel clientModel = clientDao.findByJid(clientLessonModel.clientJid);
+
+        return new ClientLesson(clientLessonModel.id, clientLessonModel.clientJid, clientModel.name, clientLessonModel.lessonJid, clientLessonModel.secret);
+    }
+
+    @Override
+    public List<ClientLesson> findAllClientLessonByLessonJid(String lessonJid) {
+        List<ClientLessonModel> clientLessonModels = clientLessonDao.findByLessonJid(lessonJid);
+        ImmutableList.Builder<ClientLesson> clientLessonBuilder = ImmutableList.builder();
+
+        for (ClientLessonModel clientLessonModel : clientLessonModels) {
+            ClientModel clientModel = clientDao.findByJid(clientLessonModel.clientJid);
+            clientLessonBuilder.add(new ClientLesson(clientLessonModel.id, clientLessonModel.clientJid, clientModel.name, clientLessonModel.lessonJid, clientLessonModel.secret));
+        }
+
+        return clientLessonBuilder.build();
+    }
+
+    @Override
+    public void createClientLesson(String lessonJid, String clientJid) {
+        ClientLessonModel clientLessonModel = new ClientLessonModel();
+        clientLessonModel.lessonJid = lessonJid;
+        clientLessonModel.clientJid = clientJid;
+        clientLessonModel.secret = JudgelsUtils.generateNewSecret();
+
+        clientLessonDao.persist(clientLessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+    }
+
+    @Override
+    public void deleteClientLesson(long clientLessonId) {
+        ClientLessonModel clientLessonModel = clientLessonDao.findById(clientLessonId);
+        clientLessonDao.remove(clientLessonModel);
     }
 
     private Client createClientFromModel(ClientModel clientModel) {

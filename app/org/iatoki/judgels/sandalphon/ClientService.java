@@ -28,9 +28,21 @@ public interface ClientService {
 
     ClientProblem findClientProblemByClientProblemId(long clientProblemId);
 
-    List<ClientProblem> findAllClientProblemByProblemId(String problemJid);
+    List<ClientProblem> findAllClientProblemByProblemJid(String problemJid);
 
     void createClientProblem(String problemJid, String clientJid);
 
     void deleteClientProblem(long clientProblemId);
+
+    boolean isClientLessonInLessonByClientJid(String lessonJid, String clientJid);
+
+    ClientLesson findClientLessonByClientJidAndLessonJid(String clientJid, String lessonJid);
+
+    ClientLesson findClientLessonByClientLessonId(long clientLessonId);
+
+    List<ClientLesson> findAllClientLessonByLessonJid(String lessonJid);
+
+    void createClientLesson(String lessonJid, String clientJid);
+
+    void deleteClientLesson(long clientLessonId);
 }

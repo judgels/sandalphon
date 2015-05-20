@@ -14,7 +14,6 @@ public final class SandalphonProperties {
     private File sandalphonBaseDataDir;
     private File submissionLocalDir;
 
-
     private String jophielBaseUrl;
     private String jophielClientJid;
     private String jophielClientSecret;
@@ -86,6 +85,18 @@ public final class SandalphonProperties {
 
     public String getBaseProblemClonesDirKey() {
         return "problem-clones";
+    }
+
+    public File getLessonLocalDir() {
+        return sandalphonBaseDataDir;
+    }
+
+    public String getBaseLessonsDirKey() {
+        return "lessons";
+    }
+
+    public String getBaseLessonClonesDirKey() {
+        return "lesson-clones";
     }
 
     private void build() {

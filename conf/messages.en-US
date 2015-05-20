@@ -47,7 +47,7 @@ problem.partner.list=Partners
 problem.partner.add=Add Partner
 problem.partner.update=Update Partner
 
-problem.partner.isAllowedToUpdateProblem=Allowed to update problem?
+problem.partner.isAllowedToUpdateLesson=Allowed to update problem?
 problem.partner.isAllowedToUpdateStatement=Allowed to update statement?
 problem.partner.isAllowedToUploadStatementResources=Allowed to upload statement resources?
 problem.partner.allowedStatementLanguagesToView=Allowed statement languages to view
@@ -191,6 +191,97 @@ grader.update=Update Grader
 
 grader.name=Name
 grader.secret=Secret
+
+lesson.lessons=Lessons
+lesson.list=Lessons
+
+lesson.type=Type
+lesson.name=Name
+lesson.additionalNote=Additional Note
+lesson.author=Author
+lesson.lastUpdateTime=Last Update Time
+lesson.jid=JID
+lesson.secret=Lesson Secret
+
+lesson.create=Create Lesson
+lesson.view=View Lesson
+lesson.update=Update Lesson
+lesson.enter=Enter Lesson
+
+lesson.statement=Statements
+lesson.statement.view=View Statement
+lesson.statement.update=Update Statement
+lesson.statement.media=Media
+lesson.statement.media.list=Media Files
+lesson.statement.language=Languages
+lesson.statement.language.list=Statement Languages
+lesson.statement.language.add=Add Language
+lesson.statement.language.available=Available Languages
+
+lesson.statement.language.language=Language
+lesson.statement.language.status=Status
+lesson.statement.language.initial=Initial Language
+
+lesson.statement.error.cantUpload=Statement can't be uploaded into system
+lesson.statement.error.cantUploadMedia=Statement media can't be uploaded into system
+lesson.statement.error.cantUploadMediaZipped=Statement zipped media can't be uploaded into system
+
+lesson.file=Files
+lesson.file.uploadNew=Upload New
+lesson.file.asSingleFile=As single file
+lesson.file.asZipFile=As zip file
+lesson.file.size=Size
+lesson.file.filename=Filename
+lesson.file.lastModified=Last Modified
+
+lesson.partner=Partners
+lesson.partner.name=Name
+lesson.partner.username=Username
+lesson.partner.list=Partners
+lesson.partner.add=Add Partner
+lesson.partner.update=Update Partner
+
+lesson.partner.isAllowedToUpdateLesson=Allowed to update lesson?
+lesson.partner.isAllowedToUpdateStatement=Allowed to update statement?
+lesson.partner.isAllowedToUploadStatementResources=Allowed to upload statement resources?
+lesson.partner.allowedStatementLanguagesToView=Allowed statement languages to view
+lesson.partner.allowedStatementLanguagesToUpdate=Allowed statement languages to update
+lesson.partner.isAllowedToManageStatementLanguages=Allowed to manage statement languages?
+lesson.partner.isAllowedToViewVersionHistory=Allowed to view version history?
+lesson.partner.isAllowedToRestoreVersionHistory=Allowed to restore version history?
+lesson.partner.isAllowedToManageLessonClients=Allowed to manage lesson clients?
+lesson.partner.leaveAllowAll=List of comma-separated language codes. Leave empty to allow all.
+
+lesson.partner.usernameNotFound=Username not found
+lesson.partner.already=This user is already a partner!
+
+lesson.version=Versions
+lesson.version.list=List Versions
+lesson.version.history=History
+lesson.version.local=Local Changes
+lesson.version.local.hasUncommitted.youHave=Warning: you have
+lesson.version.local.hasUncommitted.uncommitted=uncommitted changes
+lesson.version.local.hasUncommitted.forThisLesson=for this lesson!
+
+lesson.version.commit=Commit
+lesson.version.commit.perform=Commit Local Changes
+lesson.version.commit.title=Title
+lesson.version.commit.description=Description
+
+lesson.version.restore=Restore
+
+lesson.version.local.diff=Diff
+lesson.version.local.clean=No local changes.
+lesson.version.local.modify=Modify Local Changes
+lesson.version.local.update=Update Working Copy with Other Users'' Changes
+lesson.version.local.discard=Discard Local Changes
+lesson.version.local.cantCommit=Your working copy has diverged from the master copy. Please update your working copy.
+lesson.version.local.cantMerge=Your local changes conflict with the master copy. Please remember, discard, and then reapply your local changes.
+
+lesson.client=Clients
+lesson.client.list=Clients
+lesson.client.client=Client
+lesson.client.name=Name
 
 user.list=Users
 user.update=Update User
