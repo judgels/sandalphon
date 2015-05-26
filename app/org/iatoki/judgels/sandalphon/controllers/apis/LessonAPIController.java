@@ -2,15 +2,22 @@ package org.iatoki.judgels.sandalphon.controllers.apis;
 
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.sandalphon.Client;
+import org.iatoki.judgels.sandalphon.ClientLesson;
 import org.iatoki.judgels.sandalphon.ClientService;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonService;
+import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
+import org.iatoki.judgels.sandalphon.commons.views.html.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.views.html.lesson.statement.lessonStatementView;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.Results;
+import play.twirl.api.Html;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,6 +27,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Transactional
 public final class LessonAPIController extends Controller {
@@ -107,6 +117,37 @@ public final class LessonAPIController extends Controller {
                 return forbidden();
             }
         } else {
+            return notFound();
+        }
+    }
+
+    public Result viewLessonStatementTOTP(String clientJid, String lessonJid, int TOTP, String lang, String switchLanguageUri) {
+        try {
+            response().setHeader("Access-Control-Allow-Origin", "*");
+            if ((!clientService.clientExistsByClientJid(clientJid)) && (!lessonService.lessonExistsByJid(lessonJid)) && (!clientService.isClientLessonInLessonByClientJid(lessonJid, clientJid))) {
+                return notFound();
+            }
+
+            Lesson lesson = lessonService.findLessonByJid(lessonJid);
+            ClientLesson clientLesson = clientService.findClientLessonByClientJidAndLessonJid(clientJid, lessonJid);
+
+            Map<String, StatementLanguageStatus> availableStatementLanguages = lessonService.getAvailableLanguages(null, lesson.getJid());
+
+            if (!availableStatementLanguages.containsKey(lang) || availableStatementLanguages.get(lang) == StatementLanguageStatus.DISABLED) {
+                lang = lessonService.getDefaultLanguage(null, lessonJid);
+            }
+
+            String language = lang;
+            String statement = lessonService.getStatement(null, lessonJid, lang);
+
+            Set<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toSet());
+
+            Html html = lessonStatementView.render(lesson.getName(), statement);
+            LazyHtml content = new LazyHtml(html);
+            content.appendLayout(c -> statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, language, c));
+
+            return Results.ok(content.render());
+        } catch (IOException e) {
             return notFound();
         }
     }

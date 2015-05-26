@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.bundle;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.iatoki.judgels.sandalphon.forms.bundle.item.ItemMultipleChoiceConfForm;
 import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemMultipleChoiceConfView;
@@ -27,6 +28,9 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
         if (itemConf.penalty != null) {
             itemForm.penalty = itemConf.penalty;
         }
+        itemForm.choiceAliases = Lists.newArrayList();
+        itemForm.choiceContents = Lists.newArrayList();
+        itemForm.isCorrects = Lists.newArrayList();
         for (ItemChoice itemChoice : itemConf.choices) {
             itemForm.choiceAliases.add(itemChoice.getAlias());
             itemForm.choiceContents.add(itemChoice.getContent());

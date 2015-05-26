@@ -8,9 +8,9 @@ import java.util.List;
 public final class ItemMultipleChoiceConfForm {
 
     public ItemMultipleChoiceConfForm() {
-        choiceAliases = Lists.newArrayList();
-        choiceContents = Lists.newArrayList();
-        isCorrects = Lists.newArrayList();
+        choiceAliases = Lists.newArrayList("a","b","c","d","e");
+        choiceContents = Lists.newArrayList("","","","","");
+        isCorrects = Lists.newArrayList(false, false, false, false, false);
         score = 1.0;
         penalty = 0.0;
     }

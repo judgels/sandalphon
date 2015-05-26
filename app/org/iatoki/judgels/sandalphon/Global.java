@@ -224,7 +224,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
                 .put(BundleItemController.class, new BundleItemController(problemService, bundleProblemService, bundleItemService))
                 .put(BundleProblemPartnerController.class, new BundleProblemPartnerController(problemService, bundleProblemService))
                 .put(BundleProblemSubmissionController.class, new BundleProblemSubmissionController(problemService, bundleProblemService, bundleSubmissionService, submissionFileSystemProvider))
-                .put(ProblemAPIController.class, new ProblemAPIController(problemService, clientService))
+                .put(ProblemAPIController.class, new ProblemAPIController(problemService, bundleProblemService, bundleItemService, programmingProblemService, clientService))
                 .put(ProgrammingProblemAPIController.class, new ProgrammingProblemAPIController(problemService, programmingProblemService, clientService, graderService))
                 .put(LessonClientController.class, new LessonClientController(lessonService, clientService))
                 .put(LessonController.class, new LessonController(lessonService))
