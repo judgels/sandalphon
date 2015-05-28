@@ -28,8 +28,8 @@ public final class ControllerUtils extends AbstractControllerUtils {
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
 
         internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
+        internalLinkBuilder.add(new InternalLink(Messages.get("lesson.lessons"), routes.LessonController.index()));
         if (isAdmin()) {
-            internalLinkBuilder.add(new InternalLink(Messages.get("lesson.lessons"), routes.LessonController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("user.users"), routes.UserController.index()));
