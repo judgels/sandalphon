@@ -17,6 +17,7 @@ import org.iatoki.judgels.sandalphon.models.daos.interfaces.ProblemPartnerDao;
 import org.iatoki.judgels.sandalphon.models.domains.ProblemModel;
 import org.iatoki.judgels.sandalphon.models.domains.ProblemModel_;
 import org.iatoki.judgels.sandalphon.models.domains.ProblemPartnerModel;
+import org.iatoki.judgels.sandalphon.models.domains.ProblemPartnerModel_;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,9 +103,8 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public Page<ProblemPartner> pageProblemPartners(String problemJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
-        Map<String, String> filterColumns = ImmutableMap.of("problemJid", problemJid);
-        long totalRows = problemPartnerDao.countByFilters("", filterColumns);
-        List<ProblemPartnerModel> problemPartnerModels = problemPartnerDao.findSortedByFilters(orderBy, orderDir, "", filterColumns, pageIndex, pageIndex * pageSize);
+        long totalRows = problemPartnerDao.countByFilters("", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), ImmutableMap.of());
+        List<ProblemPartnerModel> problemPartnerModels = problemPartnerDao.findSortedByFilters(orderBy, orderDir, "", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), ImmutableMap.of(), pageIndex, pageIndex * pageSize);
         List<ProblemPartner> problemPartners = Lists.transform(problemPartnerModels, m -> createProblemPartnerFromModel(m));
 
         return new Page<>(problemPartners, totalRows, pageIndex, pageSize);
@@ -140,7 +140,7 @@ public final class ProblemServiceImpl implements ProblemService {
     public Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin) {
         if (isAdmin) {
             long totalRows = problemDao.countByFilters(filterString);
-            List<ProblemModel> problemModels = problemDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), pageIndex * pageSize, pageSize);
+            List<ProblemModel> problemModels = problemDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
             List<Problem> problems = Lists.transform(problemModels, m -> createProblemFromModel(m));
             return new Page<>(problems, totalRows, pageIndex, pageSize);

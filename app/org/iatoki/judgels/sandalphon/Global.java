@@ -9,6 +9,8 @@ import org.iatoki.judgels.commons.GitProvider;
 import org.iatoki.judgels.commons.JudgelsProperties;
 import org.iatoki.judgels.commons.LocalFileSystemProvider;
 import org.iatoki.judgels.commons.LocalGitProvider;
+import org.iatoki.judgels.jophiel.commons.DefaultUserActivityServiceImpl;
+import org.iatoki.judgels.jophiel.commons.Jophiel;
 import org.iatoki.judgels.sandalphon.commons.GradingResponsePoller;
 import org.iatoki.judgels.sandalphon.commons.SubmissionService;
 import org.iatoki.judgels.jophiel.commons.UserActivityPusher;
@@ -26,6 +28,7 @@ import org.iatoki.judgels.sandalphon.controllers.BundleProblemPartnerController;
 import org.iatoki.judgels.sandalphon.controllers.BundleProblemStatementController;
 import org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController;
 import org.iatoki.judgels.sandalphon.controllers.ClientController;
+import org.iatoki.judgels.sandalphon.controllers.ControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.GraderController;
 import org.iatoki.judgels.sandalphon.controllers.LessonClientController;
 import org.iatoki.judgels.sandalphon.controllers.LessonController;
@@ -107,6 +110,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
 
     private SandalphonProperties sandalphonProps;
 
+    private Jophiel jophiel;
     private Sealtiel sealtiel;
 
     private LocalFileSystemProvider problemFileSystemProvider;
@@ -131,9 +135,9 @@ public final class Global extends org.iatoki.judgels.commons.Global {
 
     @Override
     public void onStart(Application application) {
-        buildDaos();
         buildProperties();
-        buildSealtiel();
+        buildDaos();
+        buildCommons();
         buildFileProviders();
         buildGitProviders();
         buildServices();
@@ -173,7 +177,8 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         sandalphonProps = SandalphonProperties.getInstance();
     }
 
-    private void buildSealtiel() {
+    private void buildCommons() {
+        jophiel = new Jophiel(sandalphonProps.getJophielClientJid(), sandalphonProps.getJophielClientSecret(), sandalphonProps.getJophielBaseUrl());
         sealtiel = new Sealtiel(sandalphonProps.getSealtielClientJid(), sandalphonProps.getSealtielClientSecret(), sandalphonProps.getSealtielBaseUrl());
     }
 
@@ -191,7 +196,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
     private void buildServices() {
         clientService = new ClientServiceImpl(clientDao, clientProblemDao, clientLessonDao);
         graderService = new GraderServiceImpl(graderDao);
-        userService = new UserServiceImpl(userDao);
+        userService = new UserServiceImpl(jophiel, userDao);
         problemService = new ProblemServiceImpl(problemDao, problemPartnerDao, problemFileSystemProvider, problemGitProvider);
         bundleProblemService = new BundleProblemServiceImpl(problemFileSystemProvider);
         bundleItemService = new BundleItemServiceImpl(problemFileSystemProvider);
@@ -200,13 +205,15 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         submissionService = new SubmissionServiceImpl(programmingSubmissionDao, gradingDao, sealtiel, SandalphonProperties.getInstance().getSealtielGabrielClientJid());
         lessonService = new LessonServiceImpl(lessonDao, lessonPartnerDao, lessonFileSystemProvider, lessonGitProvider);
 
-        JidCacheService.getInstance().setDao(jidCacheDao);
+        JidCacheService.buildInstance(jidCacheDao);
+        ControllerUtils.buildInstance(jophiel);
+        DefaultUserActivityServiceImpl.buildInstance(jophiel);
     }
 
     private void buildControllers() {
         controllersRegistry = ImmutableMap.<Class<?>, Controller> builder()
-                .put(ApplicationController.class, new ApplicationController(userService))
-                .put(JophielClientController.class, new JophielClientController(userService))
+                .put(ApplicationController.class, new ApplicationController(jophiel, userService))
+                .put(JophielClientController.class, new JophielClientController(jophiel, userService))
                 .put(ClientController.class, new ClientController(clientService))
                 .put(GraderController.class, new GraderController(graderService))
                 .put(ProblemClientController.class, new ProblemClientController(problemService, clientService))
@@ -216,19 +223,19 @@ public final class Global extends org.iatoki.judgels.commons.Global {
                 .put(ProblemVersionController.class, new ProblemVersionController(problemService))
                 .put(ProgrammingProblemController.class, new ProgrammingProblemController(problemService, programmingProblemService))
                 .put(ProgrammingProblemGradingController.class, new ProgrammingProblemGradingController(problemService, programmingProblemService))
-                .put(ProgrammingProblemPartnerController.class, new ProgrammingProblemPartnerController(problemService, programmingProblemService))
+                .put(ProgrammingProblemPartnerController.class, new ProgrammingProblemPartnerController(jophiel, problemService, programmingProblemService))
                 .put(ProgrammingProblemStatementController.class, new ProgrammingProblemStatementController(problemService, programmingProblemService))
                 .put(ProgrammingProblemSubmissionController.class, new ProgrammingProblemSubmissionController(problemService, programmingProblemService, submissionService, submissionFileSystemProvider))
                 .put(BundleProblemController.class, new BundleProblemController(problemService, bundleProblemService))
                 .put(BundleProblemStatementController.class, new BundleProblemStatementController(problemService, bundleProblemService, bundleItemService))
                 .put(BundleItemController.class, new BundleItemController(problemService, bundleProblemService, bundleItemService))
-                .put(BundleProblemPartnerController.class, new BundleProblemPartnerController(problemService, bundleProblemService))
+                .put(BundleProblemPartnerController.class, new BundleProblemPartnerController(jophiel, problemService, bundleProblemService))
                 .put(BundleProblemSubmissionController.class, new BundleProblemSubmissionController(problemService, bundleProblemService, bundleSubmissionService, submissionFileSystemProvider))
                 .put(ProblemAPIController.class, new ProblemAPIController(problemService, bundleProblemService, bundleItemService, programmingProblemService, clientService))
                 .put(ProgrammingProblemAPIController.class, new ProgrammingProblemAPIController(problemService, programmingProblemService, clientService, graderService))
                 .put(LessonClientController.class, new LessonClientController(lessonService, clientService))
                 .put(LessonController.class, new LessonController(lessonService))
-                .put(LessonPartnerController.class, new LessonPartnerController(lessonService))
+                .put(LessonPartnerController.class, new LessonPartnerController(jophiel, lessonService))
                 .put(LessonStatementController.class, new LessonStatementController(lessonService))
                 .put(LessonVersionController.class, new LessonVersionController(lessonService))
                 .put(LessonAPIController.class, new LessonAPIController(lessonService, clientService))
@@ -241,7 +248,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         ExecutionContextExecutor context = Akka.system().dispatcher();
 
         GradingResponsePoller poller = new GradingResponsePoller(scheduler, context, submissionService, sealtiel, TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS));
-        UserActivityPusher userActivityPusher = new UserActivityPusher(userService, UserActivityServiceImpl.getInstance());
+        UserActivityPusher userActivityPusher = new UserActivityPusher(jophiel, userService, UserActivityServiceImpl.getInstance());
 
         scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(3, TimeUnit.SECONDS), poller, context);
         scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(1, TimeUnit.MINUTES), userActivityPusher, context);

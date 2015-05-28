@@ -1,10 +1,9 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm])(implicit fieldConstructor: b3.B3FieldConstructor)
+@(form: Form[org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm], jophielAutoCompleteUrl: String)(implicit fieldConstructor: b3.B3FieldConstructor)
 
 @import play.i18n.Messages
-@import org.iatoki.judgels.jophiel.commons.JophielUtils
 
 <script type="text/javascript">
-    var jophielAutoCompleteUrl = "@JophielUtils.getAutoCompleteEndPoint";
+    var jophielAutoCompleteUrl = "@jophielAutoCompleteUrl";
 </script>
 
 <script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/userAutoComplete.js")"></script>

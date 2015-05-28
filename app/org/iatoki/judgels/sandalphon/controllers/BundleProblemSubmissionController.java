@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.iatoki.judgels.commons.FileSystemProvider;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
@@ -14,7 +15,6 @@ import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemService;
 import org.iatoki.judgels.sandalphon.commons.BundleAnswer;
-import org.iatoki.judgels.sandalphon.commons.BundleGradingResult;
 import org.iatoki.judgels.sandalphon.commons.BundleSubmission;
 import org.iatoki.judgels.sandalphon.commons.BundleSubmissionNotFoundException;
 import org.iatoki.judgels.sandalphon.commons.BundleSubmissionService;
@@ -104,7 +104,7 @@ public final class BundleProblemSubmissionController extends BaseController {
                 BundleSubmission submission = submissionService.findSubmissionById(submissionId);
                 BundleAnswer answer = submissionService.createBundleAnswerFromPastSubmission(submissionFileProvider, null, submission.getJid());
 
-                LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), Map.class), answer, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
+                LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), new TypeToken<Map<String, Double>>(){}.getType()), answer, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
 
                 BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
                 ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);

@@ -10,8 +10,8 @@ import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.heading3Layout;
 import org.iatoki.judgels.commons.views.html.layouts.heading3WithActionLayout;
+import org.iatoki.judgels.jophiel.commons.Jophiel;
 import org.iatoki.judgels.jophiel.commons.User;
-import org.iatoki.judgels.jophiel.commons.JophielUtils;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
@@ -44,9 +44,11 @@ import java.util.Set;
 public class LessonPartnerController extends BaseController {
     private static final long PAGE_SIZE = 20;
 
+    private final Jophiel jophiel;
     private final LessonService lessonService;
 
-    public LessonPartnerController(LessonService lessonService) {
+    public LessonPartnerController(Jophiel jophiel, LessonService lessonService) {
+        this.jophiel = jophiel;
         this.lessonService = lessonService;
     }
 
@@ -112,14 +114,14 @@ public class LessonPartnerController extends BaseController {
             String username = usernameForm.get().username;
             LessonPartnerUpsertForm lessonData = lessonForm.get();
 
-            String userJid = JophielUtils.verifyUsername(username);
+            String userJid = jophiel.verifyUsername(username);
             if (userJid == null) {
                 usernameForm.reject("username", Messages.get("lesson.partner.usernameNotFound"));
                 return showAddPartner(usernameForm, lessonForm, lesson);
             }
 
             try {
-                User user = JophielUtils.getUserByUserJid(userJid);
+                User user = jophiel.getUserByUserJid(userJid);
                 JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
                 if (lessonService.isLessonPartnerByUserJid(lesson.getJid(), userJid)) {
@@ -229,7 +231,7 @@ public class LessonPartnerController extends BaseController {
     }
 
     private Result showAddPartner(Form<LessonPartnerUsernameForm> usernameForm, Form<LessonPartnerUpsertForm> lessonForm, Lesson lesson) {
-        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, lessonForm, lesson));
+        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, lessonForm, lesson, jophiel.getAutoCompleteEndPoint()));
 
         content.appendLayout(c -> heading3Layout.render(Messages.get("lesson.partner.add"), c));
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);

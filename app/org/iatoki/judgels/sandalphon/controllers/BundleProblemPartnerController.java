@@ -8,8 +8,8 @@ import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.heading3Layout;
+import org.iatoki.judgels.jophiel.commons.Jophiel;
 import org.iatoki.judgels.jophiel.commons.User;
-import org.iatoki.judgels.jophiel.commons.JophielUtils;
 import org.iatoki.judgels.sandalphon.JidCacheService;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
@@ -26,9 +26,6 @@ import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm;
 import org.iatoki.judgels.sandalphon.forms.bundle.BundlePartnerUpsertForm;
-import org.iatoki.judgels.sandalphon.forms.programming.ProgrammingPartnerUpsertForm;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfig;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfigBuilder;
 import org.iatoki.judgels.sandalphon.views.html.bundle.partner.addPartnerView;
 import org.iatoki.judgels.sandalphon.views.html.bundle.partner.updatePartnerView;
 import play.data.Form;
@@ -45,10 +42,12 @@ import java.util.Set;
 @Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class BundleProblemPartnerController extends BaseController {
+    private final Jophiel jophiel;
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
 
-    public BundleProblemPartnerController(ProblemService problemService, BundleProblemService bundleProblemService) {
+    public BundleProblemPartnerController(Jophiel jophiel, ProblemService problemService, BundleProblemService bundleProblemService) {
+        this.jophiel = jophiel;
         this.problemService = problemService;
         this.bundleProblemService = bundleProblemService;
     }
@@ -95,14 +94,14 @@ public final class BundleProblemPartnerController extends BaseController {
             ProblemPartnerUpsertForm problemData = problemForm.get();
             BundlePartnerUpsertForm bundleData = bundleForm.get();
 
-            String userJid = JophielUtils.verifyUsername(username);
+            String userJid = jophiel.verifyUsername(username);
             if (userJid == null) {
                 usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
                 return showAddPartner(usernameForm, problemForm, bundleForm, problem);
             }
 
             try {
-                User user = JophielUtils.getUserByUserJid(userJid);
+                User user = jophiel.getUserByUserJid(userJid);
                 JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
                 if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
@@ -217,7 +216,7 @@ public final class BundleProblemPartnerController extends BaseController {
     }
 
     private Result showAddPartner(Form<ProblemPartnerUsernameForm> usernameForm, Form<ProblemPartnerUpsertForm> problemForm, Form<BundlePartnerUpsertForm> bundleForm, Problem problem) {
-        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, problemForm, bundleForm, problem));
+        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, problemForm, bundleForm, problem, jophiel.getAutoCompleteEndPoint()));
 
         content.appendLayout(c -> heading3Layout.render(Messages.get("problem.partner.add"), c));
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);

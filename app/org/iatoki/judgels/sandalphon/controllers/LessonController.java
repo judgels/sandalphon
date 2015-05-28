@@ -18,7 +18,6 @@ import org.iatoki.judgels.sandalphon.controllers.security.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.security.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.LessonCreateForm;
 import org.iatoki.judgels.sandalphon.forms.LessonUpdateForm;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.views.html.lesson.createLessonView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.listLessonsView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.updateLessonView;

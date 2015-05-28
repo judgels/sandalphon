@@ -8,7 +8,6 @@ import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemService;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemPartnerConfig;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfig;
 import play.i18n.Messages;
 
 import java.util.Set;

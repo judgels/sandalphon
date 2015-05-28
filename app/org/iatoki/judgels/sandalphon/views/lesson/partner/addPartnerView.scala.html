@@ -1,4 +1,4 @@
-@(usernameForm: Form[org.iatoki.judgels.sandalphon.forms.LessonPartnerUsernameForm], problemForm: Form[org.iatoki.judgels.sandalphon.forms.LessonPartnerUpsertForm], lesson: org.iatoki.judgels.sandalphon.Lesson)
+@(usernameForm: Form[org.iatoki.judgels.sandalphon.forms.LessonPartnerUsernameForm], problemForm: Form[org.iatoki.judgels.sandalphon.forms.LessonPartnerUpsertForm], lesson: org.iatoki.judgels.sandalphon.Lesson, jophielAutoCompleteUrl: String)
 
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import scala.collection.JavaConverters._
@@ -9,7 +9,7 @@
 @b3.form(routes.LessonPartnerController.postAddPartner(lesson.getId)) {
     @helper.CSRF.formField
 
-    @usernamePartnerView(usernameForm)
+    @usernamePartnerView(usernameForm, jophielAutoCompleteUrl)
 
     @upsertPartnerView(problemForm)
 

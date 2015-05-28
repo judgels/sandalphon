@@ -47,7 +47,7 @@ problem.partner.list=Partners
 problem.partner.add=Add Partner
 problem.partner.update=Update Partner
 
-problem.partner.isAllowedToUpdateLesson=Allowed to update problem?
+problem.partner.isAllowedToUpdateProblem=Allowed to update problem?
 problem.partner.isAllowedToUpdateStatement=Allowed to update statement?
 problem.partner.isAllowedToUploadStatementResources=Allowed to upload statement resources?
 problem.partner.allowedStatementLanguagesToView=Allowed statement languages to view

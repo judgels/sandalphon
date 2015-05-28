@@ -84,8 +84,8 @@ public final class ClientServiceImpl implements ClientService {
 
     @Override
     public Page<Client> pageClients(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
-        long totalPages = clientDao.countByFilters(filterString, ImmutableMap.of());
-        List<ClientModel> clientModels = clientDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), pageIndex * pageSize, pageSize);
+        long totalPages = clientDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
+        List<ClientModel> clientModels = clientDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
         List<Client> clients = Lists.transform(clientModels, m -> createClientFromModel(m));
 
