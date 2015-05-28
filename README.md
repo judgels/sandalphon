@@ -1,4 +1,6 @@
-#Judgels Sandalphon 
+#Judgels Sandalphon
+
+[![Build Status](https://travis-ci.org/ia-toki/judgels-sandalphon.svg?branch=master)](https://travis-ci.org/ia-toki/judgels-sandalphon)
 
 ##Description
 Sandalphon is an application built using [Play Framework](https://www.playframework.com/) to provide programming resources repository functions and services.
@@ -19,13 +21,13 @@ To set up Sandalphon, you need to:
         - judgels-play-commons
         - judgels-sandalphon
 
-2. Copy conf/application_default.conf into conf/application.conf and change the configuration accordingly. **Refer to the default configuration file for explanation of the configuration keys.** In the application configuration, Sandalphon need to connect to running Jophiel (for authentication and authorization) and Sealtiel (to grade programming problems) application. In order to connect Sandalphon to running Jophiel and Sealtiel, Sandalphon must be registered as Jophiel and Sealtiel clients. 
+2. Copy conf/application_default.conf into conf/application.conf and change the configuration accordingly. **Refer to the default configuration file for explanation of the configuration keys.** In the application configuration, Sandalphon need to connect to running Jophiel (for authentication and authorization) and Sealtiel (to grade programming problems) application. In order to connect Sandalphon to running Jophiel and Sealtiel, Sandalphon must be registered as Jophiel and Sealtiel clients.
 
-3. Copy conf/db_default.conf into conf/db.conf and change the configuration accordingly. **Refer to the default configuration file for explanation of the configuration keys.** 
+3. Copy conf/db_default.conf into conf/db.conf and change the configuration accordingly. **Refer to the default configuration file for explanation of the configuration keys.**
 
 To run Sandalphon, just run "activator" then it will check and download all dependencies and enter Play Console.
 In Play Console use "run" command to run Sandalphon. By default it will listen on port 9000. For more information of Play Console, please read the [documentation](https://www.playframework.com/documentation/2.3.x/PlayConsole).
 
-After login on Sandalphon using user on Jophiel, add "writer,admin" value to role column of your user record on table "sandalphon\_user\_role" then relogin (logout and login again) to access full feature. 
+After login on Sandalphon using user on Jophiel, add "writer,admin" value to role column of your user record on table "sandalphon\_user\_role" then relogin (logout and login again) to access full feature.
 
 The version that is recommended for public use is [v0.1.0](https://github.com/ia-toki/judgels-sandalphon/tree/v0.1.0).
