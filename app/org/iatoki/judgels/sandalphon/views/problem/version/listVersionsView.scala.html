@@ -2,7 +2,6 @@
 
 @import org.iatoki.judgels.commons.JudgelsUtils
 @import org.iatoki.judgels.sandalphon.JidCacheService
-@import java.text.SimpleDateFormat
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
 
@@ -10,7 +9,7 @@
     @defining(versions.get(i)) { version =>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <span class="panel-title">@JidCacheService.getInstance().getDisplayName(version.getUserJid) <small> @@ @JudgelsUtils.formatDate(version.getTime) @(new SimpleDateFormat("zzzz").format(version.getTime))</small></span>
+                <span class="panel-title">@JidCacheService.getInstance().getDisplayName(version.getUserJid)<small> @@ <time class="display-time" datetime="@JudgelsUtils.formatISOUTCDateTime(version.getTime.getTime)">@JudgelsUtils.formatDetailedDateTime(version.getTime.getTime)</time></small></span>
                 <span class="panel-title pull-right">@if(i > 0 && isAllowedToRestoreVersionHistory){<a href="@routes.ProblemVersionController.restoreVersionHistory(problemId, version.getHash)" type="button" class="btn btn-danger btn-xs">@Messages.get("problem.version.restore")</a>}</span>
             </div>
             <div class="panel-body content-text">

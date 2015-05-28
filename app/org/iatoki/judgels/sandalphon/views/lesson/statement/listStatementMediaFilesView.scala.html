@@ -49,7 +49,7 @@
     @for(file <- mediaFiles) {
         <tr>
             <td>@file.getName</td>
-            <td>@JudgelsUtils.formatDate(file.getLastModifiedTime)</td>
+            <td><time class="display-time" datetime="@JudgelsUtils.formatISOUTCDateTime(file.getLastModifiedTime.getTime)">@JudgelsUtils.formatDetailedDateTime(file.getLastModifiedTime.getTime)</time></td>
             <td>@JudgelsUtils.formatBytesCount(file.getSize)</td>
             <td class="text-center"><a href="@routes.LessonStatementController.downloadStatementMediaFile(lessonId, file.getName)"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
         </tr>

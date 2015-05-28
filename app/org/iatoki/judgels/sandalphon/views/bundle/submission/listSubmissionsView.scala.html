@@ -50,7 +50,7 @@
                 <td>@submission.getId</td>
                 <td>@displayNamesMap.get(submission.getAuthorJid)</td>
                 <td>@(new DecimalFormat("#.##").format(submission.getLatestScore))</td>
-                <td>@JudgelsUtils.formatDate(submission.getTime)</td>
+                <td><time class="display-time" datetime="@JudgelsUtils.formatISOUTCDateTime(submission.getTime.getTime)">@JudgelsUtils.formatDetailedDateTime(submission.getTime.getTime)</time></td>
                 <td class="text-center">
                     <a href="@routes.BundleProblemSubmissionController.viewSubmission(problemId, submission.getId)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
                     <a href="@routes.BundleProblemSubmissionController.regradeSubmission(problemId, submission.getId, pageIndex, orderBy, orderDir)" onclick="return confirm('Are you sure you want to regrade?');"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></a>
