@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.models.domains.programming;
 
-import org.iatoki.judgels.gabriel.commons.models.domains.AbstractSubmissionModel;
+import org.iatoki.judgels.sandalphon.commons.models.domains.AbstractSubmissionModel;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;

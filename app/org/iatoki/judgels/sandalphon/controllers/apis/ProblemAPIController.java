@@ -9,7 +9,7 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
-import org.iatoki.judgels.gabriel.commons.SubmissionAdapters;
+import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientService;

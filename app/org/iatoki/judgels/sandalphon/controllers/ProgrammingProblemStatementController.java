@@ -7,7 +7,7 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
-import org.iatoki.judgels.gabriel.commons.SubmissionAdapters;
+import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemService;
@@ -20,7 +20,6 @@ import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
-import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
