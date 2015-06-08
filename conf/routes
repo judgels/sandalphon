@@ -131,6 +131,7 @@ POST        /problems/bundle/$pId<[0-9]{1,18}>/submit                           
 
 
 POST        /problem/totp/:cJid/:pJid/statement/:TOTP/:lang/:postSubmitUri/:switchLanguageUri       @org.iatoki.judgels.sandalphon.controllers.apis.ProblemAPIController.viewProblemStatementTOTP(cJid: String, pJid: String, TOTP: Int, lang: String, postSubmitUri: String, switchLanguageUri: String)
+POST        /problem/bundle/grade                                                                   @org.iatoki.judgels.sandalphon.controllers.apis.BundleProblemAPIController.gradeProblem()
 POST        /problem/programming/download/grading                                                   @org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController.downloadGradingFiles()
 POST        /problem/programming/getGradingLastUpdateTime                                           @org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController.getGradingLastUpdateTime()
 
@@ -153,7 +154,7 @@ GET         /lessons/$lId<[0-9]{1,18}>/partners                                 
 GET         /lessons/$lId<[0-9]{1,18}>/clients                                                      @org.iatoki.judgels.sandalphon.controllers.LessonController.jumpToClients(lId: Long)
 POST        /lessons/$lId<[0-9]{1,18}>/switchLanguage                                               @org.iatoki.judgels.sandalphon.controllers.LessonController.switchLanguage(lId: Long)
 
-GET         /lessons/$lId<[0-9]{1,18}>/statements/view                                             @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.viewStatement(lId: Long)
+GET         /lessons/$lId<[0-9]{1,18}>/statements/view                                              @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.viewStatement(lId: Long)
 POST        /lessons/$lId<[0-9]{1,18}>/statements/view/switchLanguage                               @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.viewStatementSwitchLanguage(lId: Long)
 GET         /lessons/$lId<[0-9]{1,18}>/statements/update                                            @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.updateStatement(lId: Long)
 POST        /lessons/$lId<[0-9]{1,18}>/statements/update/                                           @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.postUpdateStatement(lId: Long)

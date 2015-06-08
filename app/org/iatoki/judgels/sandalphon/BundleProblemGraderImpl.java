@@ -17,9 +17,11 @@ import java.util.List;
 
 public final class BundleProblemGraderImpl implements BundleProblemGrader {
 
+    private final ProblemService problemService;
     private final BundleItemService itemService;
 
-    public BundleProblemGraderImpl(BundleItemService itemService) {
+    public BundleProblemGraderImpl(ProblemService problemService, BundleItemService itemService) {
+        this.problemService = problemService;
         this.itemService = itemService;
     }
 
@@ -30,7 +32,12 @@ public final class BundleProblemGraderImpl implements BundleProblemGrader {
 
         double totalScore = 0;
         for (BundleItem bundleItem : bundleItems) {
-            String conf = itemService.getItemConfByItemJid(problemJid, null, bundleItem.getJid(), bundleAnswer.getLanguageCode());
+            String conf = "";
+            try {
+                conf = itemService.getItemConfByItemJid(problemJid, null, bundleItem.getJid(), bundleAnswer.getLanguageCode());
+            } catch (IOException e) {
+                conf = itemService.getItemConfByItemJid(problemJid, null, bundleItem.getJid(), problemService.getDefaultLanguage(null, problemJid));
+            }
 
             BundleItemConfAdapter confAdapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
             BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());

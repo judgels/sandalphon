@@ -46,6 +46,7 @@ import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemPartnerContro
 import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemStatementController;
 import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemSubmissionController;
 import org.iatoki.judgels.sandalphon.controllers.UserController;
+import org.iatoki.judgels.sandalphon.controllers.apis.BundleProblemAPIController;
 import org.iatoki.judgels.sandalphon.controllers.apis.LessonAPIController;
 import org.iatoki.judgels.sandalphon.controllers.apis.ProblemAPIController;
 import org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController;
@@ -200,7 +201,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         problemService = new ProblemServiceImpl(problemDao, problemPartnerDao, problemFileSystemProvider, problemGitProvider);
         bundleProblemService = new BundleProblemServiceImpl(problemFileSystemProvider);
         bundleItemService = new BundleItemServiceImpl(problemFileSystemProvider);
-        bundleSubmissionService = new BundleSubmissionServiceImpl(bundleSubmissionDao, bundleGradingDao, new BundleProblemGraderImpl(bundleItemService));
+        bundleSubmissionService = new BundleSubmissionServiceImpl(bundleSubmissionDao, bundleGradingDao, new BundleProblemGraderImpl(problemService, bundleItemService));
         programmingProblemService = new ProgrammingProblemServiceImpl(problemFileSystemProvider);
         submissionService = new SubmissionServiceImpl(programmingSubmissionDao, gradingDao, sealtiel, SandalphonProperties.getInstance().getSealtielGabrielClientJid());
         lessonService = new LessonServiceImpl(lessonDao, lessonPartnerDao, lessonFileSystemProvider, lessonGitProvider);
@@ -232,6 +233,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
                 .put(BundleProblemPartnerController.class, new BundleProblemPartnerController(jophiel, problemService, bundleProblemService))
                 .put(BundleProblemSubmissionController.class, new BundleProblemSubmissionController(problemService, bundleProblemService, bundleSubmissionService, submissionFileSystemProvider))
                 .put(ProblemAPIController.class, new ProblemAPIController(problemService, bundleProblemService, bundleItemService, programmingProblemService, clientService))
+                .put(BundleProblemAPIController.class, new BundleProblemAPIController(problemService, clientService, new BundleProblemGraderImpl(problemService, bundleItemService)))
                 .put(ProgrammingProblemAPIController.class, new ProgrammingProblemAPIController(problemService, programmingProblemService, clientService, graderService))
                 .put(LessonClientController.class, new LessonClientController(lessonService, clientService))
                 .put(LessonController.class, new LessonController(lessonService))
