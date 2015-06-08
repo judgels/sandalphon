@@ -4,5 +4,4 @@
 
 @helper.CSRF.formField
 
-@b3.text(form("name"), '_label -> Messages.get("client.name"))
-
+@b3.text(form("name"), '_label -> Messages.get("client.name"), 'class -> "form-control")

@@ -212,5 +212,9 @@ POST        /grader/$gId<[0-9]{1,18}>/update                                    
 
 GET         /users                                                                                  @org.iatoki.judgels.sandalphon.controllers.UserController.index()
 GET         /users/                                                                                 @org.iatoki.judgels.sandalphon.controllers.UserController.listUsers(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+GET         /users/create                                                                           @org.iatoki.judgels.sandalphon.controllers.UserController.createUser()
+POST        /users/create                                                                           @org.iatoki.judgels.sandalphon.controllers.UserController.postCreateUser()
+GET         /users/$cId<[0-9]{1,18}>                                                                @org.iatoki.judgels.sandalphon.controllers.UserController.viewUser(cId: Long)
 GET         /users/$uId<[0-9]{1,18}>/update                                                         @org.iatoki.judgels.sandalphon.controllers.UserController.updateUser(uId: Long)
 POST        /users/$uId<[0-9]{1,18}>/update                                                         @org.iatoki.judgels.sandalphon.controllers.UserController.postUpdateUser(uId: Long)
+GET         /users/$uId<[0-9]{1,18}>/delete                                                         @org.iatoki.judgels.sandalphon.controllers.UserController.deleteUser(uId: Long)

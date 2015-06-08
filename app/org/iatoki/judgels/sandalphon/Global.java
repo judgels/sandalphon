@@ -241,7 +241,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
                 .put(LessonStatementController.class, new LessonStatementController(lessonService))
                 .put(LessonVersionController.class, new LessonVersionController(lessonService))
                 .put(LessonAPIController.class, new LessonAPIController(lessonService, clientService))
-                .put(UserController.class, new UserController(userService))
+                .put(UserController.class, new UserController(jophiel, userService))
                 .build();
     }
 

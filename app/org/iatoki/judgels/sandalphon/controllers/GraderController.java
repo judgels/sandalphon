@@ -52,8 +52,7 @@ public final class GraderController extends BaseController {
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
                 new InternalLink(Messages.get("grader.create"), routes.GraderController.create())
         ));
-
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - Create");
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Create");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -74,10 +73,10 @@ public final class GraderController extends BaseController {
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showCreate(form);
         } else {
-            GraderUpsertForm clientUpsertForm = form.get();
-            graderService.createGrader(clientUpsertForm.name);
+            GraderUpsertForm graderUpsertForm = form.get();
+            graderService.createGrader(graderUpsertForm.name);
 
-            ControllerUtils.getInstance().addActivityLog("Create grader.");
+            ControllerUtils.getInstance().addActivityLog("Create grader " + graderUpsertForm.name + ".");
 
             return redirect(routes.GraderController.index());
         }
@@ -92,8 +91,7 @@ public final class GraderController extends BaseController {
               new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
               new InternalLink(Messages.get("grader.view"), routes.GraderController.view(graderId))
         ));
-
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - Vuew");
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - View");
 
         ControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -108,7 +106,7 @@ public final class GraderController extends BaseController {
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
                 new InternalLink(Messages.get("grader.update"), routes.GraderController.update(grader.getId()))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - Update");
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Update");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -116,9 +114,9 @@ public final class GraderController extends BaseController {
     @AddCSRFToken
     public Result update(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
-        GraderUpsertForm clientUpsertForm = new GraderUpsertForm();
-        clientUpsertForm.name = grader.getName();
-        Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).fill(clientUpsertForm);
+        GraderUpsertForm graderUpsertForm = new GraderUpsertForm();
+        graderUpsertForm.name = grader.getName();
+        Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).fill(graderUpsertForm);
 
         ControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -132,8 +130,8 @@ public final class GraderController extends BaseController {
         if (form.hasErrors() || form.hasGlobalErrors()) {
             return showUpdate(form, grader);
         } else {
-            GraderUpsertForm clientUpsertForm = form.get();
-            graderService.updateGrader(graderId, clientUpsertForm.name);
+            GraderUpsertForm graderUpsertForm = form.get();
+            graderService.updateGrader(graderId, graderUpsertForm.name);
 
             ControllerUtils.getInstance().addActivityLog("Update grader " + grader.getName() + ".");
 
@@ -142,9 +140,9 @@ public final class GraderController extends BaseController {
     }
 
     public Result list(long pageIndex, String orderBy, String orderDir, String filterString) {
-        Page<Grader> graders = graderService.pageGraders(pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
+        Page<Grader> currentPage = graderService.pageGraders(pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
-        LazyHtml content = new LazyHtml(listView.render(graders, orderBy, orderDir, filterString));
+        LazyHtml content = new LazyHtml(listView.render(currentPage, orderBy, orderDir, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.list"), new InternalLink(Messages.get("commons.create"), routes.GraderController.create()), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(

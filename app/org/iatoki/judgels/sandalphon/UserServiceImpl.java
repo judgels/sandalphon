@@ -50,64 +50,70 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
-
     @Override
     public boolean existsByUserJid(String userJid) {
         return userDao.existsByUserJid(userJid);
     }
 
     @Override
-    public User findUserById(long userId) {
-        UserModel userRoleModel = userDao.findById(userId);
-        return createUserRoleFromModel(userRoleModel);
+    public User findUserById(long userId) throws UserNotFoundException {
+        UserModel userModel = userDao.findById(userId);
+        if (userModel != null) {
+            return createUserFromUserModel(userModel);
+        } else {
+            throw new UserNotFoundException("User not found.");
+        }
     }
 
     @Override
     public User findUserByUserJid(String userJid) {
-        UserModel userRoleModel = userDao.findByUserJid(userJid);
-        return createUserRoleFromModel(userRoleModel);
+        UserModel userModel = userDao.findByUserJid(userJid);
+        return createUserFromUserModel(userModel);
     }
 
     @Override
     public void createUser(String userJid, List<String> roles) {
-        UserModel userRoleModel = new UserModel();
-        userRoleModel.userJid = userJid;
-        userRoleModel.roles = StringUtils.join(roles, ",");
+        UserModel userModel = new UserModel();
+        userModel.userJid = userJid;
+        userModel.roles = StringUtils.join(roles, ",");
 
-        userDao.persist(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userDao.persist(userModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
-    public void updateUser(long userRoleId, List<String> roles) {
-        UserModel userRoleModel = userDao.findById(userRoleId);
-        userRoleModel.roles = StringUtils.join(roles, ",");
+    public void updateUser(long userId, List<String> roles) {
+        UserModel userModel = userDao.findById(userId);
+        userModel.roles = StringUtils.join(roles, ",");
 
-        userDao.edit(userRoleModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userDao.edit(userModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
-    public void deleteUser(long userRoleId) {
-        UserModel userRoleModel = userDao.findById(userRoleId);
-        userDao.remove(userRoleModel);
+    public void deleteUser(long userId) {
+        UserModel userModel = userDao.findById(userId);
+        userDao.remove(userModel);
     }
 
     @Override
     public Page<User> pageUsers(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalPages = userDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
-        List<UserModel> userRoleModels = userDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
-
-        List<User> userRoles = Lists.transform(userRoleModels, m -> createUserRoleFromModel(m));
-
-        return new Page<>(userRoles, totalPages, pageIndex, pageSize);
+        List<UserModel> userModels = userDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
+        List<User> users = Lists.transform(userModels, m -> createUserFromUserModel(m));
+        return new Page<>(users, totalPages, pageIndex, pageSize);
     }
 
     @Override
     public void upsertUserFromJophielUserJid(String userJid) {
+        upsertUserFromJophielUserJid(userJid, SandalphonUtils.getDefaultRoles());
+    }
+
+    @Override
+    public void upsertUserFromJophielUserJid(String userJid, List<String> roles) {
         try {
             org.iatoki.judgels.jophiel.commons.User user = jophiel.getUserByUserJid(userJid);
 
             if (!userDao.existsByUserJid(userJid))
-                createUser(user.getJid(), SandalphonUtils.getDefaultRoles());
+                createUser(user.getJid(), roles);
 
             JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         } catch (IOException e) {
@@ -126,7 +132,7 @@ public final class UserServiceImpl implements UserService {
         return new UserTokens(userModel.userJid, userModel.accessToken, userModel.refreshToken, userModel.idToken, userModel.expirationTime);
     }
 
-    private User createUserRoleFromModel(UserModel userRoleModel) {
-        return new User(userRoleModel.id, userRoleModel.userJid, Arrays.asList(userRoleModel.roles.split(",")));
+    private User createUserFromUserModel(UserModel userModel) {
+        return new User(userModel.id, userModel.userJid, Arrays.asList(userModel.roles.split(",")));
     }
 }

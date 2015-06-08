@@ -2,14 +2,14 @@
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.commons.views.html.formErrorView
+@import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.sandalphon.views.html.client.upsertView
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
 @formErrorView(form)
 
-@b3.form(org.iatoki.judgels.sandalphon.controllers.routes.ClientController.postUpdate(modelId)) {
-
+@b3.form(routes.ClientController.postUpdate(modelId)) {
     @helper.CSRF.formField
 
     @upsertView(form)

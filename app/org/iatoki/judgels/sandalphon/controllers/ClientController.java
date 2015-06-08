@@ -52,7 +52,7 @@ public final class ClientController extends BaseController {
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.create"), routes.ClientController.create())
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - Create");
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Client - Create");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -91,7 +91,7 @@ public final class ClientController extends BaseController {
               new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
               new InternalLink(Messages.get("client.view"), routes.ClientController.view(clientId))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - View");
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Client - View");
 
         ControllerUtils.getInstance().addActivityLog("View client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -106,7 +106,7 @@ public final class ClientController extends BaseController {
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.update"), routes.ClientController.update(client.getId()))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - Update");
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Client - Update");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
@@ -148,8 +148,8 @@ public final class ClientController extends BaseController {
         return redirect(routes.ClientController.index());
     }
 
-    public Result list(long page, String sortBy, String orderBy, String filterString) {
-        Page<Client> currentPage = clientService.pageClients(page, PAGE_SIZE, sortBy, orderBy, filterString);
+    public Result list(long pageIndex, String sortBy, String orderBy, String filterString) {
+        Page<Client> currentPage = clientService.pageClients(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.list"), new InternalLink(Messages.get("commons.create"), routes.ClientController.create()), c));
@@ -160,7 +160,7 @@ public final class ClientController extends BaseController {
 
         ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - List");
 
-        ControllerUtils.getInstance().addActivityLog("Open all clients <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        ControllerUtils.getInstance().addActivityLog("List all clients <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
