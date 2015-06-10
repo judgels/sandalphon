@@ -57,6 +57,17 @@ public final class BundleProblemStatementController extends BaseController {
                 statement = BundleProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getCurrentStatementLanguage());
             }
 
+            boolean isAllowedToSubmitByPartner = ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem);
+            boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+
+            String reasonNotAllowedToSubmit = null;
+
+            if (!isAllowedToSubmitByPartner) {
+                reasonNotAllowedToSubmit = Messages.get("problem.programming.cantSubmit");
+            } else if (!isClean) {
+                reasonNotAllowedToSubmit = Messages.get("problem.programming.cantSubmitNotClean");
+            }
+
             try {
                 List<BundleItem> bundleItemList = bundleItemService.findAllItems(problem.getJid(), IdentityUtils.getUserJid());
                 ImmutableList.Builder<Html> htmlBuilder = ImmutableList.builder();
@@ -70,7 +81,7 @@ public final class BundleProblemStatementController extends BaseController {
                     }
                 }
 
-                LazyHtml content = new LazyHtml(bundleStatementView.render(routes.BundleProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, htmlBuilder.build()));
+                LazyHtml content = new LazyHtml(bundleStatementView.render(routes.BundleProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, htmlBuilder.build(), reasonNotAllowedToSubmit));
 
                 Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToView(problemService, problem);
 

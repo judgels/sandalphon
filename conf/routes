@@ -130,7 +130,7 @@ POST        /problems/bundle/$pId<[0-9]{1,18}>/submissions/regrade              
 POST        /problems/bundle/$pId<[0-9]{1,18}>/submit                                               @org.iatoki.judgels.sandalphon.controllers.BundleProblemSubmissionController.postSubmit(pId: Long)
 
 
-POST        /problem/totp/:cJid/:pJid/statement/:TOTP/:lang/:postSubmitUri/:switchLanguageUri       @org.iatoki.judgels.sandalphon.controllers.apis.ProblemAPIController.viewProblemStatementTOTP(cJid: String, pJid: String, TOTP: Int, lang: String, postSubmitUri: String, switchLanguageUri: String)
+POST        /problem/totp/statement                                                                 @org.iatoki.judgels.sandalphon.controllers.apis.ProblemAPIController.viewProblemStatementTOTP()
 POST        /problem/bundle/grade                                                                   @org.iatoki.judgels.sandalphon.controllers.apis.BundleProblemAPIController.gradeProblem()
 POST        /problem/programming/download/grading                                                   @org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController.downloadGradingFiles()
 POST        /problem/programming/getGradingLastUpdateTime                                           @org.iatoki.judgels.sandalphon.controllers.apis.ProgrammingProblemAPIController.getGradingLastUpdateTime()
@@ -190,7 +190,7 @@ GET         /lessons/$lId<[0-9]{1,18}>/clients/view/                            
 POST        /lessons/$lId<[0-9]{1,18}>/clients                                                      @org.iatoki.judgels.sandalphon.controllers.LessonClientController.postUpdateClientLessons(lId: Long)
 GET         /lessons/$lId<[0-9]{1,18}>/clients/:clId                                                @org.iatoki.judgels.sandalphon.controllers.LessonClientController.viewClientLesson(lId: Long, clId: Long)
 
-POST        /lesson/totp/:cJid/:lJid/statement/:TOTP/:lang/:switchLanguageUri                       @org.iatoki.judgels.sandalphon.controllers.apis.LessonAPIController.viewLessonStatementTOTP(cJid: String, lJid: String, TOTP: Int, lang: String, switchLanguageUri: String)
+POST        /lesson/totp/statement                                                                  @org.iatoki.judgels.sandalphon.controllers.apis.LessonAPIController.viewLessonStatementTOTP()
 
 
 GET         /client                                                                                 @org.iatoki.judgels.sandalphon.controllers.ClientController.index()

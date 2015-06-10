@@ -1,5 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers.apis;
 
+import com.warrenstrange.googleauth.GoogleAuthenticator;
+import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.LazyHtml;
@@ -121,16 +123,32 @@ public final class LessonAPIController extends Controller {
         }
     }
 
-    public Result viewLessonStatementTOTP(String clientJid, String lessonJid, int TOTP, String lang, String switchLanguageUri) {
+    public Result viewLessonStatementTOTP() {
+        response().setHeader("Access-Control-Allow-Origin", "*");
+
+        DynamicForm form = DynamicForm.form().bindFromRequest();
+        String clientJid = form.get("clientJid");
+        String lessonJid = form.get("lessonJid");
+        int tOTP = 0;
+        if (form.get("TOTP") != null) {
+            tOTP = Integer.parseInt(form.get("TOTP"));
+        }
+        String lang = form.get("lang");
+        String switchLanguageUri = form.get("switchLanguageUri");
+
+        if ((!clientService.clientExistsByClientJid(clientJid)) && (!lessonService.lessonExistsByJid(lessonJid)) && (!clientService.isClientLessonInLessonByClientJid(lessonJid, clientJid))) {
+            return notFound();
+        }
+
+        Lesson lesson = lessonService.findLessonByJid(lessonJid);
+        ClientLesson clientLesson = clientService.findClientLessonByClientJidAndLessonJid(clientJid, lessonJid);
+
+        GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
+        if (!googleAuthenticator.authorize(new Base32().encodeAsString(clientLesson.getSecret().getBytes()), tOTP)) {
+            return forbidden();
+        }
+
         try {
-            response().setHeader("Access-Control-Allow-Origin", "*");
-            if ((!clientService.clientExistsByClientJid(clientJid)) && (!lessonService.lessonExistsByJid(lessonJid)) && (!clientService.isClientLessonInLessonByClientJid(lessonJid, clientJid))) {
-                return notFound();
-            }
-
-            Lesson lesson = lessonService.findLessonByJid(lessonJid);
-            ClientLesson clientLesson = clientService.findClientLessonByClientJidAndLessonJid(clientJid, lessonJid);
-
             Map<String, StatementLanguageStatus> availableStatementLanguages = lessonService.getAvailableLanguages(null, lesson.getJid());
 
             if (!availableStatementLanguages.containsKey(lang) || availableStatementLanguages.get(lang) == StatementLanguageStatus.DISABLED) {
@@ -144,7 +162,9 @@ public final class LessonAPIController extends Controller {
 
             Html html = lessonStatementView.render(lesson.getName(), statement);
             LazyHtml content = new LazyHtml(html);
-            content.appendLayout(c -> statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, language, c));
+            if (switchLanguageUri != null) {
+                content.appendLayout(c -> statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, language, c));
+            }
 
             return Results.ok(content.render());
         } catch (IOException e) {

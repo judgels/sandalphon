@@ -9,7 +9,6 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
-import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.ClientService;
@@ -23,6 +22,7 @@ import org.iatoki.judgels.sandalphon.bundle.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemAdapters;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemService;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemService;
+import org.iatoki.judgels.sandalphon.commons.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.commons.programming.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.commons.views.html.bundleStatementView;
@@ -149,16 +149,34 @@ public final class ProblemAPIController extends Controller {
         }
     }
 
-    public Result viewProblemStatementTOTP(String clientJid, String problemJid, int TOTP, String lang, String postSubmitUri, String switchLanguageUri) {
+    public Result viewProblemStatementTOTP() {
+        response().setHeader("Access-Control-Allow-Origin", "*");
+
+        DynamicForm form = DynamicForm.form().bindFromRequest();
+        String clientJid = form.get("clientJid");
+        String problemJid = form.get("problemJid");
+        int tOTP = 0;
+        if (form.get("TOTP") != null) {
+            tOTP = Integer.parseInt(form.get("TOTP"));
+        }
+        String lang = form.get("lang");
+        String postSubmitUri = form.get("postSubmitUri");
+        String switchLanguageUri = form.get("switchLanguageUri");
+        String reasonNotAllowedToSubmit = form.get("reasonNotAllowedToSubmit");
+
+        if ((!clientService.clientExistsByClientJid(clientJid)) && (!problemService.problemExistsByJid(problemJid)) && (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid))) {
+            return notFound();
+        }
+
+        Problem problem = problemService.findProblemByJid(problemJid);
+        ClientProblem clientProblem = clientService.findClientProblemByClientJidAndProblemJid(clientJid, problemJid);
+
+        GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
+        if (!googleAuthenticator.authorize(new Base32().encodeAsString(clientProblem.getSecret().getBytes()), tOTP)) {
+            return forbidden();
+        }
+
         try {
-            response().setHeader("Access-Control-Allow-Origin", "*");
-            if ((!clientService.clientExistsByClientJid(clientJid)) && (!problemService.problemExistsByJid(problemJid)) && (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid))) {
-                return notFound();
-            }
-
-            Problem problem = problemService.findProblemByJid(problemJid);
-            ClientProblem clientProblem = clientService.findClientProblemByClientJidAndProblemJid(clientJid, problemJid);
-
             Map<String, StatementLanguageStatus> availableStatementLanguages = problemService.getAvailableLanguages(null, problem.getJid());
 
             if (!availableStatementLanguages.containsKey(lang) || availableStatementLanguages.get(lang) == StatementLanguageStatus.DISABLED) {
@@ -170,61 +188,67 @@ public final class ProblemAPIController extends Controller {
             Set<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toSet());
 
             if (problem.getType().equals(ProblemType.PROGRAMMING)) {
-                LanguageRestriction languageRestriction = new Gson().fromJson(request().body().asText(), LanguageRestriction.class);
-
-                if (languageRestriction == null) {
-                    return badRequest();
-                }
-
-                GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
-                if (!googleAuthenticator.authorize(new Base32().encodeAsString(clientProblem.getSecret().getBytes()), TOTP)) {
-                    return forbidden();
-                }
-
-                String engine;
-                try {
-                    engine = programmingProblemService.getGradingEngine(null, problem.getJid());
-                } catch (IOException e) {
-                    engine = GradingEngineRegistry.getInstance().getDefaultEngine();
-                }
-                LanguageRestriction problemLanguageRestriction;
-                try {
-                    problemLanguageRestriction = programmingProblemService.getLanguageRestriction(null, problem.getJid());
-                } catch (IOException e) {
-                    problemLanguageRestriction = LanguageRestriction.defaultRestriction();
-                }
-                Set<String> allowedGradingLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problemLanguageRestriction, languageRestriction));
-
-                GradingConfig config;
-                try {
-                    config = programmingProblemService.getGradingConfig(null, problem.getJid());
-                } catch (IOException e) {
-                    config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
-                }
-
-                Html html = SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames, null);
-                html = SubmissionAdapters.fromGradingEngine(engine).renderStatementLanguageSelection(switchLanguageUri, allowedStatementLanguages, lang, html);
-                return ok(html);
+                LanguageRestriction languageRestriction = new Gson().fromJson(form.get("languageRestriction"), LanguageRestriction.class);
+                return processProgrammingProblem(problem, statement, allowedStatementLanguages, lang, postSubmitUri, switchLanguageUri, languageRestriction, reasonNotAllowedToSubmit);
             } else if (problem.getType().equals(ProblemType.BUNDLE)) {
-                List<BundleItem> bundleItemList = bundleItemService.findAllItems(problem.getJid(), IdentityUtils.getUserJid());
-                ImmutableList.Builder<Html> htmlBuilder = ImmutableList.builder();
-                for (BundleItem bundleItem : bundleItemList) {
-                    BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
-                    htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), lang)));
-                }
-
-                String language = lang;
-
-                Html html = bundleStatementView.render(postSubmitUri, problem.getName(), statement, htmlBuilder.build());
-                LazyHtml content = new LazyHtml(html);
-                content.appendLayout(c -> statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, language, c));
-
-                return Results.ok(content.render());
+                return processBundleProblem(problem, statement, allowedStatementLanguages, lang, postSubmitUri, switchLanguageUri, reasonNotAllowedToSubmit);
             } else {
                 return notFound();
             }
         } catch (IOException e) {
             return notFound();
         }
+    }
+
+    private Result processProgrammingProblem(Problem problem, String statement, Set<String> allowedStatementLanguages, String lang, String postSubmitUri, String switchLanguageUri, LanguageRestriction languageRestriction, String reasonNotAllowedToSubmit) {
+        if (languageRestriction == null) {
+            return badRequest();
+        }
+
+        String engine;
+        try {
+            engine = programmingProblemService.getGradingEngine(null, problem.getJid());
+        } catch (IOException e) {
+            engine = GradingEngineRegistry.getInstance().getDefaultEngine();
+        }
+        LanguageRestriction problemLanguageRestriction;
+        try {
+            problemLanguageRestriction = programmingProblemService.getLanguageRestriction(null, problem.getJid());
+        } catch (IOException e) {
+            problemLanguageRestriction = LanguageRestriction.defaultRestriction();
+        }
+        Set<String> allowedGradingLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(problemLanguageRestriction, languageRestriction));
+
+        GradingConfig config;
+        try {
+            config = programmingProblemService.getGradingConfig(null, problem.getJid());
+        } catch (IOException e) {
+            config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
+        }
+
+        Html html = SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames, reasonNotAllowedToSubmit);
+        if (switchLanguageUri != null) {
+            html = SubmissionAdapters.fromGradingEngine(engine).renderStatementLanguageSelection(switchLanguageUri, allowedStatementLanguages, lang, html);
+        }
+        return ok(html);
+    }
+
+    private Result processBundleProblem(Problem problem, String statement, Set<String> allowedStatementLanguages, String lang, String postSubmitUri, String switchLanguageUri, String reasonNotAllowedToSubmit) throws IOException {
+        List<BundleItem> bundleItemList = bundleItemService.findAllItems(problem.getJid(), IdentityUtils.getUserJid());
+        ImmutableList.Builder<Html> htmlBuilder = ImmutableList.builder();
+        for (BundleItem bundleItem : bundleItemList) {
+            BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
+            htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), lang)));
+        }
+
+        String language = lang;
+
+        Html html = bundleStatementView.render(postSubmitUri, problem.getName(), statement, htmlBuilder.build(), reasonNotAllowedToSubmit);
+        LazyHtml content = new LazyHtml(html);
+        if (switchLanguageUri != null) {
+            content.appendLayout(c -> statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, language, c));
+        }
+
+        return Results.ok(content.render());
     }
 }
