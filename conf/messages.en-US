@@ -141,6 +141,7 @@ problem.bundle.partner.isAllowedToSubmit=Allowed to submit?
 problem.bundle.partner.isAllowedToManageItems=Allowed to manage bundle items?
 
 error.problem.bundle.item.undefined=Item undefined.
+error.problem.bundle.item.multipleChoice.duplicateAlias=Duplicate choice aliases.
 
 problem.version=Versions
 problem.version.list=List Versions
@@ -283,19 +284,11 @@ lesson.client.list=Clients
 lesson.client.client=Client
 lesson.client.name=Name
 
-user.users=Users
-user.user=User
-
 user.list=Users
-user.create=Create User
-user.view=View User
 user.update=Update User
 
-user.create.error.usernameNotFound=Username not found
-user.create.error.userAlreadyExists=User already exists
-user.delete.confirmation=Are you sure you want to delete?
-
-user.username=Username
+user.users=Users
+user.userJid=User JID
 user.name=Name
 user.roles=Roles
 

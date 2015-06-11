@@ -2,13 +2,17 @@ package org.iatoki.judgels.sandalphon.bundle;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import org.iatoki.judgels.sandalphon.forms.bundle.item.ItemMultipleChoiceConfForm;
 import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemMultipleChoiceConfView;
 import play.api.mvc.Call;
 import play.data.Form;
+import play.i18n.Messages;
 import play.mvc.Http;
 import play.twirl.api.Html;
+
+import java.util.Set;
 
 public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapter {
     @Override
@@ -51,7 +55,15 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
 
     @Override
     public Form bindFormFromRequest(Http.Request request) {
-        return Form.form(ItemMultipleChoiceConfForm.class).bindFromRequest();
+        Form form = Form.form(ItemMultipleChoiceConfForm.class).bindFromRequest();
+        if (!(form.hasErrors() || form.hasGlobalErrors())) {
+            ItemMultipleChoiceConfForm confForm = ((Form<ItemMultipleChoiceConfForm>)form).get();
+            Set<String> uniqueChoiceAliases = Sets.newHashSet(confForm.choiceAliases);
+            if (uniqueChoiceAliases.size() != confForm.choiceAliases.size()) {
+                form.reject(Messages.get("error.problem.bundle.item.multipleChoice.duplicateAlias"));
+            }
+        }
+        return form;
     }
 
     @Override
