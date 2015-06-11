@@ -9,6 +9,8 @@ public interface BundleItemService {
 
     boolean existByItemJid(String problemJid, String userJid, String itemJid) throws IOException;
 
+    boolean existByMeta(String problemJid, String userJid, String meta) throws IOException;
+
     BundleItem findByItemJid(String problemJid, String userJid, String itemJid) throws IOException;
 
     String getItemConfByItemJid(String problemJid, String userJid, String itemJid, String languageCode) throws IOException;

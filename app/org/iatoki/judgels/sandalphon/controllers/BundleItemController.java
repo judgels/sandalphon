@@ -116,9 +116,17 @@ public final class BundleItemController extends BaseController {
                             return showCreateItem(problem, itemType, adapter.getConfHtml(adapter.generateForm(), routes.BundleItemController.postCreateItem(problem.getId(), itemType, page, orderBy, orderDir, filterString), Messages.get("commons.create")), page, orderBy, orderDir, filterString);
                         } else {
                             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
-                            bundleItemService.createItem(problem.getJid(), IdentityUtils.getUserJid(), BundleItemType.valueOf(itemType), adapter.getMetaFromForm(form), adapter.processRequestForm(form), ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem));
 
-                            return redirect(routes.BundleItemController.viewItems(problem.getId()));
+                            if (!bundleItemService.existByMeta(problem.getJid(), IdentityUtils.getUserJid(), adapter.getMetaFromForm(form))) {
+                                bundleItemService.createItem(problem.getJid(), IdentityUtils.getUserJid(), BundleItemType.valueOf(itemType), adapter.getMetaFromForm(form), adapter.processRequestForm(form), ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem));
+
+                                return redirect(routes.BundleItemController.viewItems(problem.getId()));
+                            } else {
+                                form.reject("error.problem.bundle.item.duplicateMeta");
+                                Page<BundleItem> items = bundleItemService.pageItems(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
+
+                                return showListCreateItems(problem, items, orderBy, orderDir, filterString, form);
+                            }
                         }
                     } else {
                         Form<ItemCreateForm> form = Form.form(ItemCreateForm.class);

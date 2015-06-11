@@ -141,6 +141,7 @@ problem.bundle.partner.isAllowedToSubmit=Allowed to submit?
 problem.bundle.partner.isAllowedToManageItems=Allowed to manage bundle items?
 
 error.problem.bundle.item.undefined=Item undefined.
+error.problem.bundle.item.duplicateMeta=Duplicate meta on item.
 error.problem.bundle.item.multipleChoice.duplicateAlias=Duplicate choice aliases.
 
 problem.version=Versions

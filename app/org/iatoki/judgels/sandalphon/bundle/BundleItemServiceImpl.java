@@ -25,6 +25,20 @@ public final class BundleItemServiceImpl implements BundleItemService {
     }
 
     @Override
+    public boolean existByMeta(String problemJid, String userJid, String meta) throws IOException {
+        List<String> itemsConfig = BundleServiceUtils.getItemsConfigFilePath(fileSystemProvider, problemJid, userJid);
+        BundleItemsConfig bundleItemsConfig = new Gson().fromJson(fileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
+
+        for (BundleItem bundleItem : bundleItemsConfig.itemList) {
+            if (bundleItem.getMeta().equals(meta)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     public BundleItem findByItemJid(String problemJid, String userJid, String itemJid) throws IOException {
         List<String> itemsConfig = BundleServiceUtils.getItemsConfigFilePath(fileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(fileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
