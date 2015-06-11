@@ -13,7 +13,11 @@ import play.twirl.api.Html;
 public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapter {
     @Override
     public Form generateForm() {
-        return Form.form(ItemMultipleChoiceConfForm.class).fill(new ItemMultipleChoiceConfForm());
+        ItemMultipleChoiceConfForm form = new ItemMultipleChoiceConfForm();
+        form.choiceAliases = Lists.newArrayList("a", "b", "c", "d", "e");
+        form.choiceContents = Lists.newArrayList("", "", "", "", "");
+        form.isCorrects = Lists.newArrayList(false, false, false, false, false);
+        return Form.form(ItemMultipleChoiceConfForm.class).fill(form);
     }
 
     @Override
