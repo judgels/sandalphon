@@ -2,20 +2,19 @@ package org.iatoki.judgels.sandalphon.bundle;
 
 public final class BundleItem {
 
-    private final int order;
+    private transient Long number;
     private final String jid;
     private final BundleItemType type;
     private final String meta;
 
-    public BundleItem(int order, String jid, BundleItemType type, String meta) {
-        this.order = order;
+    public BundleItem(String jid, BundleItemType type, String meta) {
         this.jid = jid;
         this.type = type;
         this.meta = meta;
     }
 
-    public int getOrder() {
-        return order;
+    public Long getNumber() {
+        return number;
     }
 
     public String getJid() {
@@ -28,5 +27,9 @@ public final class BundleItem {
 
     public String getMeta() {
         return meta;
+    }
+
+    public void setNumber(Long number) {
+        this.number = number;
     }
 }
