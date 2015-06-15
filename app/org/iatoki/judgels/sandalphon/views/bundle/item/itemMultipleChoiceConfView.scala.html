@@ -80,9 +80,9 @@
                 }
             }
 
-            @for(i <- 0 until form.get.choiceAliases.size) {
+            @for(i <- 0 until form("choiceAliases").indexes().size()) {
                 addNewChoice();
-                fillChoice(@i, '@form.get.choiceAliases.get(i)', '@form.get.choiceContents.get(i)', @form.get.isCorrects.get(i));
+                fillChoice(@i, '@form("choiceAliases[" + i + "]").value()', '@form("choiceContents[" + i + "]").value()', @if(form("isCorrects[" + i + "]").value() != null) { true } else { false } );
             }
 
         });

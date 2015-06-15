@@ -113,7 +113,7 @@ public final class BundleItemController extends BaseController {
                     if (adapter != null) {
                         Form form = adapter.bindFormFromRequest(request());
                         if (form.hasErrors() || form.hasGlobalErrors()) {
-                            return showCreateItem(problem, itemType, adapter.getConfHtml(adapter.generateForm(), routes.BundleItemController.postCreateItem(problem.getId(), itemType, page, orderBy, orderDir, filterString), Messages.get("commons.create")), page, orderBy, orderDir, filterString);
+                            return showCreateItem(problem, itemType, adapter.getConfHtml(form, routes.BundleItemController.postCreateItem(problem.getId(), itemType, page, orderBy, orderDir, filterString), Messages.get("commons.create")), page, orderBy, orderDir, filterString);
                         } else {
                             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
@@ -196,7 +196,7 @@ public final class BundleItemController extends BaseController {
                     if (adapter != null) {
                         Form form = adapter.bindFormFromRequest(request());
                         if (form.hasErrors() || form.hasGlobalErrors()) {
-                            return showUpdateItem(problem, bundleItem, adapter.getConfHtml(adapter.generateForm(), routes.BundleItemController.postUpdateItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
+                            return showUpdateItem(problem, bundleItem, adapter.getConfHtml(form, routes.BundleItemController.postUpdateItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
                         } else {
                             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
                             bundleItemService.updateItem(problem.getJid(), IdentityUtils.getUserJid(), itemJid, adapter.getMetaFromForm(form), adapter.processRequestForm(form), ProblemControllerUtils.getCurrentStatementLanguage());
@@ -204,19 +204,15 @@ public final class BundleItemController extends BaseController {
                             return redirect(routes.BundleItemController.viewItems(problem.getId()));
                         }
                     } else {
-                        System.out.println("APA 1");
                         return notFound();
                     }
                 } else {
-                    System.out.println("APA 2");
                     return notFound();
                 }
             } catch (IOException e) {
-                System.out.println("APA 3");
                 throw new RuntimeException(e);
             }
         } else {
-            System.out.println("APA 4");
             return notFound();
         }
     }
