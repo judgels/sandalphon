@@ -114,6 +114,7 @@ GET         /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/update               
 POST        /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/update                                   @org.iatoki.judgels.sandalphon.controllers.BundleItemController.postUpdateItem(pId: Long, iJid: String)
 GET         /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/up                                       @org.iatoki.judgels.sandalphon.controllers.BundleItemController.moveItemUp(pId: Long, iJid: String)
 GET         /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/down                                     @org.iatoki.judgels.sandalphon.controllers.BundleItemController.moveItemDown(pId: Long, iJid: String)
+GET         /problems/bundle/$pId<[0-9]{1,18}>/items/:iJid/remove                                   @org.iatoki.judgels.sandalphon.controllers.BundleItemController.removeItem(pId: Long, iJid: String)
 
 GET         /problems/bundle/$pId<[0-9]{1,18}>/statements/view                                      @org.iatoki.judgels.sandalphon.controllers.BundleProblemStatementController.viewStatement(pId: Long)
 

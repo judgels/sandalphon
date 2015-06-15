@@ -26,4 +26,6 @@ public interface BundleItemService {
     void moveItemUp(String problemJid, String userJid, String itemJid) throws IOException;
 
     void moveItemDown(String problemJid, String userJid, String itemJid) throws IOException;
+
+    void removeItem(String problemJid, String userJid, String itemJid) throws IOException;
 }

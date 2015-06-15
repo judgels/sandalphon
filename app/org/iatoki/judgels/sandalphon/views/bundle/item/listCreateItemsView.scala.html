@@ -27,6 +27,7 @@
 @tableView() {
     @tableHeadersView(page.getPageIndex, orderBy, orderDir, filterString, listFunc)(
         "order" -> Messages.get("problem.bundle.item.order"),
+        "number" -> Messages.get("problem.bundle.item.number"),
         "jid" -> Messages.get("commons.jid"),
         "type" -> Messages.get("problem.bundle.item.type"),
         "meta" -> Messages.get("problem.bundle.item.meta")
@@ -34,7 +35,8 @@
     <tbody>
         @for((item, index) <- page.getData.zipWithIndex) {
             <tr>
-                <td>@item.getOrder</td>
+                <td>@index</td>
+                <td>@item.getNumber</td>
                 <td>@item.getJid</td>
                 <td>@item.getType</td>
                 <td>@item.getMeta</td>
@@ -46,6 +48,7 @@
                     @if(index != page.getData.size()-1) {
                         <a href="@routes.BundleItemController.moveItemDown(problemId, item.getJid)"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></a>
                     }
+                    <a href="@routes.BundleItemController.removeItem(problemId, item.getJid)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                 </td>
             </tr>
         }

@@ -111,6 +111,7 @@ problem.programming.help.changeGradingEngine=Changing grading engine will reset 
 
 problem.bundle.item=Items
 problem.bundle.item.order=Order
+problem.bundle.item.number=No.
 problem.bundle.item.type=Type
 problem.bundle.item.meta=Meta
 

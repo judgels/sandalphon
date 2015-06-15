@@ -4,11 +4,18 @@
 
 <div class="panel panel-default">
     <div class="panel-body">
-        @Html(conf.statement)
+        <div class="clearfix">
+            <div class="table-cell">
+                @(bundleItem.getNumber).&nbsp;
+            </div>
+            <div class="table-cell">
+                @Html(conf.statement)
+            </div>
+        </div>
         <hr />
         @for(choice <- conf.choices) {
             <div class="radio">
-                <label><input type="radio" name="@bundleItem.getJid" value="@choice.getAlias">@choice.getAlias. @choice.getContent</label>
+                <label><input type="radio" name="@bundleItem.getJid" value="@choice.getAlias">@choice.getAlias. @Html(choice.getContent)</label>
             </div>
         }
     </div>

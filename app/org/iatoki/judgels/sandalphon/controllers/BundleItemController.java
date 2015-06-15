@@ -261,6 +261,26 @@ public final class BundleItemController extends BaseController {
         }
     }
 
+    public Result removeItem(long problemId, String itemJid) throws ProblemNotFoundException {
+        Problem problem = problemService.findProblemById(problemId);
+
+        if (BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
+            try {
+                if (bundleItemService.existByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
+                    bundleItemService.removeItem(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
+
+                    return redirect(routes.BundleItemController.viewItems(problem.getId()));
+                } else {
+                    return notFound();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return notFound();
+        }
+    }
+
     private Result showListCreateItems(Problem problem, Page<BundleItem> currentPage, String orderBy, String orderDir, String filterString, Form<ItemCreateForm> form) {
         LazyHtml content = new LazyHtml(listCreateItemsView.render(currentPage, problem.getId(), currentPage.getPageIndex(), orderBy, orderDir, filterString, form));
 

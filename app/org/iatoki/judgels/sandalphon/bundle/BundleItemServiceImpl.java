@@ -70,6 +70,13 @@ public final class BundleItemServiceImpl implements BundleItemService {
               .limit(pageSize)
               .collect(Collectors.toList());
 
+        long number = 1;
+        for (BundleItem bundleItem : filteredBundleItems) {
+            if (BundleItemAdapters.fromItemType(bundleItem.getType()) instanceof BundleItemHasScore) {
+                bundleItem.setNumber(number++);
+            }
+        }
+
         return new Page<>(filteredBundleItems, bundleItems.size(), pageIndex, pageSize);
     }
 
@@ -78,7 +85,15 @@ public final class BundleItemServiceImpl implements BundleItemService {
         List<String> itemsConfig = BundleServiceUtils.getItemsConfigFilePath(fileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(fileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
 
-        return bundleItemsConfig.itemList.stream().sorted(new BundleItemOrderComparator()).collect(Collectors.toList());
+        List<BundleItem> bundleItems = bundleItemsConfig.itemList.stream().collect(Collectors.toList());
+        long number = 1;
+        for (BundleItem bundleItem : bundleItems) {
+            if (BundleItemAdapters.fromItemType(bundleItem.getType()) instanceof BundleItemHasScore) {
+                bundleItem.setNumber(number++);
+            }
+        }
+
+        return bundleItems;
     }
 
     @Override
@@ -88,7 +103,7 @@ public final class BundleItemServiceImpl implements BundleItemService {
         List<BundleItem> bundleItems = Lists.newArrayList(bundleItemsConfig.itemList);
 
         String itemJid = JidService.getInstance().generateNewJid("ITEM");
-        BundleItem bundleItem = new BundleItem(bundleItems.size(), itemJid, itemType, meta);
+        BundleItem bundleItem = new BundleItem(itemJid, itemType, meta);
         bundleItems.add(bundleItem);
 
         bundleItemsConfig.itemList = bundleItems;
@@ -109,7 +124,7 @@ public final class BundleItemServiceImpl implements BundleItemService {
             do {
                 if (bundleItems.get(i).getJid().equals(itemJid)) {
                     BundleItem current = bundleItems.get(i);
-                    bundleItems.set(i, new BundleItem(current.getOrder(), current.getJid(), current.getType(), meta));
+                    bundleItems.set(i, new BundleItem(current.getJid(), current.getType(), meta));
                 }
                 ++i;
             } while ((i < bundleItems.size()) && (!bundleItems.get(i - 1).getJid().equals(itemJid)));
@@ -133,8 +148,8 @@ public final class BundleItemServiceImpl implements BundleItemService {
                 if (bundleItems.get(i).getJid().equals(itemJid)) {
                     BundleItem current = bundleItems.get(i);
                     BundleItem previous = bundleItems.get(i - 1);
-                    bundleItems.set(i, new BundleItem(previous.getOrder() + 1, previous.getJid(), previous.getType(), previous.getMeta()));
-                    bundleItems.set(i - 1, new BundleItem(current.getOrder() - 1, current.getJid(), current.getType(), current.getMeta()));
+                    bundleItems.set(i, new BundleItem(previous.getJid(), previous.getType(), previous.getMeta()));
+                    bundleItems.set(i - 1, new BundleItem(current.getJid(), current.getType(), current.getMeta()));
                 }
                 ++i;
             } while ((i < bundleItems.size()) && (!bundleItems.get(i - 1).getJid().equals(itemJid)));
@@ -156,11 +171,36 @@ public final class BundleItemServiceImpl implements BundleItemService {
                 if (bundleItems.get(i).getJid().equals(itemJid)) {
                     BundleItem current = bundleItems.get(i);
                     BundleItem next = bundleItems.get(i + 1);
-                    bundleItems.set(i, new BundleItem(next.getOrder() - 1, next.getJid(), next.getType(), next.getMeta()));
-                    bundleItems.set(i + 1, new BundleItem(current.getOrder() + 1, current.getJid(), current.getType(), current.getMeta()));
+                    bundleItems.set(i, new BundleItem(next.getJid(), next.getType(), next.getMeta()));
+                    bundleItems.set(i + 1, new BundleItem(current.getJid(), current.getType(), current.getMeta()));
                 }
                 ++i;
             } while ((i < bundleItems.size() - 1) && (!bundleItems.get(i - 1).getJid().equals(itemJid)));
+        }
+
+        bundleItemsConfig.itemList = bundleItems;
+        fileSystemProvider.writeToFile(BundleServiceUtils.getItemsConfigFilePath(fileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
+    }
+
+    @Override
+    public void removeItem(String problemJid, String userJid, String itemJid) throws IOException {
+        List<String> itemsConfig = BundleServiceUtils.getItemsConfigFilePath(fileSystemProvider, problemJid, userJid);
+        BundleItemsConfig bundleItemsConfig = new Gson().fromJson(fileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
+        List<BundleItem> bundleItems = Lists.newArrayList(bundleItemsConfig.itemList);
+
+        int toBeRemovedIndex = -1;
+        int i = 0;
+        if (bundleItems.size() > 0) {
+            do {
+                if (bundleItems.get(i).getJid().equals(itemJid)) {
+                    toBeRemovedIndex = i;
+                }
+                ++i;
+            } while ((i < bundleItems.size()) && (!bundleItems.get(i - 1).getJid().equals(itemJid)));
+
+            if (toBeRemovedIndex != -1) {
+                bundleItems.remove(toBeRemovedIndex);
+            }
         }
 
         bundleItemsConfig.itemList = bundleItems;
