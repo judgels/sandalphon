@@ -5,16 +5,16 @@ import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
-import org.iatoki.judgels.jophiel.commons.Jophiel;
-import org.iatoki.judgels.jophiel.commons.ViewpointForm;
+import org.iatoki.judgels.jophiel.Jophiel;
+import org.iatoki.judgels.jophiel.UserActivityMessage;
+import org.iatoki.judgels.jophiel.controllers.forms.ViewpointForm;
 import org.iatoki.judgels.commons.controllers.AbstractControllerUtils;
 import org.iatoki.judgels.commons.views.html.layouts.menusLayout;
 import org.iatoki.judgels.commons.views.html.layouts.profileView;
 import org.iatoki.judgels.commons.views.html.layouts.sidebarLayout;
-import org.iatoki.judgels.jophiel.commons.views.html.layouts.viewAsLayout;
-import org.iatoki.judgels.jophiel.commons.UserActivity;
+import org.iatoki.judgels.jophiel.views.html.viewas.viewAsLayout;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.UserActivityServiceImpl;
+import org.iatoki.judgels.sandalphon.UserActivityMessageServiceImpl;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;
@@ -42,10 +42,10 @@ public final class ControllerUtils extends AbstractControllerUtils {
         }
 
         LazyHtml sidebarContent = new LazyHtml(profileView.render(
-              IdentityUtils.getUsername(),
-              IdentityUtils.getUserRealName(),
-              org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.profile(org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterProfile(routes.ProblemController.index().absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure()),
-              org.iatoki.judgels.jophiel.commons.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())
+                IdentityUtils.getUsername(),
+                IdentityUtils.getUserRealName(),
+                org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.profile(org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterProfile(routes.ProblemController.index().absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure()),
+                org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())
         ));
         if (SandalphonUtils.trullyHasRole("admin")) {
             Form<ViewpointForm> form = Form.form(ViewpointForm.class);
@@ -69,7 +69,7 @@ public final class ControllerUtils extends AbstractControllerUtils {
             if (JudgelsUtils.hasViewPoint()) {
                 log += " view as " +  IdentityUtils.getUserJid();
             }
-            UserActivityServiceImpl.getInstance().addUserActivity(new UserActivity(System.currentTimeMillis(), SandalphonUtils.getRealUserJid(), log, IdentityUtils.getIpAddress()));
+            UserActivityMessageServiceImpl.getInstance().addUserActivityMessage(new UserActivityMessage(System.currentTimeMillis(), SandalphonUtils.getRealUserJid(), log, IdentityUtils.getIpAddress()));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

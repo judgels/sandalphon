@@ -9,10 +9,10 @@ import org.iatoki.judgels.commons.GitProvider;
 import org.iatoki.judgels.commons.JudgelsProperties;
 import org.iatoki.judgels.commons.LocalFileSystemProvider;
 import org.iatoki.judgels.commons.LocalGitProvider;
-import org.iatoki.judgels.jophiel.commons.DefaultUserActivityServiceImpl;
-import org.iatoki.judgels.jophiel.commons.Jophiel;
-import org.iatoki.judgels.jophiel.commons.UserActivityPusher;
-import org.iatoki.judgels.jophiel.commons.controllers.JophielClientController;
+import org.iatoki.judgels.jophiel.services.impls.DefaultUserActivityMessageServiceImpl;
+import org.iatoki.judgels.jophiel.Jophiel;
+import org.iatoki.judgels.jophiel.UserActivityMessagePusher;
+import org.iatoki.judgels.jophiel.controllers.JophielClientController;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemService;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemServiceImpl;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemService;
@@ -83,12 +83,6 @@ import org.iatoki.judgels.sandalphon.programming.GraderServiceImpl;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemServiceImpl;
 import org.iatoki.judgels.sandalphon.programming.SubmissionServiceImpl;
-import org.iatoki.judgels.sandalphon.models.daos.hibernate.programming.GradingHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.hibernate.JidCacheHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.hibernate.programming.ProgrammingSubmissionHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.GradingDao;
-import org.iatoki.judgels.sandalphon.models.daos.interfaces.JidCacheDao;
-import org.iatoki.judgels.sandalphon.models.daos.interfaces.programming.ProgrammingSubmissionDao;
 import org.iatoki.judgels.sealtiel.Sealtiel;
 import play.Application;
 import play.libs.Akka;
@@ -214,7 +208,7 @@ public final class Global extends org.iatoki.judgels.commons.Global {
 
         JidCacheService.buildInstance(jidCacheDao);
         ControllerUtils.buildInstance(jophiel);
-        DefaultUserActivityServiceImpl.buildInstance(jophiel);
+        DefaultUserActivityMessageServiceImpl.buildInstance(jophiel);
     }
 
     private void buildControllers() {
@@ -256,9 +250,9 @@ public final class Global extends org.iatoki.judgels.commons.Global {
         ExecutionContextExecutor context = Akka.system().dispatcher();
 
         GradingResponsePoller poller = new GradingResponsePoller(scheduler, context, submissionService, sealtiel, TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS));
-        UserActivityPusher userActivityPusher = new UserActivityPusher(jophiel, userService, UserActivityServiceImpl.getInstance());
+        UserActivityMessagePusher userActivityMessagePusher = new UserActivityMessagePusher(jophiel, userService, UserActivityMessageServiceImpl.getInstance());
 
         scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(3, TimeUnit.SECONDS), poller, context);
-        scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(1, TimeUnit.MINUTES), userActivityPusher, context);
+        scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(1, TimeUnit.MINUTES), userActivityMessagePusher, context);
     }
 }

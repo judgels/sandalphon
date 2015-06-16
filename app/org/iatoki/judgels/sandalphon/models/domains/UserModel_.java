@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.models.domains;
 
-import org.iatoki.judgels.jophiel.commons.models.domains.AbstractUserModel_;
+import org.iatoki.judgels.jophiel.models.entities.AbstractUserModel_;
 
 import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
