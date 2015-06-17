@@ -14,7 +14,7 @@ import org.iatoki.judgels.commons.views.html.layouts.profileView;
 import org.iatoki.judgels.commons.views.html.layouts.sidebarLayout;
 import org.iatoki.judgels.jophiel.views.html.viewas.viewAsLayout;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.UserActivityMessageServiceImpl;
+import org.iatoki.judgels.sandalphon.services.impls.UserActivityMessageServiceImpl;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;

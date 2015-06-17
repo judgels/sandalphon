@@ -5,7 +5,7 @@ import org.iatoki.judgels.commons.InternalLink;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.views.html.layouts.accessTypesLayout;
 import org.iatoki.judgels.sandalphon.Lesson;
-import org.iatoki.judgels.sandalphon.LessonService;
+import org.iatoki.judgels.sandalphon.services.LessonService;
 import play.i18n.Messages;
 
 public final class LessonStatementControllerUtils {

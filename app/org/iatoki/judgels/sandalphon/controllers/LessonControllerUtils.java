@@ -10,7 +10,7 @@ import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.commons.views.html.layouts.tabLayout;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
-import org.iatoki.judgels.sandalphon.LessonService;
+import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.commons.views.html.statementLanguageSelectionLayout;
 import org.iatoki.judgels.sandalphon.views.html.lesson.version.versionLocalChangesWarningLayout;
