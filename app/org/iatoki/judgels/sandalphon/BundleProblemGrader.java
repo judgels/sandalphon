@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.commons;
+package org.iatoki.judgels.sandalphon;
 
 import java.io.IOException;
 
