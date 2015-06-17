@@ -1,9 +1,9 @@
 package org.iatoki.judgels.sandalphon.controllers.apis;
 
-import org.iatoki.judgels.sandalphon.ClientService;
-import org.iatoki.judgels.sandalphon.ProblemService;
-import org.iatoki.judgels.sandalphon.programming.GraderService;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemService;
+import org.iatoki.judgels.sandalphon.services.ClientService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.services.GraderService;
+import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
 import play.mvc.Controller;

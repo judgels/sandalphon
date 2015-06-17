@@ -9,11 +9,11 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
-import org.iatoki.judgels.sandalphon.ProblemService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
 
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.commons.views.html.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.views.html.statementLanguageSelectionLayout;
 import org.iatoki.judgels.sandalphon.views.html.problem.version.versionLocalChangesWarningLayout;
 import play.i18n.Messages;
 import play.mvc.Call;

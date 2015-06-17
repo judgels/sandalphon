@@ -1,8 +1,7 @@
 @(availableLanguages: Map[String, org.iatoki.judgels.sandalphon.StatementLanguageStatus], defaultLanguage: String, lessonId: Long)
 
-@import org.iatoki.judgels.sandalphon.commons.WorldLanguageRegistry
 @import play.i18n.Messages
-@import org.iatoki.judgels.sandalphon.StatementLanguageStatus
+@import org.iatoki.judgels.sandalphon.{WorldLanguageRegistry, StatementLanguageStatus}
 @import org.iatoki.judgels.sandalphon.controllers.routes
 
 <h3>@Messages.get("lesson.statement.language.add")</h3>

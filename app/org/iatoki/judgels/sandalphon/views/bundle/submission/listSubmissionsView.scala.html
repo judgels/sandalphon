@@ -1,5 +1,7 @@
-@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.commons.BundleSubmission], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
+@import org.iatoki.judgels.sandalphon.BundleSubmission
+@(page: org.iatoki.judgels.commons.Page[BundleSubmission], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
 
+@import org.iatoki.judgels.sandalphon.services.JidCacheService
 @import play.i18n.Messages
 @import org.iatoki.judgels.commons.views.html.table.tableView
 @import org.iatoki.judgels.commons.views.html.table.tableHeadersWithSelectionFormView
@@ -7,7 +9,6 @@
 
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.commons.JudgelsUtils
-@import org.iatoki.judgels.sandalphon.JidCacheService
 
 @import java.text.DecimalFormat
 @import scala.collection.JavaConversions
