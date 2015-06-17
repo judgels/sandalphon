@@ -1,6 +1,5 @@
 package org.iatoki.judgels.sandalphon.services.impls;
 
-import org.iatoki.judgels.sandalphon.AbstractBundleSubmissionServiceImpl;
 import org.iatoki.judgels.sandalphon.BundleProblemGrader;
 import org.iatoki.judgels.sandalphon.models.daos.bundle.BundleGradingDao;
 import org.iatoki.judgels.sandalphon.models.daos.bundle.BundleSubmissionDao;

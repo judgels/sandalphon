@@ -17,7 +17,7 @@ import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.BundleAnswer;
 import org.iatoki.judgels.sandalphon.BundleSubmission;
 import org.iatoki.judgels.sandalphon.BundleSubmissionNotFoundException;
-import org.iatoki.judgels.sandalphon.BundleSubmissionService;
+import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
 import org.iatoki.judgels.sandalphon.views.html.bundleSubmissionView;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;

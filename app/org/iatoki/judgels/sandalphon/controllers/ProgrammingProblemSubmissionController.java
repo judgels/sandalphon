@@ -15,7 +15,7 @@ import org.iatoki.judgels.sandalphon.Submission;
 import org.iatoki.judgels.sandalphon.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.SubmissionException;
 import org.iatoki.judgels.sandalphon.SubmissionNotFoundException;
-import org.iatoki.judgels.sandalphon.SubmissionService;
+import org.iatoki.judgels.sandalphon.services.SubmissionService;
 import org.iatoki.judgels.sandalphon.services.JidCacheService;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
