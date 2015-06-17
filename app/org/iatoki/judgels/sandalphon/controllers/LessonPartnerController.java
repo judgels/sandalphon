@@ -114,13 +114,13 @@ public class LessonPartnerController extends BaseController {
             String username = usernameForm.get().username;
             LessonPartnerUpsertForm lessonData = lessonForm.get();
 
-            String userJid = jophiel.verifyUsername(username);
-            if (userJid == null) {
-                usernameForm.reject("username", Messages.get("lesson.partner.usernameNotFound"));
-                return showAddPartner(usernameForm, lessonForm, lesson);
-            }
-
             try {
+                String userJid = jophiel.verifyUsername(username);
+                if (userJid == null) {
+                    usernameForm.reject("username", Messages.get("lesson.partner.usernameNotFound"));
+                    return showAddPartner(usernameForm, lessonForm, lesson);
+                }
+
                 UserInfo user = jophiel.getUserByUserJid(userJid);
                 JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 

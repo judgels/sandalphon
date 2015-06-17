@@ -94,13 +94,14 @@ public final class BundleProblemPartnerController extends BaseController {
             ProblemPartnerUpsertForm problemData = problemForm.get();
             BundlePartnerUpsertForm bundleData = bundleForm.get();
 
-            String userJid = jophiel.verifyUsername(username);
-            if (userJid == null) {
-                usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
-                return showAddPartner(usernameForm, problemForm, bundleForm, problem);
-            }
-
             try {
+                String userJid = jophiel.verifyUsername(username);
+
+                if (userJid == null) {
+                    usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
+                    return showAddPartner(usernameForm, problemForm, bundleForm, problem);
+                }
+
                 UserInfo user = jophiel.getUserByUserJid(userJid);
                 JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
