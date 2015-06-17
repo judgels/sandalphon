@@ -8,9 +8,9 @@ import org.iatoki.judgels.sandalphon.bundle.BundleItemConfAdapter;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemConfAdapters;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemHasScore;
 import org.iatoki.judgels.sandalphon.services.BundleItemService;
-import org.iatoki.judgels.sandalphon.commons.BundleAnswer;
-import org.iatoki.judgels.sandalphon.commons.BundleGradingResult;
-import org.iatoki.judgels.sandalphon.commons.BundleProblemGrader;
+import org.iatoki.judgels.sandalphon.BundleAnswer;
+import org.iatoki.judgels.sandalphon.BundleGradingResult;
+import org.iatoki.judgels.sandalphon.BundleProblemGrader;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 
 import java.io.IOException;

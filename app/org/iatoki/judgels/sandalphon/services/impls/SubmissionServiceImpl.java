@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.services.impls;
 
-import org.iatoki.judgels.sandalphon.commons.AbstractSubmissionServiceImpl;
+import org.iatoki.judgels.sandalphon.AbstractSubmissionServiceImpl;
 import org.iatoki.judgels.sandalphon.models.daos.programming.GradingDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.ProgrammingSubmissionDao;
 import org.iatoki.judgels.sandalphon.models.entities.programming.GradingModel;

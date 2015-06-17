@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.models.daos.impls.programming;
 
-import org.iatoki.judgels.sandalphon.commons.models.daos.hibernate.AbstractGradingHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.impls.AbstractGradingHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.GradingDao;
 import org.iatoki.judgels.sandalphon.models.entities.programming.GradingModel;
 

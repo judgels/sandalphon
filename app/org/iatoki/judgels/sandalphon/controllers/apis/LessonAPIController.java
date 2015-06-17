@@ -12,7 +12,7 @@ import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.commons.views.html.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.views.html.statementLanguageSelectionLayout;
 import org.iatoki.judgels.sandalphon.views.html.lesson.statement.lessonStatementView;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;

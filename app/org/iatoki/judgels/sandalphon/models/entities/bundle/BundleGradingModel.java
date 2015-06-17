@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.models.entities.bundle;
 
-import org.iatoki.judgels.sandalphon.commons.models.domains.AbstractBundleGradingModel;
+import org.iatoki.judgels.sandalphon.models.entities.AbstractBundleGradingModel;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;

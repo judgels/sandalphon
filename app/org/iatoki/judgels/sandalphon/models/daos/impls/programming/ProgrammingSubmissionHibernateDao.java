@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.models.daos.impls.programming;
 
 
-import org.iatoki.judgels.sandalphon.commons.models.daos.hibernate.AbstractSubmissionHibernateDao;
+import org.iatoki.judgels.sandalphon.models.daos.impls.AbstractSubmissionHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.ProgrammingSubmissionDao;
 import org.iatoki.judgels.sandalphon.models.entities.programming.ProgrammingSubmissionModel;
 

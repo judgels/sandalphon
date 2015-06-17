@@ -17,7 +17,7 @@ import org.iatoki.judgels.sandalphon.bundle.BundleProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.commons.views.html.bundleStatementView;
+import org.iatoki.judgels.sandalphon.views.html.bundleStatementView;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
 import play.mvc.Http;

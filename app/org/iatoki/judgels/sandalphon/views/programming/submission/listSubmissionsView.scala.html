@@ -1,4 +1,5 @@
-@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.commons.Submission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
+@import org.iatoki.judgels.sandalphon.Submission
+@(page: org.iatoki.judgels.commons.Page[Submission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
 
 @import org.iatoki.judgels.sandalphon.services.JidCacheService
 @import play.i18n.Messages
