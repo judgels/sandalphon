@@ -2,10 +2,10 @@
 ->          /                                                                                       jophielcommons.Routes
 
 GET         /                                                                                       @org.iatoki.judgels.sandalphon.controllers.ApplicationController.index()
-GET         /auth/:returnUri                                                                        @org.iatoki.judgels.sandalphon.controllers.ApplicationController.auth(returnUri: String)
-GET         /authRole/:returnUri                                                                    @org.iatoki.judgels.sandalphon.controllers.ApplicationController.authRole(returnUri: String)
-GET         /afterLogin/:returnUri                                                                  @org.iatoki.judgels.sandalphon.controllers.ApplicationController.afterLogin(returnUri: String)
-GET         /afterProfile/:returnUri                                                                @org.iatoki.judgels.sandalphon.controllers.ApplicationController.afterProfile(returnUri: String)
+GET         /auth                                                                                   @org.iatoki.judgels.sandalphon.controllers.ApplicationController.auth(returnUri: String ?= "")
+GET         /authRole                                                                               @org.iatoki.judgels.sandalphon.controllers.ApplicationController.authRole(returnUri: String ?= "")
+GET         /afterLogin                                                                             @org.iatoki.judgels.sandalphon.controllers.ApplicationController.afterLogin(returnUri: String ?= "")
+GET         /afterProfile                                                                           @org.iatoki.judgels.sandalphon.controllers.ApplicationController.afterProfile(returnUri: String ?= "")
 POST        /viewAs                                                                                 @org.iatoki.judgels.sandalphon.controllers.ApplicationController.postViewAs()
 GET         /resetViewAs                                                                            @org.iatoki.judgels.sandalphon.controllers.ApplicationController.resetViewAs()
 
