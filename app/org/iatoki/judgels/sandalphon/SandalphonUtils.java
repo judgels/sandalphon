@@ -37,16 +37,14 @@ public final class SandalphonUtils {
         putInSession("realUsername", getFromSession("username"));
         putInSession("realRole", getFromSession("role"));
         putInSession("realAvatar", getFromSession("avatar"));
-        putInSession("realEmail", getFromSession("email"));
     }
 
-    public static void setUserSession(UserInfo user, User urielUser) {
-        putInSession("userJid", user.getJid());
-        putInSession("name", user.getName());
-        putInSession("username", user.getUsername());
-        saveRolesInSession(urielUser.getRoles());
-        putInSession("avatar", user.getProfilePictureUrl().toString());
-        putInSession("email", user.getEmail());
+    public static void setUserSession(UserInfo userInfo, User user) {
+        putInSession("userJid", userInfo.getJid());
+        putInSession("name", userInfo.getName());
+        putInSession("username", userInfo.getUsername());
+        saveRolesInSession(user.getRoles());
+        putInSession("avatar", userInfo.getProfilePictureUrl().toString());
     }
 
     public static void restoreSession() {
@@ -60,8 +58,6 @@ public final class SandalphonUtils {
         Http.Context.current().session().remove("realRole");
         putInSession("avatar", getFromSession("realAvatar"));
         Http.Context.current().session().remove("realAvatar");
-        putInSession("email", getFromSession("realEmail"));
-        Http.Context.current().session().remove("realEmail");
     }
 
     public static boolean trullyHasRole(String role) {
