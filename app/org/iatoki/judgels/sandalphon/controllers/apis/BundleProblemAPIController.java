@@ -1,6 +1,8 @@
 package org.iatoki.judgels.sandalphon.controllers.apis;
 
 import com.google.gson.Gson;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.sandalphon.BundleProblemGraderImpl;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
@@ -29,32 +31,39 @@ public final class BundleProblemAPIController extends Controller {
     }
 
     public Result gradeProblem() {
-        DynamicForm form = DynamicForm.form().bindFromRequest();
+        UsernamePasswordCredentials credentials = JudgelsUtils.parseBasicAuthFromRequest(request());
 
-        String clientJid = form.get("clientJid");
-        String clientSecret = form.get("clientSecret");
-        String problemJid = form.get("problemJid");
+        if (credentials != null) {
+            DynamicForm form = DynamicForm.form().bindFromRequest();
 
-        try {
-            response().setHeader("Access-Control-Allow-Origin", "*");
-            if ((!clientService.clientExistsByClientJid(clientJid)) && (!problemService.problemExistsByJid(problemJid)) && (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid))) {
+            String clientJid = credentials.getUserName();
+            String clientSecret = credentials.getPassword();
+            String problemJid = form.get("problemJid");
+
+            try {
+                response().setHeader("Access-Control-Allow-Origin", "*");
+                if ((!clientService.clientExistsByClientJid(clientJid)) && (!problemService.problemExistsByJid(problemJid)) && (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid))) {
+                    return notFound();
+                }
+
+                Client client = clientService.findClientByJid(clientJid);
+                Problem problem = problemService.findProblemByJid(problemJid);
+                ClientProblem clientProblem = clientService.findClientProblemByClientJidAndProblemJid(clientJid, problemJid);
+
+                if (!client.getSecret().equals(clientSecret)) {
+                    return forbidden();
+                }
+
+                BundleAnswer bundleAnswer = new Gson().fromJson(form.get("answer"), BundleAnswer.class);
+                BundleGradingResult gradingResult = bundleProblemGrader.gradeBundleProblem(problem.getJid(), bundleAnswer);
+
+                return ok(new Gson().toJson(gradingResult));
+            } catch (IOException e) {
                 return notFound();
             }
-
-            Client client = clientService.findClientByJid(clientJid);
-            Problem problem = problemService.findProblemByJid(problemJid);
-            ClientProblem clientProblem = clientService.findClientProblemByClientJidAndProblemJid(clientJid, problemJid);
-
-            if (!client.getSecret().equals(clientSecret)) {
-                return forbidden();
-            }
-
-            BundleAnswer bundleAnswer = new Gson().fromJson(form.get("answer"), BundleAnswer.class);
-            BundleGradingResult gradingResult = bundleProblemGrader.gradeBundleProblem(problem.getJid(), bundleAnswer);
-
-            return ok(new Gson().toJson(gradingResult));
-        } catch (IOException e) {
-            return notFound();
+        } else {
+            response().setHeader("WWW-Authenticate", "Basic realm=\"" + request().host() + "\"");
+            return unauthorized();
         }
     }
 

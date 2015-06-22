@@ -3,7 +3,9 @@ package org.iatoki.judgels.sandalphon.controllers.apis;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientLesson;
@@ -103,23 +105,31 @@ public final class LessonAPIController extends Controller {
     }
 
     public Result verifyLesson() {
-        DynamicForm form = DynamicForm.form().bindFromRequest();
-        String clientJid = form.get("clientJid");
-        String clientSecret = form.get("clientSecret");
-        if (clientService.clientExistsByClientJid(clientJid)) {
-            Client client = clientService.findClientByJid(clientJid);
-            if (client.getSecret().equals(clientSecret)) {
-                String lessonJid = form.get("lessonJid");
-                if (lessonService.lessonExistsByJid(lessonJid)) {
-                    return ok(lessonService.findLessonByJid(lessonJid).getName());
+        UsernamePasswordCredentials credentials = JudgelsUtils.parseBasicAuthFromRequest(request());
+
+        if (credentials != null) {
+            String clientJid = credentials.getUserName();
+            String clientSecret = credentials.getPassword();
+            if (clientService.clientExistsByClientJid(clientJid)) {
+                Client client = clientService.findClientByJid(clientJid);
+                if (client.getSecret().equals(clientSecret)) {
+                    DynamicForm form = DynamicForm.form().bindFromRequest();
+
+                    String lessonJid = form.get("lessonJid");
+                    if (lessonService.lessonExistsByJid(lessonJid)) {
+                        return ok(lessonService.findLessonByJid(lessonJid).getName());
+                    } else {
+                        return notFound();
+                    }
                 } else {
-                    return notFound();
+                    return forbidden();
                 }
             } else {
-                return forbidden();
+                return notFound();
             }
         } else {
-            return notFound();
+            response().setHeader("WWW-Authenticate", "Basic realm=\"" + request().host() + "\"");
+            return unauthorized();
         }
     }
 
@@ -127,6 +137,7 @@ public final class LessonAPIController extends Controller {
         response().setHeader("Access-Control-Allow-Origin", "*");
 
         DynamicForm form = DynamicForm.form().bindFromRequest();
+
         String clientJid = form.get("clientJid");
         String lessonJid = form.get("lessonJid");
         int tOTP = 0;

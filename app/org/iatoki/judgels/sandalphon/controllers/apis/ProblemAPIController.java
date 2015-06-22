@@ -5,7 +5,9 @@ import com.google.gson.Gson;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.commons.IdentityUtils;
+import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
@@ -129,23 +131,31 @@ public final class ProblemAPIController extends Controller {
     }
 
     public Result verifyProblem() {
-        DynamicForm form = DynamicForm.form().bindFromRequest();
-        String clientJid = form.get("clientJid");
-        String clientSecret = form.get("clientSecret");
-        if (clientService.clientExistsByClientJid(clientJid)) {
-            Client client = clientService.findClientByJid(clientJid);
-            if (client.getSecret().equals(clientSecret)) {
-                String problemJid = form.get("problemJid");
-                if (problemService.problemExistsByJid(problemJid)) {
-                    return ok(problemService.findProblemByJid(problemJid).getName());
+        UsernamePasswordCredentials credentials = JudgelsUtils.parseBasicAuthFromRequest(request());
+
+        if (credentials != null) {
+            String clientJid = credentials.getUserName();
+            String clientSecret = credentials.getPassword();
+            if (clientService.clientExistsByClientJid(clientJid)) {
+                Client client = clientService.findClientByJid(clientJid);
+                if (client.getSecret().equals(clientSecret)) {
+                    DynamicForm form = DynamicForm.form().bindFromRequest();
+
+                    String problemJid = form.get("problemJid");
+                    if (problemService.problemExistsByJid(problemJid)) {
+                        return ok(problemService.findProblemByJid(problemJid).getName());
+                    } else {
+                        return notFound();
+                    }
                 } else {
-                    return notFound();
+                    return forbidden();
                 }
             } else {
-                return forbidden();
+                return notFound();
             }
         } else {
-            return notFound();
+            response().setHeader("WWW-Authenticate", "Basic realm=\"" + request().host() + "\"");
+            return unauthorized();
         }
     }
 
