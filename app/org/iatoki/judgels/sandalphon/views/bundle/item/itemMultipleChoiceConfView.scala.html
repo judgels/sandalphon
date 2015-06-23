@@ -82,7 +82,7 @@
 
             @for(i <- 0 until form("choiceAliases").indexes().size()) {
                 addNewChoice();
-                fillChoice(@i, '@form("choiceAliases[" + i + "]").value()', '@form("choiceContents[" + i + "]").value()', @if(form("isCorrects[" + i + "]").value() != null) { true } else { false } );
+                fillChoice(@i, '@form("choiceAliases[" + i + "]").value()', '@Html(form("choiceContents[" + i + "]").value())', @if(form("isCorrects[" + i + "]").value() != null) { true } else { false } );
             }
 
         });
