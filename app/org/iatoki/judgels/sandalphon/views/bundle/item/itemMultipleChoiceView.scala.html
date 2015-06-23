@@ -15,7 +15,7 @@
         <hr />
         @for(choice <- conf.choices) {
             <div class="radio">
-                <label><input type="radio" name="@bundleItem.getJid" value="@choice.getAlias">@choice.getAlias. @Html(choice.getContent)</label>
+                <label><input type="radio" name="@bundleItem.getJid" value="@choice.getAlias"><span class="badge">@choice.getAlias</span> @Html(choice.getContent)</label>
             </div>
         }
     </div>
