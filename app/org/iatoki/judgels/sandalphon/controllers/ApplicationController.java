@@ -2,25 +2,22 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.JudgelsUtils;
-import org.iatoki.judgels.commons.LazyHtml;
-import org.iatoki.judgels.jophiel.controllers.forms.ViewpointForm;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
+import org.iatoki.judgels.jophiel.controllers.forms.ViewpointForm;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.User;
-import org.iatoki.judgels.sandalphon.services.UserService;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.services.JidCacheService;
+import org.iatoki.judgels.sandalphon.services.UserService;
 import play.data.Form;
 import play.db.jpa.Transactional;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import java.io.IOException;
 
-@Transactional
 public final class ApplicationController extends BaseController {
 
     private final Jophiel jophiel;
@@ -54,6 +51,7 @@ public final class ApplicationController extends BaseController {
         }
     }
 
+    @Transactional
     public Result authRole(String returnUri) {
         if ((session().containsKey("username")) && (session().containsKey("role"))) {
             return redirect(returnUri);
@@ -71,6 +69,7 @@ public final class ApplicationController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result afterLogin(String returnUri) {
         if (session().containsKey("role")) {
             JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
@@ -97,6 +96,7 @@ public final class ApplicationController extends BaseController {
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Transactional
     public Result postViewAs() {
         Form<ViewpointForm> form = Form.form(ViewpointForm.class).bindFromRequest();
 
@@ -134,16 +134,5 @@ public final class ApplicationController extends BaseController {
         SandalphonUtils.restoreSession();
 
         return redirect(request().getHeader("Referer"));
-    }
-
-    private Result getResult(LazyHtml content, int statusCode) {
-        switch (statusCode) {
-            case Http.Status.OK:
-                return ok(content.render(0));
-            case Http.Status.NOT_FOUND:
-                return notFound(content.render(0));
-            default:
-                return badRequest(content.render(0));
-        }
     }
 }

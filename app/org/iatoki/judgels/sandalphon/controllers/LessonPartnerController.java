@@ -12,21 +12,21 @@ import org.iatoki.judgels.commons.views.html.layouts.heading3Layout;
 import org.iatoki.judgels.commons.views.html.layouts.heading3WithActionLayout;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.UserInfo;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfigBuilder;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
-import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.LessonPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.LessonPartnerUsernameForm;
-import org.iatoki.judgels.sandalphon.views.html.lesson.partner.listPartnersView;
+import org.iatoki.judgels.sandalphon.services.JidCacheService;
+import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.addPartnerView;
+import org.iatoki.judgels.sandalphon.views.html.lesson.partner.listPartnersView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.updatePartnerView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -39,9 +39,9 @@ import play.mvc.Result;
 import java.io.IOException;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public class LessonPartnerController extends BaseController {
+
     private static final long PAGE_SIZE = 20;
 
     private final Jophiel jophiel;
@@ -52,10 +52,12 @@ public class LessonPartnerController extends BaseController {
         this.lessonService = lessonService;
     }
 
+    @Transactional(readOnly = true)
     public Result viewPartners(long lessonId) throws LessonNotFoundException {
         return listPartners(lessonId, 0, "id", "desc");
     }
 
+    @Transactional(readOnly = true)
     public Result listPartners(long lessonId, long pageIndex, String orderBy, String orderDir) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
@@ -79,6 +81,7 @@ public class LessonPartnerController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result addPartner(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -95,6 +98,7 @@ public class LessonPartnerController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postAddPartner(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -154,6 +158,7 @@ public class LessonPartnerController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updatePartner(long lessonId, long partnerId) throws LessonNotFoundException, LessonPartnerNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -184,6 +189,7 @@ public class LessonPartnerController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdatePartner(long lessonId, long partnerId) throws LessonNotFoundException, LessonPartnerNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);

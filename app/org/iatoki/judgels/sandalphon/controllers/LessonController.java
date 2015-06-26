@@ -33,7 +33,6 @@ import play.mvc.Result;
 
 import java.io.IOException;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class LessonController extends BaseController {
     private static final long PAGE_SIZE = 20;
@@ -44,10 +43,12 @@ public final class LessonController extends BaseController {
         this.lessonService = lessonService;
     }
 
+    @Transactional(readOnly = true)
     public Result index() {
         return listLessons(0, "timeUpdate", "desc", "");
     }
 
+    @Transactional(readOnly = true)
     public Result listLessons(long pageIndex, String sortBy, String orderBy, String filterString) {
         Page<Lesson> lessons = lessonService.pageLessons(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString, IdentityUtils.getUserJid(), ControllerUtils.getInstance().isAdmin());
 
@@ -65,6 +66,7 @@ public final class LessonController extends BaseController {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result createLesson() {
         Form<LessonCreateForm> form = Form.form(LessonCreateForm.class);
@@ -74,6 +76,7 @@ public final class LessonController extends BaseController {
         return showCreateLesson(form);
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postCreateLesson() {
         Form<LessonCreateForm> form = Form.form(LessonCreateForm.class).bindFromRequest();
@@ -126,6 +129,7 @@ public final class LessonController extends BaseController {
         return redirect(routes.LessonClientController.updateClientLessons(lessonId));
     }
 
+    @Transactional(readOnly = true)
     public Result viewLesson(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
@@ -146,6 +150,7 @@ public final class LessonController extends BaseController {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateLesson(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -165,6 +170,7 @@ public final class LessonController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateLesson(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);

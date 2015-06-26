@@ -3,20 +3,19 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.commons.IdentityUtils;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.sandalphon.Problem;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.services.BundleProblemService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import play.db.jpa.Transactional;
 import play.mvc.Http;
 import play.mvc.Result;
 
 import java.io.IOException;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class BundleProblemController extends BaseController {
 
@@ -28,6 +27,7 @@ public final class BundleProblemController extends BaseController {
         this.bundleProblemService = bundleProblemService;
     }
 
+    @Transactional
     public Result createBundleProblem() {
         if (!ProblemControllerUtils.wasProblemJustCreated()) {
             return badRequest();

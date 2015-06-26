@@ -40,9 +40,9 @@ import play.mvc.Result;
 import java.io.IOException;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProgrammingProblemPartnerController extends BaseController {
+
     private final Jophiel jophiel;
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
@@ -53,6 +53,7 @@ public final class ProgrammingProblemPartnerController extends BaseController {
         this.programmingProblemService = programmingProblemService;
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result addPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -70,6 +71,7 @@ public final class ProgrammingProblemPartnerController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postAddPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -140,6 +142,7 @@ public final class ProgrammingProblemPartnerController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -178,6 +181,7 @@ public final class ProgrammingProblemPartnerController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);

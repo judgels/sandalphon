@@ -1,8 +1,8 @@
 package org.iatoki.judgels.sandalphon.controllers.apis;
 
 import org.iatoki.judgels.sandalphon.services.ClientService;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.GraderService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
@@ -13,8 +13,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
-@Transactional
 public final class ProgrammingProblemAPIController extends Controller {
+
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
     private final ClientService clientService;
@@ -27,6 +27,7 @@ public final class ProgrammingProblemAPIController extends Controller {
         this.graderService = graderService;
     }
 
+    @Transactional(readOnly = true)
     public Result downloadGradingFiles() {
         DynamicForm form = DynamicForm.form().bindFromRequest();
 
@@ -48,6 +49,7 @@ public final class ProgrammingProblemAPIController extends Controller {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result getGradingLastUpdateTime() {
         DynamicForm form = DynamicForm.form().bindFromRequest();
 

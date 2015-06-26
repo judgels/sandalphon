@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 
 @Transactional
 public final class LessonAPIController extends Controller {
+
     private final LessonService lessonService;
     private final ClientService clientService;
 
@@ -45,6 +46,7 @@ public final class LessonAPIController extends Controller {
         this.clientService = clientService;
     }
 
+    @Transactional(readOnly = true)
     public Result renderMediaById(long lessonId, String filename) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
         String mediaURL = lessonService.getStatementMediaFileURL(IdentityUtils.getUserJid(), lesson.getJid(), filename);
@@ -75,6 +77,7 @@ public final class LessonAPIController extends Controller {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result renderMediaByJid(String lessonJid, String filename) {
         String mediaURL = lessonService.getStatementMediaFileURL(null, lessonJid, filename);
 
@@ -104,6 +107,7 @@ public final class LessonAPIController extends Controller {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result verifyLesson() {
         UsernamePasswordCredentials credentials = JudgelsUtils.parseBasicAuthFromRequest(request());
 
@@ -133,6 +137,7 @@ public final class LessonAPIController extends Controller {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result viewLessonStatementTOTP() {
         response().setHeader("Access-Control-Allow-Origin", "*");
 

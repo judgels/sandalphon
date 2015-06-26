@@ -11,21 +11,21 @@ import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingSource;
+import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.Submission;
 import org.iatoki.judgels.sandalphon.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.SubmissionException;
 import org.iatoki.judgels.sandalphon.SubmissionNotFoundException;
-import org.iatoki.judgels.sandalphon.services.SubmissionService;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
-import org.iatoki.judgels.sandalphon.Problem;
-import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
-import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
-import org.iatoki.judgels.sandalphon.programming.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
+import org.iatoki.judgels.sandalphon.programming.LanguageRestrictionAdapter;
+import org.iatoki.judgels.sandalphon.services.JidCacheService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
+import org.iatoki.judgels.sandalphon.services.SubmissionService;
 import org.iatoki.judgels.sandalphon.views.html.programming.submission.listSubmissionsView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -38,9 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProgrammingProblemSubmissionController extends BaseController {
+
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
@@ -55,6 +55,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
         this.submissionFileProvider = submissionFileProvider;
     }
 
+    @Transactional
     public Result postSubmit(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -95,10 +96,12 @@ public final class ProgrammingProblemSubmissionController extends BaseController
         }
     }
 
+    @Transactional(readOnly = true)
     public Result viewSubmissions(long problemId) throws ProblemNotFoundException  {
         return listSubmissions(problemId, 0, "id", "desc");
     }
 
+    @Transactional(readOnly = true)
     public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -122,6 +125,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
         }
     }
 
+    @Transactional(readOnly = true)
     public Result viewSubmission(long problemId, long submissionId) throws ProblemNotFoundException, SubmissionNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -153,6 +157,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
         }
     }
 
+    @Transactional
     public Result regradeSubmission(long problemId, long submissionId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException, SubmissionNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -169,6 +174,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
         }
     }
 
+    @Transactional
     public Result regradeSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 

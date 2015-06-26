@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class BundleItemController extends BaseController {
     private static final long PAGE_SIZE = 20;
@@ -49,10 +48,12 @@ public final class BundleItemController extends BaseController {
         this.bundleItemService = bundleItemService;
     }
 
+    @Transactional(readOnly = true)
     public Result viewItems(long problemId) throws ProblemNotFoundException  {
         return listCreateItems(problemId, 0, "id", "desc", "");
     }
 
+    @Transactional(readOnly = true)
     public Result listCreateItems(long problemId, long pageIndex, String orderBy, String orderDir, String filterString) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -70,6 +71,7 @@ public final class BundleItemController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result createItem(long problemId, String itemType, long page, String orderBy, String orderDir, String filterString) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -102,6 +104,7 @@ public final class BundleItemController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postCreateItem(long problemId, String itemType, long page, String orderBy, String orderDir, String filterString) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -150,6 +153,7 @@ public final class BundleItemController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateItem(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -183,6 +187,7 @@ public final class BundleItemController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateItem(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -217,6 +222,7 @@ public final class BundleItemController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result moveItemUp(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -237,6 +243,7 @@ public final class BundleItemController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result moveItemDown(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -257,6 +264,7 @@ public final class BundleItemController extends BaseController {
         }
     }
 
+    @Transactional
     public Result removeItem(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 

@@ -27,15 +27,16 @@ import play.mvc.Result;
 import java.io.IOException;
 import java.util.List;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class LessonVersionController extends BaseController {
+
     private final LessonService lessonService;
 
     public LessonVersionController(LessonService lessonService) {
         this.lessonService = lessonService;
     }
 
+    @Transactional(readOnly = true)
     public Result listVersionHistory(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
@@ -61,6 +62,7 @@ public final class LessonVersionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result restoreVersionHistory(long lessonId, String hash) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
         boolean isClean = !lessonService.userCloneExists(IdentityUtils.getUserJid(), lesson.getJid());
@@ -76,6 +78,7 @@ public final class LessonVersionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result viewVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -93,6 +96,7 @@ public final class LessonVersionController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postCommitVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -128,6 +132,7 @@ public final class LessonVersionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result updateVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
@@ -146,6 +151,7 @@ public final class LessonVersionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result discardVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 

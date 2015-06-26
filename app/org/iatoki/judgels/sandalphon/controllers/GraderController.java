@@ -29,7 +29,6 @@ import play.mvc.Result;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
-@Transactional
 public final class GraderController extends BaseController {
 
     private static final long PAGE_SIZE = 20;
@@ -40,23 +39,30 @@ public final class GraderController extends BaseController {
         this.graderService = graderService;
     }
 
+    @Transactional(readOnly = true)
     public Result index() {
         return list(0, "id", "asc", "");
     }
 
-    private Result showCreate(Form<GraderUpsertForm> form) {
-        LazyHtml content = new LazyHtml(createView.render(form));
-        content.appendLayout(c -> headingLayout.render(Messages.get("grader.create"), c));
+    @Transactional(readOnly = true)
+    public Result list(long pageIndex, String orderBy, String orderDir, String filterString) {
+        Page<Grader> currentPage = graderService.pageGraders(pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
+
+        LazyHtml content = new LazyHtml(listView.render(currentPage, orderBy, orderDir, filterString));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.list"), new InternalLink(Messages.get("commons.create"), routes.GraderController.create()), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
-                new InternalLink(Messages.get("grader.create"), routes.GraderController.create())
+                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index())
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Create");
+
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - List");
+
+        ControllerUtils.getInstance().addActivityLog("Open graders <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result create() {
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class);
@@ -66,6 +72,7 @@ public final class GraderController extends BaseController {
         return showCreate(form);
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postCreate() {
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).bindFromRequest();
@@ -82,14 +89,15 @@ public final class GraderController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result view(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
         LazyHtml content = new LazyHtml(viewView.render(grader));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), new InternalLink(Messages.get("commons.update"), routes.GraderController.update(graderId)), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-              new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
-              new InternalLink(Messages.get("grader.view"), routes.GraderController.view(graderId))
+                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
+                new InternalLink(Messages.get("grader.view"), routes.GraderController.view(graderId))
         ));
         ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - View");
 
@@ -98,19 +106,7 @@ public final class GraderController extends BaseController {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdate(Form<GraderUpsertForm> form, Grader grader) {
-        LazyHtml content = new LazyHtml(updateView.render(form, grader.getId()));
-        content.appendLayout(c -> headingLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
-                new InternalLink(Messages.get("grader.update"), routes.GraderController.update(grader.getId()))
-        ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Update");
-
-        return ControllerUtils.getInstance().lazyOk(content);
-    }
-
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result update(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
@@ -123,6 +119,7 @@ public final class GraderController extends BaseController {
         return showUpdate(form, grader);
     }
 
+    @Transactional
     public Result postUpdate(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
         Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).bindFromRequest();
@@ -139,19 +136,28 @@ public final class GraderController extends BaseController {
         }
     }
 
-    public Result list(long pageIndex, String orderBy, String orderDir, String filterString) {
-        Page<Grader> currentPage = graderService.pageGraders(pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
-
-        LazyHtml content = new LazyHtml(listView.render(currentPage, orderBy, orderDir, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.list"), new InternalLink(Messages.get("commons.create"), routes.GraderController.create()), c));
+    private Result showCreate(Form<GraderUpsertForm> form) {
+        LazyHtml content = new LazyHtml(createView.render(form));
+        content.appendLayout(c -> headingLayout.render(Messages.get("grader.create"), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-              new InternalLink(Messages.get("grader.graders"), routes.GraderController.index())
+                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
+                new InternalLink(Messages.get("grader.create"), routes.GraderController.create())
         ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Create");
 
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - List");
+        return ControllerUtils.getInstance().lazyOk(content);
+    }
 
-        ControllerUtils.getInstance().addActivityLog("Open graders <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+    private Result showUpdate(Form<GraderUpsertForm> form, Grader grader) {
+        LazyHtml content = new LazyHtml(updateView.render(form, grader.getId()));
+        content.appendLayout(c -> headingLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), c));
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
+                new InternalLink(Messages.get("grader.update"), routes.GraderController.update(grader.getId()))
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Update");
 
         return ControllerUtils.getInstance().lazyOk(content);
     }

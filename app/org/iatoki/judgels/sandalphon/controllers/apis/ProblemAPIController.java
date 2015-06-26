@@ -13,23 +13,23 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
-import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
+import org.iatoki.judgels.sandalphon.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.bundle.BundleItem;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemAdapters;
-import org.iatoki.judgels.sandalphon.services.BundleItemService;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
-import org.iatoki.judgels.sandalphon.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.programming.LanguageRestrictionAdapter;
+import org.iatoki.judgels.sandalphon.services.BundleItemService;
+import org.iatoki.judgels.sandalphon.services.BundleProblemService;
+import org.iatoki.judgels.sandalphon.services.ClientService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.views.html.bundleStatementView;
 import org.iatoki.judgels.sandalphon.views.html.statementLanguageSelectionLayout;
-import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
 import play.mvc.Controller;
@@ -51,8 +51,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Transactional
 public final class ProblemAPIController extends Controller {
+
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
     private final BundleItemService bundleItemService;
@@ -67,6 +67,7 @@ public final class ProblemAPIController extends Controller {
         this.clientService = clientService;
     }
 
+    @Transactional(readOnly = true)
     public Result renderMediaById(long problemId, String imageFilename) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         String mediaURL = problemService.getStatementMediaFileURL(IdentityUtils.getUserJid(), problem.getJid(), imageFilename);
@@ -99,6 +100,7 @@ public final class ProblemAPIController extends Controller {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result renderMediaByJid(String problemJid, String imageFilename) {
         String mediaURL = problemService.getStatementMediaFileURL(null, problemJid, imageFilename);
 
@@ -130,6 +132,7 @@ public final class ProblemAPIController extends Controller {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result verifyProblem() {
         UsernamePasswordCredentials credentials = JudgelsUtils.parseBasicAuthFromRequest(request());
 
@@ -159,6 +162,7 @@ public final class ProblemAPIController extends Controller {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result viewProblemStatementTOTP() {
         response().setHeader("Access-Control-Allow-Origin", "*");
 

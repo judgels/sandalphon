@@ -8,19 +8,19 @@ import org.iatoki.judgels.commons.views.html.layouts.heading3WithActionLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemPartner;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.partner.listPartnersView;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public class ProblemPartnerController extends BaseController {
+
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
@@ -29,10 +29,12 @@ public class ProblemPartnerController extends BaseController {
         this.problemService = problemService;
     }
 
+    @Transactional(readOnly = true)
     public Result viewPartners(long problemId) throws ProblemNotFoundException {
         return listPartners(problemId, 0, "id", "desc");
     }
 
+    @Transactional(readOnly = true)
     public Result listPartners(long problemId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -56,6 +58,7 @@ public class ProblemPartnerController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result addPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -76,6 +79,7 @@ public class ProblemPartnerController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result updatePartner(long problemId, long partnerId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 

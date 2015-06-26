@@ -5,14 +5,14 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientLesson;
-import org.iatoki.judgels.sandalphon.forms.ClientLessonUpsertForm;
-import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
-import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.forms.ClientLessonUpsertForm;
+import org.iatoki.judgels.sandalphon.services.ClientService;
+import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.views.html.lesson.client.updateClientLessonsView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.client.viewClientLessonView;
 import play.data.Form;
@@ -25,9 +25,9 @@ import play.mvc.Result;
 
 import java.util.List;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class LessonClientController extends BaseController {
+
     private final LessonService lessonService;
     private final ClientService clientService;
 
@@ -36,6 +36,7 @@ public final class LessonClientController extends BaseController {
         this.clientService = clientService;
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateClientLessons(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -53,6 +54,7 @@ public final class LessonClientController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateClientLessons(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -83,6 +85,7 @@ public final class LessonClientController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result viewClientLesson(long lessonId, long clientLessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
         ClientLesson clientLesson = clientService.findClientLessonByClientLessonId(clientLessonId);

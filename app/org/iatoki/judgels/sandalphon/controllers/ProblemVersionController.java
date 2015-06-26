@@ -27,15 +27,16 @@ import play.mvc.Result;
 import java.io.IOException;
 import java.util.List;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProblemVersionController extends BaseController {
+
     private final ProblemService problemService;
 
     public ProblemVersionController(ProblemService problemService) {
         this.problemService = problemService;
     }
 
+    @Transactional(readOnly = true)
     public Result listVersionHistory(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -61,6 +62,7 @@ public final class ProblemVersionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result restoreVersionHistory(long problemId, String hash) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
@@ -76,6 +78,7 @@ public final class ProblemVersionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result viewVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -93,6 +96,7 @@ public final class ProblemVersionController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postCommitVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -128,6 +132,7 @@ public final class ProblemVersionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result updateVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -146,6 +151,7 @@ public final class ProblemVersionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result discardVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 

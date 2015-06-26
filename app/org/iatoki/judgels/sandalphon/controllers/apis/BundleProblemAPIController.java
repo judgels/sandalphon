@@ -3,14 +3,14 @@ package org.iatoki.judgels.sandalphon.controllers.apis;
 import com.google.gson.Gson;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.commons.JudgelsUtils;
+import org.iatoki.judgels.sandalphon.BundleAnswer;
+import org.iatoki.judgels.sandalphon.BundleGradingResult;
 import org.iatoki.judgels.sandalphon.BundleProblemGraderImpl;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
-import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
-import org.iatoki.judgels.sandalphon.BundleAnswer;
-import org.iatoki.judgels.sandalphon.BundleGradingResult;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
 import play.mvc.Controller;
@@ -18,8 +18,8 @@ import play.mvc.Result;
 
 import java.io.IOException;
 
-@Transactional
 public final class BundleProblemAPIController extends Controller {
+
     private final ProblemService problemService;
     private final ClientService clientService;
     private final BundleProblemGraderImpl bundleProblemGrader;
@@ -30,6 +30,7 @@ public final class BundleProblemAPIController extends Controller {
         this.bundleProblemGrader = bundleProblemGrader;
     }
 
+    @Transactional(readOnly = true)
     public Result gradeProblem() {
         UsernamePasswordCredentials credentials = JudgelsUtils.parseBasicAuthFromRequest(request());
 

@@ -45,9 +45,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProgrammingProblemGradingController extends BaseController {
+
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
 
@@ -56,6 +56,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         this.programmingProblemService = programmingProblemService;
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateGradingEngine(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -78,6 +79,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateGradingEngine(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -119,6 +121,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateGradingConfig(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -149,6 +152,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateGradingConfig(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -190,6 +194,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional
     public Result updateGradingConfigByTokilibFormat(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -232,6 +237,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional
     public Result updateGradingConfigByAutoPopulation(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -273,6 +279,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result listGradingTestDataFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -289,6 +296,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUploadGradingTestDataFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -343,6 +351,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result listGradingHelperFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -359,6 +368,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUploadGradingHelperFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -413,6 +423,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result downloadGradingTestDataFile(long id, String filename) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(id);
 
@@ -433,6 +444,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result downloadGradingHelperFile(long id, String filename) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(id);
 
@@ -453,6 +465,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateLanguageRestriction(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -479,6 +492,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateLanguageRestriction(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);

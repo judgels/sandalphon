@@ -10,22 +10,22 @@ import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.heading3Layout;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.UserInfo;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemPartner;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfigBuilder;
 import org.iatoki.judgels.sandalphon.ProblemPartnerNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemPartnerConfig;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm;
 import org.iatoki.judgels.sandalphon.forms.bundle.BundlePartnerUpsertForm;
+import org.iatoki.judgels.sandalphon.services.BundleProblemService;
+import org.iatoki.judgels.sandalphon.services.JidCacheService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.bundle.partner.addPartnerView;
 import org.iatoki.judgels.sandalphon.views.html.bundle.partner.updatePartnerView;
 import play.data.Form;
@@ -39,9 +39,9 @@ import play.mvc.Result;
 import java.io.IOException;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class BundleProblemPartnerController extends BaseController {
+
     private final Jophiel jophiel;
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
@@ -52,6 +52,7 @@ public final class BundleProblemPartnerController extends BaseController {
         this.bundleProblemService = bundleProblemService;
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result addPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -69,6 +70,7 @@ public final class BundleProblemPartnerController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postAddPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -137,6 +139,7 @@ public final class BundleProblemPartnerController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -174,6 +177,7 @@ public final class BundleProblemPartnerController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);

@@ -11,13 +11,13 @@ import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.commons.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ProblemCreateForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.createProblemView;
 import org.iatoki.judgels.sandalphon.views.html.problem.listProblemsView;
 import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView;
@@ -31,9 +31,9 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProblemController extends BaseController {
+
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
@@ -42,10 +42,12 @@ public final class ProblemController extends BaseController {
         this.problemService = problemService;
     }
 
+    @Transactional(readOnly = true)
     public Result index() {
         return listProblems(0, "timeUpdate", "desc", "");
     }
 
+    @Transactional(readOnly = true)
     public Result listProblems(long pageIndex, String sortBy, String orderBy, String filterString) {
         Page<Problem> problems = problemService.pageProblems(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString, IdentityUtils.getUserJid(), ControllerUtils.getInstance().isAdmin());
 
@@ -63,6 +65,7 @@ public final class ProblemController extends BaseController {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result createProblem() {
         Form<ProblemCreateForm> form = Form.form(ProblemCreateForm.class);
@@ -72,6 +75,7 @@ public final class ProblemController extends BaseController {
         return showCreateProblem(form);
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postCreateProblem() {
         Form<ProblemCreateForm> form = Form.form(ProblemCreateForm.class).bindFromRequest();
@@ -124,6 +128,7 @@ public final class ProblemController extends BaseController {
         return redirect(routes.ProblemClientController.updateClientProblems(problemId));
     }
 
+    @Transactional(readOnly = true)
     public Result viewProblem(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -144,6 +149,7 @@ public final class ProblemController extends BaseController {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateProblem(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -163,6 +169,7 @@ public final class ProblemController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateProblem(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);

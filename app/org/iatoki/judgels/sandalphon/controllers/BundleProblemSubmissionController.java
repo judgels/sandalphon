@@ -34,9 +34,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class BundleProblemSubmissionController extends BaseController {
+
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
@@ -51,6 +51,7 @@ public final class BundleProblemSubmissionController extends BaseController {
         this.submissionFileProvider = submissionFileProvider;
     }
 
+    @Transactional
     public Result postSubmit(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -70,10 +71,12 @@ public final class BundleProblemSubmissionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result viewSubmissions(long problemId) throws ProblemNotFoundException  {
         return listSubmissions(problemId, 0, "id", "desc");
     }
 
+    @Transactional(readOnly = true)
     public Result listSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -96,6 +99,7 @@ public final class BundleProblemSubmissionController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result viewSubmission(long problemId, long submissionId) throws ProblemNotFoundException, BundleSubmissionNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -124,6 +128,7 @@ public final class BundleProblemSubmissionController extends BaseController {
         }
     }
 
+    @Transactional
     public Result regradeSubmission(long problemId, long submissionId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException, BundleSubmissionNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -144,6 +149,7 @@ public final class BundleProblemSubmissionController extends BaseController {
         }
     }
 
+    @Transactional
     public Result regradeSubmissions(long problemId, long pageIndex, String orderBy, String orderDir) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 

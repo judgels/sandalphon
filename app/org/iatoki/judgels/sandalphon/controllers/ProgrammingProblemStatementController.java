@@ -7,17 +7,17 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
-import org.iatoki.judgels.sandalphon.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
-import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
-import org.iatoki.judgels.sandalphon.programming.LanguageRestrictionAdapter;
+import org.iatoki.judgels.sandalphon.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
+import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
+import org.iatoki.judgels.sandalphon.programming.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
 import play.mvc.Http;
@@ -26,9 +26,9 @@ import play.mvc.Result;
 import java.io.IOException;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProgrammingProblemStatementController extends BaseController {
+
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
 
@@ -37,6 +37,7 @@ public final class ProgrammingProblemStatementController extends BaseController 
         this.programmingProblemService = programmingProblemService;
     }
 
+    @Transactional(readOnly = true)
     public Result viewStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         try {

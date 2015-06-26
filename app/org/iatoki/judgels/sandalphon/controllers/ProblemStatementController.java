@@ -38,15 +38,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public class ProblemStatementController extends BaseController {
+
     private final ProblemService problemService;
 
     public ProblemStatementController(ProblemService problemService) {
         this.problemService = problemService;
     }
 
+    @Transactional(readOnly = true)
     public Result viewStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -77,6 +78,7 @@ public class ProblemStatementController extends BaseController {
         return redirect(routes.ProblemStatementController.updateStatement(problemId));
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -115,6 +117,7 @@ public class ProblemStatementController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -158,6 +161,7 @@ public class ProblemStatementController extends BaseController {
     }
 
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result listStatementMediaFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -173,6 +177,7 @@ public class ProblemStatementController extends BaseController {
         return showListStatementMediaFiles(form, problem, mediaFiles, isAllowedToUploadMediaFiles);
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUploadStatementMediaFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -229,6 +234,7 @@ public class ProblemStatementController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result downloadStatementMediaFile(long id, String filename) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(id);
         String mediaURL = problemService.getStatementMediaFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
@@ -244,6 +250,7 @@ public class ProblemStatementController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result listStatementLanguages(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -272,7 +279,7 @@ public class ProblemStatementController extends BaseController {
         }
     }
 
-
+    @Transactional
     public Result postAddStatementLanguage(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -300,6 +307,7 @@ public class ProblemStatementController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result enableStatementLanguage(long problemId, String languageCode) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -325,7 +333,7 @@ public class ProblemStatementController extends BaseController {
         }
     }
 
-
+    @Transactional(readOnly = true)
     public Result disableStatementLanguage(long problemId, String languageCode) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
@@ -355,6 +363,7 @@ public class ProblemStatementController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result makeDefaultStatementLanguage(long problemId, String languageCode) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 

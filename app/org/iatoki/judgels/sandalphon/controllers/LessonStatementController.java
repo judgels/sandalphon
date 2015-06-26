@@ -38,15 +38,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public class LessonStatementController extends BaseController {
+
     private final LessonService lessonService;
 
     public LessonStatementController(LessonService lessonService) {
         this.lessonService = lessonService;
     }
 
+    @Transactional(readOnly = true)
     public Result viewStatement(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
         try {
@@ -107,6 +108,7 @@ public class LessonStatementController extends BaseController {
         return redirect(routes.LessonStatementController.updateStatement(lessonId));
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateStatement(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -141,6 +143,7 @@ public class LessonStatementController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateStatement(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -183,7 +186,7 @@ public class LessonStatementController extends BaseController {
         }
     }
 
-
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result listStatementMediaFiles(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -199,6 +202,7 @@ public class LessonStatementController extends BaseController {
         return showListStatementMediaFiles(form, lesson, mediaFiles, isAllowedToUploadMediaFiles);
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUploadStatementMediaFiles(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
@@ -255,6 +259,7 @@ public class LessonStatementController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result downloadStatementMediaFile(long id, String filename) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(id);
         String mediaURL = lessonService.getStatementMediaFileURL(IdentityUtils.getUserJid(), lesson.getJid(), filename);
@@ -270,6 +275,7 @@ public class LessonStatementController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result listStatementLanguages(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
@@ -298,7 +304,7 @@ public class LessonStatementController extends BaseController {
         }
     }
 
-
+    @Transactional
     public Result postAddStatementLanguage(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
@@ -326,6 +332,7 @@ public class LessonStatementController extends BaseController {
         }
     }
 
+    @Transactional
     public Result enableStatementLanguage(long lessonId, String languageCode) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
@@ -351,7 +358,7 @@ public class LessonStatementController extends BaseController {
         }
     }
 
-
+    @Transactional
     public Result disableStatementLanguage(long lessonId, String languageCode) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
@@ -381,6 +388,7 @@ public class LessonStatementController extends BaseController {
         }
     }
 
+    @Transactional
     public Result makeDefaultStatementLanguage(long lessonId, String languageCode) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 

@@ -7,16 +7,16 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.bundle.BundleItem;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemAdapters;
-import org.iatoki.judgels.sandalphon.services.BundleItemService;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.services.BundleItemService;
+import org.iatoki.judgels.sandalphon.services.BundleProblemService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.bundleStatementView;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
@@ -28,9 +28,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class BundleProblemStatementController extends BaseController {
+
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
     private final BundleItemService bundleItemService;
@@ -41,6 +41,7 @@ public final class BundleProblemStatementController extends BaseController {
         this.bundleItemService = bundleItemService;
     }
 
+    @Transactional(readOnly = true)
     public Result viewStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         try {

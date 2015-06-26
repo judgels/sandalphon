@@ -5,14 +5,14 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
-import org.iatoki.judgels.sandalphon.forms.ClientProblemUpsertForm;
-import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.forms.ClientProblemUpsertForm;
+import org.iatoki.judgels.sandalphon.services.ClientService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.client.updateClientProblemsView;
 import org.iatoki.judgels.sandalphon.views.html.problem.client.viewClientProblemView;
 import play.data.Form;
@@ -25,9 +25,9 @@ import play.mvc.Result;
 
 import java.util.List;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProblemClientController extends BaseController {
+
     private final ProblemService problemService;
     private final ClientService clientService;
 
@@ -36,6 +36,7 @@ public final class ProblemClientController extends BaseController {
         this.clientService = clientService;
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result updateClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -53,6 +54,7 @@ public final class ProblemClientController extends BaseController {
         }
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postUpdateClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
@@ -83,6 +85,7 @@ public final class ProblemClientController extends BaseController {
         }
     }
 
+    @Transactional(readOnly = true)
     public Result viewClientProblem(long problemId, long clientProblemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);

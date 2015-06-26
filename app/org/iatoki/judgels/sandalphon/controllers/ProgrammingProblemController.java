@@ -7,14 +7,14 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.headingLayout;
 import org.iatoki.judgels.sandalphon.Problem;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.programming.ProgrammingProblemCreateForm;
-import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.views.html.programming.createProgrammingProblemView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -26,7 +26,6 @@ import play.mvc.Result;
 
 import java.io.IOException;
 
-@Transactional
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class ProgrammingProblemController extends BaseController {
 
@@ -38,6 +37,7 @@ public final class ProgrammingProblemController extends BaseController {
         this.programmingProblemService = programmingProblemService;
     }
 
+    @Transactional(readOnly = true)
     @AddCSRFToken
     public Result createProgrammingProblem() {
         if (!ProblemControllerUtils.wasProblemJustCreated()) {
@@ -51,6 +51,7 @@ public final class ProgrammingProblemController extends BaseController {
         return showCreateProgrammingProblem(form);
     }
 
+    @Transactional
     @RequireCSRFCheck
     public Result postCreateProgrammingProblem() {
         if (!ProblemControllerUtils.wasProblemJustCreated()) {
@@ -83,18 +84,6 @@ public final class ProgrammingProblemController extends BaseController {
         }
     }
 
-    private Result showCreateProgrammingProblem(Form<ProgrammingProblemCreateForm> form) {
-        LazyHtml content = new LazyHtml(createProgrammingProblemView.render(form, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
-        content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
-        ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Programming Problem - Create");
-
-        return ControllerUtils.getInstance().lazyOk(content);
-    }
-
     public Result jumpToGrading(long id) {
         ControllerUtils.getInstance().addActivityLog("Jump to programming problem grading " + id + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -105,5 +94,17 @@ public final class ProgrammingProblemController extends BaseController {
         ControllerUtils.getInstance().addActivityLog("Jump to programming problem submissions " + id + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemSubmissionController.viewSubmissions(id));
+    }
+
+    private Result showCreateProgrammingProblem(Form<ProgrammingProblemCreateForm> form) {
+        LazyHtml content = new LazyHtml(createProgrammingProblemView.render(form, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
+        content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Programming Problem - Create");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 }
