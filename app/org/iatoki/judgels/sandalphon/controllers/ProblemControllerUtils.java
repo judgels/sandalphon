@@ -111,7 +111,7 @@ public final class ProblemControllerUtils {
         ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
         internalLinks
                 .add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()))
-                .add(new InternalLink(problem.getName(), routes.ProblemController.viewProblem(problem.getId())));
+                .add(new InternalLink(problem.getName(), routes.ProblemController.enterProblem(problem.getId())));
 
         return internalLinks;
     }
