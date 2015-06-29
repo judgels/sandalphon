@@ -69,7 +69,7 @@ public final class ApplicationController extends BaseController {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Result afterLogin(String returnUri) {
         if (session().containsKey("role")) {
             JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
@@ -90,6 +90,7 @@ public final class ApplicationController extends BaseController {
         }
     }
 
+    @Transactional
     public Result afterProfile(String returnUri) {
         JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
         return redirect(returnUri);
