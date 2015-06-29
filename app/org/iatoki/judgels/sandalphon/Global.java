@@ -18,6 +18,7 @@ import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
 import org.iatoki.judgels.sandalphon.services.SubmissionService;
 import org.iatoki.judgels.sandalphon.services.impls.BundleItemServiceImpl;
 import org.iatoki.judgels.sandalphon.services.BundleProblemService;
+import org.iatoki.judgels.sandalphon.services.impls.BundleProblemGraderImpl;
 import org.iatoki.judgels.sandalphon.services.impls.BundleProblemServiceImpl;
 import org.iatoki.judgels.sandalphon.services.impls.BundleSubmissionServiceImpl;
 import org.iatoki.judgels.sandalphon.controllers.ApplicationController;

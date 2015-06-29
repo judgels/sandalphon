@@ -9,6 +9,7 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.ListTableSelectionForm;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.controllers.BaseController;
+import org.iatoki.judgels.sandalphon.BundleDetailResult;
 import org.iatoki.judgels.sandalphon.services.JidCacheService;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
@@ -108,7 +109,7 @@ public final class BundleProblemSubmissionController extends BaseController {
                 BundleSubmission submission = submissionService.findSubmissionById(submissionId);
                 BundleAnswer answer = submissionService.createBundleAnswerFromPastSubmission(submissionFileProvider, null, submission.getJid());
 
-                LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), new TypeToken<Map<String, Double>>(){}.getType()), answer, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
+                LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), new TypeToken<Map<String, BundleDetailResult>>(){}.getType()), answer, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
 
                 BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
                 ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);

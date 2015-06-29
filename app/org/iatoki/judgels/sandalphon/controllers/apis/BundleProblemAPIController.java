@@ -5,7 +5,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.commons.JudgelsUtils;
 import org.iatoki.judgels.sandalphon.BundleAnswer;
 import org.iatoki.judgels.sandalphon.BundleGradingResult;
-import org.iatoki.judgels.sandalphon.BundleProblemGraderImpl;
+import org.iatoki.judgels.sandalphon.services.impls.BundleProblemGraderImpl;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.Problem;
