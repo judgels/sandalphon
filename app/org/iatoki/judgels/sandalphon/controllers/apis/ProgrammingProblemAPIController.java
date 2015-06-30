@@ -1,6 +1,5 @@
 package org.iatoki.judgels.sandalphon.controllers.apis;
 
-import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.GraderService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
@@ -9,21 +8,25 @@ import play.db.jpa.Transactional;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
+@Singleton
+@Named
 public final class ProgrammingProblemAPIController extends Controller {
 
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
-    private final ClientService clientService;
     private final GraderService graderService;
 
-    public ProgrammingProblemAPIController(ProblemService problemService, ProgrammingProblemService programmingProblemService, ClientService clientService, GraderService graderService) {
+    @Inject
+    public ProgrammingProblemAPIController(ProblemService problemService, ProgrammingProblemService programmingProblemService, GraderService graderService) {
         this.problemService = problemService;
         this.programmingProblemService = programmingProblemService;
-        this.clientService = clientService;
         this.graderService = graderService;
     }
 

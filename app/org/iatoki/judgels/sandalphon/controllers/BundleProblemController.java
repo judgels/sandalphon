@@ -14,14 +14,20 @@ import play.db.jpa.Transactional;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class BundleProblemController extends BaseController {
 
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
 
+    @Inject
     public BundleProblemController(ProblemService problemService, BundleProblemService bundleProblemService) {
         this.problemService = problemService;
         this.bundleProblemService = bundleProblemService;

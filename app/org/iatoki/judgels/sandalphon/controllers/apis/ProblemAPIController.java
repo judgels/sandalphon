@@ -24,7 +24,6 @@ import org.iatoki.judgels.sandalphon.bundle.BundleItemAdapters;
 import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.programming.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.services.BundleItemService;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
@@ -38,6 +37,9 @@ import play.mvc.Results;
 import play.twirl.api.Html;
 
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -51,17 +53,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Singleton
+@Named
 public final class ProblemAPIController extends Controller {
 
     private final ProblemService problemService;
-    private final BundleProblemService bundleProblemService;
     private final BundleItemService bundleItemService;
     private final ProgrammingProblemService programmingProblemService;
     private final ClientService clientService;
 
-    public ProblemAPIController(ProblemService problemService, BundleProblemService bundleProblemService, BundleItemService bundleItemService, ProgrammingProblemService programmingProblemService, ClientService clientService) {
+    @Inject
+    public ProblemAPIController(ProblemService problemService, BundleItemService bundleItemService, ProgrammingProblemService programmingProblemService, ClientService clientService) {
         this.problemService = problemService;
-        this.bundleProblemService = bundleProblemService;
         this.bundleItemService = bundleItemService;
         this.programmingProblemService = programmingProblemService;
         this.clientService = clientService;

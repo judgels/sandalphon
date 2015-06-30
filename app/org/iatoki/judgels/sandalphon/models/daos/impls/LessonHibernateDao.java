@@ -8,13 +8,18 @@ import org.iatoki.judgels.sandalphon.models.entities.LessonModel_;
 import org.iatoki.judgels.sandalphon.models.entities.ProblemModel_;
 import play.db.jpa.JPA;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
 import java.util.List;
 
+@Singleton
+@Named("lessonDao")
 public final class LessonHibernateDao extends AbstractJudgelsHibernateDao<LessonModel> implements LessonDao {
+
     public LessonHibernateDao() {
         super(LessonModel.class);
     }

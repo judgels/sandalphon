@@ -23,6 +23,9 @@ import play.mvc.Result;
 import play.mvc.Results;
 import play.twirl.api.Html;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -35,12 +38,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Transactional
+@Singleton
+@Named
 public final class LessonAPIController extends Controller {
 
     private final LessonService lessonService;
     private final ClientService clientService;
 
+    @Inject
     public LessonAPIController(LessonService lessonService, ClientService clientService) {
         this.lessonService = lessonService;
         this.clientService = clientService;

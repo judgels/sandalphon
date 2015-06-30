@@ -24,14 +24,20 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class ProgrammingProblemController extends BaseController {
 
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
 
+    @Inject
     public ProgrammingProblemController(ProblemService problemService, ProgrammingProblemService programmingProblemService) {
         this.problemService = problemService;
         this.programmingProblemService = programmingProblemService;

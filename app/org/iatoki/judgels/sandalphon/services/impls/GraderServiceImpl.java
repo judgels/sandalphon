@@ -11,12 +11,18 @@ import org.iatoki.judgels.sandalphon.programming.Grader;
 import org.iatoki.judgels.sandalphon.programming.GraderNotFoundException;
 import org.iatoki.judgels.sandalphon.services.GraderService;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.List;
 
+@Singleton
+@Named("graderService")
 public final class GraderServiceImpl implements GraderService {
 
     private final GraderDao graderDao;
 
+    @Inject
     public GraderServiceImpl(GraderDao graderDao) {
         this.graderDao = graderDao;
     }

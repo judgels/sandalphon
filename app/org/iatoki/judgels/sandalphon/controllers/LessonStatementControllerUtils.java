@@ -9,11 +9,12 @@ import org.iatoki.judgels.sandalphon.services.LessonService;
 import play.i18n.Messages;
 
 public final class LessonStatementControllerUtils {
+
     private LessonStatementControllerUtils() {
         // prevent instantiation
     }
 
-    public static void appendSubtabsLayout(LazyHtml content, LessonService lessonService, Lesson lesson) {
+    static void appendSubtabsLayout(LazyHtml content, LessonService lessonService, Lesson lesson) {
         ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
 
         internalLinks.add(new InternalLink(Messages.get("commons.view"), routes.LessonStatementController.viewStatement(lesson.getId())));
@@ -31,7 +32,7 @@ public final class LessonStatementControllerUtils {
         content.appendLayout(c -> accessTypesLayout.render(internalLinks.build(), c));
     }
 
-    public static void appendBreadcrumbsLayout(LazyHtml content, Lesson lesson, InternalLink lastLink) {
+    static void appendBreadcrumbsLayout(LazyHtml content, Lesson lesson, InternalLink lastLink) {
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 LessonControllerUtils.getLessonBreadcrumbsBuilder(lesson)
                         .add(new InternalLink(Messages.get("lesson.statement"), routes.LessonController.jumpToStatement(lesson.getId())))

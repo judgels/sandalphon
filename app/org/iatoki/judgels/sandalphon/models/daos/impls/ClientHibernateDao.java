@@ -6,9 +6,13 @@ import org.iatoki.judgels.sandalphon.models.daos.ClientDao;
 import org.iatoki.judgels.sandalphon.models.entities.ClientModel;
 import org.iatoki.judgels.sandalphon.models.entities.ClientModel_;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.persistence.metamodel.SingularAttribute;
 import java.util.List;
 
+@Singleton
+@Named("clientDao")
 public final class ClientHibernateDao extends AbstractJudgelsHibernateDao<ClientModel> implements ClientDao {
 
     public ClientHibernateDao() {

@@ -16,14 +16,20 @@ import play.db.jpa.Transactional;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 
+@Singleton
+@Named
 public final class BundleProblemAPIController extends Controller {
 
     private final ProblemService problemService;
     private final ClientService clientService;
     private final BundleProblemGraderImpl bundleProblemGrader;
 
+    @Inject
     public BundleProblemAPIController(ProblemService problemService, ClientService clientService, BundleProblemGraderImpl bundleProblemGrader) {
         this.problemService = problemService;
         this.clientService = clientService;

@@ -6,12 +6,17 @@ import org.iatoki.judgels.sandalphon.models.entities.ProblemPartnerModel;
 import org.iatoki.judgels.sandalphon.models.entities.ProblemPartnerModel_;
 import play.db.jpa.JPA;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 
+@Singleton
+@Named("problemPartnerDao")
 public final class ProblemPartnerHibernateDao extends AbstractHibernateDao<Long, ProblemPartnerModel> implements ProblemPartnerDao {
+
     public ProblemPartnerHibernateDao() {
         super(ProblemPartnerModel.class);
     }

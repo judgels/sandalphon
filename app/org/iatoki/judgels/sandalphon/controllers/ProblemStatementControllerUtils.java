@@ -9,11 +9,12 @@ import org.iatoki.judgels.sandalphon.services.ProblemService;
 import play.i18n.Messages;
 
 public final class ProblemStatementControllerUtils {
+
     private ProblemStatementControllerUtils() {
         // prevent instantiation
     }
 
-    public static void appendSubtabsLayout(LazyHtml content, ProblemService problemService, Problem problem) {
+    static void appendSubtabsLayout(LazyHtml content, ProblemService problemService, Problem problem) {
         ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
 
         internalLinks.add(new InternalLink(Messages.get("commons.view"), routes.ProblemStatementController.viewStatement(problem.getId())));
@@ -31,7 +32,7 @@ public final class ProblemStatementControllerUtils {
         content.appendLayout(c -> accessTypesLayout.render(internalLinks.build(), c));
     }
 
-    public static void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
+    static void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                         .add(new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())))

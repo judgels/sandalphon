@@ -30,6 +30,9 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -39,10 +42,13 @@ import java.util.Map;
 import java.util.Set;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public class LessonStatementController extends BaseController {
 
     private final LessonService lessonService;
 
+    @Inject
     public LessonStatementController(LessonService lessonService) {
         this.lessonService = lessonService;
     }

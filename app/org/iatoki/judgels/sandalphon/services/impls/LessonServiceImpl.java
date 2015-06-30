@@ -25,6 +25,9 @@ import org.iatoki.judgels.sandalphon.models.entities.LessonPartnerModel;
 import org.iatoki.judgels.sandalphon.models.entities.LessonPartnerModel_;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -32,17 +35,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Singleton
+@Named("lessonService")
 public final class LessonServiceImpl implements LessonService {
+
     private final LessonDao lessonDao;
     private final LessonPartnerDao lessonPartnerDao;
-    private final FileSystemProvider fileSystemProvider;
-    private final GitProvider gitProvider;
+    private final FileSystemProvider lessonFileSystemProvider;
+    private final GitProvider lessonGitProvider;
 
-    public LessonServiceImpl(LessonDao lessonDao, LessonPartnerDao lessonPartnerDao, FileSystemProvider fileSystemProvider, GitProvider gitProvider) {
+    @Inject
+    public LessonServiceImpl(LessonDao lessonDao, LessonPartnerDao lessonPartnerDao, FileSystemProvider lessonFileSystemProvider, GitProvider lessonGitProvider) {
         this.lessonDao = lessonDao;
         this.lessonPartnerDao = lessonPartnerDao;
-        this.fileSystemProvider = fileSystemProvider;
-        this.gitProvider = gitProvider;
+        this.lessonFileSystemProvider = lessonFileSystemProvider;
+        this.lessonGitProvider = lessonGitProvider;
     }
 
     @Override
@@ -54,7 +61,7 @@ public final class LessonServiceImpl implements LessonService {
         lessonDao.persist(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         initStatements(lessonModel.jid, initialLanguageCode);
-        fileSystemProvider.createDirectory(LessonServiceUtils.getClonesDirPath(lessonModel.jid));
+        lessonFileSystemProvider.createDirectory(LessonServiceUtils.getClonesDirPath(lessonModel.jid));
 
         return createLessonFromModel(lessonModel);
     }
@@ -169,61 +176,61 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String lessonJid) throws IOException {
-        String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
+        String langs = lessonFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
         return new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
     }
 
     @Override
     public void addLanguage(String userJid, String lessonJid, String languageCode) throws IOException {
-        String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
+        String langs = lessonFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
         Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
 
-        String defaultLanguageStatement = fileSystemProvider.readFromFile(getStatementFilePath(userJid, lessonJid, getDefaultLanguage(userJid, lessonJid)));
-        fileSystemProvider.writeToFile(getStatementFilePath(userJid, lessonJid, languageCode), defaultLanguageStatement);
-        fileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid), new Gson().toJson(availableLanguages));
+        String defaultLanguageStatement = lessonFileSystemProvider.readFromFile(getStatementFilePath(userJid, lessonJid, getDefaultLanguage(userJid, lessonJid)));
+        lessonFileSystemProvider.writeToFile(getStatementFilePath(userJid, lessonJid, languageCode), defaultLanguageStatement);
+        lessonFileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid), new Gson().toJson(availableLanguages));
     }
 
     @Override
     public void enableLanguage(String userJid, String lessonJid, String languageCode) throws IOException {
-        String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
+        String langs = lessonFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
         Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
 
-        fileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid), new Gson().toJson(availableLanguages));
+        lessonFileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid), new Gson().toJson(availableLanguages));
     }
 
     @Override
     public void disableLanguage(String userJid, String lessonJid, String languageCode) throws IOException {
-        String langs = fileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
+        String langs = lessonFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
         Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.DISABLED);
 
-        fileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid), new Gson().toJson(availableLanguages));
+        lessonFileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid), new Gson().toJson(availableLanguages));
     }
 
     @Override
     public void makeDefaultLanguage(String userJid, String lessonJid, String languageCode) throws IOException {
-        fileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(userJid, lessonJid), languageCode);
+        lessonFileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(userJid, lessonJid), languageCode);
     }
 
     @Override
     public String getDefaultLanguage(String userJid, String lessonJid) throws IOException {
-        return fileSystemProvider.readFromFile(getStatementDefaultLanguageFilePath(userJid, lessonJid));
+        return lessonFileSystemProvider.readFromFile(getStatementDefaultLanguageFilePath(userJid, lessonJid));
     }
 
     @Override
     public String getStatement(String userJid, String lessonJid, String languageCode) throws IOException {
-        return fileSystemProvider.readFromFile(getStatementFilePath(userJid, lessonJid, languageCode));
+        return lessonFileSystemProvider.readFromFile(getStatementFilePath(userJid, lessonJid, languageCode));
     }
 
     @Override
     public void updateStatement(String userJid, long lessonId, String languageCode, String statement) throws IOException {
         LessonModel lessonModel = lessonDao.findById(lessonId);
-        fileSystemProvider.writeToFile(getStatementFilePath(userJid, lessonModel.jid, languageCode), statement);
+        lessonFileSystemProvider.writeToFile(getStatementFilePath(userJid, lessonModel.jid, languageCode), statement);
 
         lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -232,7 +239,7 @@ public final class LessonServiceImpl implements LessonService {
     public void uploadStatementMediaFile(String userJid, long id, File mediaFile, String filename) throws IOException {
         LessonModel lessonModel = lessonDao.findById(id);
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, lessonModel.jid);
-        fileSystemProvider.uploadFile(mediaDirPath, mediaFile, filename);
+        lessonFileSystemProvider.uploadFile(mediaDirPath, mediaFile, filename);
 
         lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -241,7 +248,7 @@ public final class LessonServiceImpl implements LessonService {
     public void uploadStatementMediaFileZipped(String userJid, long id, File mediaFileZipped) throws IOException {
         LessonModel lessonModel = lessonDao.findById(id);
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, lessonModel.jid);
-        fileSystemProvider.uploadZippedFiles(mediaDirPath, mediaFileZipped, false);
+        lessonFileSystemProvider.uploadZippedFiles(mediaDirPath, mediaFileZipped, false);
 
         lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -249,35 +256,35 @@ public final class LessonServiceImpl implements LessonService {
     @Override
     public List<FileInfo> getStatementMediaFiles(String userJid, String lessonJid) {
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, lessonJid);
-        return fileSystemProvider.listFilesInDirectory(mediaDirPath);
+        return lessonFileSystemProvider.listFilesInDirectory(mediaDirPath);
     }
 
     @Override
     public String getStatementMediaFileURL(String userJid, String lessonJid, String filename) {
         List<String> mediaFilePath = LessonServiceUtils.appendPath(getStatementMediaDirPath(userJid, lessonJid), filename);
-        return fileSystemProvider.getURL(mediaFilePath);
+        return lessonFileSystemProvider.getURL(mediaFilePath);
     }
 
     @Override
     public List<GitCommit> getVersions(String userJid, String lessonJid) {
-        List<String> root = LessonServiceUtils.getRootDirPath(fileSystemProvider, userJid, lessonJid);
-        return gitProvider.getLog(root);
+        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
+        return lessonGitProvider.getLog(root);
     }
 
     @Override
     public void initRepository(String userJid, String lessonJid) {
-        List<String> root = LessonServiceUtils.getRootDirPath(fileSystemProvider, null, lessonJid);
+        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, null, lessonJid);
 
-        gitProvider.init(root);
-        gitProvider.addAll(root);
-        gitProvider.commit(root, userJid, "no@email.com", "Initial commit", "");
+        lessonGitProvider.init(root);
+        lessonGitProvider.addAll(root);
+        lessonGitProvider.commit(root, userJid, "no@email.com", "Initial commit", "");
     }
 
     @Override
     public boolean userCloneExists(String userJid, String lessonJid) {
         List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
 
-        return fileSystemProvider.directoryExists(root);
+        return lessonFileSystemProvider.directoryExists(root);
     }
 
     @Override
@@ -285,8 +292,8 @@ public final class LessonServiceImpl implements LessonService {
         List<String> origin = LessonServiceUtils.getOriginDirPath(lessonJid);
         List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
 
-        if (!fileSystemProvider.directoryExists(root)) {
-            gitProvider.clone(origin, root);
+        if (!lessonFileSystemProvider.directoryExists(root)) {
+            lessonGitProvider.clone(origin, root);
         }
     }
 
@@ -294,12 +301,12 @@ public final class LessonServiceImpl implements LessonService {
     public boolean commitThenMergeUserClone(String userJid, String lessonJid, String title, String description) {
         List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
 
-        gitProvider.addAll(root);
-        gitProvider.commit(root, userJid, "no@email.com", title, description);
-        boolean success = gitProvider.rebase(root);
+        lessonGitProvider.addAll(root);
+        lessonGitProvider.commit(root, userJid, "no@email.com", title, description);
+        boolean success = lessonGitProvider.rebase(root);
 
         if (!success) {
-            gitProvider.resetToParent(root);
+            lessonGitProvider.resetToParent(root);
         }
 
         return success;
@@ -309,11 +316,11 @@ public final class LessonServiceImpl implements LessonService {
     public boolean updateUserClone(String userJid, String lessonJid) {
         List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
 
-        gitProvider.addAll(root);
-        gitProvider.commit(root, userJid, "no@email.com", "dummy", "dummy");
-        boolean success = gitProvider.rebase(root);
+        lessonGitProvider.addAll(root);
+        lessonGitProvider.commit(root, userJid, "no@email.com", "dummy", "dummy");
+        boolean success = lessonGitProvider.rebase(root);
 
-        gitProvider.resetToParent(root);
+        lessonGitProvider.resetToParent(root);
 
         return success;
     }
@@ -321,10 +328,10 @@ public final class LessonServiceImpl implements LessonService {
     @Override
     public boolean pushUserClone(String userJid, String lessonJid) {
         List<String> origin = LessonServiceUtils.getOriginDirPath(lessonJid);
-        List<String> root = LessonServiceUtils.getRootDirPath(fileSystemProvider, userJid, lessonJid);
+        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
 
-        if (gitProvider.push(root)) {
-            gitProvider.resetHard(origin);
+        if (lessonGitProvider.push(root)) {
+            lessonGitProvider.resetHard(origin);
             return true;
         }
         return false;
@@ -332,23 +339,23 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public boolean fetchUserClone(String userJid, String lessonJid) {
-        List<String> root = LessonServiceUtils.getRootDirPath(fileSystemProvider, userJid, lessonJid);
+        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
 
-        return gitProvider.fetch(root);
+        return lessonGitProvider.fetch(root);
     }
 
     @Override
     public void discardUserClone(String userJid, String lessonJid) throws IOException {
-        List<String> root = LessonServiceUtils.getRootDirPath(fileSystemProvider, userJid, lessonJid);
+        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
 
-        fileSystemProvider.removeFile(root);
+        lessonFileSystemProvider.removeFile(root);
     }
 
     @Override
     public void restore(String lessonJid, String hash) {
         List<String> root = LessonServiceUtils.getOriginDirPath(lessonJid);
 
-        gitProvider.restore(root, hash);
+        lessonGitProvider.restore(root, hash);
     }
 
     private Lesson createLessonFromModel(LessonModel lessonModel) {
@@ -357,21 +364,21 @@ public final class LessonServiceImpl implements LessonService {
 
     private void initStatements(String lessonJid, String initialLanguageCode) throws IOException {
         List<String> statementsDirPath = getStatementsDirPath(null, lessonJid);
-        fileSystemProvider.createDirectory(statementsDirPath);
+        lessonFileSystemProvider.createDirectory(statementsDirPath);
 
         List<String> mediaDirPath = getStatementMediaDirPath(null, lessonJid);
-        fileSystemProvider.createDirectory(mediaDirPath);
-        fileSystemProvider.createFile(LessonServiceUtils.appendPath(mediaDirPath, ".gitkeep"));
+        lessonFileSystemProvider.createDirectory(mediaDirPath);
+        lessonFileSystemProvider.createFile(LessonServiceUtils.appendPath(mediaDirPath, ".gitkeep"));
 
-        fileSystemProvider.createFile(getStatementFilePath(null, lessonJid, initialLanguageCode));
-        fileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(null, lessonJid), initialLanguageCode);
+        lessonFileSystemProvider.createFile(getStatementFilePath(null, lessonJid, initialLanguageCode));
+        lessonFileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(null, lessonJid), initialLanguageCode);
 
         Map<String, StatementLanguageStatus> initialLanguage = ImmutableMap.of(initialLanguageCode, StatementLanguageStatus.ENABLED);
-        fileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(null, lessonJid), new Gson().toJson(initialLanguage));
+        lessonFileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(null, lessonJid), new Gson().toJson(initialLanguage));
     }
 
     private List<String> getStatementsDirPath(String userJid, String lessonJid) {
-        return LessonServiceUtils.appendPath(LessonServiceUtils.getRootDirPath(fileSystemProvider, userJid, lessonJid), "statements");
+        return LessonServiceUtils.appendPath(LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid), "statements");
     }
 
     private List<String> getStatementFilePath(String userJid, String lessonJid, String languageCode) {

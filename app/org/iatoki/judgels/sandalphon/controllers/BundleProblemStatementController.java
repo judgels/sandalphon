@@ -15,7 +15,6 @@ import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.services.BundleItemService;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.bundleStatementView;
 import play.db.jpa.Transactional;
@@ -24,20 +23,24 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class BundleProblemStatementController extends BaseController {
 
     private final ProblemService problemService;
-    private final BundleProblemService bundleProblemService;
     private final BundleItemService bundleItemService;
 
-    public BundleProblemStatementController(ProblemService problemService, BundleProblemService bundleProblemService, BundleItemService bundleItemService) {
+    @Inject
+    public BundleProblemStatementController(ProblemService problemService, BundleItemService bundleItemService) {
         this.problemService = problemService;
-        this.bundleProblemService = bundleProblemService;
         this.bundleItemService = bundleItemService;
     }
 

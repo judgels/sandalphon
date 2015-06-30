@@ -27,14 +27,21 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = {"admin"})
+@Singleton
+@Named
 public final class ClientController extends BaseController {
 
     private static final long PAGE_SIZE = 20;
 
     private final ClientService clientService;
 
+    @Inject
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
     }

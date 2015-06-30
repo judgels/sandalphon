@@ -31,25 +31,31 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class BundleProblemSubmissionController extends BaseController {
 
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
-    private final BundleSubmissionService submissionService;
-    private final FileSystemProvider submissionFileProvider;
+    private final BundleSubmissionService bundleSubmissionService;
+    private final FileSystemProvider submissionFileSystemProvider;
 
-    public BundleProblemSubmissionController(ProblemService problemService, BundleProblemService bundleProblemService, BundleSubmissionService submissionService, FileSystemProvider submissionFileProvider) {
+    @Inject
+    public BundleProblemSubmissionController(ProblemService problemService, BundleProblemService bundleProblemService, BundleSubmissionService bundleSubmissionService, FileSystemProvider submissionFileSystemProvider) {
         this.problemService = problemService;
         this.bundleProblemService = bundleProblemService;
-        this.submissionService = submissionService;
-        this.submissionFileProvider = submissionFileProvider;
+        this.bundleSubmissionService = bundleSubmissionService;
+        this.submissionFileSystemProvider = submissionFileSystemProvider;
     }
 
     @Transactional
@@ -60,9 +66,9 @@ public final class BundleProblemSubmissionController extends BaseController {
         if (BundleProblemControllerUtils.isAllowedToSubmit(problemService, problem) || !isClean) {
             DynamicForm data = Form.form().bindFromRequest();
 
-            BundleAnswer answer = submissionService.createBundleAnswerFromNewSubmission(data, ProblemControllerUtils.getCurrentStatementLanguage());
-            String submissionJid = submissionService.submit(problem.getJid(), null, answer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-            submissionService.storeSubmissionFiles(submissionFileProvider, null, submissionJid, answer);
+            BundleAnswer answer = bundleSubmissionService.createBundleAnswerFromNewSubmission(data, ProblemControllerUtils.getCurrentStatementLanguage());
+            String submissionJid = bundleSubmissionService.submit(problem.getJid(), null, answer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            bundleSubmissionService.storeSubmissionFiles(submissionFileSystemProvider, null, submissionJid, answer);
 
             ControllerUtils.getInstance().addActivityLog("Submit to bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -82,7 +88,7 @@ public final class BundleProblemSubmissionController extends BaseController {
         Problem problem = problemService.findProblemById(problemId);
 
         if (BundleProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
-            Page<BundleSubmission> submissions = submissionService.pageSubmissions(pageIndex, PAGE_SIZE, orderBy, orderDir, null, problem.getJid(), null);
+            Page<BundleSubmission> submissions = bundleSubmissionService.pageSubmissions(pageIndex, PAGE_SIZE, orderBy, orderDir, null, problem.getJid(), null);
 
             LazyHtml content = new LazyHtml(listSubmissionsView.render(submissions, problemId, pageIndex, orderBy, orderDir));
             BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
@@ -106,8 +112,8 @@ public final class BundleProblemSubmissionController extends BaseController {
 
         if (BundleProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
             try {
-                BundleSubmission submission = submissionService.findSubmissionById(submissionId);
-                BundleAnswer answer = submissionService.createBundleAnswerFromPastSubmission(submissionFileProvider, null, submission.getJid());
+                BundleSubmission submission = bundleSubmissionService.findSubmissionById(submissionId);
+                BundleAnswer answer = bundleSubmissionService.createBundleAnswerFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
 
                 LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), new TypeToken<Map<String, BundleDetailResult>>(){}.getType()), answer, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
 
@@ -135,9 +141,9 @@ public final class BundleProblemSubmissionController extends BaseController {
 
         try {
             if (BundleProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
-                BundleSubmission submission = submissionService.findSubmissionById(submissionId);
-                BundleAnswer answer = submissionService.createBundleAnswerFromPastSubmission(submissionFileProvider, null, submission.getJid());
-                submissionService.regrade(submission.getJid(), answer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+                BundleSubmission submission = bundleSubmissionService.findSubmissionById(submissionId);
+                BundleAnswer answer = bundleSubmissionService.createBundleAnswerFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
+                bundleSubmissionService.regrade(submission.getJid(), answer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
                 ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -160,17 +166,17 @@ public final class BundleProblemSubmissionController extends BaseController {
             List<BundleSubmission> submissions;
 
             if (data.selectAll) {
-                submissions = submissionService.findSubmissionsWithoutGradingsByFilters(orderBy, orderDir, null, problem.getJid(), null);
+                submissions = bundleSubmissionService.findSubmissionsWithoutGradingsByFilters(orderBy, orderDir, null, problem.getJid(), null);
             } else if (data.selectJids != null) {
-                submissions = submissionService.findSubmissionsWithoutGradingsByJids(data.selectJids);
+                submissions = bundleSubmissionService.findSubmissionsWithoutGradingsByJids(data.selectJids);
             } else {
                 return redirect(routes.BundleProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
             }
 
             try {
                 for (BundleSubmission submission : submissions) {
-                    BundleAnswer answer = submissionService.createBundleAnswerFromPastSubmission(submissionFileProvider, null, submission.getJid());
-                    submissionService.regrade(submission.getJid(), answer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+                    BundleAnswer answer = bundleSubmissionService.createBundleAnswerFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
+                    bundleSubmissionService.regrade(submission.getJid(), answer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
                 }
 
                 ControllerUtils.getInstance().addActivityLog("Regrade submissions of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");

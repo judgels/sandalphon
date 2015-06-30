@@ -30,18 +30,25 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class BundleItemController extends BaseController {
+
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
     private final BundleItemService bundleItemService;
 
+    @Inject
     public BundleItemController(ProblemService problemService, BundleProblemService bundleProblemService, BundleItemService bundleItemService) {
         this.problemService = problemService;
         this.bundleProblemService = bundleProblemService;

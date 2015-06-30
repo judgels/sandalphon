@@ -7,6 +7,8 @@ import org.iatoki.judgels.sandalphon.models.entities.UserModel;
 import org.iatoki.judgels.sandalphon.models.entities.UserModel_;
 import play.db.jpa.JPA;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -15,6 +17,8 @@ import javax.persistence.metamodel.SingularAttribute;
 import java.util.ArrayList;
 import java.util.List;
 
+@Singleton
+@Named("userDao")
 public final class UserHibernateDao extends AbstractHibernateDao<Long, UserModel> implements UserDao {
 
     public UserHibernateDao() {

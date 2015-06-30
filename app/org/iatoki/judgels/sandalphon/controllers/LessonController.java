@@ -31,14 +31,21 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class LessonController extends BaseController {
+
     private static final long PAGE_SIZE = 20;
 
     private final LessonService lessonService;
 
+    @Inject
     public LessonController(LessonService lessonService) {
         this.lessonService = lessonService;
     }

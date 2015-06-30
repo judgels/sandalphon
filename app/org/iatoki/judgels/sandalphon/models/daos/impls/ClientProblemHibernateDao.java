@@ -6,11 +6,15 @@ import org.iatoki.judgels.sandalphon.models.entities.ClientProblemModel;
 import org.iatoki.judgels.sandalphon.models.entities.ClientProblemModel_;
 import play.db.jpa.JPA;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 
+@Singleton
+@Named("clientProblemDao")
 public final class ClientProblemHibernateDao extends AbstractHibernateDao<Long, ClientProblemModel> implements ClientProblemDao {
 
     public ClientProblemHibernateDao() {

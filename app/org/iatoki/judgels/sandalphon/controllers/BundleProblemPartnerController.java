@@ -36,16 +36,22 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Set;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class BundleProblemPartnerController extends BaseController {
 
     private final Jophiel jophiel;
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
 
+    @Inject
     public BundleProblemPartnerController(Jophiel jophiel, ProblemService problemService, BundleProblemService bundleProblemService) {
         this.jophiel = jophiel;
         this.problemService = problemService;

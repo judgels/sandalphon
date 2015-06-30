@@ -6,11 +6,15 @@ import org.iatoki.judgels.sandalphon.models.entities.LessonPartnerModel;
 import org.iatoki.judgels.sandalphon.models.entities.LessonPartnerModel_;
 import play.db.jpa.JPA;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 
+@Singleton
+@Named("lessonPartnerDao")
 public final class LessonPartnerHibernateDao extends AbstractHibernateDao<Long, LessonPartnerModel> implements LessonPartnerDao {
     public LessonPartnerHibernateDao() {
         super(LessonPartnerModel.class);

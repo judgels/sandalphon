@@ -11,6 +11,7 @@ import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfig
 import play.i18n.Messages;
 
 public final class ProgrammingProblemControllerUtils {
+
     private ProgrammingProblemControllerUtils() {
         // prevent instantiation
     }

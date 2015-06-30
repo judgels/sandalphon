@@ -36,10 +36,15 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Set;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public class LessonPartnerController extends BaseController {
 
     private static final long PAGE_SIZE = 20;
@@ -47,6 +52,7 @@ public class LessonPartnerController extends BaseController {
     private final Jophiel jophiel;
     private final LessonService lessonService;
 
+    @Inject
     public LessonPartnerController(Jophiel jophiel, LessonService lessonService) {
         this.jophiel = jophiel;
         this.lessonService = lessonService;

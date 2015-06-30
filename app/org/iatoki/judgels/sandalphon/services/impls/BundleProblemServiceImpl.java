@@ -6,20 +6,27 @@ import org.iatoki.judgels.sandalphon.bundle.BundleItemUtils;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemsConfig;
 import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 
+@Singleton
+@Named("bundleProblemService")
 public final class BundleProblemServiceImpl implements BundleProblemService {
-    private final FileSystemProvider fileSystemProvider;
 
-    public BundleProblemServiceImpl(FileSystemProvider fileSystemProvider) {
-        this.fileSystemProvider = fileSystemProvider;
+    private final FileSystemProvider problemFileSystemProvider;
+
+    @Inject
+    public BundleProblemServiceImpl(FileSystemProvider problemFileSystemProvider) {
+        this.problemFileSystemProvider = problemFileSystemProvider;
     }
 
     @Override
     public void initBundleProblem(String problemJid) throws IOException {
-        fileSystemProvider.createDirectory(BundleServiceUtils.getItemsDirPath(fileSystemProvider, problemJid, null));
+        problemFileSystemProvider.createDirectory(BundleServiceUtils.getItemsDirPath(problemFileSystemProvider, problemJid, null));
 
         BundleItemsConfig config = BundleItemUtils.createDefaultItemConfig();
-        fileSystemProvider.writeToFile(BundleServiceUtils.getItemsConfigFilePath(fileSystemProvider, problemJid, null), new Gson().toJson(config));
+        problemFileSystemProvider.writeToFile(BundleServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, null), new Gson().toJson(config));
     }
 }

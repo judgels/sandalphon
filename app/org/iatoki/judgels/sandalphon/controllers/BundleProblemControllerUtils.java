@@ -13,6 +13,7 @@ import play.i18n.Messages;
 import java.util.Set;
 
 public final class BundleProblemControllerUtils {
+
     private BundleProblemControllerUtils() {
         // prevent instantiation
     }

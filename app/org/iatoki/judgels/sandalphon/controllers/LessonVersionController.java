@@ -24,14 +24,20 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class LessonVersionController extends BaseController {
 
     private final LessonService lessonService;
 
+    @Inject
     public LessonVersionController(LessonService lessonService) {
         this.lessonService = lessonService;
     }

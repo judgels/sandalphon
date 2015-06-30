@@ -23,14 +23,20 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.List;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
 public final class LessonClientController extends BaseController {
 
     private final LessonService lessonService;
     private final ClientService clientService;
 
+    @Inject
     public LessonClientController(LessonService lessonService, ClientService clientService) {
         this.lessonService = lessonService;
         this.clientService = clientService;

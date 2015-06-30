@@ -18,15 +18,21 @@ import org.iatoki.judgels.sandalphon.models.entities.ClientModel;
 import org.iatoki.judgels.sandalphon.models.entities.ClientProblemModel;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Singleton
+@Named("clientService")
 public final class ClientServiceImpl implements ClientService {
 
     private final ClientDao clientDao;
     private final ClientProblemDao clientProblemDao;
     private final ClientLessonDao clientLessonDao;
 
+    @Inject
     public ClientServiceImpl(ClientDao clientDao, ClientProblemDao clientProblemDao, ClientLessonDao clientLessonDao) {
         this.clientDao = clientDao;
         this.clientProblemDao = clientProblemDao;
