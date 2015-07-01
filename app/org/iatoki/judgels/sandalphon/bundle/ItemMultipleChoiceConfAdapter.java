@@ -41,7 +41,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
         itemForm.isCorrects = Lists.newArrayList();
         for (ItemChoice itemChoice : itemConf.choices) {
             itemForm.choiceAliases.add(itemChoice.getAlias());
-            itemForm.choiceContents.add(itemChoice.getContent());
+            itemForm.choiceContents.add(itemChoice.getContent().replace("'", "\\'"));
             if (itemChoice.isCorrect()) {
                 itemForm.isCorrects.add(true);
             } else {
