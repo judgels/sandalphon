@@ -80,9 +80,9 @@
                 }
             }
 
-            @for(i <- 0 until form("choiceAliases").indexes().size()) {
+            @for(i <- form("choiceAliases").indexes.indices) {
                 addNewChoice();
-                fillChoice(@i, '@form("choiceAliases[" + i + "]").value()', '@Html(form("choiceContents[" + i + "]").value())', @if(form("isCorrects[" + i + "]").value() != null) { true } else { false } );
+                fillChoice(@i, '@form("choiceAliases[" + i + "]").value', '@Html(form("choiceContents[" + i + "]").value)', @if(form("isCorrects[" + i + "]").value != null && form("isCorrects[" + i + "]").value) { true } else { false } );
             }
 
         });

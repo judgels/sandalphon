@@ -42,7 +42,11 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
         for (ItemChoice itemChoice : itemConf.choices) {
             itemForm.choiceAliases.add(itemChoice.getAlias());
             itemForm.choiceContents.add(itemChoice.getContent());
-            itemForm.isCorrects.add(itemChoice.isCorrect());
+            if (itemChoice.isCorrect()) {
+                itemForm.isCorrects.add(true);
+            } else {
+                itemForm.isCorrects.add(null);
+            }
         }
 
         return Form.form(ItemMultipleChoiceConfForm.class).fill(itemForm);
@@ -78,6 +82,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
     public String processRequestForm(Form form) {
         Form<ItemMultipleChoiceConfForm> realForm = (Form<ItemMultipleChoiceConfForm>)form;
         ItemMultipleChoiceConfForm itemForm = realForm.get();
+
         ItemMultipleChoiceConf itemConf = new ItemMultipleChoiceConf();
         itemConf.statement = itemForm.statement;
         itemConf.score = itemForm.score;
@@ -85,8 +90,8 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
         ImmutableList.Builder<ItemChoice> itemChoiceBuilder = ImmutableList.builder();
         for (int i=0;i<itemForm.choiceContents.size();++i) {
             boolean isCorrect = false;
-            if ((itemForm.isCorrects.size() > i) && (itemForm.isCorrects.get(i) != null)) {
-                isCorrect = itemForm.isCorrects.get(i);
+            if ((itemForm.isCorrects != null) && (itemForm.isCorrects.size() > i) && (itemForm.isCorrects.get(i) != null)) {
+                isCorrect = true;
             }
             itemChoiceBuilder.add(new ItemChoice(itemForm.choiceAliases.get(i), itemForm.choiceContents.get(i), isCorrect));
         }
