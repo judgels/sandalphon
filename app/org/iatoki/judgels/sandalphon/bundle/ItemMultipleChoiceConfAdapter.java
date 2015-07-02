@@ -20,7 +20,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
         ItemMultipleChoiceConfForm form = new ItemMultipleChoiceConfForm();
         form.choiceAliases = Lists.newArrayList("a", "b", "c", "d", "e");
         form.choiceContents = Lists.newArrayList("", "", "", "", "");
-        form.isCorrects = Lists.newArrayList(false, false, false, false, false);
+        form.isCorrects = Lists.newArrayList(null, null, null, null, null);
         return Form.form(ItemMultipleChoiceConfForm.class).fill(form);
     }
 
