@@ -10,14 +10,12 @@ import org.iatoki.judgels.commons.controllers.BaseController;
 import org.iatoki.judgels.commons.views.html.layouts.heading3Layout;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.UserInfo;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemPartner;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfigBuilder;
 import org.iatoki.judgels.sandalphon.ProblemPartnerNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
@@ -26,7 +24,8 @@ import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm;
 import org.iatoki.judgels.sandalphon.forms.programming.ProgrammingPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfigBuilder;
-import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.programming.partner.addPartnerView;
 import org.iatoki.judgels.sandalphon.views.html.programming.partner.updatePartnerView;
 import play.data.Form;
@@ -50,13 +49,11 @@ public final class ProgrammingProblemPartnerController extends BaseController {
 
     private final Jophiel jophiel;
     private final ProblemService problemService;
-    private final ProgrammingProblemService programmingProblemService;
 
     @Inject
-    public ProgrammingProblemPartnerController(Jophiel jophiel, ProblemService problemService, ProgrammingProblemService programmingProblemService) {
+    public ProgrammingProblemPartnerController(Jophiel jophiel, ProblemService problemService) {
         this.jophiel = jophiel;
         this.problemService = problemService;
-        this.programmingProblemService = programmingProblemService;
     }
 
     @Transactional(readOnly = true)
@@ -111,7 +108,7 @@ public final class ProgrammingProblemPartnerController extends BaseController {
                 }
 
                 UserInfo user = jophiel.getUserByUserJid(userJid);
-                JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+                JidCacheServiceImpl.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
                 if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
                     usernameForm.reject("username", Messages.get("problem.partner.already"));
@@ -251,7 +248,7 @@ public final class ProgrammingProblemPartnerController extends BaseController {
     private Result showUpdatePartner(Form<ProblemPartnerUpsertForm> problemForm, Form<ProgrammingPartnerUpsertForm> programmingForm, Problem problem, ProblemPartner problemPartner) {
         LazyHtml content = new LazyHtml(updatePartnerView.render(problemForm, programmingForm, problem, problemPartner));
 
-        content.appendLayout(c -> heading3Layout.render(Messages.get("problem.partner.update") + ": " + JidCacheService.getInstance().getDisplayName(problemPartner.getPartnerJid()), c));
+        content.appendLayout(c -> heading3Layout.render(Messages.get("problem.partner.update") + ": " + JidCacheServiceImpl.getInstance().getDisplayName(problemPartner.getPartnerJid()), c));
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);

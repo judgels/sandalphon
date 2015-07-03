@@ -1,6 +1,6 @@
 @(problem: org.iatoki.judgels.sandalphon.Problem)
 
-@import org.iatoki.judgels.sandalphon.services.JidCacheService
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
 @import play.i18n.Messages
 @import org.iatoki.judgels.commons.JudgelsUtils
 
@@ -16,7 +16,7 @@
             <td>@Messages.get("problem.name")</td><td>@problem.getName</td>
         </tr>
         <tr>
-            <td>@Messages.get("problem.author")</td><td>@JidCacheService.getInstance().getDisplayName(problem.getAuthorJid)</td>
+            <td>@Messages.get("problem.author")</td><td>@JidCacheServiceImpl.getInstance().getDisplayName(problem.getAuthorJid)</td>
         </tr>
         <tr>
             <td>@Messages.get("problem.additionalNote")</td><td>@Html(JudgelsUtils.escapeHtmlString(problem.getAdditionalNote))</td>

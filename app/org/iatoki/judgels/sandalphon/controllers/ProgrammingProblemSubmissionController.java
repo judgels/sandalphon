@@ -17,12 +17,13 @@ import org.iatoki.judgels.sandalphon.Submission;
 import org.iatoki.judgels.sandalphon.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.SubmissionException;
 import org.iatoki.judgels.sandalphon.SubmissionNotFoundException;
+import org.iatoki.judgels.sandalphon.config.SubmissionFile;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.programming.LanguageRestrictionAdapter;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.services.SubmissionService;
@@ -54,7 +55,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
     private final FileSystemProvider submissionFileSystemProvider;
 
     @Inject
-    public ProgrammingProblemSubmissionController(ProblemService problemService, ProgrammingProblemService programmingProblemService, SubmissionService submissionService, FileSystemProvider submissionFileSystemProvider) {
+    public ProgrammingProblemSubmissionController(ProblemService problemService, ProgrammingProblemService programmingProblemService, SubmissionService submissionService, @SubmissionFile FileSystemProvider submissionFileSystemProvider) {
         this.problemService = problemService;
         this.programmingProblemService = programmingProblemService;
         this.submissionService = submissionService;
@@ -146,7 +147,7 @@ public final class ProgrammingProblemSubmissionController extends BaseController
             }
             GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
 
-            LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewSubmission(submission, source, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
+            LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewSubmission(submission, source, JidCacheServiceImpl.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
 
             ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
             ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);

@@ -10,8 +10,8 @@ import org.iatoki.judgels.sandalphon.User;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
 import org.iatoki.judgels.sandalphon.services.UserService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
@@ -78,7 +78,7 @@ public final class ApplicationController extends BaseController {
     @Transactional
     public Result afterLogin(String returnUri) {
         if (session().containsKey("role")) {
-            JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
+            JudgelsUtils.updateUserJidCache(JidCacheServiceImpl.getInstance());
 
             if (JudgelsUtils.hasViewPoint()) {
                 try {
@@ -98,7 +98,7 @@ public final class ApplicationController extends BaseController {
 
     @Transactional
     public Result afterProfile(String returnUri) {
-        JudgelsUtils.updateUserJidCache(JidCacheService.getInstance());
+        JudgelsUtils.updateUserJidCache(JidCacheServiceImpl.getInstance());
         return redirect(returnUri);
     }
 

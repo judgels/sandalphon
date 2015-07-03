@@ -17,6 +17,8 @@ import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
+import org.iatoki.judgels.sandalphon.config.LessonFile;
+import org.iatoki.judgels.sandalphon.config.LessonGit;
 import org.iatoki.judgels.sandalphon.models.daos.LessonDao;
 import org.iatoki.judgels.sandalphon.models.daos.LessonPartnerDao;
 import org.iatoki.judgels.sandalphon.models.entities.LessonModel;
@@ -45,7 +47,7 @@ public final class LessonServiceImpl implements LessonService {
     private final GitProvider lessonGitProvider;
 
     @Inject
-    public LessonServiceImpl(LessonDao lessonDao, LessonPartnerDao lessonPartnerDao, FileSystemProvider lessonFileSystemProvider, GitProvider lessonGitProvider) {
+    public LessonServiceImpl(LessonDao lessonDao, LessonPartnerDao lessonPartnerDao, @LessonFile FileSystemProvider lessonFileSystemProvider, @LessonGit GitProvider lessonGitProvider) {
         this.lessonDao = lessonDao;
         this.lessonPartnerDao = lessonPartnerDao;
         this.lessonFileSystemProvider = lessonFileSystemProvider;

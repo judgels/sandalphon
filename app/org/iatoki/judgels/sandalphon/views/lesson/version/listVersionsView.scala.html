@@ -1,5 +1,5 @@
 @(versions: List[org.iatoki.judgels.commons.GitCommit], lessonId: Long, isAllowedToRestoreVersionHistory: Boolean)
-@import org.iatoki.judgels.sandalphon.services.JidCacheService
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
 
 @import org.iatoki.judgels.commons.JudgelsUtils
 @import play.i18n.Messages
@@ -9,7 +9,7 @@
     @defining(versions.get(i)) { version =>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <span class="panel-title">@JidCacheService.getInstance().getDisplayName(version.getUserJid)<small> @@ <time class="display-time" datetime="@JudgelsUtils.formatISOUTCDateTime(version.getTime.getTime)">@JudgelsUtils.formatDetailedDateTime(version.getTime.getTime)</time></small></span>
+                <span class="panel-title">@JidCacheServiceImpl.getInstance().getDisplayName(version.getUserJid)<small> @@ <time class="display-time" datetime="@JudgelsUtils.formatISOUTCDateTime(version.getTime.getTime)">@JudgelsUtils.formatDetailedDateTime(version.getTime.getTime)</time></small></span>
                 <span class="panel-title pull-right">@if(i > 0 && isAllowedToRestoreVersionHistory){<a href="@routes.LessonVersionController.restoreVersionHistory(lessonId, version.getHash)" type="button" class="btn btn-danger btn-xs">@Messages.get("lesson.version.restore")</a>}</span>
             </div>
             <div class="panel-body content-text">

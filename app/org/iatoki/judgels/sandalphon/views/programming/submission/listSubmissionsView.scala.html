@@ -1,7 +1,6 @@
-@import org.iatoki.judgels.sandalphon.Submission
-@(page: org.iatoki.judgels.commons.Page[Submission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
+@(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.Submission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
 
-@import org.iatoki.judgels.sandalphon.services.JidCacheService
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
 @import play.i18n.Messages
 @import org.iatoki.judgels.commons.views.html.table.tableView
 @import org.iatoki.judgels.commons.views.html.table.tableHeadersWithSelectionFormView
@@ -45,7 +44,7 @@
     )
     <tbody>
 
-    @defining(JidCacheService.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
         @for(submission <- page.getData) {
             <tr>
                 <td><input type="checkbox" class="checkboxJid" name="selectJids[]" value="@submission.getJid"></td>

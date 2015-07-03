@@ -12,6 +12,7 @@ import org.iatoki.judgels.sandalphon.bundle.BundleItemComparator;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemHasScore;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemType;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemsConfig;
+import org.iatoki.judgels.sandalphon.config.ProblemFile;
 import org.iatoki.judgels.sandalphon.services.BundleItemService;
 
 import javax.inject.Inject;
@@ -28,7 +29,7 @@ public final class BundleItemServiceImpl implements BundleItemService {
     private final FileSystemProvider problemFileSystemProvider;
 
     @Inject
-    public BundleItemServiceImpl(FileSystemProvider problemFileSystemProvider) {
+    public BundleItemServiceImpl(@ProblemFile FileSystemProvider problemFileSystemProvider) {
         this.problemFileSystemProvider = problemFileSystemProvider;
     }
 

@@ -1,5 +1,5 @@
 @(page: org.iatoki.judgels.commons.Page[org.iatoki.judgels.sandalphon.Lesson], orderBy: String, orderDir: String, filterString: String)
-@import org.iatoki.judgels.sandalphon.services.JidCacheService
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
 
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.commons.JudgelsUtils
@@ -23,7 +23,7 @@
         "timeUpdate" -> Messages.get("problem.lastUpdateTime")
     )
     <tbody>
-    @defining(JidCacheService.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
         @for(lesson <- page.getData) {
             <tr>
                 <td>@lesson.getId</td>

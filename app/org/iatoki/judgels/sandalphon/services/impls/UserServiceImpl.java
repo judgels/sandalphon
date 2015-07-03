@@ -14,7 +14,6 @@ import org.iatoki.judgels.sandalphon.User;
 import org.iatoki.judgels.sandalphon.UserNotFoundException;
 import org.iatoki.judgels.sandalphon.models.daos.UserDao;
 import org.iatoki.judgels.sandalphon.models.entities.UserModel;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
 import org.iatoki.judgels.sandalphon.services.UserService;
 
 import javax.inject.Inject;
@@ -127,7 +126,7 @@ public final class UserServiceImpl implements UserService {
             if (!userDao.existsByUserJid(userJid))
                 createUser(user.getJid(), roles);
 
-            JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            JidCacheServiceImpl.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         } catch (IOException e) {
             // do nothing
         }

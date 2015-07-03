@@ -23,9 +23,8 @@ import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm;
 import org.iatoki.judgels.sandalphon.forms.bundle.BundlePartnerUpsertForm;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.bundle.partner.addPartnerView;
 import org.iatoki.judgels.sandalphon.views.html.bundle.partner.updatePartnerView;
 import play.data.Form;
@@ -49,13 +48,11 @@ public final class BundleProblemPartnerController extends BaseController {
 
     private final Jophiel jophiel;
     private final ProblemService problemService;
-    private final BundleProblemService bundleProblemService;
 
     @Inject
-    public BundleProblemPartnerController(Jophiel jophiel, ProblemService problemService, BundleProblemService bundleProblemService) {
+    public BundleProblemPartnerController(Jophiel jophiel, ProblemService problemService) {
         this.jophiel = jophiel;
         this.problemService = problemService;
-        this.bundleProblemService = bundleProblemService;
     }
 
     @Transactional(readOnly = true)
@@ -111,7 +108,7 @@ public final class BundleProblemPartnerController extends BaseController {
                 }
 
                 UserInfo user = jophiel.getUserByUserJid(userJid);
-                JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+                JidCacheServiceImpl.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
                 if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
                     usernameForm.reject("username", Messages.get("problem.partner.already"));
@@ -243,7 +240,7 @@ public final class BundleProblemPartnerController extends BaseController {
     private Result showUpdatePartner(Form<ProblemPartnerUpsertForm> problemForm, Form<BundlePartnerUpsertForm> bundleForm, Problem problem, ProblemPartner problemPartner) {
         LazyHtml content = new LazyHtml(updatePartnerView.render(problemForm, bundleForm, problem, problemPartner));
 
-        content.appendLayout(c -> heading3Layout.render(Messages.get("problem.partner.update") + ": " + JidCacheService.getInstance().getDisplayName(problemPartner.getPartnerJid()), c));
+        content.appendLayout(c -> heading3Layout.render(Messages.get("problem.partner.update") + ": " + JidCacheServiceImpl.getInstance().getDisplayName(problemPartner.getPartnerJid()), c));
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);

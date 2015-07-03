@@ -9,21 +9,20 @@ import org.iatoki.judgels.commons.LazyHtml;
 import org.iatoki.judgels.commons.ListTableSelectionForm;
 import org.iatoki.judgels.commons.Page;
 import org.iatoki.judgels.commons.controllers.BaseController;
-import org.iatoki.judgels.sandalphon.BundleDetailResult;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
-import org.iatoki.judgels.sandalphon.Problem;
-import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.BundleAnswer;
+import org.iatoki.judgels.sandalphon.BundleDetailResult;
 import org.iatoki.judgels.sandalphon.BundleSubmission;
 import org.iatoki.judgels.sandalphon.BundleSubmissionNotFoundException;
-import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
-import org.iatoki.judgels.sandalphon.views.html.bundleSubmissionView;
+import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.bundle.submission.listSubmissionsView;
+import org.iatoki.judgels.sandalphon.views.html.bundleSubmissionView;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -46,14 +45,12 @@ public final class BundleProblemSubmissionController extends BaseController {
     private static final long PAGE_SIZE = 20;
 
     private final ProblemService problemService;
-    private final BundleProblemService bundleProblemService;
     private final BundleSubmissionService bundleSubmissionService;
     private final FileSystemProvider submissionFileSystemProvider;
 
     @Inject
-    public BundleProblemSubmissionController(ProblemService problemService, BundleProblemService bundleProblemService, BundleSubmissionService bundleSubmissionService, FileSystemProvider submissionFileSystemProvider) {
+    public BundleProblemSubmissionController(ProblemService problemService, BundleSubmissionService bundleSubmissionService, FileSystemProvider submissionFileSystemProvider) {
         this.problemService = problemService;
-        this.bundleProblemService = bundleProblemService;
         this.bundleSubmissionService = bundleSubmissionService;
         this.submissionFileSystemProvider = submissionFileSystemProvider;
     }
@@ -115,7 +112,7 @@ public final class BundleProblemSubmissionController extends BaseController {
                 BundleSubmission submission = bundleSubmissionService.findSubmissionById(submissionId);
                 BundleAnswer answer = bundleSubmissionService.createBundleAnswerFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
 
-                LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), new TypeToken<Map<String, BundleDetailResult>>(){}.getType()), answer, JidCacheService.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
+                LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), new TypeToken<Map<String, BundleDetailResult>>(){}.getType()), answer, JidCacheServiceImpl.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
 
                 BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
                 ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);

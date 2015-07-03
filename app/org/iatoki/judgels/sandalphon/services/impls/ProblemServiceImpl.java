@@ -20,6 +20,8 @@ import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
+import org.iatoki.judgels.sandalphon.config.ProblemFile;
+import org.iatoki.judgels.sandalphon.config.ProblemGit;
 import org.iatoki.judgels.sandalphon.models.daos.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.ProblemPartnerDao;
 import org.iatoki.judgels.sandalphon.models.entities.ProblemModel;
@@ -48,7 +50,7 @@ public final class ProblemServiceImpl implements ProblemService {
     private final GitProvider problemGitProvider;
 
     @Inject
-    public ProblemServiceImpl(ProblemDao problemDao, ProblemPartnerDao problemPartnerDao, FileSystemProvider problemFileSystemProvider, GitProvider problemGitProvider) {
+    public ProblemServiceImpl(ProblemDao problemDao, ProblemPartnerDao problemPartnerDao, @ProblemFile FileSystemProvider problemFileSystemProvider, @ProblemGit GitProvider problemGitProvider) {
         this.problemDao = problemDao;
         this.problemPartnerDao = problemPartnerDao;
         this.problemFileSystemProvider = problemFileSystemProvider;

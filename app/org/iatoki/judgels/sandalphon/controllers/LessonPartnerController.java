@@ -23,7 +23,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.LessonPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.LessonPartnerUsernameForm;
-import org.iatoki.judgels.sandalphon.services.JidCacheService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.addPartnerView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.listPartnersView;
@@ -132,7 +132,7 @@ public class LessonPartnerController extends BaseController {
                 }
 
                 UserInfo user = jophiel.getUserByUserJid(userJid);
-                JidCacheService.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+                JidCacheServiceImpl.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
                 if (lessonService.isLessonPartnerByUserJid(lesson.getJid(), userJid)) {
                     usernameForm.reject("username", Messages.get("lesson.partner.already"));
@@ -259,7 +259,7 @@ public class LessonPartnerController extends BaseController {
     private Result showUpdatePartner(Form<LessonPartnerUpsertForm> lessonForm, Lesson lesson, LessonPartner lessonPartner) {
         LazyHtml content = new LazyHtml(updatePartnerView.render(lessonForm, lesson, lessonPartner));
 
-        content.appendLayout(c -> heading3Layout.render(Messages.get("lesson.partner.update") + ": " + JidCacheService.getInstance().getDisplayName(lessonPartner.getPartnerJid()), c));
+        content.appendLayout(c -> heading3Layout.render(Messages.get("lesson.partner.update") + ": " + JidCacheServiceImpl.getInstance().getDisplayName(lessonPartner.getPartnerJid()), c));
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
