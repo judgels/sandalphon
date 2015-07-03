@@ -90,7 +90,7 @@ public final class LessonControllerUtils {
         ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
         internalLinks
                 .add(new InternalLink(Messages.get("lesson.lessons"), routes.LessonController.index()))
-                .add(new InternalLink(lesson.getName(), routes.LessonController.viewLesson(lesson.getId())));
+                .add(new InternalLink(lesson.getName(), routes.LessonController.enterLesson(lesson.getId())));
 
         return internalLinks;
     }
