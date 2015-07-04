@@ -13,9 +13,7 @@ To insert image, add the image as a media file and then insert it as "render/&lt
     @helper.CSRF.formField
 
     <div class="form-group">
-        <textarea class="ckeditor form-control" name="statement">
-            @form("statement").value
-        </textarea>
+        <textarea class="ckeditor form-control" name="statement">@form("statement").value</textarea>
     </div>
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
