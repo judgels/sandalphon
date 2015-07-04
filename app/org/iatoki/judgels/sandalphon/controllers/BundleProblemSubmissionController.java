@@ -15,6 +15,7 @@ import org.iatoki.judgels.sandalphon.BundleSubmission;
 import org.iatoki.judgels.sandalphon.BundleSubmissionNotFoundException;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
+import org.iatoki.judgels.sandalphon.config.SubmissionFile;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
@@ -49,7 +50,7 @@ public final class BundleProblemSubmissionController extends BaseController {
     private final FileSystemProvider submissionFileSystemProvider;
 
     @Inject
-    public BundleProblemSubmissionController(ProblemService problemService, BundleSubmissionService bundleSubmissionService, FileSystemProvider submissionFileSystemProvider) {
+    public BundleProblemSubmissionController(ProblemService problemService, BundleSubmissionService bundleSubmissionService, @SubmissionFile FileSystemProvider submissionFileSystemProvider) {
         this.problemService = problemService;
         this.bundleSubmissionService = bundleSubmissionService;
         this.submissionFileSystemProvider = submissionFileSystemProvider;
