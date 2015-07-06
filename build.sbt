@@ -11,7 +11,8 @@ lazy val sandalphon = (project in file("."))
         name := "sandalphon",
         version := IO.read(file("version.properties")).trim,
         scalaVersion := "2.11.7",
-        routesGenerator := InjectedRoutesGenerator
+        routesGenerator := InjectedRoutesGenerator,
+        PlayKeys.externalizeResources := false
     )
     .settings(TestNGPlugin.testNGSettings: _*)
     .settings(
