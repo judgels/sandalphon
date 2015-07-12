@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.programming;
+package org.iatoki.judgels.sandalphon.adapters;
 
 import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.gabriel.GradingConfig;

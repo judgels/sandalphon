@@ -1,9 +1,13 @@
-package org.iatoki.judgels.sandalphon.bundle;
+package org.iatoki.judgels.sandalphon.adapters.impls;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+import org.iatoki.judgels.sandalphon.adapters.BundleItemConfAdapter;
+import org.iatoki.judgels.sandalphon.bundle.BundleItemConf;
+import org.iatoki.judgels.sandalphon.bundle.ItemChoice;
+import org.iatoki.judgels.sandalphon.bundle.ItemMultipleChoiceConf;
 import org.iatoki.judgels.sandalphon.forms.bundle.item.ItemMultipleChoiceConfForm;
 import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemMultipleChoiceConfView;
 import play.api.mvc.Call;

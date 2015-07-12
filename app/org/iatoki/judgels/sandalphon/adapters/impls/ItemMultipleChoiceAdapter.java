@@ -1,6 +1,12 @@
-package org.iatoki.judgels.sandalphon.bundle;
+package org.iatoki.judgels.sandalphon.adapters.impls;
 
 import com.google.gson.Gson;
+import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
+import org.iatoki.judgels.sandalphon.bundle.BundleItem;
+import org.iatoki.judgels.sandalphon.bundle.BundleItemConf;
+import org.iatoki.judgels.sandalphon.bundle.BundleItemHasScore;
+import org.iatoki.judgels.sandalphon.bundle.ItemChoice;
+import org.iatoki.judgels.sandalphon.bundle.ItemMultipleChoiceConf;
 import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemMultipleChoiceView;
 import play.twirl.api.Html;
 

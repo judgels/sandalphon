@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.programming;
+package org.iatoki.judgels.sandalphon;
 
 import com.google.common.collect.ImmutableMap;
 

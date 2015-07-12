@@ -4,7 +4,7 @@ import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemType;
-import org.iatoki.judgels.sandalphon.bundle.BundleProblemStatementUtils;
+import org.iatoki.judgels.sandalphon.adapters.impls.BundleProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;

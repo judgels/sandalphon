@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.programming.adapters;
+package org.iatoki.judgels.sandalphon.adapters.impls;
 
 class TokilibFile implements Comparable<TokilibFile> {
     public String filename;

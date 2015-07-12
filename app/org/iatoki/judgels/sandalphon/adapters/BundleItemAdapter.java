@@ -1,5 +1,6 @@
-package org.iatoki.judgels.sandalphon.bundle;
+package org.iatoki.judgels.sandalphon.adapters;
 
+import org.iatoki.judgels.sandalphon.bundle.BundleItem;
 import play.twirl.api.Html;
 
 public interface BundleItemAdapter {

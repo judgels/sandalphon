@@ -7,7 +7,7 @@ import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.play.JidService;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.bundle.BundleItem;
-import org.iatoki.judgels.sandalphon.bundle.BundleItemAdapters;
+import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemAdapters;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemComparator;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemHasScore;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemType;

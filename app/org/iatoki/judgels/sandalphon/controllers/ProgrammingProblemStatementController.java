@@ -15,7 +15,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.programming.LanguageRestrictionAdapter;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
+import org.iatoki.judgels.sandalphon.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import play.db.jpa.Transactional;

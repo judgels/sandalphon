@@ -1,4 +1,7 @@
-package org.iatoki.judgels.sandalphon.bundle;
+package org.iatoki.judgels.sandalphon.adapters.impls;
+
+import org.iatoki.judgels.sandalphon.adapters.BundleItemConfAdapter;
+import org.iatoki.judgels.sandalphon.bundle.BundleItemType;
 
 public final class BundleItemConfAdapters {
     private BundleItemConfAdapters() {
