@@ -1,8 +1,8 @@
 package org.iatoki.judgels.sandalphon.services;
 
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.sandalphon.programming.Grader;
-import org.iatoki.judgels.sandalphon.programming.GraderNotFoundException;
+import org.iatoki.judgels.sandalphon.Grader;
+import org.iatoki.judgels.sandalphon.GraderNotFoundException;
 
 public interface GraderService {
 

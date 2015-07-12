@@ -6,7 +6,7 @@ import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.config.ProblemFile;
-import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
+import org.iatoki.judgels.sandalphon.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 
 import javax.inject.Inject;

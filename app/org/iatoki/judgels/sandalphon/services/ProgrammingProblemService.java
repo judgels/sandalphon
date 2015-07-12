@@ -2,7 +2,7 @@ package org.iatoki.judgels.sandalphon.services;
 
 import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.gabriel.GradingConfig;
-import org.iatoki.judgels.sandalphon.programming.LanguageRestriction;
+import org.iatoki.judgels.sandalphon.LanguageRestriction;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

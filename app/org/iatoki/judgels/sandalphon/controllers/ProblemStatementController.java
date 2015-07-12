@@ -17,7 +17,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.UploadFileForm;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemStatementUtils;
+import org.iatoki.judgels.sandalphon.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.listStatementLanguagesView;
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.listStatementMediaFilesView;
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.updateStatementView;

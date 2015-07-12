@@ -1,6 +1,0 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.programming.ProgrammingPartnerUpsertForm])(implicit fieldConstructor: b3.B3FieldConstructor)
-
-@import play.i18n.Messages
-
-@b3.checkbox(form("isAllowedToSubmit"), '_label -> Messages.get("problem.programming.partner.isAllowedToSubmit"))
-@b3.checkbox(form("isAllowedToManageGrading"), '_label -> Messages.get("problem.programming.partner.isAllowedToManageGrading"))
