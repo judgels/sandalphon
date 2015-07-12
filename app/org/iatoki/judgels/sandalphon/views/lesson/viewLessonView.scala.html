@@ -2,7 +2,7 @@
 
 @import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
 @import play.i18n.Messages
-@import org.iatoki.judgels.play.JudgelsUtils
+@import org.iatoki.judgels.play.JudgelsPlayUtils
 
 <table class="table">
     <tbody>
@@ -19,7 +19,7 @@
             <td>@Messages.get("problem.author")</td><td>@JidCacheServiceImpl.getInstance().getDisplayName(lesson.getAuthorJid)</td>
         </tr>
         <tr>
-            <td>@Messages.get("problem.additionalNote")</td><td>@Html(JudgelsUtils.escapeHtmlString(lesson.getAdditionalNote))</td>
+            <td>@Messages.get("problem.additionalNote")</td><td>@Html(JudgelsPlayUtils.escapeHtmlString(lesson.getAdditionalNote))</td>
         </tr>
     </tbody>
 </table>

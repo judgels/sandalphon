@@ -3,7 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.heading3WithActionLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
@@ -25,7 +25,7 @@ import javax.inject.Singleton;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public class ProblemPartnerController extends BaseController {
+public class ProblemPartnerController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
 

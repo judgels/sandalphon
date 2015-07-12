@@ -5,8 +5,8 @@ import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.controllers.BaseController;
-import org.iatoki.judgels.play.views.html.layouts.accessTypesLayout;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
+import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.Problem;
@@ -51,7 +51,7 @@ import java.util.List;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class ProgrammingProblemGradingController extends BaseController {
+public final class ProgrammingProblemGradingController extends AbstractJudgelsController {
 
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
@@ -605,7 +605,7 @@ public final class ProgrammingProblemGradingController extends BaseController {
     }
 
     private void appendSubtabsLayout(LazyHtml content, Problem problem) {
-        content.appendLayout(c -> accessTypesLayout.render(ImmutableList.of(
+        content.appendLayout(c -> subtabLayout.render(ImmutableList.of(
                 new InternalLink(Messages.get("problem.programming.grading.engine"), routes.ProgrammingProblemGradingController.updateGradingEngine(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading.testData"), routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId())),

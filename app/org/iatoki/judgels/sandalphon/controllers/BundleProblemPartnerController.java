@@ -4,9 +4,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
-import org.iatoki.judgels.play.JudgelsUtils;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.heading3Layout;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.UserInfo;
@@ -44,7 +44,7 @@ import java.util.Set;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class BundleProblemPartnerController extends BaseController {
+public final class BundleProblemPartnerController extends AbstractJudgelsController {
 
     private final Jophiel jophiel;
     private final ProblemService problemService;
@@ -108,7 +108,7 @@ public final class BundleProblemPartnerController extends BaseController {
                 }
 
                 UserInfo user = jophiel.getUserByUserJid(userJid);
-                JidCacheServiceImpl.getInstance().putDisplayName(user.getJid(), JudgelsUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+                JidCacheServiceImpl.getInstance().putDisplayName(user.getJid(), JudgelsPlayUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
                 if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
                     usernameForm.reject("username", Messages.get("problem.partner.already"));

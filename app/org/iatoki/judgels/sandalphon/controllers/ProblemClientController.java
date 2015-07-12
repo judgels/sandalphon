@@ -2,7 +2,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.Problem;
@@ -31,7 +31,7 @@ import java.util.List;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class ProblemClientController extends BaseController {
+public final class ProblemClientController extends AbstractJudgelsController {
 
     private final ProblemService problemService;
     private final ClientService clientService;

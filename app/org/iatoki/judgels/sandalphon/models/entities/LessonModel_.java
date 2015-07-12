@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.models.entities;
 
-import org.iatoki.judgels.play.models.domains.AbstractJudgelsModel_;
+import org.iatoki.judgels.play.models.entities.AbstractJudgelsModel_;
 
 import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;

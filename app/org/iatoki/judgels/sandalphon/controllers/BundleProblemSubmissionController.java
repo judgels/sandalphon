@@ -6,9 +6,9 @@ import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.ListTableSelectionForm;
+import org.iatoki.judgels.play.forms.ListTableSelectionForm;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.BundleAnswer;
 import org.iatoki.judgels.sandalphon.BundleDetailResult;
 import org.iatoki.judgels.sandalphon.BundleSubmission;
@@ -41,7 +41,7 @@ import java.util.Map;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class BundleProblemSubmissionController extends BaseController {
+public final class BundleProblemSubmissionController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
 

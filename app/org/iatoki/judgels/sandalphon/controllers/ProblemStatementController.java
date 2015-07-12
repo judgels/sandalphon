@@ -5,7 +5,7 @@ import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
@@ -44,7 +44,7 @@ import java.util.Set;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public class ProblemStatementController extends BaseController {
+public class ProblemStatementController extends AbstractJudgelsController {
 
     private final ProblemService problemService;
 

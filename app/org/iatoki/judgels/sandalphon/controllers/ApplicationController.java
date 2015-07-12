@@ -1,8 +1,8 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.JudgelsUtils;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.controllers.forms.ViewpointForm;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
@@ -23,7 +23,7 @@ import java.io.IOException;
 
 @Singleton
 @Named
-public final class ApplicationController extends BaseController {
+public final class ApplicationController extends AbstractJudgelsController {
 
     private final Jophiel jophiel;
     private final UserService userService;
@@ -78,14 +78,14 @@ public final class ApplicationController extends BaseController {
     @Transactional
     public Result afterLogin(String returnUri) {
         if (session().containsKey("role")) {
-            JudgelsUtils.updateUserJidCache(JidCacheServiceImpl.getInstance());
+            JudgelsPlayUtils.updateUserJidCache(JidCacheServiceImpl.getInstance());
 
-            if (JudgelsUtils.hasViewPoint()) {
+            if (JudgelsPlayUtils.hasViewPoint()) {
                 try {
                     SandalphonUtils.backupSession();
-                    SandalphonUtils.setUserSession(jophiel.getUserByUserJid(JudgelsUtils.getViewPoint()), userService.findUserByUserJid(JudgelsUtils.getViewPoint()));
+                    SandalphonUtils.setUserSession(jophiel.getUserByUserJid(JudgelsPlayUtils.getViewPoint()), userService.findUserByUserJid(JudgelsPlayUtils.getViewPoint()));
                 } catch (IOException e) {
-                    JudgelsUtils.removeViewPoint();
+                    JudgelsPlayUtils.removeViewPoint();
                     SandalphonUtils.restoreSession();
                 }
             }
@@ -98,7 +98,7 @@ public final class ApplicationController extends BaseController {
 
     @Transactional
     public Result afterProfile(String returnUri) {
-        JudgelsUtils.updateUserJidCache(JidCacheServiceImpl.getInstance());
+        JudgelsPlayUtils.updateUserJidCache(JidCacheServiceImpl.getInstance());
         return redirect(returnUri);
     }
 
@@ -114,16 +114,16 @@ public final class ApplicationController extends BaseController {
                 if (userJid != null) {
                     try {
                         userService.upsertUserFromJophielUserJid(userJid);
-                        if (!JudgelsUtils.hasViewPoint()) {
+                        if (!JudgelsPlayUtils.hasViewPoint()) {
                             SandalphonUtils.backupSession();
                         }
-                        JudgelsUtils.setViewPointInSession(userJid);
+                        JudgelsPlayUtils.setViewPointInSession(userJid);
                         SandalphonUtils.setUserSession(jophiel.getUserByUserJid(userJid), userService.findUserByUserJid(userJid));
 
                         ControllerUtils.getInstance().addActivityLog("View as user " + viewpointForm.username + ".");
 
                     } catch (IOException e) {
-                        JudgelsUtils.removeViewPoint();
+                        JudgelsPlayUtils.removeViewPoint();
                         SandalphonUtils.restoreSession();
                     }
                 }
@@ -137,7 +137,7 @@ public final class ApplicationController extends BaseController {
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     public Result resetViewAs() {
-        JudgelsUtils.removeViewPoint();
+        JudgelsPlayUtils.removeViewPoint();
         SandalphonUtils.restoreSession();
 
         return redirect(request().getHeader("Referer"));

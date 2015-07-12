@@ -3,12 +3,12 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
-import org.iatoki.judgels.play.JudgelsUtils;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.UserActivityMessage;
 import org.iatoki.judgels.jophiel.controllers.forms.ViewpointForm;
-import org.iatoki.judgels.play.controllers.AbstractControllerUtils;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsControllerUtils;
 import org.iatoki.judgels.play.views.html.layouts.menusLayout;
 import org.iatoki.judgels.play.views.html.layouts.profileView;
 import org.iatoki.judgels.play.views.html.layouts.sidebarLayout;
@@ -20,7 +20,7 @@ import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;
 
-public final class ControllerUtils extends AbstractControllerUtils {
+public final class ControllerUtils extends AbstractJudgelsControllerUtils {
 
     private static ControllerUtils INSTANCE;
 
@@ -50,7 +50,7 @@ public final class ControllerUtils extends AbstractControllerUtils {
         ));
         if (SandalphonUtils.trullyHasRole("admin")) {
             Form<ViewpointForm> form = Form.form(ViewpointForm.class);
-            if (JudgelsUtils.hasViewPoint()) {
+            if (JudgelsPlayUtils.hasViewPoint()) {
                 ViewpointForm viewpointForm = new ViewpointForm();
                 viewpointForm.username = IdentityUtils.getUsername();
                 form.fill(viewpointForm);
@@ -69,7 +69,7 @@ public final class ControllerUtils extends AbstractControllerUtils {
 
     public void addActivityLog(String log) {
         try {
-            if (JudgelsUtils.hasViewPoint()) {
+            if (JudgelsPlayUtils.hasViewPoint()) {
                 log += " view as " +  IdentityUtils.getUserJid();
             }
             UserActivityMessageServiceImpl.getInstance().addUserActivityMessage(new UserActivityMessage(System.currentTimeMillis(), SandalphonUtils.getRealUserJid(), log, IdentityUtils.getIpAddress()));

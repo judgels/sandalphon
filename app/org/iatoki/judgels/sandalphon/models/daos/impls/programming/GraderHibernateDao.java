@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.models.daos.impls.programming;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.play.models.daos.hibernate.AbstractJudgelsHibernateDao;
+import org.iatoki.judgels.play.models.daos.impls.AbstractJudgelsHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.programming.GraderDao;
 import org.iatoki.judgels.sandalphon.models.entities.programming.GraderModel;
 import org.iatoki.judgels.sandalphon.models.entities.programming.GraderModel_;

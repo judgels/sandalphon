@@ -5,9 +5,9 @@ import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.ListTableSelectionForm;
+import org.iatoki.judgels.play.forms.ListTableSelectionForm;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.GradingSource;
@@ -45,7 +45,7 @@ import java.util.Set;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class ProgrammingProblemSubmissionController extends BaseController {
+public final class ProgrammingProblemSubmissionController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
 

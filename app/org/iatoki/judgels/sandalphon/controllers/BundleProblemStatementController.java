@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.bundle.BundleItem;
@@ -33,7 +33,7 @@ import java.util.Set;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class BundleProblemStatementController extends BaseController {
+public final class BundleProblemStatementController extends AbstractJudgelsController {
 
     private final ProblemService problemService;
     private final BundleItemService bundleItemService;

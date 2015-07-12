@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.controllers.BaseController;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemStatementUtils;
@@ -22,7 +22,7 @@ import java.io.IOException;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class BundleProblemController extends BaseController {
+public final class BundleProblemController extends AbstractJudgelsController {
 
     private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;

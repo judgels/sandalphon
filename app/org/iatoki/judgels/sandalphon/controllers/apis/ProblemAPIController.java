@@ -7,7 +7,7 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.JudgelsUtils;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
@@ -137,7 +137,7 @@ public final class ProblemAPIController extends Controller {
 
     @Transactional(readOnly = true)
     public Result verifyProblem() {
-        UsernamePasswordCredentials credentials = JudgelsUtils.parseBasicAuthFromRequest(request());
+        UsernamePasswordCredentials credentials = JudgelsPlayUtils.parseBasicAuthFromRequest(request());
 
         if (credentials != null) {
             String clientJid = credentials.getUserName();

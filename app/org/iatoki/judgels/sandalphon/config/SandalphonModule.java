@@ -4,14 +4,14 @@ import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.GitProvider;
 import org.iatoki.judgels.LocalFileSystemProvider;
 import org.iatoki.judgels.LocalGitProvider;
-import org.iatoki.judgels.play.config.JudgelsAbstractModule;
+import org.iatoki.judgels.play.config.AbstractJudgelsModule;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.services.BaseUserService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.services.impls.UserServiceImpl;
 import org.iatoki.judgels.sealtiel.Sealtiel;
 
-public final class SandalphonModule extends JudgelsAbstractModule {
+public final class SandalphonModule extends AbstractJudgelsModule {
 
     @Override
     protected void manualBinding() {

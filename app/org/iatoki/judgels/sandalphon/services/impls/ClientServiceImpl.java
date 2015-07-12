@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.JudgelsUtils;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientLesson;
@@ -73,7 +73,7 @@ public final class ClientServiceImpl implements ClientService {
     public void createClient(String name) {
         ClientModel clientModel = new ClientModel();
         clientModel.name = name;
-        clientModel.secret = JudgelsUtils.generateNewSecret();
+        clientModel.secret = JudgelsPlayUtils.generateNewSecret();
 
         clientDao.persist(clientModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -142,7 +142,7 @@ public final class ClientServiceImpl implements ClientService {
         ClientProblemModel clientProblemModel = new ClientProblemModel();
         clientProblemModel.problemJid = problemJid;
         clientProblemModel.clientJid = clientJid;
-        clientProblemModel.secret = JudgelsUtils.generateNewSecret();
+        clientProblemModel.secret = JudgelsPlayUtils.generateNewSecret();
 
         clientProblemDao.persist(clientProblemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -192,7 +192,7 @@ public final class ClientServiceImpl implements ClientService {
         ClientLessonModel clientLessonModel = new ClientLessonModel();
         clientLessonModel.lessonJid = lessonJid;
         clientLessonModel.clientJid = clientJid;
-        clientLessonModel.secret = JudgelsUtils.generateNewSecret();
+        clientLessonModel.secret = JudgelsPlayUtils.generateNewSecret();
 
         clientLessonDao.persist(clientLessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }

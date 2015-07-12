@@ -5,7 +5,7 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.JudgelsUtils;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientLesson;
@@ -114,7 +114,7 @@ public final class LessonAPIController extends Controller {
 
     @Transactional(readOnly = true)
     public Result verifyLesson() {
-        UsernamePasswordCredentials credentials = JudgelsUtils.parseBasicAuthFromRequest(request());
+        UsernamePasswordCredentials credentials = JudgelsPlayUtils.parseBasicAuthFromRequest(request());
 
         if (credentials != null) {
             String clientJid = credentials.getUserName();

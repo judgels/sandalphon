@@ -5,8 +5,8 @@ import org.iatoki.judgels.GitCommit;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.controllers.BaseController;
-import org.iatoki.judgels.play.views.html.layouts.accessTypesLayout;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
+import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.services.LessonService;
@@ -33,7 +33,7 @@ import java.util.List;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class LessonVersionController extends BaseController {
+public final class LessonVersionController extends AbstractJudgelsController {
 
     private final LessonService lessonService;
 
@@ -196,7 +196,7 @@ public final class LessonVersionController extends BaseController {
             internalLinks.add(new InternalLink(Messages.get("lesson.version.history"), routes.LessonVersionController.listVersionHistory(lesson.getId())));
         }
 
-        content.appendLayout(c -> accessTypesLayout.render(internalLinks.build(), c));
+        content.appendLayout(c -> subtabLayout.render(internalLinks.build(), c));
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Lesson lesson, InternalLink lastLink) {

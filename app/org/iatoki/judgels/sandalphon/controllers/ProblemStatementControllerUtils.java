@@ -3,7 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.views.html.layouts.accessTypesLayout;
+import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import play.i18n.Messages;
@@ -29,7 +29,7 @@ public final class ProblemStatementControllerUtils {
             internalLinks.add(new InternalLink(Messages.get("problem.statement.language"), routes.ProblemStatementController.listStatementLanguages(problem.getId())));
         }
 
-        content.appendLayout(c -> accessTypesLayout.render(internalLinks.build(), c));
+        content.appendLayout(c -> subtabLayout.render(internalLinks.build(), c));
     }
 
     static void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {

@@ -5,8 +5,8 @@ import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.controllers.BaseController;
-import org.iatoki.judgels.play.views.html.layouts.accessTypesLayout;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
+import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.Lesson;
@@ -39,7 +39,7 @@ import java.io.IOException;
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
-public final class LessonController extends BaseController {
+public final class LessonController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
 
@@ -246,6 +246,6 @@ public final class LessonController extends BaseController {
             internalLinks.add(new InternalLink(Messages.get("commons.update"), routes.LessonController.updateLesson(lesson.getId())));
         }
 
-        content.appendLayout(c -> accessTypesLayout.render(internalLinks.build(), c));
+        content.appendLayout(c -> subtabLayout.render(internalLinks.build(), c));
     }
 }

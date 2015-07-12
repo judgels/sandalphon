@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.models.daos.impls;
 
-import org.iatoki.judgels.play.models.daos.hibernate.AbstractHibernateDao;
+import org.iatoki.judgels.play.models.daos.impls.AbstractHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.ClientLessonDao;
 import org.iatoki.judgels.sandalphon.models.entities.ClientLessonModel;
 import org.iatoki.judgels.sandalphon.models.entities.ClientLessonModel_;
