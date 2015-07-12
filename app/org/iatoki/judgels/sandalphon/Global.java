@@ -2,7 +2,7 @@ package org.iatoki.judgels.sandalphon;
 
 import akka.actor.Scheduler;
 import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.UserActivityMessagePusher;
+import org.iatoki.judgels.jophiel.runnables.UserActivityMessagePusher;
 import org.iatoki.judgels.jophiel.services.impls.DefaultUserActivityMessageServiceImpl;
 import org.iatoki.judgels.sandalphon.controllers.ControllerUtils;
 import org.iatoki.judgels.sandalphon.models.daos.JidCacheDao;
