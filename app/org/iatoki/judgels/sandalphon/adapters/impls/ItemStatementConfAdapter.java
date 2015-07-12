@@ -5,7 +5,7 @@ import org.iatoki.judgels.sandalphon.adapters.BundleItemConfAdapter;
 import org.iatoki.judgels.sandalphon.BundleItemConf;
 import org.iatoki.judgels.sandalphon.ItemStatementConf;
 import org.iatoki.judgels.sandalphon.forms.ItemStatementConfForm;
-import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemStatementConfView;
+import org.iatoki.judgels.sandalphon.views.html.problem.bundle.item.itemStatementConfView;
 import play.api.mvc.Call;
 import play.data.Form;
 import play.mvc.Http;

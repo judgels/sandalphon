@@ -15,7 +15,7 @@ import org.iatoki.judgels.sandalphon.forms.ProgrammingProblemCreateForm;
 import org.iatoki.judgels.sandalphon.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
-import org.iatoki.judgels.sandalphon.views.html.programming.createProgrammingProblemView;
+import org.iatoki.judgels.sandalphon.views.html.problem.programming.createProgrammingProblemView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;

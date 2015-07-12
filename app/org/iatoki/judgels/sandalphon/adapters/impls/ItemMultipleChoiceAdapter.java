@@ -7,7 +7,7 @@ import org.iatoki.judgels.sandalphon.BundleItemConf;
 import org.iatoki.judgels.sandalphon.BundleItemHasScore;
 import org.iatoki.judgels.sandalphon.ItemChoice;
 import org.iatoki.judgels.sandalphon.ItemMultipleChoiceConf;
-import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemMultipleChoiceView;
+import org.iatoki.judgels.sandalphon.views.html.problem.bundle.item.itemMultipleChoiceView;
 import play.twirl.api.Html;
 
 public final class ItemMultipleChoiceAdapter implements BundleItemAdapter, BundleItemHasScore {

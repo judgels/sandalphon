@@ -27,7 +27,7 @@ import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.services.SubmissionService;
-import org.iatoki.judgels.sandalphon.views.html.programming.submission.listSubmissionsView;
+import org.iatoki.judgels.sandalphon.views.html.problem.programming.submission.listSubmissionsView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;

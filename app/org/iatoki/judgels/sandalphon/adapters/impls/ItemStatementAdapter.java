@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.ItemStatementConf;
-import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemStatementView;
+import org.iatoki.judgels.sandalphon.views.html.problem.bundle.item.itemStatementView;
 import play.twirl.api.Html;
 
 public final class ItemStatementAdapter implements BundleItemAdapter {
