@@ -1,8 +1,9 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.UploadFileForm], problemId: Long, mediaFiles: List[org.iatoki.judgels.commons.FileInfo], isAllowedToUploadMediaFiles: Boolean)
+@import org.iatoki.judgels.FileInfo
+@(form: Form[org.iatoki.judgels.sandalphon.forms.UploadFileForm], problemId: Long, mediaFiles: List[FileInfo], isAllowedToUploadMediaFiles: Boolean)
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
-@import org.iatoki.judgels.commons.JudgelsUtils
+@import org.iatoki.judgels.play.JudgelsUtils
 
 @implicitFieldConstructor = @{b3.horizontal.fieldConstructor("col-md-2", "col-md-10")}
 

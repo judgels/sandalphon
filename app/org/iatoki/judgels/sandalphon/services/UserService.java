@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.services;
 
-import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.jophiel.services.BaseUserService;
 import org.iatoki.judgels.sandalphon.User;
 import org.iatoki.judgels.sandalphon.UserNotFoundException;

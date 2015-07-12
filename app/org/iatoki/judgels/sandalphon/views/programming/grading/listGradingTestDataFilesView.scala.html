@@ -1,8 +1,9 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.UploadFileForm], problemId: Long, testDataFiles: List[org.iatoki.judgels.commons.FileInfo])
+@import org.iatoki.judgels.FileInfo
+@(form: Form[org.iatoki.judgels.sandalphon.forms.UploadFileForm], problemId: Long, testDataFiles: List[FileInfo])
 
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
-@import org.iatoki.judgels.commons.JudgelsUtils
+@import org.iatoki.judgels.play.JudgelsUtils
 
 <h3>@Messages.get("problem.file.uploadNew")</h3>
 

@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
-import org.iatoki.judgels.commons.IdentityUtils;
-import org.iatoki.judgels.commons.controllers.BaseController;
+import org.iatoki.judgels.play.IdentityUtils;
+import org.iatoki.judgels.play.controllers.BaseController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.bundle.BundleProblemStatementUtils;

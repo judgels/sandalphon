@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.services.impls;
 
-import org.iatoki.judgels.commons.services.impls.AbstractBaseJidCacheServiceImpl;
+import org.iatoki.judgels.play.services.impls.AbstractBaseJidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.models.daos.JidCacheDao;
 import org.iatoki.judgels.sandalphon.models.entities.JidCacheModel;
 import org.iatoki.judgels.sandalphon.services.JidCacheService;

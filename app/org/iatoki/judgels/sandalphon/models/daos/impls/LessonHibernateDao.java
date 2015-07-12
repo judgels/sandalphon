@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.models.daos.impls;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.commons.models.daos.hibernate.AbstractJudgelsHibernateDao;
+import org.iatoki.judgels.play.models.daos.hibernate.AbstractJudgelsHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.LessonDao;
 import org.iatoki.judgels.sandalphon.models.entities.LessonModel;
 import org.iatoki.judgels.sandalphon.models.entities.LessonModel_;

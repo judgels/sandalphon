@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.services.impls;
 
 import com.google.common.collect.Lists;
-import org.iatoki.judgels.commons.FileSystemProvider;
+import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 
 import java.util.List;

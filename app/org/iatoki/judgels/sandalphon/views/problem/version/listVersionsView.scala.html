@@ -1,7 +1,8 @@
-@(versions: List[org.iatoki.judgels.commons.GitCommit], problemId: Long, isAllowedToRestoreVersionHistory: Boolean)
+@import org.iatoki.judgels.GitCommit
+@(versions: List[GitCommit], problemId: Long, isAllowedToRestoreVersionHistory: Boolean)
 @import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
 
-@import org.iatoki.judgels.commons.JudgelsUtils
+@import org.iatoki.judgels.play.JudgelsUtils
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
 

@@ -1,8 +1,8 @@
 package org.iatoki.judgels.sandalphon.services;
 
-import org.iatoki.judgels.commons.FileInfo;
-import org.iatoki.judgels.commons.GitCommit;
-import org.iatoki.judgels.commons.Page;
+import org.iatoki.judgels.FileInfo;
+import org.iatoki.judgels.GitCommit;
+import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemPartner;

@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.services.impls;
 
 import com.google.gson.Gson;
-import org.iatoki.judgels.commons.FileSystemProvider;
+import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemUtils;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemsConfig;
 import org.iatoki.judgels.sandalphon.config.ProblemFile;

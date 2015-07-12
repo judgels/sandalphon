@@ -1,10 +1,10 @@
 package org.iatoki.judgels.sandalphon.config;
 
-import org.iatoki.judgels.commons.FileSystemProvider;
-import org.iatoki.judgels.commons.GitProvider;
-import org.iatoki.judgels.commons.LocalFileSystemProvider;
-import org.iatoki.judgels.commons.LocalGitProvider;
-import org.iatoki.judgels.commons.config.JudgelsAbstractModule;
+import org.iatoki.judgels.FileSystemProvider;
+import org.iatoki.judgels.GitProvider;
+import org.iatoki.judgels.LocalFileSystemProvider;
+import org.iatoki.judgels.LocalGitProvider;
+import org.iatoki.judgels.play.config.JudgelsAbstractModule;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.services.BaseUserService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;

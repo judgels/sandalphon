@@ -1,8 +1,8 @@
 package org.iatoki.judgels.sandalphon.services.impls;
 
 import com.google.gson.Gson;
-import org.iatoki.judgels.commons.FileInfo;
-import org.iatoki.judgels.commons.FileSystemProvider;
+import org.iatoki.judgels.FileInfo;
+import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.config.ProblemFile;
