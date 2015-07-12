@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.adapters.impls;
 
 import com.google.common.collect.Lists;
-import org.iatoki.judgels.sandalphon.bundle.BundleItemsConfig;
+import org.iatoki.judgels.sandalphon.BundleItemsConfig;
 
 public final class BundleItemUtils {
 

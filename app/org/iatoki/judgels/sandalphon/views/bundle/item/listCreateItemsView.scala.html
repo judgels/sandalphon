@@ -1,6 +1,8 @@
 @import org.iatoki.judgels.sandalphon.forms.ItemCreateForm
-@(page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.bundle.BundleItem], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String, filterString: String, form: Form[ItemCreateForm])
+@import org.iatoki.judgels.sandalphon.BundleItem
+@(page: org.iatoki.judgels.play.Page[BundleItem], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String, filterString: String, form: Form[ItemCreateForm])
 
+@import org.iatoki.judgels.sandalphon.BundleItemType
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.searchView
 @import org.iatoki.judgels.play.views.html.table.tableView
@@ -8,7 +10,6 @@
 @import org.iatoki.judgels.play.views.html.table.paginationView
 
 @import org.iatoki.judgels.sandalphon.controllers.routes
-@import org.iatoki.judgels.sandalphon.bundle.BundleItemType
 
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.BundleItemController.listCreateItems(problemId, newPageIndex, newOrderBy, newOrderDir, filterString)}
 

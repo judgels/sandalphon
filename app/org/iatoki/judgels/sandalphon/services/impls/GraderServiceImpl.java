@@ -7,8 +7,8 @@ import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.models.daos.programming.GraderDao;
 import org.iatoki.judgels.sandalphon.models.entities.programming.GraderModel;
-import org.iatoki.judgels.sandalphon.programming.Grader;
-import org.iatoki.judgels.sandalphon.programming.GraderNotFoundException;
+import org.iatoki.judgels.sandalphon.Grader;
+import org.iatoki.judgels.sandalphon.GraderNotFoundException;
 import org.iatoki.judgels.sandalphon.services.GraderService;
 
 import javax.inject.Inject;

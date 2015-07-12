@@ -2,8 +2,8 @@ package org.iatoki.judgels.sandalphon.adapters.impls;
 
 import com.google.gson.Gson;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemConfAdapter;
-import org.iatoki.judgels.sandalphon.bundle.BundleItemConf;
-import org.iatoki.judgels.sandalphon.bundle.ItemStatementConf;
+import org.iatoki.judgels.sandalphon.BundleItemConf;
+import org.iatoki.judgels.sandalphon.ItemStatementConf;
 import org.iatoki.judgels.sandalphon.forms.ItemStatementConfForm;
 import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemStatementConfView;
 import play.api.mvc.Call;

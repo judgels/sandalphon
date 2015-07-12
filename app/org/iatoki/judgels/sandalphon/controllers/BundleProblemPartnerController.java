@@ -16,7 +16,7 @@ import org.iatoki.judgels.sandalphon.ProblemPartner;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfigBuilder;
 import org.iatoki.judgels.sandalphon.ProblemPartnerNotFoundException;
-import org.iatoki.judgels.sandalphon.bundle.BundleProblemPartnerConfig;
+import org.iatoki.judgels.sandalphon.BundleProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;

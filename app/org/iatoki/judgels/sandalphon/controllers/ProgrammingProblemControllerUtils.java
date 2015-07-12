@@ -7,7 +7,7 @@ import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.views.html.layouts.tabLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
-import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfig;
+import org.iatoki.judgels.sandalphon.ProgrammingProblemPartnerConfig;
 import play.i18n.Messages;
 
 public final class ProgrammingProblemControllerUtils {

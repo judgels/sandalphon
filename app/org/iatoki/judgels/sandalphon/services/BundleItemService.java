@@ -1,8 +1,8 @@
 package org.iatoki.judgels.sandalphon.services;
 
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.sandalphon.bundle.BundleItem;
-import org.iatoki.judgels.sandalphon.bundle.BundleItemType;
+import org.iatoki.judgels.sandalphon.BundleItem;
+import org.iatoki.judgels.sandalphon.BundleItemType;
 
 import java.io.IOException;
 import java.util.List;

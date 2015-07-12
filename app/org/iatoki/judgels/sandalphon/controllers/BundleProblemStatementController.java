@@ -7,7 +7,7 @@ import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.bundle.BundleItem;
+import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemAdapters;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleProblemStatementUtils;

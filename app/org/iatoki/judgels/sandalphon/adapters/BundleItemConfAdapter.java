@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.adapters;
 
-import org.iatoki.judgels.sandalphon.bundle.BundleItemConf;
+import org.iatoki.judgels.sandalphon.BundleItemConf;
 import play.api.mvc.Call;
 import play.data.Form;
 import play.mvc.Http;
