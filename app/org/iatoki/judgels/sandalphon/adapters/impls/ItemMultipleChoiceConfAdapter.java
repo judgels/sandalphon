@@ -8,7 +8,7 @@ import org.iatoki.judgels.sandalphon.adapters.BundleItemConfAdapter;
 import org.iatoki.judgels.sandalphon.bundle.BundleItemConf;
 import org.iatoki.judgels.sandalphon.bundle.ItemChoice;
 import org.iatoki.judgels.sandalphon.bundle.ItemMultipleChoiceConf;
-import org.iatoki.judgels.sandalphon.forms.bundle.item.ItemMultipleChoiceConfForm;
+import org.iatoki.judgels.sandalphon.forms.ItemMultipleChoiceConfForm;
 import org.iatoki.judgels.sandalphon.views.html.bundle.item.itemMultipleChoiceConfView;
 import play.api.mvc.Call;
 import play.data.Form;

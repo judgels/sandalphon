@@ -22,7 +22,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm;
-import org.iatoki.judgels.sandalphon.forms.bundle.BundlePartnerUpsertForm;
+import org.iatoki.judgels.sandalphon.forms.BundlePartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.bundle.partner.addPartnerView;

@@ -21,7 +21,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm;
-import org.iatoki.judgels.sandalphon.forms.programming.ProgrammingPartnerUpsertForm;
+import org.iatoki.judgels.sandalphon.forms.ProgrammingPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.programming.ProgrammingProblemPartnerConfigBuilder;
 import org.iatoki.judgels.sandalphon.services.ProblemService;

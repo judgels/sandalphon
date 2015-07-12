@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.forms.bundle;
+package org.iatoki.judgels.sandalphon.forms;
 
 public final class BundlePartnerUpsertForm {
     public boolean isAllowedToSubmit;

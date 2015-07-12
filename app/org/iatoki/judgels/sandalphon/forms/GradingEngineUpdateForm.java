@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.forms.programming;
+package org.iatoki.judgels.sandalphon.forms;
 
 import play.data.validation.Constraints;
 
