@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.bundle;
+package org.iatoki.judgels.sandalphon;
 
 import java.util.List;
 
