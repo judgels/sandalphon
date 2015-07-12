@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon;
 
-import org.iatoki.judgels.commons.EntityNotFoundException;
+import org.iatoki.judgels.play.EntityNotFoundException;
 
 public final class ProblemNotFoundException extends EntityNotFoundException {
 

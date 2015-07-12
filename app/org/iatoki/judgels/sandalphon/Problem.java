@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon;
 
-import org.iatoki.judgels.commons.AttributeNotAvailableException;
+import org.iatoki.judgels.play.AttributeNotAvailableException;
 
 import java.util.Date;
 
