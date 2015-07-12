@@ -23,7 +23,7 @@ import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.problem.bundle.submission.listSubmissionsView;
-import org.iatoki.judgels.sandalphon.views.html.bundleSubmissionView;
+import org.iatoki.judgels.sandalphon.views.html.problem.bundle.submission.bundleSubmissionView;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
