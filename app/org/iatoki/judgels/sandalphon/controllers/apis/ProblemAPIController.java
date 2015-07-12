@@ -17,7 +17,7 @@ import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.SubmissionAdapters;
+import org.iatoki.judgels.sandalphon.adapters.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemAdapters;

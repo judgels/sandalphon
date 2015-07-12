@@ -14,7 +14,7 @@ import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.Submission;
-import org.iatoki.judgels.sandalphon.SubmissionAdapters;
+import org.iatoki.judgels.sandalphon.adapters.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.SubmissionException;
 import org.iatoki.judgels.sandalphon.SubmissionNotFoundException;
 import org.iatoki.judgels.sandalphon.config.SubmissionFile;

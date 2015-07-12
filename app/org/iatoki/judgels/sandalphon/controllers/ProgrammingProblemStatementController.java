@@ -9,7 +9,7 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.SubmissionAdapters;
+import org.iatoki.judgels.sandalphon.adapters.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
