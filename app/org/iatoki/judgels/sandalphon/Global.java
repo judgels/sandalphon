@@ -10,6 +10,7 @@ import org.iatoki.judgels.sandalphon.runnables.GradingResponsePoller;
 import org.iatoki.judgels.sandalphon.services.SubmissionService;
 import org.iatoki.judgels.sandalphon.services.UserService;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
+import org.iatoki.judgels.sandalphon.services.impls.SandalphonDataMigrationServiceImpl;
 import org.iatoki.judgels.sandalphon.services.impls.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.sealtiel.Sealtiel;
 import play.Application;
@@ -21,6 +22,10 @@ import scala.concurrent.duration.Duration;
 import java.util.concurrent.TimeUnit;
 
 public final class Global extends org.iatoki.judgels.play.Global {
+
+    public Global() {
+        super(new SandalphonDataMigrationServiceImpl());
+    }
 
     @Override
     public void onStart(Application application) {
