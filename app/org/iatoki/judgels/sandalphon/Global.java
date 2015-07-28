@@ -4,6 +4,8 @@ import akka.actor.Scheduler;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.runnables.UserActivityMessagePusher;
 import org.iatoki.judgels.jophiel.services.impls.DefaultUserActivityMessageServiceImpl;
+import org.iatoki.judgels.play.AbstractGlobal;
+import org.iatoki.judgels.play.services.BaseDataMigrationService;
 import org.iatoki.judgels.sandalphon.controllers.ControllerUtils;
 import org.iatoki.judgels.sandalphon.models.daos.JidCacheDao;
 import org.iatoki.judgels.sandalphon.runnables.GradingResponsePoller;
@@ -21,11 +23,7 @@ import scala.concurrent.duration.Duration;
 
 import java.util.concurrent.TimeUnit;
 
-public final class Global extends org.iatoki.judgels.play.Global {
-
-    public Global() {
-        super(new SandalphonDataMigrationServiceImpl());
-    }
+public final class Global extends AbstractGlobal {
 
     @Override
     public void onStart(Application application) {
@@ -34,6 +32,11 @@ public final class Global extends org.iatoki.judgels.play.Global {
         scheduleThreads(application.injector());
 
         super.onStart(application);
+    }
+
+    @Override
+    protected BaseDataMigrationService getDataMigrationService() {
+        new SandalphonDataMigrationServiceImpl();
     }
 
     private void buildServices(Injector injector) {
