@@ -36,7 +36,7 @@ public final class Global extends AbstractGlobal {
 
     @Override
     protected BaseDataMigrationService getDataMigrationService() {
-        new SandalphonDataMigrationServiceImpl();
+        return new SandalphonDataMigrationServiceImpl();
     }
 
     private void buildServices(Injector injector) {
