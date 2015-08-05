@@ -1,0 +1,16 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.GradingEngineUpdateForm], problem: org.iatoki.judgels.sandalphon.Problem)
+
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.gabriel.GradingEngineRegistry
+@import scala.collection.JavaConverters._
+@import play.i18n.Messages
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
+
+@b3.form(routes.ProgrammingProblemGradingController.postUpdateGradingEngine(problem.getId)) {
+    @helper.CSRF.formField
+
+    @b3.select(form("gradingEngineName"), GradingEngineRegistry.getInstance().getGradingEngines.asScala.toSeq, '_label -> Messages.get("problem.programming.gradingEngine"), '_help -> Messages.get("problem.programming.help.changeGradingEngine"))
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
+}

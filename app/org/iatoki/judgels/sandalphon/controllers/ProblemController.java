@@ -1,0 +1,250 @@
+package org.iatoki.judgels.sandalphon.controllers;
+
+import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.play.IdentityUtils;
+import org.iatoki.judgels.play.InternalLink;
+import org.iatoki.judgels.play.LazyHtml;
+import org.iatoki.judgels.play.Page;
+import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
+import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
+import org.iatoki.judgels.play.views.html.layouts.headingLayout;
+import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
+import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
+import org.iatoki.judgels.sandalphon.ProblemType;
+import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
+import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
+import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.forms.ProblemCreateForm;
+import org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.views.html.problem.createProblemView;
+import org.iatoki.judgels.sandalphon.views.html.problem.listProblemsView;
+import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView;
+import org.iatoki.judgels.sandalphon.views.html.problem.viewProblemView;
+import play.data.DynamicForm;
+import play.data.Form;
+import play.db.jpa.Transactional;
+import play.filters.csrf.AddCSRFToken;
+import play.filters.csrf.RequireCSRFCheck;
+import play.i18n.Messages;
+import play.mvc.Http;
+import play.mvc.Result;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+@Authenticated(value = {LoggedIn.class, HasRole.class})
+@Singleton
+@Named
+public final class ProblemController extends AbstractJudgelsController {
+
+    private static final long PAGE_SIZE = 20;
+
+    private final ProblemService problemService;
+
+    @Inject
+    public ProblemController(ProblemService problemService) {
+        this.problemService = problemService;
+    }
+
+    @Transactional(readOnly = true)
+    public Result index() {
+        return listProblems(0, "timeUpdate", "desc", "");
+    }
+
+    @Transactional(readOnly = true)
+    public Result listProblems(long pageIndex, String sortBy, String orderBy, String filterString) {
+        Page<Problem> problems = problemService.pageProblems(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString, IdentityUtils.getUserJid(), ControllerUtils.getInstance().isAdmin());
+
+        LazyHtml content = new LazyHtml(listProblemsView.render(problems, sortBy, orderBy, filterString));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.list"), new InternalLink(Messages.get("commons.create"), routes.ProblemController.createProblem()), c));
+
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+              new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problems");
+
+        ControllerUtils.getInstance().addActivityLog("Open allowed problems <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return ControllerUtils.getInstance().lazyOk(content);
+    }
+
+    @Transactional(readOnly = true)
+    @AddCSRFToken
+    public Result createProblem() {
+        Form<ProblemCreateForm> form = Form.form(ProblemCreateForm.class);
+
+        ControllerUtils.getInstance().addActivityLog("Try to create problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showCreateProblem(form);
+    }
+
+    @Transactional
+    @RequireCSRFCheck
+    public Result postCreateProblem() {
+        Form<ProblemCreateForm> form = Form.form(ProblemCreateForm.class).bindFromRequest();
+
+        if (form.hasErrors() || form.hasGlobalErrors()) {
+            return showCreateProblem(form);
+        } else {
+            ProblemCreateForm data = form.get();
+            ProblemControllerUtils.setJustCreatedProblem(data.name, data.additionalNote, data.initLanguageCode);
+
+            if (data.type.equals(ProblemType.PROGRAMMING.name())) {
+                ControllerUtils.getInstance().addActivityLog("Create problem " + data.name + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+                return redirect(routes.ProgrammingProblemController.createProgrammingProblem());
+            } else if (data.type.equals(ProblemType.BUNDLE.name())) {
+                return redirect(routes.BundleProblemController.createBundleProblem());
+            }
+
+            return internalServerError();
+        }
+    }
+
+    public Result enterProblem(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Enter problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemController.jumpToStatement(problemId));
+    }
+
+    public Result jumpToStatement(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Jump to problem statement " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemStatementController.viewStatement(problemId));
+    }
+
+    public Result jumpToVersions(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Jump to problem version " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problemId));
+    }
+
+    public Result jumpToPartners(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Jump to problem partner " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemPartnerController.viewPartners(problemId));
+    }
+
+    public Result jumpToClients(long problemId) {
+        ControllerUtils.getInstance().addActivityLog("Jump to problem client " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemClientController.updateClientProblems(problemId));
+    }
+
+    @Transactional(readOnly = true)
+    public Result viewProblem(long problemId) throws ProblemNotFoundException {
+        Problem problem = problemService.findProblemById(problemId);
+
+        LazyHtml content = new LazyHtml(viewProblemView.render(problem));
+        appendSubtabs(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+              ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
+                    .add(new InternalLink(Messages.get("problem.view"), routes.ProblemController.viewProblem(problem.getId())))
+                    .build()
+        );
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View");
+
+        ControllerUtils.getInstance().addActivityLog("View problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return ControllerUtils.getInstance().lazyOk(content);
+    }
+
+    @Transactional(readOnly = true)
+    @AddCSRFToken
+    public Result updateProblem(long problemId) throws ProblemNotFoundException {
+        Problem problem = problemService.findProblemById(problemId);
+
+        if (ProblemControllerUtils.isAllowedToUpdateProblem(problemService, problem)) {
+            ProblemUpdateForm data = new ProblemUpdateForm();
+            data.name = problem.getName();
+            data.additionalNote = problem.getAdditionalNote();
+
+            Form<ProblemUpdateForm> form = Form.form(ProblemUpdateForm.class).fill(data);
+
+            ControllerUtils.getInstance().addActivityLog("Try to update problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+            return showUpdateProblem(form, problem);
+        } else {
+            return redirect(routes.ProblemController.viewProblem(problem.getId()));
+        }
+    }
+
+    @Transactional
+    @RequireCSRFCheck
+    public Result postUpdateProblem(long problemId) throws ProblemNotFoundException {
+        Problem problem = problemService.findProblemById(problemId);
+
+        if (ProblemControllerUtils.isAllowedToUpdateProblem(problemService, problem)) {
+            Form<ProblemUpdateForm> form = Form.form(ProblemUpdateForm.class).bindFromRequest();
+            if (form.hasErrors() || form.hasGlobalErrors()) {
+                return showUpdateProblem(form, problem);
+            } else {
+                ProblemUpdateForm data = form.get();
+                problemService.updateProblem(problemId, data.name, data.additionalNote);
+
+                ControllerUtils.getInstance().addActivityLog("Update problem " + problem.getName() + ".");
+
+                return redirect(routes.ProblemController.viewProblem(problem.getId()));
+            }
+        } else {
+            return notFound();
+        }
+    }
+
+    public Result switchLanguage(long problemId) {
+        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
+        ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
+
+        ControllerUtils.getInstance().addActivityLog("Switch language to " + languageCode + " of problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(request().getHeader("Referer"));
+    }
+
+    private Result showCreateProblem(Form<ProblemCreateForm> form) {
+        LazyHtml content = new LazyHtml(createProblemView.render(form));
+        content.appendLayout(c -> headingLayout.render(Messages.get("problem.create"), c));
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+                new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
+                new InternalLink(Messages.get("problem.create"), routes.ProblemController.createProblem())
+        ));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Create");
+
+        return ControllerUtils.getInstance().lazyOk(content);
+    }
+
+    private Result showUpdateProblem(Form<ProblemUpdateForm> form, Problem problem) {
+        LazyHtml content = new LazyHtml(updateProblemView.render(form, problem));
+        appendSubtabs(content, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+                ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
+                .add(new InternalLink(Messages.get("problem.update"), routes.ProblemController.updateProblem(problem.getId())))
+                .build()
+        );
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update");
+
+        return ControllerUtils.getInstance().lazyOk(content);
+    }
+
+    private void appendSubtabs(LazyHtml content, Problem problem) {
+        ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
+
+        internalLinks.add(new InternalLink(Messages.get("commons.view"), routes.ProblemController.viewProblem(problem.getId())));
+
+        if (ProblemControllerUtils.isAllowedToUpdateProblem(problemService, problem)) {
+            internalLinks.add(new InternalLink(Messages.get("commons.update"), routes.ProblemController.updateProblem(problem.getId())));
+        }
+
+        content.appendLayout(c -> subtabLayout.render(internalLinks.build(), c));
+    }
+}

@@ -1,0 +1,20 @@
+@(problemForm: Form[org.iatoki.judgels.sandalphon.forms.ProblemPartnerUpsertForm], bundleProblemForm: Form[org.iatoki.judgels.sandalphon.forms.BundlePartnerUpsertForm], problem: org.iatoki.judgels.sandalphon.Problem, problemPartner: org.iatoki.judgels.sandalphon.ProblemPartner)
+
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import scala.collection.JavaConverters._
+@import play.i18n.Messages
+
+@import org.iatoki.judgels.sandalphon.views.html.problem.partner.upsertPartnerView
+@import org.iatoki.judgels.sandalphon.views.html.problem.bundle.partner.upsertBundlePartnerView
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-6", "col-md-6") }
+
+@b3.form(routes.BundleProblemPartnerController.postUpdatePartner(problem.getId, problemPartner.getId)) {
+  @helper.CSRF.formField
+
+  @upsertPartnerView(problemForm)
+
+  @upsertBundlePartnerView(bundleProblemForm)
+
+  @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
+}

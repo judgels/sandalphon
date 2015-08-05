@@ -1,0 +1,21 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm], problem: org.iatoki.judgels.sandalphon.Problem)
+
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.views.html.formErrorView
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
+
+@formErrorView(form)
+
+@b3.form(routes.ProblemController.postUpdateProblem(problem.getId)) {
+
+    @helper.CSRF.formField
+
+    @b3.text(form("name"), '_label -> Messages.get("problem.name"))
+
+    @b3.textarea(form("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
+}

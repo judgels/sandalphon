@@ -1,0 +1,21 @@
+@(form: Form[org.iatoki.judgels.sandalphon.forms.ProblemCreateForm])
+
+@import org.iatoki.judgels.sandalphon.{WorldLanguageRegistry, ProblemType}
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import scala.collection.JavaConverters._
+@import play.i18n.Messages
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
+
+@b3.form(routes.ProblemController.postCreateProblem()) {
+    @helper.CSRF.formField
+
+    @b3.select(form("type"), ProblemType.values.map(e => (e.name() -> e.name())).toSeq, '_label -> Messages.get("problem.type"), 'class -> "form-control selectpicker")
+    @b3.text(form("name"), '_label -> Messages.get("problem.name"))
+    @b3.textarea(form("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
+
+
+    @b3.select(form("initLanguageCode"), WorldLanguageRegistry.getInstance.getLanguages.asScala.toSeq, '_label -> Messages.get("problem.statement.language.initial"), 'value -> "en-US")
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.next") }
+}
