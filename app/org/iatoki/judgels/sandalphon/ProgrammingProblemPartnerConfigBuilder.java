@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon;
 
 public class ProgrammingProblemPartnerConfigBuilder {
+
     private boolean isAllowedToSubmit;
     private boolean isAllowedToManageGrading;
 

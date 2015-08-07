@@ -12,14 +12,12 @@ public final class BundleItemAdapters {
         BundleItemAdapter itemAdapter = null;
 
         switch (itemType) {
-            case STATEMENT: {
+            case STATEMENT:
                 itemAdapter = new ItemStatementAdapter();
                 break;
-            }
-            case MULTIPLE_CHOICE:{
+            case MULTIPLE_CHOICE:
                 itemAdapter = new ItemMultipleChoiceAdapter();
                 break;
-            }
             default: break;
         }
 

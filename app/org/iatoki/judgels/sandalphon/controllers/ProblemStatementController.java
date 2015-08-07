@@ -173,9 +173,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
         Problem problem = problemService.findProblemById(problemId);
 
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-        
         boolean isAllowedToUploadMediaFiles = ProblemControllerUtils.isAllowedToUploadStatementResources(problemService, problem);
-        
         List<FileInfo> mediaFiles = problemService.getStatementMediaFiles(IdentityUtils.getUserJid(), problem.getJid());
 
         ControllerUtils.getInstance().addActivityLog("List statement media files of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");

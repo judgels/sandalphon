@@ -113,7 +113,7 @@ public final class BundleProblemSubmissionController extends AbstractJudgelsCont
                 BundleSubmission submission = bundleSubmissionService.findSubmissionById(submissionId);
                 BundleAnswer answer = bundleSubmissionService.createBundleAnswerFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
 
-                LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), new TypeToken<Map<String, BundleDetailResult>>(){}.getType()), answer, JidCacheServiceImpl.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
+                LazyHtml content = new LazyHtml(bundleSubmissionView.render(submission, new Gson().fromJson(submission.getLatestDetails(), new TypeToken<Map<String, BundleDetailResult>>() { }.getType()), answer, JidCacheServiceImpl.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), null));
 
                 BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
                 ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);

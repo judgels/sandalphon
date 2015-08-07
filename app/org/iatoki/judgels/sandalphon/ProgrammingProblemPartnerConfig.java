@@ -1,8 +1,7 @@
 package org.iatoki.judgels.sandalphon;
 
-import org.iatoki.judgels.sandalphon.ProblemPartnerChildConfig;
-
 public final class ProgrammingProblemPartnerConfig implements ProblemPartnerChildConfig {
+
     private final boolean isAllowedToSubmit;
     private final boolean isAllowedToManageGrading;
 

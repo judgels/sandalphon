@@ -34,25 +34,25 @@ public final class Problem {
         this.type = type;
     }
 
-    public final long getId() {
+    public long getId() {
         if (id == -1) {
             throw new AttributeNotAvailableException("id");
         }
         return id;
     }
 
-    public final String getJid() {
+    public String getJid() {
         return jid;
     }
 
-    public final String getName() {
+    public String getName() {
         if (name == null) {
             throw new AttributeNotAvailableException("name");
         }
         return name;
     }
 
-    public final String getAuthorJid() {
+    public String getAuthorJid() {
         if (authorJid == null) {
             throw new AttributeNotAvailableException("authorJid");
         }
@@ -66,14 +66,14 @@ public final class Problem {
         return additionalNote;
     }
 
-    public final Date getLastUpdateTime() {
+    public Date getLastUpdateTime() {
         if (lastUpdateTime == null) {
             throw new AttributeNotAvailableException("lastUpdateTime");
         }
         return lastUpdateTime;
     }
 
-    public final ProblemType getType() {
+    public ProblemType getType() {
         return type;
     }
 }

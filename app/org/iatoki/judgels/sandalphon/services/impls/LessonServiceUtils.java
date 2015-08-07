@@ -8,6 +8,10 @@ import java.util.List;
 
 public final class LessonServiceUtils {
 
+    private LessonServiceUtils() {
+        // prevent instantiation
+    }
+
     public static List<String> getOriginDirPath(String lessonJid) {
         return Lists.newArrayList(SandalphonProperties.getInstance().getBaseLessonsDirKey(), lessonJid);
     }

@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
 
 public final class ProblemControllerUtils {
 
+    private ProblemControllerUtils() {
+        // prevent instantiation
+    }
+
     static void appendTabsLayout(LazyHtml content, ProblemService problemService, Problem problem) {
         if (problem.getType().equals(ProblemType.PROGRAMMING)) {
             ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
@@ -102,9 +106,9 @@ public final class ProblemControllerUtils {
     }
 
     static boolean wasProblemJustCreated() {
-        return getJustCreatedProblemName() != null &&
-                getJustCreatedProblemAdditionalNote() != null &&
-                getJustCreatedProblemInitLanguageCode() != null;
+        return getJustCreatedProblemName() != null
+                && getJustCreatedProblemAdditionalNote() != null
+                && getJustCreatedProblemInitLanguageCode() != null;
     }
 
     static ImmutableList.Builder<InternalLink> getProblemBreadcrumbsBuilder(Problem problem) {

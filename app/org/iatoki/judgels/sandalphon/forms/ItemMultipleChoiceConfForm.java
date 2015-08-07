@@ -6,11 +6,6 @@ import java.util.List;
 
 public final class ItemMultipleChoiceConfForm {
 
-    public ItemMultipleChoiceConfForm() {
-        score = 1.0;
-        penalty = 0.0;
-    }
-
     @Constraints.Required
     public String meta;
 
@@ -29,4 +24,8 @@ public final class ItemMultipleChoiceConfForm {
 
     public List<Boolean> isCorrects;
 
+    public ItemMultipleChoiceConfForm() {
+        score = 1.0;
+        penalty = 0.0;
+    }
 }

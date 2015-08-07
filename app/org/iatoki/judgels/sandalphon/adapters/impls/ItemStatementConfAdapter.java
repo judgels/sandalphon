@@ -12,6 +12,7 @@ import play.mvc.Http;
 import play.twirl.api.Html;
 
 public final class ItemStatementConfAdapter implements BundleItemConfAdapter {
+
     @Override
     public Form generateForm() {
         return Form.form(ItemStatementConfForm.class);
@@ -39,7 +40,7 @@ public final class ItemStatementConfAdapter implements BundleItemConfAdapter {
 
     @Override
     public String getMetaFromForm(Form form) {
-        Form<ItemStatementConfForm> realForm = (Form<ItemStatementConfForm>)form;
+        Form<ItemStatementConfForm> realForm = (Form<ItemStatementConfForm>) form;
         ItemStatementConfForm itemForm = realForm.get();
 
         return itemForm.meta;
@@ -47,7 +48,7 @@ public final class ItemStatementConfAdapter implements BundleItemConfAdapter {
 
     @Override
     public String processRequestForm(Form form) {
-        Form<ItemStatementConfForm> realForm = (Form<ItemStatementConfForm>)form;
+        Form<ItemStatementConfForm> realForm = (Form<ItemStatementConfForm>) form;
         ItemStatementConfForm itemForm = realForm.get();
         ItemStatementConf itemConf = new ItemStatementConf();
         itemConf.statement = itemForm.statement;

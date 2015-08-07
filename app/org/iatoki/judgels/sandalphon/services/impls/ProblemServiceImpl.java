@@ -77,7 +77,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public final Problem findProblemById(long problemId) throws ProblemNotFoundException {
+    public Problem findProblemById(long problemId) throws ProblemNotFoundException {
         ProblemModel problemModel = problemDao.findById(problemId);
         if (problemModel != null) {
             return createProblemFromModel(problemModel);
@@ -87,7 +87,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public final Problem findProblemByJid(String problemJid) {
+    public Problem findProblemByJid(String problemJid) {
         ProblemModel problemModel = problemDao.findByJid(problemJid);
         return createProblemFromModel(problemModel);
     }
@@ -191,8 +191,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public void addLanguage(String userJid, String problemJid, String languageCode) throws IOException {
         String langs = problemFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, problemJid));
-        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {
-        }.getType());
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() { }.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
 
@@ -204,8 +203,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public void enableLanguage(String userJid, String problemJid, String languageCode) throws IOException {
         String langs = problemFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, problemJid));
-        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {
-        }.getType());
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() { }.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
 
@@ -215,8 +213,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public void disableLanguage(String userJid, String problemJid, String languageCode) throws IOException {
         String langs = problemFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, problemJid));
-        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {
-        }.getType());
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() { }.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.DISABLED);
 

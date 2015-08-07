@@ -198,9 +198,7 @@ public class LessonStatementController extends AbstractJudgelsController {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
         Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-        
         boolean isAllowedToUploadMediaFiles = LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson);
-        
         List<FileInfo> mediaFiles = lessonService.getStatementMediaFiles(IdentityUtils.getUserJid(), lesson.getJid());
 
         ControllerUtils.getInstance().addActivityLog("List statement media files of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");

@@ -74,7 +74,7 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public final Lesson findLessonById(long lessonId) throws LessonNotFoundException {
+    public Lesson findLessonById(long lessonId) throws LessonNotFoundException {
         LessonModel lessonModel = lessonDao.findById(lessonId);
         if (lessonModel != null) {
             return createLessonFromModel(lessonModel);
@@ -84,7 +84,7 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public final Lesson findLessonByJid(String lessonJid) {
+    public Lesson findLessonByJid(String lessonJid) {
         LessonModel lessonModel = lessonDao.findByJid(lessonJid);
         return createLessonFromModel(lessonModel);
     }
@@ -179,13 +179,13 @@ public final class LessonServiceImpl implements LessonService {
     @Override
     public Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String lessonJid) throws IOException {
         String langs = lessonFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
-        return new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
+        return new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() { }.getType());
     }
 
     @Override
     public void addLanguage(String userJid, String lessonJid, String languageCode) throws IOException {
         String langs = lessonFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
-        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() { }.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
 
@@ -197,7 +197,7 @@ public final class LessonServiceImpl implements LessonService {
     @Override
     public void enableLanguage(String userJid, String lessonJid, String languageCode) throws IOException {
         String langs = lessonFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
-        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() { }.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
 
@@ -207,7 +207,7 @@ public final class LessonServiceImpl implements LessonService {
     @Override
     public void disableLanguage(String userJid, String lessonJid, String languageCode) throws IOException {
         String langs = lessonFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid));
-        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {}.getType());
+        Map<String, StatementLanguageStatus> availableLanguages = new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() { }.getType());
 
         availableLanguages.put(languageCode, StatementLanguageStatus.DISABLED);
 

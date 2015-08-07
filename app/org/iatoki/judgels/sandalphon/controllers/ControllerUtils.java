@@ -68,11 +68,12 @@ public final class ControllerUtils extends AbstractJudgelsControllerUtils {
     }
 
     public void addActivityLog(String log) {
+        String newLog = log;
         try {
             if (JudgelsPlayUtils.hasViewPoint()) {
-                log += " view as " +  IdentityUtils.getUserJid();
+                newLog += " view as " +  IdentityUtils.getUserJid();
             }
-            UserActivityMessageServiceImpl.getInstance().addUserActivityMessage(new UserActivityMessage(System.currentTimeMillis(), SandalphonUtils.getRealUserJid(), log, IdentityUtils.getIpAddress()));
+            UserActivityMessageServiceImpl.getInstance().addUserActivityMessage(new UserActivityMessage(System.currentTimeMillis(), SandalphonUtils.getRealUserJid(), newLog, IdentityUtils.getIpAddress()));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

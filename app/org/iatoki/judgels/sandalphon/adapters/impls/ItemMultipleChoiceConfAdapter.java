@@ -19,6 +19,7 @@ import play.twirl.api.Html;
 import java.util.Set;
 
 public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapter {
+
     @Override
     public Form generateForm() {
         ItemMultipleChoiceConfForm form = new ItemMultipleChoiceConfForm();
@@ -65,7 +66,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
     public Form bindFormFromRequest(Http.Request request) {
         Form form = Form.form(ItemMultipleChoiceConfForm.class).bindFromRequest();
         if (!(form.hasErrors() || form.hasGlobalErrors())) {
-            ItemMultipleChoiceConfForm confForm = ((Form<ItemMultipleChoiceConfForm>)form).get();
+            ItemMultipleChoiceConfForm confForm = ((Form<ItemMultipleChoiceConfForm>) form).get();
             Set<String> uniqueChoiceAliases = Sets.newHashSet(confForm.choiceAliases);
             if (uniqueChoiceAliases.size() != confForm.choiceAliases.size()) {
                 form.reject(Messages.get("error.problem.bundle.item.multipleChoice.duplicateAlias"));
@@ -76,7 +77,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
 
     @Override
     public String getMetaFromForm(Form form) {
-        Form<ItemMultipleChoiceConfForm> realForm = (Form<ItemMultipleChoiceConfForm>)form;
+        Form<ItemMultipleChoiceConfForm> realForm = (Form<ItemMultipleChoiceConfForm>) form;
         ItemMultipleChoiceConfForm itemForm = realForm.get();
 
         return itemForm.meta;
@@ -84,7 +85,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
 
     @Override
     public String processRequestForm(Form form) {
-        Form<ItemMultipleChoiceConfForm> realForm = (Form<ItemMultipleChoiceConfForm>)form;
+        Form<ItemMultipleChoiceConfForm> realForm = (Form<ItemMultipleChoiceConfForm>) form;
         ItemMultipleChoiceConfForm itemForm = realForm.get();
 
         ItemMultipleChoiceConf itemConf = new ItemMultipleChoiceConf();
@@ -92,7 +93,7 @@ public final class ItemMultipleChoiceConfAdapter implements BundleItemConfAdapte
         itemConf.score = itemForm.score;
         itemConf.penalty = itemForm.penalty;
         ImmutableList.Builder<ItemChoice> itemChoiceBuilder = ImmutableList.builder();
-        for (int i=0;i<itemForm.choiceContents.size();++i) {
+        for (int i = 0; i < itemForm.choiceContents.size(); ++i) {
             boolean isCorrect = false;
             if ((itemForm.isCorrects != null) && (itemForm.isCorrects.size() > i) && (itemForm.isCorrects.get(i) != null)) {
                 isCorrect = true;

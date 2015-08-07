@@ -28,6 +28,10 @@ import java.util.stream.Collectors;
 
 public final class LessonControllerUtils {
 
+    private LessonControllerUtils() {
+        // prevent instantiation
+    }
+
     static void appendTabsLayout(LazyHtml content, LessonService lessonService, Lesson lesson) {
         ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
 

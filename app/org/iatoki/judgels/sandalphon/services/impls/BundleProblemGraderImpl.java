@@ -48,7 +48,7 @@ public final class BundleProblemGraderImpl implements BundleProblemGrader {
             BundleItemConfAdapter confAdapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
             BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
             if ((adapter instanceof BundleItemHasScore) && (bundleAnswer.getAnswers().containsKey(bundleItem.getJid()))) {
-                double score = ((BundleItemHasScore)adapter).calculateScore(confAdapter.parseConfString(conf), bundleAnswer.getAnswers().get(bundleItem.getJid()));
+                double score = ((BundleItemHasScore) adapter).calculateScore(confAdapter.parseConfString(conf), bundleAnswer.getAnswers().get(bundleItem.getJid()));
                 detailResultBuilder.put(bundleItem.getJid(), new BundleDetailResult(bundleItem.getNumber(), score));
                 totalScore += score;
             }

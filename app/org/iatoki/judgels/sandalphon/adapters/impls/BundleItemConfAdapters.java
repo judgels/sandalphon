@@ -4,6 +4,7 @@ import org.iatoki.judgels.sandalphon.adapters.BundleItemConfAdapter;
 import org.iatoki.judgels.sandalphon.BundleItemType;
 
 public final class BundleItemConfAdapters {
+
     private BundleItemConfAdapters() {
         // prevent instantiation
     }
@@ -12,14 +13,12 @@ public final class BundleItemConfAdapters {
         BundleItemConfAdapter itemConfAdapter = null;
 
         switch (itemType) {
-            case STATEMENT: {
+            case STATEMENT:
                 itemConfAdapter = new ItemStatementConfAdapter();
                 break;
-            }
-            case MULTIPLE_CHOICE:{
+            case MULTIPLE_CHOICE:
                 itemConfAdapter = new ItemMultipleChoiceConfAdapter();
                 break;
-            }
             default: break;
         }
 

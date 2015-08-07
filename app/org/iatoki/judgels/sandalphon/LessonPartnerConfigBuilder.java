@@ -3,8 +3,9 @@ package org.iatoki.judgels.sandalphon;
 import java.util.Set;
 
 public class LessonPartnerConfigBuilder {
+
     private boolean isAllowedToUpdateLesson;
-    boolean isAllowedToUpdateStatement;
+    private boolean isAllowedToUpdateStatement;
     private boolean isAllowedToUploadStatementResources;
     private Set<String> allowedStatementLanguagesToView;
     private Set<String> allowedStatementLanguagesToUpdate;

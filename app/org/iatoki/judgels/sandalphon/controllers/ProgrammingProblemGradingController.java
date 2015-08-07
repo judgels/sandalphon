@@ -71,7 +71,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             GradingEngineUpdateForm data = new GradingEngineUpdateForm();
             try  {
                 data.gradingEngineName = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
-            } catch(IOException e) {
+            } catch (IOException e) {
                 data.gradingEngineName = GradingEngineRegistry.getInstance().getDefaultEngine();
             }
 
@@ -162,7 +162,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
     @RequireCSRFCheck
     public Result postUpdateGradingConfig(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
-        
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             String engine;
             try {
@@ -322,7 +321,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
                     ControllerUtils.getInstance().addActivityLog("Upload test data file of problem " + problem.getName() + ".");
 
                     return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
-                } catch (IOException e){
+                } catch (IOException e) {
                     Form<UploadFileForm> form = Form.form(UploadFileForm.class);
                     List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
                     form.reject("problem.programming.grading.error.cantUploadTestData");

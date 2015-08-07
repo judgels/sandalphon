@@ -71,15 +71,12 @@ public class ProblemPartnerController extends AbstractJudgelsController {
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
             switch (problem.getType()) {
-                case PROGRAMMING: {
+                case PROGRAMMING:
                     return redirect(routes.ProgrammingProblemPartnerController.addPartner(problem.getId()));
-                }
-                case BUNDLE: {
+                case BUNDLE:
                     return redirect(routes.BundleProblemPartnerController.addPartner(problem.getId()));
-                }
-                default: {
+                default:
                     return badRequest();
-                }
             }
         } else {
             return notFound();
@@ -92,15 +89,12 @@ public class ProblemPartnerController extends AbstractJudgelsController {
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
             switch (problem.getType()) {
-                case PROGRAMMING: {
+                case PROGRAMMING:
                     return redirect(routes.ProgrammingProblemPartnerController.updatePartner(problem.getId(), partnerId));
-                }
-                case BUNDLE: {
+                case BUNDLE:
                     return redirect(routes.BundleProblemPartnerController.updatePartner(problem.getId(), partnerId));
-                }
-                default: {
+                default:
                     return badRequest();
-                }
             }
         } else {
             return notFound();
