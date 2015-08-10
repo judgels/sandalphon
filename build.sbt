@@ -42,5 +42,5 @@ lazy val sandalphon = (project in file("."))
         buildInfoPackage := "org.iatoki.judgels.sandalphon"
     )
 
-lazy val sandalphoncommons = RootProject(file("../sandalphoncommons"))
-lazy val jophielcommons = RootProject(file("../jophielcommons"))
+lazy val sandalphoncommons = RootProject(file("../sandalphon-commons"))
+lazy val jophielcommons = RootProject(file("../jophiel-commons"))
