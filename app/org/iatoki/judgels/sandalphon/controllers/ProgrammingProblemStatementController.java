@@ -9,7 +9,7 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.adapters.impls.SubmissionAdapters;
+import org.iatoki.judgels.sandalphon.adapters.impls.SubmissionAdapterRegistry;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
@@ -93,7 +93,7 @@ public final class ProgrammingProblemStatementController extends AbstractJudgels
             }
 
             try {
-                LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewStatement(routes.ProgrammingProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, config, engine, allowedLanguageNames, reasonNotAllowedToSubmit));
+                LazyHtml content = new LazyHtml(SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).renderViewStatement(routes.ProgrammingProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, config, engine, allowedLanguageNames, reasonNotAllowedToSubmit));
 
                 Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToView(problemService, problem);
 
