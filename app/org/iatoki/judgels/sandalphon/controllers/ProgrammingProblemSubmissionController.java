@@ -14,9 +14,9 @@ import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.Submission;
-import org.iatoki.judgels.sandalphon.adapters.impls.SubmissionAdapters;
 import org.iatoki.judgels.sandalphon.SubmissionException;
 import org.iatoki.judgels.sandalphon.SubmissionNotFoundException;
+import org.iatoki.judgels.sandalphon.adapters.impls.SubmissionAdapterRegistry;
 import org.iatoki.judgels.sandalphon.config.SubmissionFile;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
@@ -87,9 +87,9 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
             Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(languageRestriction));
 
             try {
-                GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromNewSubmission(body);
+                GradingSource source = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).createGradingSourceFromNewSubmission(body);
                 String submissionJid = submissionService.submit(problem.getJid(), null, engine, gradingLanguage, allowedLanguageNames, source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-                SubmissionAdapters.fromGradingEngine(engine).storeSubmissionFiles(submissionFileSystemProvider, null, submissionJid, source);
+                SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).storeSubmissionFiles(submissionFileSystemProvider, null, submissionJid, source);
             } catch (SubmissionException e) {
                 flash("submissionError", e.getMessage());
                 return redirect(routes.ProgrammingProblemStatementController.viewStatement(problem.getId()));
@@ -145,9 +145,9 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
             } catch (IOException e) {
                 engine = GradingEngineRegistry.getInstance().getDefaultEngine();
             }
-            GradingSource source = SubmissionAdapters.fromGradingEngine(engine).createGradingSourceFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
+            GradingSource source = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).createGradingSourceFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
 
-            LazyHtml content = new LazyHtml(SubmissionAdapters.fromGradingEngine(engine).renderViewSubmission(submission, source, JidCacheServiceImpl.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
+            LazyHtml content = new LazyHtml(SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).renderViewSubmission(submission, source, JidCacheServiceImpl.getInstance().getDisplayName(submission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(submission.getGradingLanguage()).getName(), null));
 
             ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
             ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
@@ -170,7 +170,7 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
 
         if (ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem)) {
             Submission submission = submissionService.findSubmissionById(submissionId);
-            GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
+            GradingSource source = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
             submissionService.regrade(submission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
             ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
@@ -199,7 +199,7 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
             }
 
             for (Submission submission : submissions) {
-                GradingSource source = SubmissionAdapters.fromGradingEngine(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
+                GradingSource source = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(submission.getGradingEngine()).createGradingSourceFromPastSubmission(submissionFileSystemProvider, null, submission.getJid());
                 submissionService.regrade(submission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
             }
 
