@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon;
 import com.google.gson.Gson;
 
 public final class LessonPartner {
+
     private final long id;
     private final String lessonJid;
     private final String partnerJid;

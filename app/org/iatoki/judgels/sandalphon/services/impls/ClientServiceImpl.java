@@ -29,24 +29,24 @@ import java.util.stream.Collectors;
 public final class ClientServiceImpl implements ClientService {
 
     private final ClientDao clientDao;
-    private final ClientProblemDao clientProblemDao;
     private final ClientLessonDao clientLessonDao;
+    private final ClientProblemDao clientProblemDao;
 
     @Inject
-    public ClientServiceImpl(ClientDao clientDao, ClientProblemDao clientProblemDao, ClientLessonDao clientLessonDao) {
+    public ClientServiceImpl(ClientDao clientDao, ClientLessonDao clientLessonDao, ClientProblemDao clientProblemDao) {
         this.clientDao = clientDao;
-        this.clientProblemDao = clientProblemDao;
         this.clientLessonDao = clientLessonDao;
+        this.clientProblemDao = clientProblemDao;
     }
 
     @Override
-    public boolean clientExistsByClientJid(String clientJid) {
+    public boolean clientExistsByJid(String clientJid) {
         return clientDao.existsByJid(clientJid);
     }
 
     @Override
-    public List<Client> findAllClients() {
-        List<ClientModel> clientModels = clientDao.findAll();
+    public List<Client> getClients() {
+        List<ClientModel> clientModels = clientDao.getAll();
 
         return clientModels.stream().map(c -> new Client(c.id, c.jid, c.name, c.secret)).collect(Collectors.toList());
     }
@@ -54,11 +54,11 @@ public final class ClientServiceImpl implements ClientService {
     @Override
     public Client findClientById(long clientId) throws ClientNotFoundException {
         ClientModel clientModel = clientDao.findById(clientId);
-        if (clientModel != null) {
-            return createClientFromModel(clientModel);
-        } else {
+        if (clientModel == null) {
             throw new ClientNotFoundException("Client not found.");
         }
+
+        return createClientFromModel(clientModel);
     }
 
 
@@ -94,7 +94,7 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Page<Client> pageClients(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
+    public Page<Client> getPageOfClients(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalPages = clientDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
         List<ClientModel> clientModels = clientDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
@@ -104,7 +104,7 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public boolean isClientProblemInProblemByClientJid(String problemJid, String clientJid) {
+    public boolean isClientAuthorizedForProblem(String problemJid, String clientJid) {
         return clientProblemDao.existsByClientJidAndProblemJid(clientJid, problemJid);
     }
 
@@ -117,7 +117,7 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientProblem findClientProblemByClientProblemId(long clientProblemId) {
+    public ClientProblem findClientProblemById(long clientProblemId) {
         ClientProblemModel clientProblemModel = clientProblemDao.findById(clientProblemId);
         ClientModel clientModel = clientDao.findByJid(clientProblemModel.clientJid);
 
@@ -125,8 +125,8 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public List<ClientProblem> findAllClientProblemByProblemJid(String problemJid) {
-        List<ClientProblemModel> clientProblemModels = clientProblemDao.findByProblemJid(problemJid);
+    public List<ClientProblem> getClientProblemsByProblemJid(String problemJid) {
+        List<ClientProblemModel> clientProblemModels = clientProblemDao.getByProblemJid(problemJid);
         ImmutableList.Builder<ClientProblem> clientProblemBuilder = ImmutableList.builder();
 
         for (ClientProblemModel clientProblemModel : clientProblemModels) {
@@ -154,7 +154,7 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public boolean isClientLessonInLessonByClientJid(String lessonJid, String clientJid) {
+    public boolean isClientAuthorizedForLesson(String lessonJid, String clientJid) {
         return clientLessonDao.existsByClientJidAndLessonJid(clientJid, lessonJid);
     }
 
@@ -167,7 +167,7 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientLesson findClientLessonByClientLessonId(long clientLessonId) {
+    public ClientLesson findClientLessonById(long clientLessonId) {
         ClientLessonModel clientLessonModel = clientLessonDao.findById(clientLessonId);
         ClientModel clientModel = clientDao.findByJid(clientLessonModel.clientJid);
 
@@ -175,8 +175,8 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public List<ClientLesson> findAllClientLessonByLessonJid(String lessonJid) {
-        List<ClientLessonModel> clientLessonModels = clientLessonDao.findByLessonJid(lessonJid);
+    public List<ClientLesson> getClientLessonsByLessonJid(String lessonJid) {
+        List<ClientLessonModel> clientLessonModels = clientLessonDao.getByLessonJid(lessonJid);
         ImmutableList.Builder<ClientLesson> clientLessonBuilder = ImmutableList.builder();
 
         for (ClientLessonModel clientLessonModel : clientLessonModels) {

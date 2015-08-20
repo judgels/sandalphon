@@ -1,30 +1,31 @@
-@(page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.Lesson], orderBy: String, orderDir: String, filterString: String)
-@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
-
-@import org.iatoki.judgels.sandalphon.controllers.routes
-@import org.iatoki.judgels.play.JudgelsPlayUtils
-
 @import play.i18n.Messages
+@import scala.collection.JavaConversions
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersView
 @import org.iatoki.judgels.play.views.html.table.searchView
 @import org.iatoki.judgels.play.views.html.table.paginationView
-@import scala.collection.JavaConversions
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.sandalphon.Lesson
 
-@searchView(page.getPageIndex, orderBy, orderDir, filterString, routes.LessonController.listLessons)
+@(pageOfLessons: Page[Lesson], orderBy: String, orderDir: String, filterString: String)
+
+@searchView(pageOfLessons.getPageIndex, orderBy, orderDir, filterString, routes.LessonController.listLessons)
 
 <div class="clearfix"></div>
 
 @tableView() {
-    @tableHeadersView(page.getPageIndex, orderBy, orderDir, filterString, routes.LessonController.listLessons)(
+    @tableHeadersView(pageOfLessons.getPageIndex, orderBy, orderDir, filterString, routes.LessonController.listLessons)(
         "id" -> Messages.get("commons.id"),
         "name" -> Messages.get("problem.name"),
         "userCreate" -> Messages.get("problem.author"),
         "timeUpdate" -> Messages.get("problem.lastUpdateTime")
     )
     <tbody>
-    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
-        @for(lesson <- page.getData) {
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfLessons.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
+        @for(lesson <- pageOfLessons.getData) {
             <tr>
                 <td>@lesson.getId</td>
                 <td>@lesson.getName</td>
@@ -41,4 +42,4 @@
     </tbody>
 }
 
-@paginationView(page, orderBy, orderDir, filterString, routes.LessonController.listLessons)
+@paginationView(pageOfLessons, orderBy, orderDir, filterString, routes.LessonController.listLessons)

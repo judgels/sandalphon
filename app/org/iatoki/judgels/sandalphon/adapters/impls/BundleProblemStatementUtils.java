@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public final class BundleProblemStatementUtils {
+
+    // TODO refactor this
     private static final Map<String, String> DEFAULT_STATEMENTS = ImmutableMap.of(
             "id-ID",
                     "<h3>Bundel Soal</h3>\n",

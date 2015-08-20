@@ -33,13 +33,13 @@ import java.util.List;
 @Named
 public final class ProblemClientController extends AbstractJudgelsController {
 
-    private final ProblemService problemService;
     private final ClientService clientService;
+    private final ProblemService problemService;
 
     @Inject
-    public ProblemClientController(ProblemService problemService, ClientService clientService) {
-        this.problemService = problemService;
+    public ProblemClientController(ClientService clientService, ProblemService problemService) {
         this.clientService = clientService;
+        this.problemService = problemService;
     }
 
     @Transactional(readOnly = true)
@@ -47,17 +47,17 @@ public final class ProblemClientController extends AbstractJudgelsController {
     public Result updateClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAllowedToManageClients(problemService, problem)) {
-            Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class);
-            List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemJid(problem.getJid());
-            List<Client> clients = clientService.findAllClients();
-
-            ControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return showUpdateClientProblems(form, problem, clients, clientProblems);
-        } else {
+        if (!ProblemControllerUtils.isAllowedToManageClients(problemService, problem)) {
             return notFound();
         }
+
+        Form<ClientProblemUpsertForm> clientProblemUpsertForm = Form.form(ClientProblemUpsertForm.class);
+        List<ClientProblem> clientProblems = clientService.getClientProblemsByProblemJid(problem.getJid());
+        List<Client> clients = clientService.getClients();
+
+        ControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showUpdateClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
     }
 
     @Transactional
@@ -65,55 +65,57 @@ public final class ProblemClientController extends AbstractJudgelsController {
     public Result postUpdateClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAllowedToManageClients(problemService, problem)) {
-            Form<ClientProblemUpsertForm> form = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
-
-            if (form.hasErrors() || form.hasGlobalErrors()) {
-                List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemJid(problem.getJid());
-                List<Client> clients = clientService.findAllClients();
-                return showUpdateClientProblems(form, problem, clients, clientProblems);
-            } else {
-                ClientProblemUpsertForm clientProblemUpsertForm = form.get();
-                if ((clientService.clientExistsByClientJid(clientProblemUpsertForm.clientJid)) && (!clientService.isClientProblemInProblemByClientJid(problem.getJid(), clientProblemUpsertForm.clientJid))) {
-                    clientService.createClientProblem(problem.getJid(), clientProblemUpsertForm.clientJid);
-
-                    ControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertForm.clientJid + " to problem " + problem.getName() + ".");
-
-                    return redirect(routes.ProblemClientController.updateClientProblems(problem.getId()));
-                } else {
-                    List<ClientProblem> clientProblems = clientService.findAllClientProblemByProblemJid(problem.getJid());
-                    List<Client> clients = clientService.findAllClients();
-                    return showUpdateClientProblems(form, problem, clients, clientProblems);
-                }
-            }
-        } else {
+        if (!ProblemControllerUtils.isAllowedToManageClients(problemService, problem)) {
             return notFound();
         }
+
+        Form<ClientProblemUpsertForm> clientProblemUpsertForm = Form.form(ClientProblemUpsertForm.class).bindFromRequest();
+
+        if (formHasErrors(clientProblemUpsertForm)) {
+            List<ClientProblem> clientProblems = clientService.getClientProblemsByProblemJid(problem.getJid());
+            List<Client> clients = clientService.getClients();
+
+            return showUpdateClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
+        }
+
+        ClientProblemUpsertForm clientProblemUpsertData = clientProblemUpsertForm.get();
+        if (!clientService.clientExistsByJid(clientProblemUpsertData.clientJid) || clientService.isClientAuthorizedForProblem(problem.getJid(), clientProblemUpsertData.clientJid)) {
+            List<ClientProblem> clientProblems = clientService.getClientProblemsByProblemJid(problem.getJid());
+            List<Client> clients = clientService.getClients();
+
+            return showUpdateClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
+        }
+
+        clientService.createClientProblem(problem.getJid(), clientProblemUpsertData.clientJid);
+
+        ControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertData.clientJid + " to problem " + problem.getName() + ".");
+
+        return redirect(routes.ProblemClientController.updateClientProblems(problem.getId()));
     }
 
     @Transactional(readOnly = true)
     public Result viewClientProblem(long problemId, long clientProblemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
-        ClientProblem clientProblem = clientService.findClientProblemByClientProblemId(clientProblemId);
-        if (clientProblem.getProblemJid().equals(problem.getJid())) {
-            LazyHtml content = new LazyHtml(viewClientProblemView.render(problem, clientProblem));
-            ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
-            ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
-            ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-            ControllerUtils.getInstance().appendSidebarLayout(content);
-            appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.client"), routes.ProblemClientController.viewClientProblem(problemId, clientProblemId)));
-            ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
-
-            ControllerUtils.getInstance().addActivityLog("View client " + clientProblem.getClientName() + " to problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return ControllerUtils.getInstance().lazyOk(content);
-        } else {
+        ClientProblem clientProblem = clientService.findClientProblemById(clientProblemId);
+        if (!clientProblem.getProblemJid().equals(problem.getJid())) {
             return notFound();
         }
+
+        LazyHtml content = new LazyHtml(viewClientProblemView.render(problem, clientProblem));
+        ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.client"), routes.ProblemClientController.viewClientProblem(problemId, clientProblemId)));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        ControllerUtils.getInstance().addActivityLog("View client " + clientProblem.getClientName() + " to problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> form, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
-        LazyHtml content = new LazyHtml(updateClientProblemsView.render(form, problem.getId(), clients, clientProblems));
+    private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> clientProblemUpsertForm, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
+        LazyHtml content = new LazyHtml(updateClientProblemsView.render(clientProblemUpsertForm, problem.getId(), clients, clientProblems));
         ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);

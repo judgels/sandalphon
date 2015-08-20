@@ -17,11 +17,11 @@ public final class SandalphonModule extends AbstractJudgelsPlayModule {
     protected void manualBinding() {
         bind(Jophiel.class).toInstance(jophiel());
         bind(Sealtiel.class).toInstance(sealtiel());
-        bind(FileSystemProvider.class).annotatedWith(ProblemFile.class).toInstance(problemFileSystemProvider());
-        bind(FileSystemProvider.class).annotatedWith(SubmissionFile.class).toInstance(submissionFileSystemProvider());
-        bind(FileSystemProvider.class).annotatedWith(LessonFile.class).toInstance(lessonFileSystemProvider());
-        bind(GitProvider.class).annotatedWith(ProblemGit.class).toInstance(problemGitProvider());
-        bind(GitProvider.class).annotatedWith(LessonGit.class).toInstance(lessonGitProvider());
+        bind(FileSystemProvider.class).annotatedWith(ProblemFileSystemProvider.class).toInstance(problemFileSystemProvider());
+        bind(FileSystemProvider.class).annotatedWith(SubmissionFileSystemProvider.class).toInstance(submissionFileSystemProvider());
+        bind(FileSystemProvider.class).annotatedWith(LessonFileSystemProvider.class).toInstance(lessonFileSystemProvider());
+        bind(GitProvider.class).annotatedWith(ProblemGitProvider.class).toInstance(problemGitProvider());
+        bind(GitProvider.class).annotatedWith(LessonGitProvider.class).toInstance(lessonGitProvider());
         bindConstant().annotatedWith(GabrielClientJid.class).to(gabrielClientJid());
         bind(BaseUserService.class).to(UserServiceImpl.class);
     }

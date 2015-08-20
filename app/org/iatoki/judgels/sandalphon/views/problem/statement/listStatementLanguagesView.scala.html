@@ -1,8 +1,8 @@
-@(availableLanguages: Map[String, org.iatoki.judgels.sandalphon.StatementLanguageStatus], defaultLanguage: String, problemId: Long)
-
 @import play.i18n.Messages
-@import org.iatoki.judgels.sandalphon.{WorldLanguageRegistry, StatementLanguageStatus}
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.{WorldLanguageRegistry, StatementLanguageStatus}
+
+@(availableLanguages: Map[String, StatementLanguageStatus], defaultLanguage: String, problemId: Long)
 
 <h3>@Messages.get("problem.statement.language.add")</h3>
 

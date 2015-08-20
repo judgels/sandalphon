@@ -1,22 +1,23 @@
-@(page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.Problem], orderBy: String, orderDir: String, filterString: String)
-@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
-
-@import org.iatoki.judgels.sandalphon.controllers.routes
-@import org.iatoki.judgels.play.JudgelsPlayUtils
-
 @import play.i18n.Messages
+@import scala.collection.JavaConversions
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersView
 @import org.iatoki.judgels.play.views.html.table.searchView
 @import org.iatoki.judgels.play.views.html.table.paginationView
-@import scala.collection.JavaConversions
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.sandalphon.Problem
 
-@searchView(page.getPageIndex, orderBy, orderDir, filterString, routes.ProblemController.listProblems)
+@(pageOfProblems: Page[Problem], orderBy: String, orderDir: String, filterString: String)
+
+@searchView(pageOfProblems.getPageIndex, orderBy, orderDir, filterString, routes.ProblemController.listProblems)
 
 <div class="clearfix"></div>
 
 @tableView() {
-    @tableHeadersView(page.getPageIndex, orderBy, orderDir, filterString, routes.ProblemController.listProblems)(
+    @tableHeadersView(pageOfProblems.getPageIndex, orderBy, orderDir, filterString, routes.ProblemController.listProblems)(
         "id" -> Messages.get("commons.id"),
         "name" -> Messages.get("problem.name"),
         "type" -> Messages.get("problem.type"),
@@ -24,8 +25,8 @@
         "timeUpdate" -> Messages.get("problem.lastUpdateTime")
     )
     <tbody>
-    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
-        @for(problem <- page.getData) {
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfProblems.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
+        @for(problem <- pageOfProblems.getData) {
             <tr>
                 <td>@problem.getId</td>
                 <td>@problem.getName</td>
@@ -43,4 +44,4 @@
     </tbody>
 }
 
-@paginationView(page, orderBy, orderDir, filterString, routes.ProblemController.listProblems)
+@paginationView(pageOfProblems, orderBy, orderDir, filterString, routes.ProblemController.listProblems)

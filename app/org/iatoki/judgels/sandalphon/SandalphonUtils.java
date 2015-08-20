@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class SandalphonUtils {
+
     private SandalphonUtils() {
         // prevent instantiation
     }

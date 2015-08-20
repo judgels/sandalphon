@@ -7,6 +7,7 @@ import play.mvc.Http;
 import play.twirl.api.Html;
 
 public interface BundleItemConfAdapter {
+
     Form generateForm();
 
     Form generateForm(String conf, String meta);

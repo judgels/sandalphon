@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 public final class SandalphonProperties {
+
     private static SandalphonProperties INSTANCE;
 
     private final Config config;

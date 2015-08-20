@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon;
 import java.util.Set;
 
 public final class LessonPartnerConfig {
+
     private final boolean isAllowedToUpdateLesson;
 
     private final boolean isAllowedToUpdateStatement;

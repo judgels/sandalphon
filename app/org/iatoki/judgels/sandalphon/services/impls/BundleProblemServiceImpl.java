@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemUtils;
 import org.iatoki.judgels.sandalphon.BundleItemsConfig;
-import org.iatoki.judgels.sandalphon.config.ProblemFile;
+import org.iatoki.judgels.sandalphon.config.ProblemFileSystemProvider;
 import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 
 import javax.inject.Inject;
@@ -19,7 +19,7 @@ public final class BundleProblemServiceImpl implements BundleProblemService {
     private final FileSystemProvider problemFileSystemProvider;
 
     @Inject
-    public BundleProblemServiceImpl(@ProblemFile FileSystemProvider problemFileSystemProvider) {
+    public BundleProblemServiceImpl(@ProblemFileSystemProvider FileSystemProvider problemFileSystemProvider) {
         this.problemFileSystemProvider = problemFileSystemProvider;
     }
 

@@ -1,6 +1,9 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.ClientProblemUpsertForm], id: Long, clients: List[org.iatoki.judgels.sandalphon.Client], clientProblems: List[org.iatoki.judgels.sandalphon.ClientProblem])
-
 @import play.i18n.Messages
+@import org.iatoki.judgels.sandalphon.forms.ClientProblemUpsertForm
+@import org.iatoki.judgels.sandalphon.Client
+@import org.iatoki.judgels.sandalphon.ClientProblem
+
+@(clientProblemUpsertForm: Form[ClientProblemUpsertForm], id: Long, clients: List[Client], clientProblems: List[ClientProblem])
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 

@@ -4,6 +4,7 @@ import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.BundleItemType;
 
 public final class BundleItemAdapters {
+
     private BundleItemAdapters() {
         // prevent instantiation
     }

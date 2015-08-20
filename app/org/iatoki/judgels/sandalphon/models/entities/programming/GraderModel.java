@@ -10,6 +10,7 @@ import javax.persistence.Table;
 @Table(name = "sandalphon_grader")
 @JidPrefix("SAGR")
 public final class GraderModel extends AbstractJudgelsModel {
+
     public String name;
     public String secret;
 

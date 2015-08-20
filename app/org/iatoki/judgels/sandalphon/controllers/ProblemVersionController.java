@@ -46,26 +46,26 @@ public final class ProblemVersionController extends AbstractJudgelsController {
     public Result listVersionHistory(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAllowedToViewVersionHistory(problemService, problem)) {
-            List<GitCommit> versions = problemService.getVersions(IdentityUtils.getUserJid(), problem.getJid());
-            boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
-            boolean isAllowedToRestoreVersionHistory = isClean && ProblemControllerUtils.isAllowedToRestoreVersionHistory(problemService, problem);
-
-            LazyHtml content = new LazyHtml(listVersionsView.render(versions, problem.getId(), isAllowedToRestoreVersionHistory));
-            appendSubtabsLayout(content, problem);
-            ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
-            ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
-            ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-            ControllerUtils.getInstance().appendSidebarLayout(content);
-            appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.version.history"), routes.ProblemVersionController.listVersionHistory(problem.getId())));
-            ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
-
-            ControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return ControllerUtils.getInstance().lazyOk(content);
-        } else {
+        if (!ProblemControllerUtils.isAllowedToViewVersionHistory(problemService, problem)) {
             return notFound();
         }
+
+        List<GitCommit> versions = problemService.getVersions(IdentityUtils.getUserJid(), problem.getJid());
+        boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+        boolean isAllowedToRestoreVersionHistory = isClean && ProblemControllerUtils.isAllowedToRestoreVersionHistory(problemService, problem);
+
+        LazyHtml content = new LazyHtml(listVersionsView.render(versions, problem.getId(), isAllowedToRestoreVersionHistory));
+        appendSubtabsLayout(content, problem);
+        ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.version.history"), routes.ProblemVersionController.listVersionHistory(problem.getId())));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
+
+        ControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -73,15 +73,15 @@ public final class ProblemVersionController extends AbstractJudgelsController {
         Problem problem = problemService.findProblemById(problemId);
         boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
 
-        if (isClean && ProblemControllerUtils.isAllowedToRestoreVersionHistory(problemService, problem)) {
-            problemService.restore(problem.getJid(), hash);
-
-            ControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.ProblemVersionController.listVersionHistory(problem.getId()));
-        } else {
+        if (!isClean || !ProblemControllerUtils.isAllowedToRestoreVersionHistory(problemService, problem)) {
             return notFound();
         }
+
+        problemService.restore(problem.getJid(), hash);
+
+        ControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemVersionController.listVersionHistory(problem.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -89,17 +89,17 @@ public final class ProblemVersionController extends AbstractJudgelsController {
     public Result viewVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
-            boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
-
-            Form<VersionCommitForm> form = Form.form(VersionCommitForm.class);
-
-            ControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return showViewVersionLocalChanges(form, problem, isClean);
-        } else {
+        if (!ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
             return notFound();
         }
+
+        boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        Form<VersionCommitForm> versionCommitForm = Form.form(VersionCommitForm.class);
+
+        ControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showViewVersionLocalChanges(versionCommitForm, problem, isClean);
     }
 
     @Transactional
@@ -107,76 +107,76 @@ public final class ProblemVersionController extends AbstractJudgelsController {
     public Result postCommitVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
-            Form<VersionCommitForm> form = Form.form(VersionCommitForm.class).bindFromRequest();
-            if (form.hasErrors() || form.hasGlobalErrors()) {
-                boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
-                return showViewVersionLocalChanges(form, problem, isClean);
-            }
-
-            VersionCommitForm data = form.get();
-
-            if (problemService.fetchUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
-                flash("localChangesError", Messages.get("problem.version.local.cantCommit"));
-            } else if (!problemService.commitThenMergeUserClone(IdentityUtils.getUserJid(), problem.getJid(), data.title, data.description)) {
-                flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
-            } else if (!problemService.pushUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
-                flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
-            } else {
-                try {
-                    problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
-                } catch (IOException e) {
-                    // do nothing
-                }
-            }
-
-            ControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
-        } else {
+        if (!ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
             return notFound();
         }
+
+        Form<VersionCommitForm> versionCommitForm = Form.form(VersionCommitForm.class).bindFromRequest();
+        if (formHasErrors(versionCommitForm)) {
+            boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+            return showViewVersionLocalChanges(versionCommitForm, problem, isClean);
+        }
+
+        VersionCommitForm versionCommitData = versionCommitForm.get();
+
+        if (problemService.fetchUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
+            flash("localChangesError", Messages.get("problem.version.local.cantCommit"));
+        } else if (!problemService.commitThenMergeUserClone(IdentityUtils.getUserJid(), problem.getJid(), versionCommitData.title, versionCommitData.description)) {
+            flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
+        } else if (!problemService.pushUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
+            flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
+        } else {
+            try {
+                problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
     }
 
     @Transactional(readOnly = true)
     public Result updateVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
-            problemService.fetchUserClone(IdentityUtils.getUserJid(), problem.getJid());
-
-            if (!problemService.updateUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
-                flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
-            }
-
-            ControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
-        } else {
+        if (!ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
             return notFound();
         }
+
+        problemService.fetchUserClone(IdentityUtils.getUserJid(), problem.getJid());
+
+        if (!problemService.updateUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
+            flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
     }
 
     @Transactional(readOnly = true)
     public Result discardVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
-            try {
-                problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
-                ControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        if (!ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {
+            return notFound();
+        }
 
-                return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
-            } catch (IOException e) {
-                return notFound();
-            }
-        } else {
+        try {
+            problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
+            ControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+            return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
+        } catch (IOException e) {
             return notFound();
         }
     }
 
-    private Result showViewVersionLocalChanges(Form<VersionCommitForm> form, Problem problem, boolean isClean) {
-        LazyHtml content = new LazyHtml(viewVersionLocalChangesView.render(form, problem, isClean));
+    private Result showViewVersionLocalChanges(Form<VersionCommitForm> versionCommitForm, Problem problem, boolean isClean) {
+        LazyHtml content = new LazyHtml(viewVersionLocalChangesView.render(versionCommitForm, problem, isClean));
         appendSubtabsLayout(content, problem);
         ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);

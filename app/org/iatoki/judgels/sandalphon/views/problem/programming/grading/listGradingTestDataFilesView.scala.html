@@ -1,8 +1,10 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.UploadFileForm], problemId: Long, testDataFiles: List[org.iatoki.judgels.FileInfo])
-
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.FileInfo
 @import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.sandalphon.forms.UploadFileForm
+
+@(uploadFileForm: Form[UploadFileForm], problemId: Long, testDataFiles: List[FileInfo])
 
 <h3>@Messages.get("problem.file.uploadNew")</h3>
 
@@ -11,7 +13,7 @@
 @b3.form(routes.ProgrammingProblemGradingController.postUploadGradingTestDataFiles(problemId), 'enctype->"multipart/form-data") {
     @helper.CSRF.formField
 
-    @b3.file(form("file"), '_label -> Messages.get("problem.file.asSingleFile"))
+    @b3.file(uploadFileForm("file"), '_label -> Messages.get("problem.file.asSingleFile"))
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.upload") }
 }
@@ -19,7 +21,7 @@
 @b3.form(routes.ProgrammingProblemGradingController.postUploadGradingTestDataFiles(problemId), 'enctype->"multipart/form-data") {
     @helper.CSRF.formField
 
-    @b3.file(form("fileZipped"), '_label -> Messages.get("problem.file.asZipFile"))
+    @b3.file(uploadFileForm("fileZipped"), '_label -> Messages.get("problem.file.asZipFile"))
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.upload") }
 }

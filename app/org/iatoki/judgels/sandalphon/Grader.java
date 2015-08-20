@@ -3,11 +3,8 @@ package org.iatoki.judgels.sandalphon;
 public final class Grader {
 
     private final long id;
-
     private final String jid;
-
     private final String name;
-
     private final String secret;
 
     public Grader(long id, String jid, String name, String secret) {

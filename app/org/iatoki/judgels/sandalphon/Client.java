@@ -3,11 +3,8 @@ package org.iatoki.judgels.sandalphon;
 public final class Client {
 
     private final long id;
-
     private final String jid;
-
     private final String name;
-
     private final String secret;
 
     public Client(long id, String jid, String name, String secret) {

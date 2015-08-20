@@ -1,8 +1,10 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.VersionCommitForm], lesson: org.iatoki.judgels.sandalphon.Lesson, isClean: Boolean)
-
-@import org.iatoki.judgels.sandalphon.controllers.routes
 @import play.i18n.Messages
 @import play.mvc.Controller
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.forms.VersionCommitForm
+@import org.iatoki.judgels.sandalphon.Lesson
+
+@(versionCommitForm: Form[VersionCommitForm], lesson: Lesson, isClean: Boolean)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
 
@@ -17,8 +19,8 @@
         @b3.form(routes.LessonVersionController.postCommitVersionLocalChanges(lesson.getId())) {
             @helper.CSRF.formField
 
-            @b3.text(form("title"), '_label -> Messages.get("lesson.version.commit.title"))
-            @b3.textarea(form("description"), '_label -> Messages.get("lesson.version.commit.description"))
+            @b3.text(versionCommitForm("title"), '_label -> Messages.get("lesson.version.commit.title"))
+            @b3.textarea(versionCommitForm("description"), '_label -> Messages.get("lesson.version.commit.description"))
 
             @b3.submit('class -> "btn btn-primary") {
                 @Messages.get("lesson.version.commit")

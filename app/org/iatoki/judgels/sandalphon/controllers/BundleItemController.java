@@ -7,19 +7,18 @@ import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
+import org.iatoki.judgels.sandalphon.BundleItem;
+import org.iatoki.judgels.sandalphon.BundleItemType;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
-import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemConfAdapter;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemConfAdapters;
-import org.iatoki.judgels.sandalphon.services.BundleItemService;
-import org.iatoki.judgels.sandalphon.BundleItemType;
-import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ItemCreateForm;
+import org.iatoki.judgels.sandalphon.services.BundleItemService;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.bundle.item.listCreateItemsView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -44,15 +43,13 @@ public final class BundleItemController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
 
-    private final ProblemService problemService;
-    private final BundleProblemService bundleProblemService;
     private final BundleItemService bundleItemService;
+    private final ProblemService problemService;
 
     @Inject
-    public BundleItemController(ProblemService problemService, BundleProblemService bundleProblemService, BundleItemService bundleItemService) {
-        this.problemService = problemService;
-        this.bundleProblemService = bundleProblemService;
+    public BundleItemController(BundleItemService bundleItemService, ProblemService problemService) {
         this.bundleItemService = bundleItemService;
+        this.problemService = problemService;
     }
 
     @Transactional(readOnly = true)
@@ -64,17 +61,17 @@ public final class BundleItemController extends AbstractJudgelsController {
     public Result listCreateItems(long problemId, long pageIndex, String orderBy, String orderDir, String filterString) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
-            try {
-                Page<BundleItem> items = bundleItemService.pageItems(problem.getJid(), IdentityUtils.getUserJid(), pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
-                Form<ItemCreateForm> form = Form.form(ItemCreateForm.class);
-
-                return showListCreateItems(problem, items, orderBy, orderDir, filterString, form);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
+        if (!BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
             return notFound();
+        }
+
+        try {
+            Page<BundleItem> pageOfBundleItems = bundleItemService.getPageOfBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid(), pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
+            Form<ItemCreateForm> itemCreateForm = Form.form(ItemCreateForm.class);
+
+            return showListCreateItems(problem, pageOfBundleItems, orderBy, orderDir, filterString, itemCreateForm);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -83,32 +80,40 @@ public final class BundleItemController extends AbstractJudgelsController {
     public Result createItem(long problemId, String itemType, long page, String orderBy, String orderDir, String filterString) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
+        if (!BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
+            return notFound();
+        }
+
+        if (!EnumUtils.isValidEnum(BundleItemType.class, itemType)) {
+            Form<ItemCreateForm> itemCreateForm = Form.form(ItemCreateForm.class);
+            itemCreateForm.reject("error.problem.bundle.item.undefined");
+
+            Page<BundleItem> pageOfBundleItems;
             try {
-                if (EnumUtils.isValidEnum(BundleItemType.class, itemType)) {
-                    BundleItemConfAdapter adapter = BundleItemConfAdapters.fromItemType(BundleItemType.valueOf(itemType));
-                    if (adapter != null) {
-                        return showCreateItem(problem, itemType, adapter.getConfHtml(adapter.generateForm(), routes.BundleItemController.postCreateItem(problem.getId(), itemType, page, orderBy, orderDir, filterString), Messages.get("commons.create")), page, orderBy, orderDir, filterString);
-                    } else {
-                        Form<ItemCreateForm> form = Form.form(ItemCreateForm.class);
-                        form.reject("error.problem.bundle.item.undefined");
-                        Page<BundleItem> items = bundleItemService.pageItems(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
-
-                        return showListCreateItems(problem, items, orderBy, orderDir, filterString, form);
-                    }
-                } else {
-                    Form<ItemCreateForm> form = Form.form(ItemCreateForm.class);
-                    form.reject("error.problem.bundle.item.undefined");
-                    Page<BundleItem> items = bundleItemService.pageItems(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
-
-                    return showListCreateItems(problem, items, orderBy, orderDir, filterString, form);
-                }
+                pageOfBundleItems = bundleItemService.getPageOfBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else {
-            return notFound();
+
+            return showListCreateItems(problem, pageOfBundleItems, orderBy, orderDir, filterString, itemCreateForm);
         }
+
+        BundleItemConfAdapter adapter = BundleItemConfAdapters.fromItemType(BundleItemType.valueOf(itemType));
+        if (adapter == null) {
+            Form<ItemCreateForm> itemCreateForm = Form.form(ItemCreateForm.class);
+            itemCreateForm.reject("error.problem.bundle.item.undefined");
+
+            Page<BundleItem> pageOfBundleItems;
+            try {
+                pageOfBundleItems = bundleItemService.getPageOfBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            return showListCreateItems(problem, pageOfBundleItems, orderBy, orderDir, filterString, itemCreateForm);
+        }
+
+        return showCreateItem(problem, itemType, adapter.getConfHtml(adapter.generateForm(), routes.BundleItemController.postCreateItem(problem.getId(), itemType, page, orderBy, orderDir, filterString), Messages.get("commons.create")), page, orderBy, orderDir, filterString);
     }
 
     @Transactional
@@ -116,47 +121,60 @@ public final class BundleItemController extends AbstractJudgelsController {
     public Result postCreateItem(long problemId, String itemType, long page, String orderBy, String orderDir, String filterString) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
+        if (!BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
+            return notFound();
+        }
+
+        if (!EnumUtils.isValidEnum(BundleItemType.class, itemType)) {
+            Form<ItemCreateForm> itemCreateForm = Form.form(ItemCreateForm.class);
+            itemCreateForm.reject("error.problem.bundle.item.undefined");
+
+            Page<BundleItem> pageOfBundleItems;
             try {
-                if (EnumUtils.isValidEnum(BundleItemType.class, itemType)) {
-                    BundleItemConfAdapter adapter = BundleItemConfAdapters.fromItemType(BundleItemType.valueOf(itemType));
-                    if (adapter != null) {
-                        Form form = adapter.bindFormFromRequest(request());
-                        if (form.hasErrors() || form.hasGlobalErrors()) {
-                            return showCreateItem(problem, itemType, adapter.getConfHtml(form, routes.BundleItemController.postCreateItem(problem.getId(), itemType, page, orderBy, orderDir, filterString), Messages.get("commons.create")), page, orderBy, orderDir, filterString);
-                        } else {
-                            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
-
-                            if (!bundleItemService.existByMeta(problem.getJid(), IdentityUtils.getUserJid(), adapter.getMetaFromForm(form))) {
-                                bundleItemService.createItem(problem.getJid(), IdentityUtils.getUserJid(), BundleItemType.valueOf(itemType), adapter.getMetaFromForm(form), adapter.processRequestForm(form), ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem));
-
-                                return redirect(routes.BundleItemController.viewItems(problem.getId()));
-                            } else {
-                                form.reject("error.problem.bundle.item.duplicateMeta");
-                                Page<BundleItem> items = bundleItemService.pageItems(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
-
-                                return showListCreateItems(problem, items, orderBy, orderDir, filterString, form);
-                            }
-                        }
-                    } else {
-                        Form<ItemCreateForm> form = Form.form(ItemCreateForm.class);
-                        form.reject("error.problem.bundle.item.undefined");
-                        Page<BundleItem> items = bundleItemService.pageItems(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
-
-                        return showListCreateItems(problem, items, orderBy, orderDir, filterString, form);
-                    }
-                } else {
-                    Form<ItemCreateForm> form = Form.form(ItemCreateForm.class);
-                    form.reject("error.problem.bundle.item.undefined");
-                    Page<BundleItem> items = bundleItemService.pageItems(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
-
-                    return showListCreateItems(problem, items, orderBy, orderDir, filterString, form);
-                }
+                pageOfBundleItems = bundleItemService.getPageOfBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else {
-            return notFound();
+
+            return showListCreateItems(problem, pageOfBundleItems, orderBy, orderDir, filterString, itemCreateForm);
+        }
+
+
+        BundleItemConfAdapter bundleItemConfAdapter = BundleItemConfAdapters.fromItemType(BundleItemType.valueOf(itemType));
+        if (bundleItemConfAdapter == null) {
+            Form<ItemCreateForm> itemCreateForm = Form.form(ItemCreateForm.class);
+            itemCreateForm.reject("error.problem.bundle.item.undefined");
+
+            Page<BundleItem> pageOfBundleItems;
+            try {
+                pageOfBundleItems = bundleItemService.getPageOfBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            return showListCreateItems(problem, pageOfBundleItems, orderBy, orderDir, filterString, itemCreateForm);
+        }
+
+        Form bundleItemConfForm = bundleItemConfAdapter.bindFormFromRequest(request());
+        if (formHasErrors(bundleItemConfForm)) {
+            return showCreateItem(problem, itemType, bundleItemConfAdapter.getConfHtml(bundleItemConfForm, routes.BundleItemController.postCreateItem(problem.getId(), itemType, page, orderBy, orderDir, filterString), Messages.get("commons.create")), page, orderBy, orderDir, filterString);
+        }
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        try {
+            if (bundleItemService.bundleItemExistsInProblemWithCloneByMeta(problem.getJid(), IdentityUtils.getUserJid(), bundleItemConfAdapter.getMetaFromForm(bundleItemConfForm))) {
+                bundleItemConfForm.reject("error.problem.bundle.item.duplicateMeta");
+                Page<BundleItem> items = bundleItemService.getPageOfBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid(), page, PAGE_SIZE, orderBy, orderDir, filterString);
+
+                return showListCreateItems(problem, items, orderBy, orderDir, filterString, bundleItemConfForm);
+            }
+
+            bundleItemService.createBundleItem(problem.getJid(), IdentityUtils.getUserJid(), BundleItemType.valueOf(itemType), bundleItemConfAdapter.getMetaFromForm(bundleItemConfForm), bundleItemConfAdapter.processRequestForm(bundleItemConfForm), ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem));
+
+            return redirect(routes.BundleItemController.viewItems(problem.getId()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -165,33 +183,49 @@ public final class BundleItemController extends AbstractJudgelsController {
     public Result updateItem(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (BundleProblemControllerUtils.isAllowedToUpdateItemInLanguage(problemService, problem)) {
-            try {
-                if (bundleItemService.existByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
-                    BundleItem bundleItem = bundleItemService.findByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
-                    BundleItemConfAdapter adapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
-                    Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToUpdate(problemService, problem);
-                    if (adapter != null) {
-                        Form form;
-                        try {
-                            form = adapter.generateForm(bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid, ProblemControllerUtils.getCurrentStatementLanguage()), bundleItem.getMeta());
-                        } catch (IOException e) {
-                            form = adapter.generateForm(bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid, ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem)), bundleItem.getMeta());
-                        }
-
-                        return showUpdateItem(problem, bundleItem, adapter.getConfHtml(form, routes.BundleItemController.postUpdateItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
-                    } else {
-                        return notFound();
-                    }
-                } else {
-                    return notFound();
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
+        if (!BundleProblemControllerUtils.isAllowedToUpdateItemInLanguage(problemService, problem)) {
             return notFound();
         }
+
+        try {
+            if (!bundleItemService.bundleItemExistsInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
+                return notFound();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        BundleItem bundleItem;
+        try {
+            bundleItem = bundleItemService.findInProblemWithCloneByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        BundleItemConfAdapter bundleItemConfAdapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
+        Set<String> allowedLanguages;
+        try {
+            allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToUpdate(problemService, problem);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (bundleItemConfAdapter == null) {
+            return notFound();
+        }
+
+        Form bundleItemConfForm;
+        try {
+            bundleItemConfForm = bundleItemConfAdapter.generateForm(bundleItemService.getItemConfInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid, ProblemControllerUtils.getCurrentStatementLanguage()), bundleItem.getMeta());
+        } catch (IOException e) {
+            try {
+                bundleItemConfForm = bundleItemConfAdapter.generateForm(bundleItemService.getItemConfInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid, ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem)), bundleItem.getMeta());
+            } catch (IOException e1) {
+                throw new RuntimeException(e1);
+            }
+        }
+
+        return showUpdateItem(problem, bundleItem, bundleItemConfAdapter.getConfHtml(bundleItemConfForm, routes.BundleItemController.postUpdateItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
     }
 
     @Transactional
@@ -199,101 +233,116 @@ public final class BundleItemController extends AbstractJudgelsController {
     public Result postUpdateItem(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (BundleProblemControllerUtils.isAllowedToUpdateItemInLanguage(problemService, problem)) {
-            try {
-                if (bundleItemService.existByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
-                    BundleItem bundleItem = bundleItemService.findByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
-                    BundleItemConfAdapter adapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
-                    Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToUpdate(problemService, problem);
-                    if (adapter != null) {
-                        Form form = adapter.bindFormFromRequest(request());
-                        if (form.hasErrors() || form.hasGlobalErrors()) {
-                            return showUpdateItem(problem, bundleItem, adapter.getConfHtml(form, routes.BundleItemController.postUpdateItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
-                        } else {
-                            problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
-                            bundleItemService.updateItem(problem.getJid(), IdentityUtils.getUserJid(), itemJid, adapter.getMetaFromForm(form), adapter.processRequestForm(form), ProblemControllerUtils.getCurrentStatementLanguage());
-
-                            return redirect(routes.BundleItemController.viewItems(problem.getId()));
-                        }
-                    } else {
-                        return notFound();
-                    }
-                } else {
-                    return notFound();
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
+        if (!BundleProblemControllerUtils.isAllowedToUpdateItemInLanguage(problemService, problem)) {
             return notFound();
         }
+
+        try {
+            if (!bundleItemService.bundleItemExistsInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
+                return notFound();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        BundleItem bundleItem;
+        try {
+            bundleItem = bundleItemService.findInProblemWithCloneByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        BundleItemConfAdapter bundleItemConfAdapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
+        Set<String> allowedLanguages;
+        try {
+            allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToUpdate(problemService, problem);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (bundleItemConfAdapter == null) {
+            return notFound();
+        }
+
+        Form bundleItemConfForm = bundleItemConfAdapter.bindFormFromRequest(request());
+        if (formHasErrors(bundleItemConfForm)) {
+            return showUpdateItem(problem, bundleItem, bundleItemConfAdapter.getConfHtml(bundleItemConfForm, routes.BundleItemController.postUpdateItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
+        }
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+        try {
+            bundleItemService.updateBundleItem(problem.getJid(), IdentityUtils.getUserJid(), itemJid, bundleItemConfAdapter.getMetaFromForm(bundleItemConfForm), bundleItemConfAdapter.processRequestForm(bundleItemConfForm), ProblemControllerUtils.getCurrentStatementLanguage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return redirect(routes.BundleItemController.viewItems(problem.getId()));
     }
 
     @Transactional(readOnly = true)
     public Result moveItemUp(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
-            try {
-                if (bundleItemService.existByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
-                    bundleItemService.moveItemUp(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
-
-                    return redirect(routes.BundleItemController.viewItems(problem.getId()));
-                } else {
-                    return notFound();
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
+        if (!BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
             return notFound();
         }
+
+        try {
+            if (!bundleItemService.bundleItemExistsInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
+                return notFound();
+            }
+
+            bundleItemService.moveBundleItemUp(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return redirect(routes.BundleItemController.viewItems(problem.getId()));
     }
 
     @Transactional(readOnly = true)
     public Result moveItemDown(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
-            try {
-                if (bundleItemService.existByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
-                    bundleItemService.moveItemDown(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
-
-                    return redirect(routes.BundleItemController.viewItems(problem.getId()));
-                } else {
-                    return notFound();
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
+        if (!BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
             return notFound();
         }
+
+        try {
+            if (!bundleItemService.bundleItemExistsInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
+                return notFound();
+            }
+
+            bundleItemService.moveBundleItemDown(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return redirect(routes.BundleItemController.viewItems(problem.getId()));
     }
 
     @Transactional
     public Result removeItem(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
-            try {
-                if (bundleItemService.existByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
-                    bundleItemService.removeItem(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
-
-                    return redirect(routes.BundleItemController.viewItems(problem.getId()));
-                } else {
-                    return notFound();
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
+        if (!BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
             return notFound();
         }
+
+        try {
+            if (!bundleItemService.bundleItemExistsInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
+                return notFound();
+            }
+            bundleItemService.removeBundleItem(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return redirect(routes.BundleItemController.viewItems(problem.getId()));
     }
 
-    private Result showListCreateItems(Problem problem, Page<BundleItem> currentPage, String orderBy, String orderDir, String filterString, Form<ItemCreateForm> form) {
-        LazyHtml content = new LazyHtml(listCreateItemsView.render(currentPage, problem.getId(), currentPage.getPageIndex(), orderBy, orderDir, filterString, form));
+    private Result showListCreateItems(Problem problem, Page<BundleItem> pageOfBundleItems, String orderBy, String orderDir, String filterString, Form<ItemCreateForm> itemCreateForm) {
+        LazyHtml content = new LazyHtml(listCreateItemsView.render(pageOfBundleItems, problem.getId(), pageOfBundleItems.getPageIndex(), orderBy, orderDir, filterString, itemCreateForm));
 
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);

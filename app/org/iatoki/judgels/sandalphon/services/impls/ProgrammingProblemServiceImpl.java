@@ -5,7 +5,7 @@ import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
-import org.iatoki.judgels.sandalphon.config.ProblemFile;
+import org.iatoki.judgels.sandalphon.config.ProblemFileSystemProvider;
 import org.iatoki.judgels.sandalphon.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 
@@ -25,7 +25,7 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
     private final FileSystemProvider problemFileSystemProvider;
 
     @Inject
-    public ProgrammingProblemServiceImpl(@ProblemFile FileSystemProvider problemFileSystemProvider) {
+    public ProgrammingProblemServiceImpl(@ProblemFileSystemProvider FileSystemProvider problemFileSystemProvider) {
         this.problemFileSystemProvider = problemFileSystemProvider;
     }
 

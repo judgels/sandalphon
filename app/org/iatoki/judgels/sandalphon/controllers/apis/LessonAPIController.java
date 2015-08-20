@@ -7,20 +7,19 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
+import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientLesson;
-import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
-import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.views.html.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.services.ClientService;
+import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.views.html.lesson.statement.lessonStatementView;
+import org.iatoki.judgels.sandalphon.views.html.statementLanguageSelectionLayout;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
-import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Results;
 import play.twirl.api.Html;
 
 import javax.inject.Inject;
@@ -40,15 +39,15 @@ import java.util.stream.Collectors;
 
 @Singleton
 @Named
-public final class LessonAPIController extends Controller {
+public final class LessonAPIController extends AbstractJudgelsAPIController {
 
-    private final LessonService lessonService;
     private final ClientService clientService;
+    private final LessonService lessonService;
 
     @Inject
-    public LessonAPIController(LessonService lessonService, ClientService clientService) {
-        this.lessonService = lessonService;
+    public LessonAPIController(ClientService clientService, LessonService lessonService) {
         this.clientService = clientService;
+        this.lessonService = lessonService;
     }
 
     @Transactional(readOnly = true)
@@ -116,48 +115,48 @@ public final class LessonAPIController extends Controller {
     public Result verifyLesson() {
         UsernamePasswordCredentials credentials = JudgelsPlayUtils.parseBasicAuthFromRequest(request());
 
-        if (credentials != null) {
-            String clientJid = credentials.getUserName();
-            String clientSecret = credentials.getPassword();
-            if (clientService.clientExistsByClientJid(clientJid)) {
-                Client client = clientService.findClientByJid(clientJid);
-                if (client.getSecret().equals(clientSecret)) {
-                    DynamicForm form = DynamicForm.form().bindFromRequest();
-
-                    String lessonJid = form.get("lessonJid");
-                    if (lessonService.lessonExistsByJid(lessonJid)) {
-                        return ok(lessonService.findLessonByJid(lessonJid).getName());
-                    } else {
-                        return notFound();
-                    }
-                } else {
-                    return forbidden();
-                }
-            } else {
-                return notFound();
-            }
-        } else {
+        if (credentials == null) {
             response().setHeader("WWW-Authenticate", "Basic realm=\"" + request().host() + "\"");
             return unauthorized();
         }
+
+        String clientJid = credentials.getUserName();
+        String clientSecret = credentials.getPassword();
+        if (!clientService.clientExistsByJid(clientJid)) {
+            return notFound();
+        }
+
+        Client client = clientService.findClientByJid(clientJid);
+        if (!client.getSecret().equals(clientSecret)) {
+            return forbidden();
+        }
+
+        DynamicForm dForm = DynamicForm.form().bindFromRequest();
+
+        String lessonJid = dForm.get("lessonJid");
+        if (!lessonService.lessonExistsByJid(lessonJid)) {
+            return notFound();
+        }
+
+        return ok(lessonService.findLessonByJid(lessonJid).getName());
     }
 
     @Transactional(readOnly = true)
     public Result viewLessonStatementTOTP() {
         response().setHeader("Access-Control-Allow-Origin", "*");
 
-        DynamicForm form = DynamicForm.form().bindFromRequest();
+        DynamicForm dForm = DynamicForm.form().bindFromRequest();
 
-        String clientJid = form.get("clientJid");
-        String lessonJid = form.get("lessonJid");
+        String clientJid = dForm.get("clientJid");
+        String lessonJid = dForm.get("lessonJid");
         int tOTP = 0;
-        if (form.get("TOTP") != null) {
-            tOTP = Integer.parseInt(form.get("TOTP"));
+        if (dForm.get("TOTP") != null) {
+            tOTP = Integer.parseInt(dForm.get("TOTP"));
         }
-        String lang = form.get("lang");
-        String switchLanguageUri = form.get("switchLanguageUri");
+        String lang = dForm.get("lang");
+        String switchLanguageUri = dForm.get("switchLanguageUri");
 
-        if ((!clientService.clientExistsByClientJid(clientJid)) && (!lessonService.lessonExistsByJid(lessonJid)) && (!clientService.isClientLessonInLessonByClientJid(lessonJid, clientJid))) {
+        if ((!clientService.clientExistsByJid(clientJid)) && (!lessonService.lessonExistsByJid(lessonJid)) && (!clientService.isClientAuthorizedForLesson(lessonJid, clientJid))) {
             return notFound();
         }
 
@@ -169,6 +168,7 @@ public final class LessonAPIController extends Controller {
             return forbidden();
         }
 
+        LazyHtml content;
         try {
             Map<String, StatementLanguageStatus> availableStatementLanguages = lessonService.getAvailableLanguages(null, lesson.getJid());
 
@@ -182,14 +182,14 @@ public final class LessonAPIController extends Controller {
             Set<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toSet());
 
             Html html = lessonStatementView.render(lesson.getName(), statement);
-            LazyHtml content = new LazyHtml(html);
+            content = new LazyHtml(html);
             if (switchLanguageUri != null) {
                 content.appendLayout(c -> statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, language, c));
             }
-
-            return Results.ok(content.render());
         } catch (IOException e) {
             return notFound();
         }
+
+        return ok(content.render());
     }
 }

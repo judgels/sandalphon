@@ -62,38 +62,39 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        if (LessonControllerUtils.isAllowedToViewStatement(lessonService, lesson)) {
-            String statement;
-            try {
-                statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), LessonControllerUtils.getCurrentStatementLanguage());
-            } catch (IOException e) {
-                statement = LessonStatementUtils.getDefaultStatement(LessonControllerUtils.getCurrentStatementLanguage());
-            }
-
-            try {
-                LazyHtml content = new LazyHtml(lessonStatementView.render(lesson.getName(), statement));
-
-                Set<String> allowedLanguages = LessonControllerUtils.getAllowedLanguagesToView(lessonService, lesson);
-
-                LessonControllerUtils.appendStatementLanguageSelectionLayout(content, LessonControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.LessonStatementController.viewStatementSwitchLanguage(lesson.getId()));
-
-                LessonStatementControllerUtils.appendSubtabsLayout(content, lessonService, lesson);
-                LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
-                LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
-                LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
-                ControllerUtils.getInstance().appendSidebarLayout(content);
-                LessonStatementControllerUtils.appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.statement.view"), routes.LessonStatementController.viewStatement(lessonId)));
-                ControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Statement");
-
-                ControllerUtils.getInstance().addActivityLog("View statement of programming lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                return ControllerUtils.getInstance().lazyOk(content);
-            } catch (IOException e) {
-                return notFound();
-            }
-        } else {
+        if (!LessonControllerUtils.isAllowedToViewStatement(lessonService, lesson)) {
             return notFound();
         }
+
+        String statement;
+        try {
+            statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), LessonControllerUtils.getCurrentStatementLanguage());
+        } catch (IOException e) {
+            statement = LessonStatementUtils.getDefaultStatement(LessonControllerUtils.getCurrentStatementLanguage());
+        }
+
+        LazyHtml content = new LazyHtml(lessonStatementView.render(lesson.getName(), statement));
+
+        Set<String> allowedLanguages;
+        try {
+            allowedLanguages = LessonControllerUtils.getAllowedLanguagesToView(lessonService, lesson);
+        } catch (IOException e) {
+            return notFound();
+        }
+
+        LessonControllerUtils.appendStatementLanguageSelectionLayout(content, LessonControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.LessonStatementController.viewStatementSwitchLanguage(lesson.getId()));
+
+        LessonStatementControllerUtils.appendSubtabsLayout(content, lessonService, lesson);
+        LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
+        LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
+        LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        LessonStatementControllerUtils.appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.statement.view"), routes.LessonStatementController.viewStatement(lessonId)));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Statement");
+
+        ControllerUtils.getInstance().addActivityLog("View statement of programming lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     public Result viewStatementSwitchLanguage(long lessonId) {
@@ -124,29 +125,30 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        if (LessonControllerUtils.isAllowedToUpdateStatementInLanguage(lessonService, lesson)) {
-            String statement;
-            try {
-                statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), LessonControllerUtils.getCurrentStatementLanguage());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class);
-            form = form.bind(ImmutableMap.of("statement", statement));
-
-            try {
-                Set<String> allowedLanguages = LessonControllerUtils.getAllowedLanguagesToUpdate(lessonService, lesson);
-
-                ControllerUtils.getInstance().addActivityLog("Try to update statement of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                return showUpdateStatement(form, lesson, allowedLanguages);
-            } catch (IOException e) {
-                return notFound();
-            }
-        } else {
+        if (!LessonControllerUtils.isAllowedToUpdateStatementInLanguage(lessonService, lesson)) {
             return notFound();
         }
+
+        String statement;
+        try {
+            statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), LessonControllerUtils.getCurrentStatementLanguage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Form<UpdateStatementForm> updateStatementForm = Form.form(UpdateStatementForm.class);
+        updateStatementForm = updateStatementForm.bind(ImmutableMap.of("statement", statement));
+
+        Set<String> allowedLanguages;
+        try {
+            allowedLanguages = LessonControllerUtils.getAllowedLanguagesToUpdate(lessonService, lesson);
+        } catch (IOException e) {
+            return notFound();
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Try to update statement of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showUpdateStatement(updateStatementForm, lesson, allowedLanguages);
     }
 
     @Transactional
@@ -159,37 +161,37 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        if (LessonControllerUtils.isAllowedToUpdateStatementInLanguage(lessonService, lesson)) {
-            Form<UpdateStatementForm> form = Form.form(UpdateStatementForm.class).bindFromRequest();
-            if (form.hasErrors() || form.hasGlobalErrors()) {
-                try {
-                    Set<String> allowedLanguages = LessonControllerUtils.getAllowedLanguagesToUpdate(lessonService, lesson);
-                    return showUpdateStatement(form, lesson, allowedLanguages);
-                } catch (IOException e) {
-                    return notFound();
-                }
-            } else {
-                lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
-
-                try {
-                    lessonService.updateStatement(IdentityUtils.getUserJid(), lessonId, LessonControllerUtils.getCurrentStatementLanguage(), form.get().statement);
-
-                    ControllerUtils.getInstance().addActivityLog("Update statement of lesson " + lesson.getName() + ".");
-
-                    return redirect(routes.LessonStatementController.updateStatement(lesson.getId()));
-                } catch (IOException e) {
-                    try {
-                        form.reject("lesson.statement.error.cantUpload");
-                        Set<String> allowedLanguages = LessonControllerUtils.getAllowedLanguagesToUpdate(lessonService, lesson);
-                        return showUpdateStatement(form, lesson, allowedLanguages);
-                    } catch (IOException e2) {
-                        return notFound();
-                    }
-                }
-            }
-        } else {
+        if (!LessonControllerUtils.isAllowedToUpdateStatementInLanguage(lessonService, lesson)) {
             return notFound();
         }
+
+        Form<UpdateStatementForm> updateStatementForm = Form.form(UpdateStatementForm.class).bindFromRequest();
+        if (formHasErrors(updateStatementForm)) {
+            try {
+                Set<String> allowedLanguages = LessonControllerUtils.getAllowedLanguagesToUpdate(lessonService, lesson);
+                return showUpdateStatement(updateStatementForm, lesson, allowedLanguages);
+            } catch (IOException e) {
+                return notFound();
+            }
+        }
+
+        lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
+
+        try {
+            lessonService.updateStatement(IdentityUtils.getUserJid(), lessonId, LessonControllerUtils.getCurrentStatementLanguage(), updateStatementForm.get().statement);
+        } catch (IOException e) {
+            try {
+                updateStatementForm.reject("lesson.statement.error.cantUpload");
+                Set<String> allowedLanguages = LessonControllerUtils.getAllowedLanguagesToUpdate(lessonService, lesson);
+                return showUpdateStatement(updateStatementForm, lesson, allowedLanguages);
+            } catch (IOException e2) {
+                return notFound();
+            }
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Update statement of lesson " + lesson.getName() + ".");
+
+        return redirect(routes.LessonStatementController.updateStatement(lesson.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -197,13 +199,13 @@ public class LessonStatementController extends AbstractJudgelsController {
     public Result listStatementMediaFiles(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        Form<UploadFileForm> form = Form.form(UploadFileForm.class);
+        Form<UploadFileForm> uploadFileForm = Form.form(UploadFileForm.class);
         boolean isAllowedToUploadMediaFiles = LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson);
         List<FileInfo> mediaFiles = lessonService.getStatementMediaFiles(IdentityUtils.getUserJid(), lesson.getJid());
 
         ControllerUtils.getInstance().addActivityLog("List statement media files of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showListStatementMediaFiles(form, lesson, mediaFiles, isAllowedToUploadMediaFiles);
+        return showListStatementMediaFiles(uploadFileForm, lesson, mediaFiles, isAllowedToUploadMediaFiles);
     }
 
     @Transactional
@@ -211,56 +213,56 @@ public class LessonStatementController extends AbstractJudgelsController {
     public Result postUploadStatementMediaFiles(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson)) {
-            Http.MultipartFormData body = request().body().asMultipartFormData();
-            Http.MultipartFormData.FilePart file;
-
-            file = body.getFile("file");
-            if (file != null) {
-                File mediaFile = file.getFile();
-                lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
-
-                try {
-                    lessonService.uploadStatementMediaFile(IdentityUtils.getUserJid(), lesson.getId(), mediaFile, file.getFilename());
-
-                    ControllerUtils.getInstance().addActivityLog("Upload statement media file of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                    return redirect(routes.LessonStatementController.listStatementMediaFiles(lesson.getId()));
-                } catch (IOException e) {
-                    Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-                    form.reject("lesson.statement.error.cantUploadMedia");
-                    boolean isAllowedToUploadMediaFiles = LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson);
-                    List<FileInfo> mediaFiles = lessonService.getStatementMediaFiles(IdentityUtils.getUserJid(), lesson.getJid());
-
-                    return showListStatementMediaFiles(form, lesson, mediaFiles, isAllowedToUploadMediaFiles);
-                }
-            }
-
-            file = body.getFile("fileZipped");
-            if (file != null) {
-                File mediaFile = file.getFile();
-                lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
-
-                try {
-                    lessonService.uploadStatementMediaFileZipped(IdentityUtils.getUserJid(), lesson.getId(), mediaFile);
-
-                    ControllerUtils.getInstance().addActivityLog("Upload statement zipped media files of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                    return redirect(routes.LessonStatementController.listStatementMediaFiles(lesson.getId()));
-                } catch (IOException e) {
-                    Form<UploadFileForm> form = Form.form(UploadFileForm.class);
-                    form.reject("lesson.statement.error.cantUploadMediaZipped");
-                    boolean isAllowedToUploadMediaFiles = LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson);
-                    List<FileInfo> mediaFiles = lessonService.getStatementMediaFiles(IdentityUtils.getUserJid(), lesson.getJid());
-
-                    return showListStatementMediaFiles(form, lesson, mediaFiles, isAllowedToUploadMediaFiles);
-                }
-            }
-
-            return redirect(routes.LessonStatementController.listStatementMediaFiles(lesson.getId()));
-        } else {
+        if (!LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson)) {
             return notFound();
         }
+
+        Http.MultipartFormData body = request().body().asMultipartFormData();
+        Http.MultipartFormData.FilePart file;
+
+        file = body.getFile("file");
+        if (file != null) {
+            File mediaFile = file.getFile();
+            lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
+
+            try {
+                lessonService.uploadStatementMediaFile(IdentityUtils.getUserJid(), lesson.getId(), mediaFile, file.getFilename());
+            } catch (IOException e) {
+                Form<UploadFileForm> form = Form.form(UploadFileForm.class);
+                form.reject("lesson.statement.error.cantUploadMedia");
+                boolean isAllowedToUploadMediaFiles = LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson);
+                List<FileInfo> mediaFiles = lessonService.getStatementMediaFiles(IdentityUtils.getUserJid(), lesson.getJid());
+
+                return showListStatementMediaFiles(form, lesson, mediaFiles, isAllowedToUploadMediaFiles);
+            }
+
+            ControllerUtils.getInstance().addActivityLog("Upload statement media file of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+            return redirect(routes.LessonStatementController.listStatementMediaFiles(lesson.getId()));
+        }
+
+        file = body.getFile("fileZipped");
+        if (file != null) {
+            File mediaFile = file.getFile();
+            lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
+
+            try {
+                lessonService.uploadStatementMediaFileZipped(IdentityUtils.getUserJid(), lesson.getId(), mediaFile);
+            } catch (IOException e) {
+                Form<UploadFileForm> form = Form.form(UploadFileForm.class);
+                form.reject("lesson.statement.error.cantUploadMediaZipped");
+                boolean isAllowedToUploadMediaFiles = LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson);
+                List<FileInfo> mediaFiles = lessonService.getStatementMediaFiles(IdentityUtils.getUserJid(), lesson.getJid());
+
+                return showListStatementMediaFiles(form, lesson, mediaFiles, isAllowedToUploadMediaFiles);
+            }
+
+            ControllerUtils.getInstance().addActivityLog("Upload statement zipped media files of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+            return redirect(routes.LessonStatementController.listStatementMediaFiles(lesson.getId()));
+        }
+
+        return redirect(routes.LessonStatementController.listStatementMediaFiles(lesson.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -283,143 +285,146 @@ public class LessonStatementController extends AbstractJudgelsController {
     public Result listStatementLanguages(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
-            try {
-                Map<String, StatementLanguageStatus> availableLanguages = lessonService.getAvailableLanguages(IdentityUtils.getUserJid(), lesson.getJid());
-                String defaultLanguage = lessonService.getDefaultLanguage(IdentityUtils.getUserJid(), lesson.getJid());
-
-                LazyHtml content = new LazyHtml(listStatementLanguagesView.render(availableLanguages, defaultLanguage, lesson.getId()));
-                LessonStatementControllerUtils.appendSubtabsLayout(content, lessonService, lesson);
-                LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
-                LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
-                LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
-                ControllerUtils.getInstance().appendSidebarLayout(content);
-                LessonStatementControllerUtils.appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.statement.language.list"), routes.LessonStatementController.listStatementLanguages(lesson.getId())));
-                ControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Statement Languages");
-
-                ControllerUtils.getInstance().addActivityLog("List statement languages of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                return ControllerUtils.getInstance().lazyOk(content);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        } else {
+        if (!LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
             return notFound();
         }
+
+        Map<String, StatementLanguageStatus> availableLanguages;
+        String defaultLanguage;
+        try {
+            availableLanguages = lessonService.getAvailableLanguages(IdentityUtils.getUserJid(), lesson.getJid());
+            defaultLanguage = lessonService.getDefaultLanguage(IdentityUtils.getUserJid(), lesson.getJid());
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+        LazyHtml content = new LazyHtml(listStatementLanguagesView.render(availableLanguages, defaultLanguage, lesson.getId()));
+        LessonStatementControllerUtils.appendSubtabsLayout(content, lessonService, lesson);
+        LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
+        LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
+        LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        LessonStatementControllerUtils.appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.statement.language.list"), routes.LessonStatementController.listStatementLanguages(lesson.getId())));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Statement Languages");
+
+        ControllerUtils.getInstance().addActivityLog("List statement languages of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional
     public Result postAddStatementLanguage(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
-            lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
-
-            try {
-                String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
-                if (WorldLanguageRegistry.getInstance().getLanguages().containsKey(languageCode)) {
-                    lessonService.addLanguage(IdentityUtils.getUserJid(), lesson.getJid(), languageCode);
-
-                    ControllerUtils.getInstance().addActivityLog("Add statement language " + languageCode + " of lesson " + lesson.getName() + ".");
-
-                    return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
-                } else {
-                    // TODO should use form so it can be rejected
-                    throw new IllegalStateException("Languages is not from list.");
-                }
-            } catch (IOException e) {
-                // TODO should use form so it can be rejected
-                throw new IllegalStateException(e);
-            }
-        } else {
+        if (!LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
             return notFound();
         }
+
+        lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
+
+        String languageCode;
+        try {
+            languageCode = DynamicForm.form().bindFromRequest().get("langCode");
+            if (!WorldLanguageRegistry.getInstance().getLanguages().containsKey(languageCode)) {
+                // TODO should use form so it can be rejected
+                throw new IllegalStateException("Languages is not from list.");
+            }
+
+            lessonService.addLanguage(IdentityUtils.getUserJid(), lesson.getJid(), languageCode);
+        } catch (IOException e) {
+            // TODO should use form so it can be rejected
+            throw new IllegalStateException(e);
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Add statement language " + languageCode + " of lesson " + lesson.getName() + ".");
+
+        return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }
 
     @Transactional
     public Result enableStatementLanguage(long lessonId, String languageCode) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
-            lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
-
-            try {
-                // TODO should check if language has been enabled
-                if (WorldLanguageRegistry.getInstance().getLanguages().containsKey(languageCode)) {
-                    lessonService.enableLanguage(IdentityUtils.getUserJid(), lesson.getJid(), languageCode);
-
-                    ControllerUtils.getInstance().addActivityLog("Enable statement language " + languageCode + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                    return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
-                } else {
-                    return notFound();
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException("Statement language probably hasn't been added.", e);
-            }
-        } else {
+        if (!LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
             return notFound();
         }
+
+        lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
+
+        try {
+            // TODO should check if language has been enabled
+            if (!WorldLanguageRegistry.getInstance().getLanguages().containsKey(languageCode)) {
+                return notFound();
+            }
+
+            lessonService.enableLanguage(IdentityUtils.getUserJid(), lesson.getJid(), languageCode);
+        } catch (IOException e) {
+            throw new IllegalStateException("Statement language probably hasn't been added.", e);
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Enable statement language " + languageCode + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }
 
     @Transactional
     public Result disableStatementLanguage(long lessonId, String languageCode) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
-            lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
-
-            try {
-                // TODO should check if language has been enabled
-                if (WorldLanguageRegistry.getInstance().getLanguages().containsKey(languageCode)) {
-                    lessonService.disableLanguage(IdentityUtils.getUserJid(), lesson.getJid(), languageCode);
-
-                    if (LessonControllerUtils.getCurrentStatementLanguage().equals(languageCode)) {
-                        LessonControllerUtils.setCurrentStatementLanguage(lessonService.getDefaultLanguage(IdentityUtils.getUserJid(), lesson.getJid()));
-                    }
-
-                    ControllerUtils.getInstance().addActivityLog("Disable statement language " + languageCode + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                    return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
-                } else {
-                    return notFound();
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException("Statement language probably hasn't been added.", e);
-            }
-        } else {
+        if (!LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
             return notFound();
         }
+
+        lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
+
+        try {
+            // TODO should check if language has been enabled
+            if (!WorldLanguageRegistry.getInstance().getLanguages().containsKey(languageCode)) {
+                return notFound();
+            }
+
+            lessonService.disableLanguage(IdentityUtils.getUserJid(), lesson.getJid(), languageCode);
+
+            if (LessonControllerUtils.getCurrentStatementLanguage().equals(languageCode)) {
+                LessonControllerUtils.setCurrentStatementLanguage(lessonService.getDefaultLanguage(IdentityUtils.getUserJid(), lesson.getJid()));
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Statement language probably hasn't been added.", e);
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Disable statement language " + languageCode + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }
 
     @Transactional
     public Result makeDefaultStatementLanguage(long lessonId, String languageCode) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
-            lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
-
-            try {
-                // TODO should check if language has been enabled
-                if (WorldLanguageRegistry.getInstance().getLanguages().containsKey(languageCode)) {
-                    lessonService.makeDefaultLanguage(IdentityUtils.getUserJid(), lesson.getJid(), languageCode);
-
-                    ControllerUtils.getInstance().addActivityLog("Make statement language " + languageCode + " default of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                    return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
-                } else {
-                    return notFound();
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException("Statement language probably hasn't been added.", e);
-            }
-        } else {
+        if (!LessonControllerUtils.isAllowedToManageStatementLanguages(lessonService, lesson)) {
             return notFound();
         }
+
+        lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
+
+        try {
+            // TODO should check if language has been enabled
+            if (!WorldLanguageRegistry.getInstance().getLanguages().containsKey(languageCode)) {
+                return notFound();
+            }
+
+            lessonService.makeDefaultLanguage(IdentityUtils.getUserJid(), lesson.getJid(), languageCode);
+        } catch (IOException e) {
+            throw new IllegalStateException("Statement language probably hasn't been added.", e);
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Make statement language " + languageCode + " default of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }
 
-    private Result showUpdateStatement(Form<UpdateStatementForm> form, Lesson lesson, Set<String> allowedLanguages) {
-        LazyHtml content = new LazyHtml(updateStatementView.render(form, lesson.getId()));
+    private Result showUpdateStatement(Form<UpdateStatementForm> updateStatementForm, Lesson lesson, Set<String> allowedLanguages) {
+        LazyHtml content = new LazyHtml(updateStatementView.render(updateStatementForm, lesson.getId()));
         LessonControllerUtils.appendStatementLanguageSelectionLayout(content, LessonControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.LessonStatementController.updateStatementSwitchLanguage(lesson.getId()));
         LessonStatementControllerUtils.appendSubtabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
@@ -433,8 +438,8 @@ public class LessonStatementController extends AbstractJudgelsController {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showListStatementMediaFiles(Form<UploadFileForm> form, Lesson lesson, List<FileInfo> mediaFiles, boolean isAllowedToUploadMediaFiles) {
-        LazyHtml content = new LazyHtml(listStatementMediaFilesView.render(form, lesson.getId(), mediaFiles, isAllowedToUploadMediaFiles));
+    private Result showListStatementMediaFiles(Form<UploadFileForm> uploadFileForm, Lesson lesson, List<FileInfo> mediaFiles, boolean isAllowedToUploadMediaFiles) {
+        LazyHtml content = new LazyHtml(listStatementMediaFilesView.render(uploadFileForm, lesson.getId(), mediaFiles, isAllowedToUploadMediaFiles));
         LessonStatementControllerUtils.appendSubtabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);

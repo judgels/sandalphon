@@ -1,24 +1,26 @@
-@(page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.Grader], orderBy: String, orderDir: String, filterString: String)
-
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersView
 @import org.iatoki.judgels.play.views.html.table.searchView
 @import org.iatoki.judgels.play.views.html.table.paginationView
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.sandalphon.Grader
 
-@searchView(page.getPageIndex, orderBy, orderDir, filterString, routes.GraderController.list)
+@(pageOfGraders: Page[Grader], orderBy: String, orderDir: String, filterString: String)
+
+@searchView(pageOfGraders.getPageIndex, orderBy, orderDir, filterString, routes.GraderController.list)
 
 <div class="clearfix"></div>
 
 @tableView() {
-    @tableHeadersView(page.getPageIndex, orderBy, orderDir, filterString, routes.GraderController.list)(
+    @tableHeadersView(pageOfGraders.getPageIndex, orderBy, orderDir, filterString, routes.GraderController.list)(
         "id" -> Messages.get("commons.id"),
         "jid" -> Messages.get("commons.jid"),
         "name" -> Messages.get("grader.name")
     )
     <tbody>
-    @for(grader <- page.getData) {
+    @for(grader <- pageOfGraders.getData) {
         <tr>
             <td>@grader.getId</td>
             <td>@grader.getJid</td>
@@ -32,4 +34,4 @@
     </tbody>
 }
 
-@paginationView(page, orderBy, orderDir, filterString, routes.GraderController.list)
+@paginationView(pageOfGraders, orderBy, orderDir, filterString, routes.GraderController.list)

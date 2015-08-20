@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon;
 import java.util.Set;
 
 public final class ProblemPartnerConfig {
+
     private final boolean isAllowedToUpdateProblem;
 
     private final boolean isAllowedToUpdateStatement;

@@ -69,7 +69,7 @@ public final class BundleProblemControllerUtils {
 
         Set<String> allowedLanguages = ProblemControllerUtils.getPartnerConfig(problemService, problem).getAllowedStatementLanguagesToUpdate();
 
-        if (allowedLanguages == null || allowedLanguages.contains(language)) {
+        if ((allowedLanguages == null) || allowedLanguages.contains(language)) {
             return true;
         }
 

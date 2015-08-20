@@ -24,13 +24,13 @@ import java.io.IOException;
 @Named
 public final class BundleProblemController extends AbstractJudgelsController {
 
-    private final ProblemService problemService;
     private final BundleProblemService bundleProblemService;
+    private final ProblemService problemService;
 
     @Inject
-    public BundleProblemController(ProblemService problemService, BundleProblemService bundleProblemService) {
-        this.problemService = problemService;
+    public BundleProblemController(BundleProblemService bundleProblemService, ProblemService problemService) {
         this.bundleProblemService = bundleProblemService;
+        this.problemService = problemService;
     }
 
     @Transactional
@@ -39,22 +39,24 @@ public final class BundleProblemController extends AbstractJudgelsController {
             return badRequest();
         }
 
+        Problem problem;
         try {
-            Problem problem = problemService.createProblem(ProblemType.BUNDLE, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
+            problem = problemService.createProblem(ProblemType.BUNDLE, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
             problemService.updateStatement(null, problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), BundleProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
             bundleProblemService.initBundleProblem(problem.getJid());
-            problemService.initRepository(IdentityUtils.getUserJid(), problem.getJid());
-
-            ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
-            ProblemControllerUtils.removeJustCreatedProblem();
-
-            ControllerUtils.getInstance().addActivityLog("Create bundle problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.ProblemController.enterProblem(problem.getId()));
         } catch (IOException e) {
             e.printStackTrace();
             return internalServerError();
         }
+
+        problemService.initRepository(IdentityUtils.getUserJid(), problem.getJid());
+
+        ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
+        ProblemControllerUtils.removeJustCreatedProblem();
+
+        ControllerUtils.getInstance().addActivityLog("Create bundle problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemController.enterProblem(problem.getId()));
     }
 
     public Result jumpToItems(long problemId) {

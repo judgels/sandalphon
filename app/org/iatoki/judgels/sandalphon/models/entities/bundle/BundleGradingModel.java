@@ -8,4 +8,5 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "sandalphon_bundle_grading")
 public final class BundleGradingModel extends AbstractBundleGradingModel {
+
 }

@@ -1,31 +1,33 @@
-@(page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.BundleItem], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String, filterString: String, form: Form[org.iatoki.judgels.sandalphon.forms.ItemCreateForm])
-
-@import org.iatoki.judgels.sandalphon.BundleItemType
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.searchView
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersView
 @import org.iatoki.judgels.play.views.html.table.paginationView
-
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.sandalphon.BundleItemType
+@import org.iatoki.judgels.sandalphon.BundleItem
+@import org.iatoki.judgels.sandalphon.forms.ItemCreateForm
+
+@(pageOfBundleItems: Page[BundleItem], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String, filterString: String, itemCreateForm: Form[ItemCreateForm])
 
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.BundleItemController.listCreateItems(problemId, newPageIndex, newOrderBy, newOrderDir, filterString)}
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
-@b3.form(org.iatoki.judgels.sandalphon.controllers.routes.BundleItemController.createItem(problemId, null, page.getPageIndex, orderBy, orderDir, filterString)) {
+@b3.form(org.iatoki.judgels.sandalphon.controllers.routes.BundleItemController.createItem(problemId, null, pageOfBundleItems.getPageIndex, orderBy, orderDir, filterString)) {
 
-    @b3.select(form("itemType"), BundleItemType.values.map(e => (e.name() -> e.name())).toSeq, '_label -> Messages.get("problem.bundle.item.type"), 'class -> "form-control selectpicker")
+    @b3.select(itemCreateForm("itemType"), BundleItemType.values.map(e => (e.name() -> e.name())).toSeq, '_label -> Messages.get("problem.bundle.item.type"), 'class -> "form-control selectpicker")
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.create") }
 }
 
-@searchView(page.getPageIndex, orderBy, orderDir, filterString, listFunc)
+@searchView(pageOfBundleItems.getPageIndex, orderBy, orderDir, filterString, listFunc)
 
 <div class="clearfix"></div>
 
 @tableView() {
-    @tableHeadersView(page.getPageIndex, orderBy, orderDir, filterString, listFunc)(
+    @tableHeadersView(pageOfBundleItems.getPageIndex, orderBy, orderDir, filterString, listFunc)(
         "order" -> Messages.get("problem.bundle.item.order"),
         "number" -> Messages.get("problem.bundle.item.number"),
         "jid" -> Messages.get("commons.jid"),
@@ -33,7 +35,7 @@
         "meta" -> Messages.get("problem.bundle.item.meta")
     )
     <tbody>
-        @for((item, index) <- page.getData.zipWithIndex) {
+        @for((item, index) <- pageOfBundleItems.getData.zipWithIndex) {
             <tr>
                 <td>@index</td>
                 <td>@item.getNumber</td>
@@ -45,7 +47,7 @@
                     @if(index != 0) {
                         <a href="@routes.BundleItemController.moveItemUp(problemId, item.getJid)"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span></a>
                     }
-                    @if(index != page.getData.size()-1) {
+                    @if(index != pageOfBundleItems.getData.size()-1) {
                         <a href="@routes.BundleItemController.moveItemDown(problemId, item.getJid)"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></a>
                     }
                     <a href="@routes.BundleItemController.removeItem(problemId, item.getJid)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
@@ -55,4 +57,4 @@
     </tbody>
 }
 
-@paginationView(page, orderBy, orderDir, filterString, listFunc)
+@paginationView(pageOfBundleItems, orderBy, orderDir, filterString, listFunc)

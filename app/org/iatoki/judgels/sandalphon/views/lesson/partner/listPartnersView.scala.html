@@ -1,24 +1,25 @@
-@(lessonId: Long, page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.LessonPartner], orderBy: String, orderDir: String)
-@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
-
-@import org.iatoki.judgels.sandalphon.controllers.routes
-
 @import play.i18n.Messages
+@import scala.collection.JavaConversions
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersView
 @import org.iatoki.judgels.play.views.html.table.paginationView
-@import scala.collection.JavaConversions
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.sandalphon.LessonPartner
+
+@(lessonId: Long, pageOfLessonPartners: Page[LessonPartner], orderBy: String, orderDir: String)
 
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ProblemPartnerController.listPartners(lessonId, newPageIndex, newOrderBy, newOrderDir)}
 
 @tableView() {
-    @tableHeadersView(page.getPageIndex, orderBy, orderDir, "", listFunc)(
+    @tableHeadersView(pageOfLessonPartners.getPageIndex, orderBy, orderDir, "", listFunc)(
         "id" -> Messages.get("commons.id"),
         "partnerJid" -> Messages.get("lesson.partner.name")
     )
     <tbody>
-    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getPartnerJid).toSeq))) { displayNamesMap =>
-        @for(partner <- page.getData) {
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfLessonPartners.getData.map(s => s.getPartnerJid).toSeq))) { displayNamesMap =>
+        @for(partner <- pageOfLessonPartners.getData) {
             <tr>
                 <td>@partner.getId</td>
                 <td>@displayNamesMap.get(partner.getPartnerJid)</td>
@@ -31,4 +32,4 @@
     </tbody>
 }
 
-@paginationView(page, orderBy, orderDir, "", listFunc)
+@paginationView(pageOfLessonPartners, orderBy, orderDir, "", listFunc)

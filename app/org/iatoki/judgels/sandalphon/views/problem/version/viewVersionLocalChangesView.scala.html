@@ -1,8 +1,10 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.VersionCommitForm], problem: org.iatoki.judgels.sandalphon.Problem, isClean: Boolean)
-
-@import org.iatoki.judgels.sandalphon.controllers.routes
 @import play.i18n.Messages
 @import play.mvc.Controller
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.forms.VersionCommitForm
+@import org.iatoki.judgels.sandalphon.Problem
+
+@(form: Form[VersionCommitForm], problem: Problem, isClean: Boolean)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
 

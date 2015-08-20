@@ -61,17 +61,17 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
     public Result addPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class);
-            Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class);
-            Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class);
-
-            ControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return showAddPartner(usernameForm, problemForm, programmingForm, problem);
-        } else {
+        if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
             return notFound();
         }
+
+        Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class);
+        Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class);
+        Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class);
+
+        ControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showAddPartner(usernameForm, problemForm, programmingForm, problem);
     }
 
     @Transactional
@@ -79,70 +79,70 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
     public Result postAddPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class).bindFromRequest();
-            Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).bindFromRequest();
-            Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).bindFromRequest();
-
-            if (usernameForm.hasErrors() || usernameForm.hasGlobalErrors()) {
-                return showAddPartner(usernameForm, problemForm, programmingForm, problem);
-            }
-
-            if (problemForm.hasErrors() || problemForm.hasGlobalErrors()) {
-                return showAddPartner(usernameForm, problemForm, programmingForm, problem);
-            }
-
-            if (programmingForm.hasErrors() || programmingForm.hasGlobalErrors()) {
-                return showAddPartner(usernameForm, problemForm, programmingForm, problem);
-            }
-
-            String username = usernameForm.get().username;
-            ProblemPartnerUpsertForm problemData = problemForm.get();
-            ProgrammingPartnerUpsertForm programmingData = programmingForm.get();
-
-            try {
-                String userJid = jophiel.verifyUsername(username);
-                if (userJid == null) {
-                    usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
-                    return showAddPartner(usernameForm, problemForm, programmingForm, problem);
-                }
-
-                UserInfo user = jophiel.getUserByUserJid(userJid);
-                JidCacheServiceImpl.getInstance().putDisplayName(user.getJid(), JudgelsPlayUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
-                if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
-                    usernameForm.reject("username", Messages.get("problem.partner.already"));
-                    return showAddPartner(usernameForm, problemForm, programmingForm, problem);
-                }
-
-                ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
-                      .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
-                      .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
-                      .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
-                      .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
-                      .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
-                      .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
-                      .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
-                      .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
-                      .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
-                      .build();
-
-                ProgrammingProblemPartnerConfig programmingConfig = new ProgrammingProblemPartnerConfigBuilder()
-                      .setIsAllowedToSubmit(programmingData.isAllowedToSubmit)
-                      .setIsAllowedToManageGrading(programmingData.isAllowedToManageGrading)
-                      .build();
-
-                problemService.createProblemPartner(problem.getId(), userJid, problemConfig, programmingConfig);
-
-                ControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
-
-                return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
-            } catch (IOException e) {
-                return notFound();
-            }
-        } else {
+        if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
             return notFound();
         }
+
+        Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class).bindFromRequest();
+        Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).bindFromRequest();
+        Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).bindFromRequest();
+
+        if (formHasErrors(usernameForm) || formHasErrors(problemForm) || formHasErrors(programmingForm)) {
+            return showAddPartner(usernameForm, problemForm, programmingForm, problem);
+        }
+
+        String username = usernameForm.get().username;
+        ProblemPartnerUpsertForm problemData = problemForm.get();
+        ProgrammingPartnerUpsertForm programmingData = programmingForm.get();
+
+        String userJid;
+        try {
+            userJid = jophiel.verifyUsername(username);
+        } catch (IOException e) {
+            return notFound();
+        }
+
+        if (userJid == null) {
+            usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
+            return showAddPartner(usernameForm, problemForm, programmingForm, problem);
+        }
+
+        UserInfo userInfo;
+        try {
+            userInfo = jophiel.getUserByUserJid(userJid);
+        } catch (IOException e) {
+            return notFound();
+        }
+
+        JidCacheServiceImpl.getInstance().putDisplayName(userInfo.getJid(), JudgelsPlayUtils.getUserDisplayName(userInfo.getUsername(), userInfo.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+
+        if (problemService.isUserPartnerForProblem(problem.getJid(), userJid)) {
+            usernameForm.reject("username", Messages.get("problem.partner.already"));
+            return showAddPartner(usernameForm, problemForm, programmingForm, problem);
+        }
+
+        ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
+              .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
+              .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
+              .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
+              .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
+              .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
+              .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
+              .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
+              .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
+              .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
+              .build();
+
+        ProgrammingProblemPartnerConfig programmingConfig = new ProgrammingProblemPartnerConfigBuilder()
+              .setIsAllowedToSubmit(programmingData.isAllowedToSubmit)
+              .setIsAllowedToManageGrading(programmingData.isAllowedToManageGrading)
+              .build();
+
+        problemService.createProblemPartner(problem.getId(), userJid, problemConfig, programmingConfig);
+
+        ControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
+
+        return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -151,37 +151,37 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            ProblemPartner problemPartner = problemService.findProblemPartnerByProblemPartnerId(partnerId);
-
-            ProblemPartnerConfig problemConfig = problemPartner.getBaseConfig();
-            ProblemPartnerUpsertForm problemData = new ProblemPartnerUpsertForm();
-
-            problemData.isAllowedToUpdateProblem = problemConfig.isAllowedToUpdateProblem();
-            problemData.isAllowedToUpdateStatement = problemConfig.isAllowedToUpdateStatement();
-            problemData.isAllowedToUploadStatementResources = problemConfig.isAllowedToUploadStatementResources();
-            problemData.allowedStatementLanguagesToView = combineByComma(problemConfig.getAllowedStatementLanguagesToView());
-            problemData.allowedStatementLanguagesToUpdate = combineByComma(problemConfig.getAllowedStatementLanguagesToUpdate());
-            problemData.isAllowedToManageStatementLanguages = problemConfig.isAllowedToManageStatementLanguages();
-            problemData.isAllowedToViewVersionHistory = problemConfig.isAllowedToViewVersionHistory();
-            problemData.isAllowedToRestoreVersionHistory = problemConfig.isAllowedToRestoreVersionHistory();
-            problemData.isAllowedToManageProblemClients = problemConfig.isAllowedToManageProblemClients();
-
-            Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).fill(problemData);
-
-            ProgrammingProblemPartnerConfig programmingConfig = problemPartner.getChildConfig(ProgrammingProblemPartnerConfig.class);
-            ProgrammingPartnerUpsertForm programmingData = new ProgrammingPartnerUpsertForm();
-
-            programmingData.isAllowedToSubmit = programmingConfig.isAllowedToSubmit();
-            programmingData.isAllowedToManageGrading = programmingConfig.isAllowedToManageGrading();
-
-            Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).fill(programmingData);
-
-            ControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return showUpdatePartner(problemForm, programmingForm, problem, problemPartner);
-        } else {
             return notFound();
         }
+
+        ProblemPartner problemPartner = problemService.findProblemPartnerById(partnerId);
+
+        ProblemPartnerConfig problemConfig = problemPartner.getBaseConfig();
+        ProblemPartnerUpsertForm problemData = new ProblemPartnerUpsertForm();
+
+        problemData.isAllowedToUpdateProblem = problemConfig.isAllowedToUpdateProblem();
+        problemData.isAllowedToUpdateStatement = problemConfig.isAllowedToUpdateStatement();
+        problemData.isAllowedToUploadStatementResources = problemConfig.isAllowedToUploadStatementResources();
+        problemData.allowedStatementLanguagesToView = combineByComma(problemConfig.getAllowedStatementLanguagesToView());
+        problemData.allowedStatementLanguagesToUpdate = combineByComma(problemConfig.getAllowedStatementLanguagesToUpdate());
+        problemData.isAllowedToManageStatementLanguages = problemConfig.isAllowedToManageStatementLanguages();
+        problemData.isAllowedToViewVersionHistory = problemConfig.isAllowedToViewVersionHistory();
+        problemData.isAllowedToRestoreVersionHistory = problemConfig.isAllowedToRestoreVersionHistory();
+        problemData.isAllowedToManageProblemClients = problemConfig.isAllowedToManageProblemClients();
+
+        Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).fill(problemData);
+
+        ProgrammingProblemPartnerConfig programmingConfig = problemPartner.getChildConfig(ProgrammingProblemPartnerConfig.class);
+        ProgrammingPartnerUpsertForm programmingData = new ProgrammingPartnerUpsertForm();
+
+        programmingData.isAllowedToSubmit = programmingConfig.isAllowedToSubmit();
+        programmingData.isAllowedToManageGrading = programmingConfig.isAllowedToManageGrading();
+
+        Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).fill(programmingData);
+
+        ControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showUpdatePartner(problemForm, programmingForm, problem, problemPartner);
     }
 
     @Transactional
@@ -189,46 +189,46 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
     public Result postUpdatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            ProblemPartner problemPartner = problemService.findProblemPartnerByProblemPartnerId(partnerId);
-
-            Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).bindFromRequest();
-            Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).bindFromRequest();
-
-            if (problemForm.hasErrors() || problemForm.hasGlobalErrors()) {
-                return showUpdatePartner(problemForm, programmingForm, problem, problemPartner);
-            }
-
-            ProblemPartnerUpsertForm problemData = problemForm.get();
-
-            ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
-                    .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
-                    .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
-                    .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
-                    .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
-                    .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
-                    .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
-                    .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
-                    .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
-                    .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
-                    .build();
-
-            ProgrammingPartnerUpsertForm programmingData = programmingForm.get();
-
-            ProgrammingProblemPartnerConfig programmingConfig = new ProgrammingProblemPartnerConfigBuilder()
-                    .setIsAllowedToSubmit(programmingData.isAllowedToSubmit)
-                    .setIsAllowedToManageGrading(programmingData.isAllowedToManageGrading)
-                    .build();
-
-
-            problemService.updateProblemPartner(partnerId, problemConfig, programmingConfig);
-
-            ControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + ".");
-
-            return redirect(routes.ProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId()));
-        } else {
+        if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
             return notFound();
         }
+
+        ProblemPartner problemPartner = problemService.findProblemPartnerById(partnerId);
+
+        Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).bindFromRequest();
+        Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).bindFromRequest();
+
+        if (formHasErrors(problemForm) || formHasErrors(programmingForm)) {
+            return showUpdatePartner(problemForm, programmingForm, problem, problemPartner);
+        }
+
+        ProblemPartnerUpsertForm problemData = problemForm.get();
+
+        ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
+                .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
+                .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
+                .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
+                .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
+                .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
+                .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
+                .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
+                .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
+                .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
+                .build();
+
+        ProgrammingPartnerUpsertForm programmingData = programmingForm.get();
+
+        ProgrammingProblemPartnerConfig programmingConfig = new ProgrammingProblemPartnerConfigBuilder()
+                .setIsAllowedToSubmit(programmingData.isAllowedToSubmit)
+                .setIsAllowedToManageGrading(programmingData.isAllowedToManageGrading)
+                .build();
+
+
+        problemService.updateProblemPartner(partnerId, problemConfig, programmingConfig);
+
+        ControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + ".");
+
+        return redirect(routes.ProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId()));
     }
 
     private Result showAddPartner(Form<ProblemPartnerUsernameForm> usernameForm, Form<ProblemPartnerUpsertForm> problemForm, Form<ProgrammingPartnerUpsertForm> programmingForm, Problem problem) {

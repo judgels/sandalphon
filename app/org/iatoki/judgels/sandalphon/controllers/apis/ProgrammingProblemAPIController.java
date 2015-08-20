@@ -19,24 +19,24 @@ import java.util.Date;
 @Named
 public final class ProgrammingProblemAPIController extends Controller {
 
+    private final GraderService graderService;
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
-    private final GraderService graderService;
 
     @Inject
-    public ProgrammingProblemAPIController(ProblemService problemService, ProgrammingProblemService programmingProblemService, GraderService graderService) {
+    public ProgrammingProblemAPIController(GraderService graderService, ProblemService problemService, ProgrammingProblemService programmingProblemService) {
+        this.graderService = graderService;
         this.problemService = problemService;
         this.programmingProblemService = programmingProblemService;
-        this.graderService = graderService;
     }
 
     @Transactional(readOnly = true)
     public Result downloadGradingFiles() {
-        DynamicForm form = DynamicForm.form().bindFromRequest();
+        DynamicForm dForm = DynamicForm.form().bindFromRequest();
 
-        String graderJid = form.get("graderJid");
-        String graderSecret = form.get("graderSecret");
-        String problemJid = form.get("problemJid");
+        String graderJid = dForm.get("graderJid");
+        String graderSecret = dForm.get("graderSecret");
+        String problemJid = dForm.get("problemJid");
 
         if (!problemService.problemExistsByJid(problemJid) || !graderService.verifyGrader(graderJid, graderSecret)) {
             return forbidden();
@@ -54,11 +54,11 @@ public final class ProgrammingProblemAPIController extends Controller {
 
     @Transactional(readOnly = true)
     public Result getGradingLastUpdateTime() {
-        DynamicForm form = DynamicForm.form().bindFromRequest();
+        DynamicForm dForm = DynamicForm.form().bindFromRequest();
 
-        String graderJid = form.get("graderJid");
-        String graderSecret = form.get("graderSecret");
-        String problemJid = form.get("problemJid");
+        String graderJid = dForm.get("graderJid");
+        String graderSecret = dForm.get("graderSecret");
+        String problemJid = dForm.get("problemJid");
 
         if (!problemService.problemExistsByJid(problemJid) || !graderService.verifyGrader(graderJid, graderSecret)) {
             return forbidden();

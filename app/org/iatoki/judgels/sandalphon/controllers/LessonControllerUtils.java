@@ -117,7 +117,7 @@ public final class LessonControllerUtils {
     }
 
     static boolean isPartner(LessonService lessonService, Lesson lesson) {
-        return lessonService.isLessonPartnerByUserJid(lesson.getJid(), IdentityUtils.getUserJid());
+        return lessonService.isUserPartnerForLesson(lesson.getJid(), IdentityUtils.getUserJid());
     }
 
     static boolean isPartnerOrAbove(LessonService lessonService, Lesson lesson) {

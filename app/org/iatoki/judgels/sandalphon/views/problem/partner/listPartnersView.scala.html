@@ -1,24 +1,25 @@
-@(problemId: Long, page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.ProblemPartner], orderBy: String, orderDir: String)
-@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
-
-@import org.iatoki.judgels.sandalphon.controllers.routes
-
+@import scala.collection.JavaConversions
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersView
 @import org.iatoki.judgels.play.views.html.table.paginationView
-@import scala.collection.JavaConversions
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.sandalphon.ProblemPartner
+
+@(problemId: Long, pageOfProblemPartners: Page[ProblemPartner], orderBy: String, orderDir: String)
 
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ProblemPartnerController.listPartners(problemId, newPageIndex, newOrderBy, newOrderDir)}
 
 @tableView() {
-    @tableHeadersView(page.getPageIndex, orderBy, orderDir, "", listFunc)(
+    @tableHeadersView(pageOfProblemPartners.getPageIndex, orderBy, orderDir, "", listFunc)(
         "id" -> Messages.get("commons.id"),
         "partnerJid" -> Messages.get("problem.partner.name")
     )
     <tbody>
-    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getPartnerJid).toSeq))) { displayNamesMap =>
-        @for(partner <- page.getData) {
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfProblemPartners.getData.map(s => s.getPartnerJid).toSeq))) { displayNamesMap =>
+        @for(partner <- pageOfProblemPartners.getData) {
             <tr>
                 <td>@partner.getId</td>
                 <td>@displayNamesMap.get(partner.getPartnerJid)</td>
@@ -31,4 +32,4 @@
     </tbody>
 }
 
-@paginationView(page, orderBy, orderDir, "", listFunc)
+@paginationView(pageOfProblemPartners, orderBy, orderDir, "", listFunc)

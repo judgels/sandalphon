@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.GitCommit;
@@ -20,8 +21,8 @@ import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.config.ProblemFile;
-import org.iatoki.judgels.sandalphon.config.ProblemGit;
+import org.iatoki.judgels.sandalphon.config.ProblemFileSystemProvider;
+import org.iatoki.judgels.sandalphon.config.ProblemGitProvider;
 import org.iatoki.judgels.sandalphon.models.daos.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.daos.ProblemPartnerDao;
 import org.iatoki.judgels.sandalphon.models.entities.ProblemModel;
@@ -30,7 +31,6 @@ import org.iatoki.judgels.sandalphon.models.entities.ProblemPartnerModel;
 import org.iatoki.judgels.sandalphon.models.entities.ProblemPartnerModel_;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
@@ -45,16 +45,16 @@ import java.util.Set;
 public final class ProblemServiceImpl implements ProblemService {
 
     private final ProblemDao problemDao;
-    private final ProblemPartnerDao problemPartnerDao;
     private final FileSystemProvider problemFileSystemProvider;
     private final GitProvider problemGitProvider;
+    private final ProblemPartnerDao problemPartnerDao;
 
     @Inject
-    public ProblemServiceImpl(ProblemDao problemDao, ProblemPartnerDao problemPartnerDao, @ProblemFile FileSystemProvider problemFileSystemProvider, @ProblemGit GitProvider problemGitProvider) {
+    public ProblemServiceImpl(ProblemDao problemDao, @ProblemFileSystemProvider FileSystemProvider problemFileSystemProvider, @ProblemGitProvider GitProvider problemGitProvider, ProblemPartnerDao problemPartnerDao) {
         this.problemDao = problemDao;
-        this.problemPartnerDao = problemPartnerDao;
         this.problemFileSystemProvider = problemFileSystemProvider;
         this.problemGitProvider = problemGitProvider;
+        this.problemPartnerDao = problemPartnerDao;
     }
 
     @Override
@@ -79,21 +79,22 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public Problem findProblemById(long problemId) throws ProblemNotFoundException {
         ProblemModel problemModel = problemDao.findById(problemId);
-        if (problemModel != null) {
-            return createProblemFromModel(problemModel);
-        } else {
+        if (problemModel == null) {
             throw new ProblemNotFoundException("Problem not found.");
         }
+
+        return createProblemFromModel(problemModel);
     }
 
     @Override
     public Problem findProblemByJid(String problemJid) {
         ProblemModel problemModel = problemDao.findByJid(problemJid);
+
         return createProblemFromModel(problemModel);
     }
 
     @Override
-    public boolean isProblemPartnerByUserJid(String problemJid, String userJid) {
+    public boolean isUserPartnerForProblem(String problemJid, String userJid) {
         return problemPartnerDao.existsByProblemJidAndPartnerJid(problemJid, userJid);
     }
 
@@ -120,7 +121,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Page<ProblemPartner> pageProblemPartners(String problemJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
+    public Page<ProblemPartner> getPageOfProblemPartners(String problemJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
         long totalRows = problemPartnerDao.countByFilters("", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), ImmutableMap.of());
         List<ProblemPartnerModel> problemPartnerModels = problemPartnerDao.findSortedByFilters(orderBy, orderDir, "", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), ImmutableMap.of(), pageIndex, pageIndex * pageSize);
         List<ProblemPartner> problemPartners = Lists.transform(problemPartnerModels, m -> createProblemPartnerFromModel(m));
@@ -129,13 +130,13 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public ProblemPartner findProblemPartnerByProblemPartnerId(long problemPartnerId) throws ProblemPartnerNotFoundException {
+    public ProblemPartner findProblemPartnerById(long problemPartnerId) throws ProblemPartnerNotFoundException {
         ProblemPartnerModel problemPartnerModel = problemPartnerDao.findById(problemPartnerId);
         if (problemPartnerModel != null) {
-            return createProblemPartnerFromModel(problemPartnerModel);
-        } else {
             throw new ProblemPartnerNotFoundException("Problem partner not found.");
         }
+
+        return createProblemPartnerFromModel(problemPartnerModel);
     }
 
     @Override
@@ -155,7 +156,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Page<Problem> pageProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin) {
+    public Page<Problem> getPageOfProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin) {
         if (isAdmin) {
             long totalRows = problemDao.countByFilters(filterString);
             List<ProblemModel> problemModels = problemDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
@@ -163,8 +164,8 @@ public final class ProblemServiceImpl implements ProblemService {
             List<Problem> problems = Lists.transform(problemModels, m -> createProblemFromModel(m));
             return new Page<>(problems, totalRows, pageIndex, pageSize);
         } else {
-            List<String> problemJidsWhereIsAuthor = problemDao.findProblemJidsByAuthorJid(userJid);
-            List<String> problemJidsWhereIsPartner = problemPartnerDao.findProblemJidsByPartnerJid(userJid);
+            List<String> problemJidsWhereIsAuthor = problemDao.getJidsByAuthorJid(userJid);
+            List<String> problemJidsWhereIsPartner = problemPartnerDao.getProblemJidsByPartnerJid(userJid);
 
             ImmutableSet.Builder<String> allowedProblemJidsBuilder = ImmutableSet.builder();
             allowedProblemJidsBuilder.addAll(problemJidsWhereIsAuthor);

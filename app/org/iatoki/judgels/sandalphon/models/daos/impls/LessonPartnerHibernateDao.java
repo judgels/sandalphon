@@ -16,6 +16,7 @@ import java.util.List;
 @Singleton
 @Named("lessonPartnerDao")
 public final class LessonPartnerHibernateDao extends AbstractHibernateDao<Long, LessonPartnerModel> implements LessonPartnerDao {
+
     public LessonPartnerHibernateDao() {
         super(LessonPartnerModel.class);
     }
@@ -46,7 +47,7 @@ public final class LessonPartnerHibernateDao extends AbstractHibernateDao<Long, 
     }
 
     @Override
-    public List<String> findLessonJidsByPartnerJid(String partnerJid) {
+    public List<String> getLessonJidsByPartnerJid(String partnerJid) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<String> query = cb.createQuery(String.class);
         Root<LessonPartnerModel> root = query.from(getModelClass());

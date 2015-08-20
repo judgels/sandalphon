@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.forms;
 
 public final class ProblemPartnerUpsertForm {
+
     public boolean isAllowedToUpdateProblem;
     public boolean isAllowedToUpdateStatement;
     public boolean isAllowedToUploadStatementResources;

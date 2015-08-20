@@ -1,16 +1,16 @@
-@(page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.BundleSubmission], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
-
-@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
+@import java.text.DecimalFormat
+@import scala.collection.JavaConversions
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersWithSelectionFormView
 @import org.iatoki.judgels.play.views.html.table.paginationView
-
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.sandalphon.BundleSubmission
 
-@import java.text.DecimalFormat
-@import scala.collection.JavaConversions
+@(pageOfBundleSubmissions: Page[BundleSubmission], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
 
 <script type="text/javascript">
     require(["jquery"], function( __jquery__ ) {
@@ -35,7 +35,7 @@
 <br />
 
 @tableView() {
-    @tableHeadersWithSelectionFormView(page.getPageIndex, orderBy, orderDir, "", listFunc)(
+    @tableHeadersWithSelectionFormView(pageOfBundleSubmissions.getPageIndex, orderBy, orderDir, "", listFunc)(
         "id" -> Messages.get("commons.id"),
         "userCreate" -> Messages.get("problem.bundle.submission.author"),
         "score" -> Messages.get("problem.bundle.submission.score"),
@@ -43,8 +43,8 @@
     )
     <tbody>
 
-    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
-        @for(submission <- page.getData) {
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfBundleSubmissions.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
+        @for(submission <- pageOfBundleSubmissions.getData) {
             <tr>
                 <td><input type="checkbox" class="checkboxJid" name="selectJids[]" value="@submission.getJid"></td>
                 <td>@submission.getId</td>
@@ -63,4 +63,4 @@
 
 </form>
 
-@paginationView(page, orderBy, orderDir, "", listFunc)
+@paginationView(pageOfBundleSubmissions, orderBy, orderDir, "", listFunc)

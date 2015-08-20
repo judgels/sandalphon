@@ -46,26 +46,26 @@ public final class LessonVersionController extends AbstractJudgelsController {
     public Result listVersionHistory(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isAllowedToViewVersionHistory(lessonService, lesson)) {
-            List<GitCommit> versions = lessonService.getVersions(IdentityUtils.getUserJid(), lesson.getJid());
-            boolean isClean = !lessonService.userCloneExists(IdentityUtils.getUserJid(), lesson.getJid());
-            boolean isAllowedToRestoreVersionHistory = isClean && LessonControllerUtils.isAllowedToRestoreVersionHistory(lessonService, lesson);
-
-            LazyHtml content = new LazyHtml(listVersionsView.render(versions, lesson.getId(), isAllowedToRestoreVersionHistory));
-            appendSubtabsLayout(content, lesson);
-            LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
-            LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
-            LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
-            ControllerUtils.getInstance().appendSidebarLayout(content);
-            appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.version.history"), routes.LessonVersionController.listVersionHistory(lesson.getId())));
-            ControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Versions - History");
-
-            ControllerUtils.getInstance().addActivityLog("List version history of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return ControllerUtils.getInstance().lazyOk(content);
-        } else {
+        if (!LessonControllerUtils.isAllowedToViewVersionHistory(lessonService, lesson)) {
             return notFound();
         }
+
+        List<GitCommit> versions = lessonService.getVersions(IdentityUtils.getUserJid(), lesson.getJid());
+        boolean isClean = !lessonService.userCloneExists(IdentityUtils.getUserJid(), lesson.getJid());
+        boolean isAllowedToRestoreVersionHistory = isClean && LessonControllerUtils.isAllowedToRestoreVersionHistory(lessonService, lesson);
+
+        LazyHtml content = new LazyHtml(listVersionsView.render(versions, lesson.getId(), isAllowedToRestoreVersionHistory));
+        appendSubtabsLayout(content, lesson);
+        LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
+        LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
+        LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.version.history"), routes.LessonVersionController.listVersionHistory(lesson.getId())));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Versions - History");
+
+        ControllerUtils.getInstance().addActivityLog("List version history of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -73,15 +73,15 @@ public final class LessonVersionController extends AbstractJudgelsController {
         Lesson lesson = lessonService.findLessonById(lessonId);
         boolean isClean = !lessonService.userCloneExists(IdentityUtils.getUserJid(), lesson.getJid());
 
-        if (isClean && LessonControllerUtils.isAllowedToRestoreVersionHistory(lessonService, lesson)) {
-            lessonService.restore(lesson.getJid(), hash);
-
-            ControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.LessonVersionController.listVersionHistory(lesson.getId()));
-        } else {
+        if (!isClean || !LessonControllerUtils.isAllowedToRestoreVersionHistory(lessonService, lesson)) {
             return notFound();
         }
+
+        lessonService.restore(lesson.getJid(), hash);
+
+        ControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.LessonVersionController.listVersionHistory(lesson.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -89,17 +89,17 @@ public final class LessonVersionController extends AbstractJudgelsController {
     public Result viewVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {
-            boolean isClean = !lessonService.userCloneExists(IdentityUtils.getUserJid(), lesson.getJid());
-
-            Form<VersionCommitForm> form = Form.form(VersionCommitForm.class);
-
-            ControllerUtils.getInstance().addActivityLog("View version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return showViewVersionLocalChanges(form, lesson, isClean);
-        } else {
+        if (!LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {
             return notFound();
         }
+
+        boolean isClean = !lessonService.userCloneExists(IdentityUtils.getUserJid(), lesson.getJid());
+
+        Form<VersionCommitForm> versionCommitForm = Form.form(VersionCommitForm.class);
+
+        ControllerUtils.getInstance().addActivityLog("View version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showViewVersionLocalChanges(versionCommitForm, lesson, isClean);
     }
 
     @Transactional
@@ -107,76 +107,76 @@ public final class LessonVersionController extends AbstractJudgelsController {
     public Result postCommitVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {
-            Form<VersionCommitForm> form = Form.form(VersionCommitForm.class).bindFromRequest();
-            if (form.hasErrors() || form.hasGlobalErrors()) {
-                boolean isClean = !lessonService.userCloneExists(IdentityUtils.getUserJid(), lesson.getJid());
-                return showViewVersionLocalChanges(form, lesson, isClean);
-            }
-
-            VersionCommitForm data = form.get();
-
-            if (lessonService.fetchUserClone(IdentityUtils.getUserJid(), lesson.getJid())) {
-                flash("localChangesError", Messages.get("lesson.version.local.cantCommit"));
-            } else if (!lessonService.commitThenMergeUserClone(IdentityUtils.getUserJid(), lesson.getJid(), data.title, data.description)) {
-                flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
-            } else if (!lessonService.pushUserClone(IdentityUtils.getUserJid(), lesson.getJid())) {
-                flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
-            } else {
-                try {
-                    lessonService.discardUserClone(IdentityUtils.getUserJid(), lesson.getJid());
-                } catch (IOException e) {
-                    // do nothing
-                }
-            }
-
-            ControllerUtils.getInstance().addActivityLog("Commit version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
-        } else {
+        if (!LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {
             return notFound();
         }
+
+        Form<VersionCommitForm> versionCommitForm = Form.form(VersionCommitForm.class).bindFromRequest();
+        if (formHasErrors(versionCommitForm)) {
+            boolean isClean = !lessonService.userCloneExists(IdentityUtils.getUserJid(), lesson.getJid());
+            return showViewVersionLocalChanges(versionCommitForm, lesson, isClean);
+        }
+
+        VersionCommitForm versionCommitData = versionCommitForm.get();
+
+        if (lessonService.fetchUserClone(IdentityUtils.getUserJid(), lesson.getJid())) {
+            flash("localChangesError", Messages.get("lesson.version.local.cantCommit"));
+        } else if (!lessonService.commitThenMergeUserClone(IdentityUtils.getUserJid(), lesson.getJid(), versionCommitData.title, versionCommitData.description)) {
+            flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
+        } else if (!lessonService.pushUserClone(IdentityUtils.getUserJid(), lesson.getJid())) {
+            flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
+        } else {
+            try {
+                lessonService.discardUserClone(IdentityUtils.getUserJid(), lesson.getJid());
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Commit version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
     }
 
     @Transactional(readOnly = true)
     public Result updateVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {
-            lessonService.fetchUserClone(IdentityUtils.getUserJid(), lesson.getJid());
-
-            if (!lessonService.updateUserClone(IdentityUtils.getUserJid(), lesson.getJid())) {
-                flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
-            }
-
-            ControllerUtils.getInstance().addActivityLog("Update version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
-        } else {
+        if (!LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {
             return notFound();
         }
+
+        lessonService.fetchUserClone(IdentityUtils.getUserJid(), lesson.getJid());
+
+        if (!lessonService.updateUserClone(IdentityUtils.getUserJid(), lesson.getJid())) {
+            flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
+        }
+
+        ControllerUtils.getInstance().addActivityLog("Update version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
     }
 
     @Transactional(readOnly = true)
     public Result discardVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
-        if (LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {
-            try {
-                lessonService.discardUserClone(IdentityUtils.getUserJid(), lesson.getJid());
-                ControllerUtils.getInstance().addActivityLog("Discard version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        if (!LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {
+            return notFound();
+        }
 
-                return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
-            } catch (IOException e) {
-                return notFound();
-            }
-        } else {
+        try {
+            lessonService.discardUserClone(IdentityUtils.getUserJid(), lesson.getJid());
+            ControllerUtils.getInstance().addActivityLog("Discard version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+            return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
+        } catch (IOException e) {
             return notFound();
         }
     }
 
-    private Result showViewVersionLocalChanges(Form<VersionCommitForm> form, Lesson lesson, boolean isClean) {
-        LazyHtml content = new LazyHtml(viewVersionLocalChangesView.render(form, lesson, isClean));
+    private Result showViewVersionLocalChanges(Form<VersionCommitForm> versionCommitForm, Lesson lesson, boolean isClean) {
+        LazyHtml content = new LazyHtml(viewVersionLocalChangesView.render(versionCommitForm, lesson, isClean));
         appendSubtabsLayout(content, lesson);
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);

@@ -60,17 +60,17 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
     public Result addPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class);
-            Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class);
-            Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class);
-
-            ControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return showAddPartner(usernameForm, problemForm, bundleForm, problem);
-        } else {
+        if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
             return notFound();
         }
+
+        Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class);
+        Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class);
+        Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class);
+
+        ControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showAddPartner(usernameForm, problemForm, bundleForm, problem);
     }
 
     @Transactional
@@ -78,68 +78,67 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
     public Result postAddPartner(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class).bindFromRequest();
-            Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).bindFromRequest();
-            Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class).bindFromRequest();
-
-            if (usernameForm.hasErrors() || usernameForm.hasGlobalErrors()) {
-                return showAddPartner(usernameForm, problemForm, bundleForm, problem);
-            }
-
-            if (problemForm.hasErrors() || problemForm.hasGlobalErrors()) {
-                return showAddPartner(usernameForm, problemForm, bundleForm, problem);
-            }
-
-            if (bundleForm.hasErrors() || bundleForm.hasGlobalErrors()) {
-                return showAddPartner(usernameForm, problemForm, bundleForm, problem);
-            }
-
-            String username = usernameForm.get().username;
-            ProblemPartnerUpsertForm problemData = problemForm.get();
-            BundlePartnerUpsertForm bundleData = bundleForm.get();
-
-            try {
-                String userJid = jophiel.verifyUsername(username);
-
-                if (userJid == null) {
-                    usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
-                    return showAddPartner(usernameForm, problemForm, bundleForm, problem);
-                }
-
-                UserInfo user = jophiel.getUserByUserJid(userJid);
-                JidCacheServiceImpl.getInstance().putDisplayName(user.getJid(), JudgelsPlayUtils.getUserDisplayName(user.getUsername(), user.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
-                if (problemService.isProblemPartnerByUserJid(problem.getJid(), userJid)) {
-                    usernameForm.reject("username", Messages.get("problem.partner.already"));
-                    return showAddPartner(usernameForm, problemForm, bundleForm, problem);
-                }
-
-                ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
-                      .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
-                      .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
-                      .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
-                      .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
-                      .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
-                      .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
-                      .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
-                      .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
-                      .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
-                      .build();
-
-                BundleProblemPartnerConfig bundleConfig = new BundleProblemPartnerConfig(bundleData.isAllowedToSubmit, bundleData.isAllowedToManageItems);
-
-                problemService.createProblemPartner(problem.getId(), userJid, problemConfig, bundleConfig);
-
-                ControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
-
-                return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
-            } catch (IOException e) {
-                return notFound();
-            }
-        } else {
+        if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
             return notFound();
         }
+
+        Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class).bindFromRequest();
+        Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).bindFromRequest();
+        Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class).bindFromRequest();
+
+        if (formHasErrors(usernameForm) || formHasErrors(problemForm) || formHasErrors(bundleForm)) {
+            return showAddPartner(usernameForm, problemForm, bundleForm, problem);
+        }
+
+        String username = usernameForm.get().username;
+        ProblemPartnerUpsertForm problemData = problemForm.get();
+        BundlePartnerUpsertForm bundleData = bundleForm.get();
+
+        String userJid;
+        try {
+            userJid = jophiel.verifyUsername(username);
+        } catch (IOException e) {
+            return notFound();
+        }
+
+        if (userJid == null) {
+            usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
+            return showAddPartner(usernameForm, problemForm, bundleForm, problem);
+        }
+
+        UserInfo userInfo;
+        try {
+            userInfo = jophiel.getUserByUserJid(userJid);
+        } catch (IOException e) {
+            return notFound();
+        }
+
+        JidCacheServiceImpl.getInstance().putDisplayName(userInfo.getJid(), JudgelsPlayUtils.getUserDisplayName(userInfo.getUsername(), userInfo.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+
+        if (problemService.isUserPartnerForProblem(problem.getJid(), userJid)) {
+            usernameForm.reject("username", Messages.get("problem.partner.already"));
+            return showAddPartner(usernameForm, problemForm, bundleForm, problem);
+        }
+
+        ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
+              .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
+              .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
+              .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
+              .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
+              .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
+              .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
+              .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
+              .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
+              .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
+              .build();
+
+        BundleProblemPartnerConfig bundleConfig = new BundleProblemPartnerConfig(bundleData.isAllowedToSubmit, bundleData.isAllowedToManageItems);
+
+        problemService.createProblemPartner(problem.getId(), userJid, problemConfig, bundleConfig);
+
+        ControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
+
+        return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -147,37 +146,37 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
     public Result updatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            ProblemPartner problemPartner = problemService.findProblemPartnerByProblemPartnerId(partnerId);
-
-            ProblemPartnerConfig problemConfig = problemPartner.getBaseConfig();
-            ProblemPartnerUpsertForm problemData = new ProblemPartnerUpsertForm();
-
-            problemData.isAllowedToUpdateProblem = problemConfig.isAllowedToUpdateProblem();
-            problemData.isAllowedToUpdateStatement = problemConfig.isAllowedToUpdateStatement();
-            problemData.isAllowedToUploadStatementResources = problemConfig.isAllowedToUploadStatementResources();
-            problemData.allowedStatementLanguagesToView = combineByComma(problemConfig.getAllowedStatementLanguagesToView());
-            problemData.allowedStatementLanguagesToUpdate = combineByComma(problemConfig.getAllowedStatementLanguagesToUpdate());
-            problemData.isAllowedToManageStatementLanguages = problemConfig.isAllowedToManageStatementLanguages();
-            problemData.isAllowedToViewVersionHistory = problemConfig.isAllowedToViewVersionHistory();
-            problemData.isAllowedToRestoreVersionHistory = problemConfig.isAllowedToRestoreVersionHistory();
-            problemData.isAllowedToManageProblemClients = problemConfig.isAllowedToManageProblemClients();
-
-            Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).fill(problemData);
-
-            BundleProblemPartnerConfig bundleConfig = problemPartner.getChildConfig(BundleProblemPartnerConfig.class);
-            BundlePartnerUpsertForm bundleData = new BundlePartnerUpsertForm();
-
-            bundleData.isAllowedToManageItems = bundleConfig.isAllowedToManageItems();
-
-            Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class).fill(bundleData);
-
-            ControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-            return showUpdatePartner(problemForm, bundleForm, problem, problemPartner);
-        } else {
+        if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
             return notFound();
         }
+
+        ProblemPartner problemPartner = problemService.findProblemPartnerById(partnerId);
+
+        ProblemPartnerConfig problemConfig = problemPartner.getBaseConfig();
+        ProblemPartnerUpsertForm problemData = new ProblemPartnerUpsertForm();
+
+        problemData.isAllowedToUpdateProblem = problemConfig.isAllowedToUpdateProblem();
+        problemData.isAllowedToUpdateStatement = problemConfig.isAllowedToUpdateStatement();
+        problemData.isAllowedToUploadStatementResources = problemConfig.isAllowedToUploadStatementResources();
+        problemData.allowedStatementLanguagesToView = combineByComma(problemConfig.getAllowedStatementLanguagesToView());
+        problemData.allowedStatementLanguagesToUpdate = combineByComma(problemConfig.getAllowedStatementLanguagesToUpdate());
+        problemData.isAllowedToManageStatementLanguages = problemConfig.isAllowedToManageStatementLanguages();
+        problemData.isAllowedToViewVersionHistory = problemConfig.isAllowedToViewVersionHistory();
+        problemData.isAllowedToRestoreVersionHistory = problemConfig.isAllowedToRestoreVersionHistory();
+        problemData.isAllowedToManageProblemClients = problemConfig.isAllowedToManageProblemClients();
+
+        Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).fill(problemData);
+
+        BundleProblemPartnerConfig bundleConfig = problemPartner.getChildConfig(BundleProblemPartnerConfig.class);
+        BundlePartnerUpsertForm bundleData = new BundlePartnerUpsertForm();
+
+        bundleData.isAllowedToManageItems = bundleConfig.isAllowedToManageItems();
+
+        Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class).fill(bundleData);
+
+        ControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return showUpdatePartner(problemForm, bundleForm, problem, problemPartner);
     }
 
     @Transactional
@@ -185,42 +184,42 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
     public Result postUpdatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
-            ProblemPartner problemPartner = problemService.findProblemPartnerByProblemPartnerId(partnerId);
-
-            Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).bindFromRequest();
-            Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class).bindFromRequest();
-
-            if (problemForm.hasErrors() || problemForm.hasGlobalErrors()) {
-                return showUpdatePartner(problemForm, bundleForm, problem, problemPartner);
-            }
-
-            ProblemPartnerUpsertForm problemData = problemForm.get();
-
-            ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
-                  .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
-                  .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
-                  .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
-                  .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
-                  .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
-                  .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
-                  .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
-                  .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
-                  .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
-                  .build();
-
-            BundlePartnerUpsertForm bundleData = bundleForm.get();
-
-            BundleProblemPartnerConfig bundleConfig = new BundleProblemPartnerConfig(bundleData.isAllowedToSubmit, bundleData.isAllowedToManageItems);
-
-            problemService.updateProblemPartner(partnerId, problemConfig, bundleConfig);
-
-            ControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + ".");
-
-            return redirect(routes.ProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId()));
-        } else {
+        if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
             return notFound();
         }
+
+        ProblemPartner problemPartner = problemService.findProblemPartnerById(partnerId);
+
+        Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class).bindFromRequest();
+        Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class).bindFromRequest();
+
+        if (formHasErrors(problemForm) || formHasErrors(bundleForm)) {
+            return showUpdatePartner(problemForm, bundleForm, problem, problemPartner);
+        }
+
+        ProblemPartnerUpsertForm problemData = problemForm.get();
+
+        ProblemPartnerConfig problemConfig = new ProblemPartnerConfigBuilder()
+              .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
+              .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
+              .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
+              .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
+              .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
+              .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
+              .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
+              .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
+              .setIsAllowedToManageProblemClients(problemData.isAllowedToManageProblemClients)
+              .build();
+
+        BundlePartnerUpsertForm bundleData = bundleForm.get();
+
+        BundleProblemPartnerConfig bundleConfig = new BundleProblemPartnerConfig(bundleData.isAllowedToSubmit, bundleData.isAllowedToManageItems);
+
+        problemService.updateProblemPartner(partnerId, problemConfig, bundleConfig);
+
+        ControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + ".");
+
+        return redirect(routes.ProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId()));
     }
 
     private Result showAddPartner(Form<ProblemPartnerUsernameForm> usernameForm, Form<ProblemPartnerUpsertForm> problemForm, Form<BundlePartnerUpsertForm> bundleForm, Problem problem) {

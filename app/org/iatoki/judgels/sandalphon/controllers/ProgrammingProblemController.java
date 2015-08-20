@@ -64,30 +64,32 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
             return badRequest();
         }
 
-        Form<ProgrammingProblemCreateForm> form = Form.form(ProgrammingProblemCreateForm.class).bindFromRequest();
+        Form<ProgrammingProblemCreateForm> programmingProblemCreateForm = Form.form(ProgrammingProblemCreateForm.class).bindFromRequest();
 
-        if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showCreateProgrammingProblem(form);
-        } else {
-            try {
-                ProgrammingProblemCreateForm data = form.get();
-
-                Problem problem = problemService.createProblem(ProblemType.PROGRAMMING, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
-                problemService.updateStatement(null, problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), ProgrammingProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
-                programmingProblemService.initProgrammingProblem(problem.getJid(), data.gradingEngineName);
-                problemService.initRepository(IdentityUtils.getUserJid(), problem.getJid());
-
-                ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
-                ProblemControllerUtils.removeJustCreatedProblem();
-
-                ControllerUtils.getInstance().addActivityLog("Create programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                return redirect(routes.ProblemController.enterProblem(problem.getId()));
-            } catch (IOException e) {
-                form.reject("problem.programming.error.cantCreate");
-                return showCreateProgrammingProblem(form);
-            }
+        if (formHasErrors(programmingProblemCreateForm)) {
+            return showCreateProgrammingProblem(programmingProblemCreateForm);
         }
+
+        ProgrammingProblemCreateForm programmingProblemCreateData = programmingProblemCreateForm.get();
+
+        Problem problem;
+        try {
+            problem = problemService.createProblem(ProblemType.PROGRAMMING, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
+            problemService.updateStatement(null, problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), ProgrammingProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
+            programmingProblemService.initProgrammingProblem(problem.getJid(), programmingProblemCreateData.gradingEngineName);
+        } catch (IOException e) {
+            programmingProblemCreateForm.reject("problem.programming.error.cantCreate");
+            return showCreateProgrammingProblem(programmingProblemCreateForm);
+        }
+
+        problemService.initRepository(IdentityUtils.getUserJid(), problem.getJid());
+
+        ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
+        ProblemControllerUtils.removeJustCreatedProblem();
+
+        ControllerUtils.getInstance().addActivityLog("Create programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return redirect(routes.ProblemController.enterProblem(problem.getId()));
     }
 
     public Result jumpToGrading(long id) {
@@ -102,8 +104,8 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
         return redirect(routes.ProgrammingProblemSubmissionController.viewSubmissions(id));
     }
 
-    private Result showCreateProgrammingProblem(Form<ProgrammingProblemCreateForm> form) {
-        LazyHtml content = new LazyHtml(createProgrammingProblemView.render(form, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
+    private Result showCreateProgrammingProblem(Form<ProgrammingProblemCreateForm> programmingProblemCreateForm) {
+        LazyHtml content = new LazyHtml(createProgrammingProblemView.render(programmingProblemCreateForm, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
         content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(

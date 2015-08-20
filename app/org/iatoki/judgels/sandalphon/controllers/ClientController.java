@@ -53,9 +53,9 @@ public final class ClientController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     public Result list(long pageIndex, String sortBy, String orderBy, String filterString) {
-        Page<Client> currentPage = clientService.pageClients(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString);
+        Page<Client> pageOfClients = clientService.getPageOfClients(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString);
 
-        LazyHtml content = new LazyHtml(listView.render(currentPage, sortBy, orderBy, filterString));
+        LazyHtml content = new LazyHtml(listView.render(pageOfClients, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.list"), new InternalLink(Messages.get("commons.create"), routes.ClientController.create()), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
@@ -72,33 +72,34 @@ public final class ClientController extends AbstractJudgelsController {
     @Transactional(readOnly = true)
     @AddCSRFToken
     public Result create() {
-        Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class);
+        Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class);
 
         ControllerUtils.getInstance().addActivityLog("Try to create client <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showCreate(form);
+        return showCreate(clientUpsertForm);
     }
 
     @Transactional
     @RequireCSRFCheck
     public Result postCreate() {
-        Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).bindFromRequest();
+        Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class).bindFromRequest();
 
-        if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showCreate(form);
-        } else {
-            ClientUpsertForm clientUpsertForm = form.get();
-            clientService.createClient(clientUpsertForm.name);
-
-            ControllerUtils.getInstance().addActivityLog("Create client " + clientUpsertForm.name + ".");
-
-            return redirect(routes.ClientController.index());
+        if (formHasErrors(clientUpsertForm)) {
+            return showCreate(clientUpsertForm);
         }
+
+        ClientUpsertForm clientUpsertData = clientUpsertForm.get();
+        clientService.createClient(clientUpsertData.name);
+
+        ControllerUtils.getInstance().addActivityLog("Create client " + clientUpsertData.name + ".");
+
+        return redirect(routes.ClientController.index());
     }
 
     @Transactional(readOnly = true)
     public Result view(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
+
         LazyHtml content = new LazyHtml(viewView.render(client));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), new InternalLink(Messages.get("commons.update"), routes.ClientController.update(clientId)), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
@@ -117,31 +118,31 @@ public final class ClientController extends AbstractJudgelsController {
     @AddCSRFToken
     public Result update(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
-        ClientUpsertForm clientUpsertForm = new ClientUpsertForm();
-        clientUpsertForm.name = client.getName();
-        Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).fill(clientUpsertForm);
+        ClientUpsertForm clientUpsertData = new ClientUpsertForm();
+        clientUpsertData.name = client.getName();
+        Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class).fill(clientUpsertData);
 
         ControllerUtils.getInstance().addActivityLog("Try to update client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdate(form, client);
+        return showUpdate(clientUpsertForm, client);
     }
 
     @Transactional
     @RequireCSRFCheck
     public Result postUpdate(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
-        Form<ClientUpsertForm> form = Form.form(ClientUpsertForm.class).bindFromRequest();
+        Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class).bindFromRequest();
 
-        if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showUpdate(form, client);
-        } else {
-            ClientUpsertForm clientUpsertForm = form.get();
-            clientService.updateClient(clientId, clientUpsertForm.name);
-
-            ControllerUtils.getInstance().addActivityLog("Update client " + client.getName() + ".");
-
-            return redirect(routes.ClientController.index());
+        if (formHasErrors(clientUpsertForm)) {
+            return showUpdate(clientUpsertForm, client);
         }
+
+        ClientUpsertForm clientUpsertData = clientUpsertForm.get();
+        clientService.updateClient(clientId, clientUpsertData.name);
+
+        ControllerUtils.getInstance().addActivityLog("Update client " + client.getName() + ".");
+
+        return redirect(routes.ClientController.index());
     }
 
     @Transactional
@@ -154,8 +155,8 @@ public final class ClientController extends AbstractJudgelsController {
         return redirect(routes.ClientController.index());
     }
 
-    private Result showCreate(Form<ClientUpsertForm> form) {
-        LazyHtml content = new LazyHtml(createView.render(form));
+    private Result showCreate(Form<ClientUpsertForm> clientUpsertForm) {
+        LazyHtml content = new LazyHtml(createView.render(clientUpsertForm));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.create"), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
@@ -167,8 +168,8 @@ public final class ClientController extends AbstractJudgelsController {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdate(Form<ClientUpsertForm> form, Client client) {
-        LazyHtml content = new LazyHtml(updateView.render(form, client.getId()));
+    private Result showUpdate(Form<ClientUpsertForm> clientUpsertForm, Client client) {
+        LazyHtml content = new LazyHtml(updateView.render(clientUpsertForm, client.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(

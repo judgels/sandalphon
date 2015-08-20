@@ -4,4 +4,5 @@ import org.iatoki.judgels.sandalphon.models.daos.BaseBundleGradingDao;
 import org.iatoki.judgels.sandalphon.models.entities.bundle.BundleGradingModel;
 
 public interface BundleGradingDao extends BaseBundleGradingDao<BundleGradingModel> {
+
 }

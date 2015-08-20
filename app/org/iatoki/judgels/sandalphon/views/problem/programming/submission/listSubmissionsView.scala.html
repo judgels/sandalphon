@@ -1,13 +1,14 @@
-@(page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.Submission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
-
-@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersWithSelectionFormView
 @import org.iatoki.judgels.play.views.html.table.paginationView
-
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.play.Page
 @import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.sandalphon.ProgrammingSubmission
+
+@(pageOfProgrammingSubmissions: Page[ProgrammingSubmission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
 
 @import scala.collection.JavaConversions
 
@@ -34,7 +35,7 @@
 <br />
 
 @tableView() {
-    @tableHeadersWithSelectionFormView(page.getPageIndex, orderBy, orderDir, "", listFunc)(
+    @tableHeadersWithSelectionFormView(pageOfProgrammingSubmissions.getPageIndex, orderBy, orderDir, "", listFunc)(
         "id" -> Messages.get("commons.id"),
         "userCreate" -> Messages.get("problem.programming.submission.author"),
         "gradingLanguage" -> Messages.get("problem.programming.submission.gradingLanguage"),
@@ -44,8 +45,8 @@
     )
     <tbody>
 
-    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(page.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
-        @for(submission <- page.getData) {
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfProgrammingSubmissions.getData.map(s => s.getAuthorJid).toSeq))) { displayNamesMap =>
+        @for(submission <- pageOfProgrammingSubmissions.getData) {
             <tr>
                 <td><input type="checkbox" class="checkboxJid" name="selectJids[]" value="@submission.getJid"></td>
                 <td>@submission.getId</td>
@@ -66,4 +67,4 @@
 
 </form>
 
-@paginationView(page, orderBy, orderDir, "", listFunc)
+@paginationView(pageOfProgrammingSubmissions, orderBy, orderDir, "", listFunc)

@@ -47,7 +47,7 @@ public final class ClientProblemHibernateDao extends AbstractHibernateDao<Long, 
     }
 
     @Override
-    public List<ClientProblemModel> findByProblemJid(String problemJid) {
+    public List<ClientProblemModel> getByProblemJid(String problemJid) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<ClientProblemModel> query = cb.createQuery(ClientProblemModel.class);
         Root<ClientProblemModel> root = query.from(ClientProblemModel.class);

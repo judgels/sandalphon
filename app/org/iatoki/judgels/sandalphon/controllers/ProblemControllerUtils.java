@@ -138,7 +138,7 @@ public final class ProblemControllerUtils {
     }
 
     static boolean isPartner(ProblemService problemService, Problem problem) {
-        return problemService.isProblemPartnerByUserJid(problem.getJid(), IdentityUtils.getUserJid());
+        return problemService.isUserPartnerForProblem(problem.getJid(), IdentityUtils.getUserJid());
     }
 
     static boolean isPartnerOrAbove(ProblemService problemService, Problem problem) {

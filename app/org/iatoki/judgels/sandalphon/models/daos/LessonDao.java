@@ -6,5 +6,6 @@ import org.iatoki.judgels.sandalphon.models.entities.LessonModel;
 import java.util.List;
 
 public interface LessonDao extends JudgelsDao<LessonModel> {
-    List<String> findLessonJidsByAuthorJid(String authorJid);
+
+    List<String> getJidsByAuthorJid(String authorJid);
 }

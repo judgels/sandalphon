@@ -1,11 +1,13 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.ItemMultipleChoiceConfForm], target: play.api.mvc.Call, submitLabel: String)
-
 @import play.i18n.Messages
+@import play.api.mvc.Call
 @import org.iatoki.judgels.play.views.html.formErrorView
+@import org.iatoki.judgels.sandalphon.forms.ItemMultipleChoiceConfForm
+
+@(itemMultipleChoiceConfForm: Form[ItemMultipleChoiceConfForm], target: Call, submitLabel: String)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
-@formErrorView(form)
+@formErrorView(itemMultipleChoiceConfForm)
 
 <script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/ckeditor.js")"></script>
 
@@ -80,9 +82,9 @@
                 }
             }
 
-            @for(i <- form("choiceAliases").indexes.indices) {
+            @for(i <- itemMultipleChoiceConfForm("choiceAliases").indexes.indices) {
                 addNewChoice();
-                fillChoice(@i, '@form("choiceAliases[" + i + "]").value', '@Html(form("choiceContents[" + i + "]").value)', @if(form("isCorrects[" + i + "]").value != null && form("isCorrects[" + i + "]").value) { true } else { false } );
+                fillChoice(@i, '@itemMultipleChoiceConfForm("choiceAliases[" + i + "]").value', '@Html(itemMultipleChoiceConfForm("choiceContents[" + i + "]").value)', @if(itemMultipleChoiceConfForm("isCorrects[" + i + "]").value != null && itemMultipleChoiceConfForm("isCorrects[" + i + "]").value) { true } else { false } );
             }
 
         });
@@ -94,10 +96,10 @@
 
     @helper.CSRF.formField
 
-    @b3.text(form("meta"), '_label -> Messages.get("problem.bundle.item.meta"))
-    @b3.textarea(form("statement"), '_label -> Messages.get("problem.bundle.item.multipleChoice.statement"), 'class -> "ckeditor")
-    @b3.text(form("score"), '_label -> Messages.get("problem.bundle.item.multipleChoice.score"))
-    @b3.text(form("penalty"), '_label -> Messages.get("problem.bundle.item.multipleChoice.penalty"))
+    @b3.text(itemMultipleChoiceConfForm("meta"), '_label -> Messages.get("problem.bundle.item.meta"))
+    @b3.textarea(itemMultipleChoiceConfForm("statement"), '_label -> Messages.get("problem.bundle.item.multipleChoice.statement"), 'class -> "ckeditor")
+    @b3.text(itemMultipleChoiceConfForm("score"), '_label -> Messages.get("problem.bundle.item.multipleChoice.score"))
+    @b3.text(itemMultipleChoiceConfForm("penalty"), '_label -> Messages.get("problem.bundle.item.multipleChoice.penalty"))
 
     <div class="row">
         <div class="col-md-2">

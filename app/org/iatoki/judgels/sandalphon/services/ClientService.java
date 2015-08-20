@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface ClientService {
 
-    boolean clientExistsByClientJid(String clientJid);
+    boolean clientExistsByJid(String clientJid);
 
-    List<Client> findAllClients();
+    List<Client> getClients();
 
     Client findClientById(long clientId) throws ClientNotFoundException;
 
@@ -24,27 +24,27 @@ public interface ClientService {
 
     void deleteClient(long clientId);
 
-    Page<Client> pageClients(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
+    Page<Client> getPageOfClients(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    boolean isClientProblemInProblemByClientJid(String problemJid, String clientJid);
+    boolean isClientAuthorizedForProblem(String problemJid, String clientJid);
 
     ClientProblem findClientProblemByClientJidAndProblemJid(String clientJid, String problemJid);
 
-    ClientProblem findClientProblemByClientProblemId(long clientProblemId);
+    ClientProblem findClientProblemById(long clientProblemId);
 
-    List<ClientProblem> findAllClientProblemByProblemJid(String problemJid);
+    List<ClientProblem> getClientProblemsByProblemJid(String problemJid);
 
     void createClientProblem(String problemJid, String clientJid);
 
     void deleteClientProblem(long clientProblemId);
 
-    boolean isClientLessonInLessonByClientJid(String lessonJid, String clientJid);
+    boolean isClientAuthorizedForLesson(String lessonJid, String clientJid);
 
     ClientLesson findClientLessonByClientJidAndLessonJid(String clientJid, String lessonJid);
 
-    ClientLesson findClientLessonByClientLessonId(long clientLessonId);
+    ClientLesson findClientLessonById(long clientLessonId);
 
-    List<ClientLesson> findAllClientLessonByLessonJid(String lessonJid);
+    List<ClientLesson> getClientLessonsByLessonJid(String lessonJid);
 
     void createClientLesson(String lessonJid, String clientJid);
 

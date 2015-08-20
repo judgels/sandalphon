@@ -1,9 +1,10 @@
-@(versions: List[org.iatoki.judgels.GitCommit], lessonId: Long, isAllowedToRestoreVersionHistory: Boolean)
-@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
-
-@import org.iatoki.judgels.play.JudgelsPlayUtils
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.GitCommit
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
+
+@(versions: List[GitCommit], lessonId: Long, isAllowedToRestoreVersionHistory: Boolean)
 
 @for(i <- 0 until versions.size) {
     @defining(versions.get(i)) { version =>

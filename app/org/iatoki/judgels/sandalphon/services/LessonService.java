@@ -25,21 +25,21 @@ public interface LessonService {
 
     Lesson findLessonByJid(String lessonJid);
 
-    boolean isLessonPartnerByUserJid(String lessonJid, String userJid);
+    boolean isUserPartnerForLesson(String lessonJid, String userJid);
 
     void createLessonPartner(long lessonId, String userJid, LessonPartnerConfig config);
 
     void updateLessonPartner(long lessonPartnerId, LessonPartnerConfig config);
 
-    Page<LessonPartner> pageLessonPartners(String lessonJid, long pageIndex, long pageSize, String orderBy, String orderDir);
+    Page<LessonPartner> getPageOfLessonPartners(String lessonJid, long pageIndex, long pageSize, String orderBy, String orderDir);
 
-    LessonPartner findLessonPartnerByLessonPartnerId(long lessonPartnerId) throws LessonPartnerNotFoundException;
+    LessonPartner findLessonPartnerById(long lessonPartnerId) throws LessonPartnerNotFoundException;
 
     LessonPartner findLessonPartnerByLessonJidAndPartnerJid(String lessonJid, String partnerJid);
 
     void updateLesson(long lessonId, String name, String additionalNote);
 
-    Page<Lesson> pageLessons(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin);
+    Page<Lesson> getPageOfLessons(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin);
 
     Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String lessonJid) throws IOException;
 

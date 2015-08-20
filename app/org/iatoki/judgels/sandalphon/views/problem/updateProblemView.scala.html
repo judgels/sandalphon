@@ -1,21 +1,22 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm], problem: org.iatoki.judgels.sandalphon.Problem)
-
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.formErrorView
 @import org.iatoki.judgels.sandalphon.controllers.routes
-@import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView
+@import org.iatoki.judgels.sandalphon.forms.ProblemUpdateForm
+@import org.iatoki.judgels.sandalphon.Problem
+
+@(problemUpdateForm: Form[ProblemUpdateForm], problem: Problem)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
 
-@formErrorView(form)
+@formErrorView(problemUpdateForm)
 
 @b3.form(routes.ProblemController.postUpdateProblem(problem.getId)) {
 
     @helper.CSRF.formField
 
-    @b3.text(form("name"), '_label -> Messages.get("problem.name"))
+    @b3.text(problemUpdateForm("name"), '_label -> Messages.get("problem.name"))
 
-    @b3.textarea(form("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
+    @b3.textarea(problemUpdateForm("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
 }

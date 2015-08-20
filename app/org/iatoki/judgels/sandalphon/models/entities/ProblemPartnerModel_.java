@@ -9,6 +9,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 @Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
 @StaticMetamodel(ProblemPartnerModel.class)
 public final class ProblemPartnerModel_ extends AbstractModel_{
+
     public static volatile SingularAttribute<ProblemPartnerModel, Long> id;
     public static volatile SingularAttribute<ProblemPartnerModel, String> problemJid;
     public static volatile SingularAttribute<ProblemPartnerModel, String> userJid;

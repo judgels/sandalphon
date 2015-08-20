@@ -1,20 +1,21 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.LessonCreateForm])
-
+@import play.i18n.Messages
+@import scala.collection.JavaConverters._
 @import org.iatoki.judgels.sandalphon.WorldLanguageRegistry
 @import org.iatoki.judgels.sandalphon.controllers.routes
-@import scala.collection.JavaConverters._
-@import play.i18n.Messages
+@import org.iatoki.judgels.sandalphon.forms.LessonCreateForm
+
+@(lessonCreateForm: Form[LessonCreateForm])
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
 
 @b3.form(routes.LessonController.postCreateLesson()) {
     @helper.CSRF.formField
 
-    @b3.text(form("name"), '_label -> Messages.get("lesson.name"))
-    @b3.textarea(form("additionalNote"), '_label -> Messages.get("lesson.additionalNote"))
+    @b3.text(lessonCreateForm("name"), '_label -> Messages.get("lesson.name"))
+    @b3.textarea(lessonCreateForm("additionalNote"), '_label -> Messages.get("lesson.additionalNote"))
 
 
-    @b3.select(form("initLanguageCode"), WorldLanguageRegistry.getInstance.getLanguages.asScala.toSeq, '_label -> Messages.get("lesson.statement.language.initial"), 'value -> "en-US")
+    @b3.select(lessonCreateForm("initLanguageCode"), WorldLanguageRegistry.getInstance.getLanguages.asScala.toSeq, '_label -> Messages.get("lesson.statement.language.initial"), 'value -> "en-US")
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.next") }
 }

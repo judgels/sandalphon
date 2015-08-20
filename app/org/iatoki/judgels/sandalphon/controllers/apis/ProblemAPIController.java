@@ -6,22 +6,23 @@ import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.iatoki.judgels.gabriel.GradingConfig;
+import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.gabriel.GradingConfig;
-import org.iatoki.judgels.gabriel.GradingEngineRegistry;
+import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
+import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientProblem;
+import org.iatoki.judgels.sandalphon.LanguageRestriction;
+import org.iatoki.judgels.sandalphon.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemAdapters;
-import org.iatoki.judgels.sandalphon.LanguageRestriction;
-import org.iatoki.judgels.sandalphon.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.adapters.impls.SubmissionAdapterRegistry;
 import org.iatoki.judgels.sandalphon.services.BundleItemService;
 import org.iatoki.judgels.sandalphon.services.ClientService;
@@ -31,7 +32,6 @@ import org.iatoki.judgels.sandalphon.views.html.problem.bundle.statement.bundleS
 import org.iatoki.judgels.sandalphon.views.html.statementLanguageSelectionLayout;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
-import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Results;
 import play.twirl.api.Html;
@@ -55,19 +55,19 @@ import java.util.stream.Collectors;
 
 @Singleton
 @Named
-public final class ProblemAPIController extends Controller {
+public final class ProblemAPIController extends AbstractJudgelsAPIController {
 
-    private final ProblemService problemService;
     private final BundleItemService bundleItemService;
-    private final ProgrammingProblemService programmingProblemService;
     private final ClientService clientService;
+    private final ProblemService problemService;
+    private final ProgrammingProblemService programmingProblemService;
 
     @Inject
-    public ProblemAPIController(ProblemService problemService, BundleItemService bundleItemService, ProgrammingProblemService programmingProblemService, ClientService clientService) {
-        this.problemService = problemService;
+    public ProblemAPIController(BundleItemService bundleItemService, ClientService clientService, ProblemService problemService, ProgrammingProblemService programmingProblemService) {
         this.bundleItemService = bundleItemService;
-        this.programmingProblemService = programmingProblemService;
         this.clientService = clientService;
+        this.problemService = problemService;
+        this.programmingProblemService = programmingProblemService;
     }
 
     @Transactional(readOnly = true)
@@ -142,7 +142,7 @@ public final class ProblemAPIController extends Controller {
         if (credentials != null) {
             String clientJid = credentials.getUserName();
             String clientSecret = credentials.getPassword();
-            if (clientService.clientExistsByClientJid(clientJid)) {
+            if (clientService.clientExistsByJid(clientJid)) {
                 Client client = clientService.findClientByJid(clientJid);
                 if (client.getSecret().equals(clientSecret)) {
                     DynamicForm form = DynamicForm.form().bindFromRequest();
@@ -181,7 +181,7 @@ public final class ProblemAPIController extends Controller {
         String switchLanguageUri = form.get("switchLanguageUri");
         String reasonNotAllowedToSubmit = form.get("reasonNotAllowedToSubmit");
 
-        if ((!clientService.clientExistsByClientJid(clientJid)) && (!problemService.problemExistsByJid(problemJid)) && (!clientService.isClientProblemInProblemByClientJid(problemJid, clientJid))) {
+        if ((!clientService.clientExistsByJid(clientJid)) && (!problemService.problemExistsByJid(problemJid)) && (!clientService.isClientAuthorizedForProblem(problemJid, clientJid))) {
             return notFound();
         }
 
@@ -251,11 +251,11 @@ public final class ProblemAPIController extends Controller {
     }
 
     private Result processBundleProblem(Problem problem, String statement, Set<String> allowedStatementLanguages, String lang, String postSubmitUri, String switchLanguageUri, String reasonNotAllowedToSubmit) throws IOException {
-        List<BundleItem> bundleItemList = bundleItemService.findAllItems(problem.getJid(), IdentityUtils.getUserJid());
+        List<BundleItem> bundleItemList = bundleItemService.getBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid());
         ImmutableList.Builder<Html> htmlBuilder = ImmutableList.builder();
         for (BundleItem bundleItem : bundleItemList) {
             BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
-            htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), lang)));
+            htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), lang)));
         }
 
         String language = lang;

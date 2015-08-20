@@ -11,10 +11,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
-import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
@@ -26,7 +24,7 @@ public final class UserHibernateDao extends AbstractHibernateDao<Long, UserModel
     }
 
     @Override
-    public boolean existsByUserJid(String userJid) {
+    public boolean existsByJid(String userJid) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
         Root<UserModel> root = query.from(UserModel.class);
@@ -39,7 +37,7 @@ public final class UserHibernateDao extends AbstractHibernateDao<Long, UserModel
     }
 
     @Override
-    public UserModel findByUserJid(String userJid) {
+    public UserModel findByJid(String userJid) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<UserModel> query = cb.createQuery(UserModel.class);
         Root<UserModel> root = query.from(UserModel.class);
@@ -47,24 +45,6 @@ public final class UserHibernateDao extends AbstractHibernateDao<Long, UserModel
         query.where(cb.equal(root.get(UserModel_.userJid), userJid));
 
         return JPA.em().createQuery(query).getSingleResult();
-    }
-
-    @Override
-    public List<String> findUserJidByFilter(String filterString) {
-        CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
-        CriteriaQuery<String> query = cb.createQuery(String.class);
-        Root<UserModel> root = query.from(UserModel.class);
-
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.like(root.get(UserModel_.userJid), "%" + filterString + "%"));
-
-        Predicate condition = cb.or(predicates.toArray(new Predicate[predicates.size()]));
-
-        query
-                .select(root.get(UserModel_.userJid))
-                .where(condition);
-
-        return JPA.em().createQuery(query).getResultList();
     }
 
     @Override

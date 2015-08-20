@@ -1,8 +1,9 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.UpdateStatementForm], problemId: Long)
-
 @import play.i18n.Messages
 @import b3.vertical.fieldConstructor
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.sandalphon.forms.UpdateStatementForm
+
+@(updateStatementForm: Form[UpdateStatementForm], problemId: Long)
 
 <script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/ckeditor.js")"></script>
 
@@ -14,7 +15,7 @@ To insert image, add the image as a media file and then insert it as "render/&lt
 
     <div class="form-group">
         <textarea class="ckeditor" name="statement">
-            @form("statement").value
+            @updateStatementForm("statement").value
         </textarea>
     </div>
 

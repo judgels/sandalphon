@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public final class ProgrammingProblemStatementUtils {
+
     private static final Map<String, String> DEFAULT_STATEMENTS = ImmutableMap.of(
             "id-ID",
                     "<h3>Deskripsi</h3>\n"

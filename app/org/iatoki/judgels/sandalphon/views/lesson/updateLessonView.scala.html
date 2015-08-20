@@ -1,21 +1,22 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.LessonUpdateForm], lesson: org.iatoki.judgels.sandalphon.Lesson)
-
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.formErrorView
 @import org.iatoki.judgels.sandalphon.controllers.routes
-@import org.iatoki.judgels.sandalphon.views.html.problem.updateProblemView
+@import org.iatoki.judgels.sandalphon.forms.LessonUpdateForm
+@import org.iatoki.judgels.sandalphon.Lesson
+
+@(lessonUpdateForm: Form[LessonUpdateForm], lesson: Lesson)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
 
-@formErrorView(form)
+@formErrorView(lessonUpdateForm)
 
 @b3.form(routes.LessonController.postUpdateLesson(lesson.getId)) {
 
     @helper.CSRF.formField
 
-    @b3.text(form("name"), '_label -> Messages.get("lesson.name"))
+    @b3.text(lessonUpdateForm("name"), '_label -> Messages.get("lesson.name"))
 
-    @b3.textarea(form("additionalNote"), '_label -> Messages.get("lesson.additionalNote"))
+    @b3.textarea(lessonUpdateForm("additionalNote"), '_label -> Messages.get("lesson.additionalNote"))
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
 }

@@ -11,6 +11,7 @@ import javax.persistence.Table;
 @Table(name = "sandalphon_lesson")
 @JidPrefix("LESS")
 public final class LessonModel extends AbstractJudgelsModel {
+
     public String name;
 
     @Column(columnDefinition = "TEXT")

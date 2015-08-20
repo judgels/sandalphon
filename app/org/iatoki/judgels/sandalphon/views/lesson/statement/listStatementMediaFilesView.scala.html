@@ -1,8 +1,10 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.UploadFileForm], lessonId: Long, mediaFiles: List[org.iatoki.judgels.FileInfo], isAllowedToUploadMediaFiles: Boolean)
-
 @import play.i18n.Messages
-@import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.FileInfo
+@import org.iatoki.judgels.sandalphon.forms.UploadFileForm
+
+@(uploadFileForm: Form[UploadFileForm], lessonId: Long, mediaFiles: List[FileInfo], isAllowedToUploadMediaFiles: Boolean)
 
 @implicitFieldConstructor = @{b3.horizontal.fieldConstructor("col-md-2", "col-md-10")}
 
@@ -13,7 +15,7 @@
     @b3.form(routes.LessonStatementController.postUploadStatementMediaFiles(lessonId), 'enctype -> "multipart/form-data") {
         @helper.CSRF.formField
 
-        @b3.file(form("file"), '_label -> Messages.get("lesson.file.asSingleFile"))
+        @b3.file(uploadFileForm("file"), '_label -> Messages.get("lesson.file.asSingleFile"))
 
         @b3.submit('class -> "btn btn-primary") {
             @Messages.get("commons.upload")
@@ -23,7 +25,7 @@
     @b3.form(routes.LessonStatementController.postUploadStatementMediaFiles(lessonId), 'enctype -> "multipart/form-data") {
         @helper.CSRF.formField
 
-        @b3.file(form("fileZipped"), '_label -> Messages.get("lesson.file.asZipFile"))
+        @b3.file(uploadFileForm("fileZipped"), '_label -> Messages.get("lesson.file.asZipFile"))
 
         @b3.submit('class -> "btn btn-primary") {
             @Messages.get("commons.upload")

@@ -1,9 +1,10 @@
-@(bundleItem: org.iatoki.judgels.sandalphon.BundleItem, conf: org.iatoki.judgels.sandalphon.ItemStatementConf)
+@import org.iatoki.judgels.sandalphon.BundleItem
+@import org.iatoki.judgels.sandalphon.ItemStatementConf
 
-@import play.i18n.Messages
+@(bundleItem: BundleItem, itemStatementConf: ItemStatementConf)
 
 <div class="panel panel-default">
     <div class="panel-body">
-        @Html(conf.statement)
+        @Html(itemStatementConf.statement)
     </div>
 </div>

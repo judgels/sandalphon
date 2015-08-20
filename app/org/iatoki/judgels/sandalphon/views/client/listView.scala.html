@@ -1,24 +1,26 @@
-@(page: org.iatoki.judgels.play.Page[org.iatoki.judgels.sandalphon.Client], orderBy: String, orderDir: String, filterString: String)
-
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersView
 @import org.iatoki.judgels.play.views.html.table.searchView
 @import org.iatoki.judgels.play.views.html.table.paginationView
 @import org.iatoki.judgels.sandalphon.controllers.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.sandalphon.Client
 
-@searchView(page.getPageIndex, orderBy, orderDir, filterString, routes.ClientController.list)
+@(pageOfClients: Page[Client], orderBy: String, orderDir: String, filterString: String)
+
+@searchView(pageOfClients.getPageIndex, orderBy, orderDir, filterString, routes.ClientController.list)
 
 <div class="clearfix"></div>
 
 @tableView() {
-    @tableHeadersView(page.getPageIndex, orderBy, orderDir, filterString, routes.ClientController.list)(
+    @tableHeadersView(pageOfClients.getPageIndex, orderBy, orderDir, filterString, routes.ClientController.list)(
         "id" -> Messages.get("commons.id"),
         "jid" -> Messages.get("commons.jid"),
         "name" -> Messages.get("client.name")
     )
     <tbody>
-    @for(client <- page.getData) {
+    @for(client <- pageOfClients.getData) {
         <tr>
             <td>@client.getId</td>
             <td>@client.getJid</td>
@@ -32,4 +34,4 @@
     </tbody>
 }
 
-@paginationView(page, orderBy, orderDir, filterString, routes.ClientController.list)
+@paginationView(pageOfClients, orderBy, orderDir, filterString, routes.ClientController.list)

@@ -17,8 +17,8 @@ import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.config.LessonFile;
-import org.iatoki.judgels.sandalphon.config.LessonGit;
+import org.iatoki.judgels.sandalphon.config.LessonFileSystemProvider;
+import org.iatoki.judgels.sandalphon.config.LessonGitProvider;
 import org.iatoki.judgels.sandalphon.models.daos.LessonDao;
 import org.iatoki.judgels.sandalphon.models.daos.LessonPartnerDao;
 import org.iatoki.judgels.sandalphon.models.entities.LessonModel;
@@ -42,16 +42,16 @@ import java.util.Set;
 public final class LessonServiceImpl implements LessonService {
 
     private final LessonDao lessonDao;
-    private final LessonPartnerDao lessonPartnerDao;
     private final FileSystemProvider lessonFileSystemProvider;
     private final GitProvider lessonGitProvider;
+    private final LessonPartnerDao lessonPartnerDao;
 
     @Inject
-    public LessonServiceImpl(LessonDao lessonDao, LessonPartnerDao lessonPartnerDao, @LessonFile FileSystemProvider lessonFileSystemProvider, @LessonGit GitProvider lessonGitProvider) {
+    public LessonServiceImpl(LessonDao lessonDao, @LessonFileSystemProvider FileSystemProvider lessonFileSystemProvider, @LessonGitProvider GitProvider lessonGitProvider, LessonPartnerDao lessonPartnerDao) {
         this.lessonDao = lessonDao;
-        this.lessonPartnerDao = lessonPartnerDao;
         this.lessonFileSystemProvider = lessonFileSystemProvider;
         this.lessonGitProvider = lessonGitProvider;
+        this.lessonPartnerDao = lessonPartnerDao;
     }
 
     @Override
@@ -76,21 +76,22 @@ public final class LessonServiceImpl implements LessonService {
     @Override
     public Lesson findLessonById(long lessonId) throws LessonNotFoundException {
         LessonModel lessonModel = lessonDao.findById(lessonId);
-        if (lessonModel != null) {
-            return createLessonFromModel(lessonModel);
-        } else {
+        if (lessonModel == null) {
             throw new LessonNotFoundException("Lesson not found.");
         }
+
+        return createLessonFromModel(lessonModel);
     }
 
     @Override
     public Lesson findLessonByJid(String lessonJid) {
         LessonModel lessonModel = lessonDao.findByJid(lessonJid);
+
         return createLessonFromModel(lessonModel);
     }
 
     @Override
-    public boolean isLessonPartnerByUserJid(String lessonJid, String userJid) {
+    public boolean isUserPartnerForLesson(String lessonJid, String userJid) {
         return lessonPartnerDao.existsByLessonJidAndPartnerJid(lessonJid, userJid);
     }
 
@@ -115,7 +116,7 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public Page<LessonPartner> pageLessonPartners(String lessonJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
+    public Page<LessonPartner> getPageOfLessonPartners(String lessonJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
         long totalRows = lessonPartnerDao.countByFilters("", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), ImmutableMap.of());
         List<LessonPartnerModel> lessonPartnerModels = lessonPartnerDao.findSortedByFilters(orderBy, orderDir, "", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), ImmutableMap.of(), pageIndex, pageIndex * pageSize);
         List<LessonPartner> lessonPartners = Lists.transform(lessonPartnerModels, m -> createLessonPartnerFromModel(m));
@@ -124,13 +125,13 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public LessonPartner findLessonPartnerByLessonPartnerId(long lessonPartnerId) throws LessonPartnerNotFoundException {
+    public LessonPartner findLessonPartnerById(long lessonPartnerId) throws LessonPartnerNotFoundException {
         LessonPartnerModel lessonPartnerModel = lessonPartnerDao.findById(lessonPartnerId);
-        if (lessonPartnerModel != null) {
-            return createLessonPartnerFromModel(lessonPartnerModel);
-        } else {
+        if (lessonPartnerModel == null) {
             throw new LessonPartnerNotFoundException("Lesson partner not found.");
         }
+
+        return createLessonPartnerFromModel(lessonPartnerModel);
     }
 
     @Override
@@ -150,7 +151,7 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public Page<Lesson> pageLessons(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin) {
+    public Page<Lesson> getPageOfLessons(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin) {
         if (isAdmin) {
             long totalRows = lessonDao.countByFilters(filterString);
             List<LessonModel> lessonModels = lessonDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
@@ -158,8 +159,8 @@ public final class LessonServiceImpl implements LessonService {
             List<Lesson> lessons = Lists.transform(lessonModels, m -> createLessonFromModel(m));
             return new Page<>(lessons, totalRows, pageIndex, pageSize);
         } else {
-            List<String> lessonJidsWhereIsAuthor = lessonDao.findLessonJidsByAuthorJid(userJid);
-            List<String> lessonJidsWhereIsPartner = lessonPartnerDao.findLessonJidsByPartnerJid(userJid);
+            List<String> lessonJidsWhereIsAuthor = lessonDao.getJidsByAuthorJid(userJid);
+            List<String> lessonJidsWhereIsPartner = lessonPartnerDao.getLessonJidsByPartnerJid(userJid);
 
             ImmutableSet.Builder<String> allowedLessonJidsBuilder = ImmutableSet.builder();
             allowedLessonJidsBuilder.addAll(lessonJidsWhereIsAuthor);

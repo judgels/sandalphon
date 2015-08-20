@@ -10,5 +10,4 @@ public abstract class ClientModel_ extends org.iatoki.judgels.play.models.entiti
 
         public static volatile SingularAttribute<ClientModel, String> name;
         public static volatile SingularAttribute<ClientModel, String> secret;
-
 }

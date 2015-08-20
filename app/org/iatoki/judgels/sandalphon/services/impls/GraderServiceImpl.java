@@ -28,23 +28,24 @@ public final class GraderServiceImpl implements GraderService {
     }
 
     @Override
-    public boolean existsByJid(String graderJid) {
+    public boolean graderExistsByJid(String graderJid) {
         return graderDao.existsByJid(graderJid);
     }
 
     @Override
     public Grader findGraderById(long graderId) throws GraderNotFoundException {
         GraderModel graderModel = graderDao.findById(graderId);
-        if (graderModel != null) {
-            return createGraderFromModel(graderModel);
-        } else {
+        if (graderModel == null) {
             throw new GraderNotFoundException("Grader not found.");
         }
+
+        return createGraderFromModel(graderModel);
     }
 
     @Override
     public Grader findGraderByJid(String graderJid) {
         GraderModel graderModel = graderDao.findByJid(graderJid);
+
         return createGraderFromModel(graderModel);
     }
 
@@ -66,7 +67,7 @@ public final class GraderServiceImpl implements GraderService {
     }
 
     @Override
-    public Page<Grader> pageGraders(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
+    public Page<Grader> getPageOfGraders(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalPages = graderDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
         List<GraderModel> graderModels = graderDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
@@ -79,7 +80,7 @@ public final class GraderServiceImpl implements GraderService {
     public boolean verifyGrader(String graderJid, String graderSecret) {
         GraderModel graderModel = graderDao.findByJid(graderJid);
 
-        return graderModel != null && graderModel.secret.equals(graderSecret);
+        return (graderModel != null) && graderModel.secret.equals(graderSecret);
     }
 
     private Grader createGraderFromModel(GraderModel graderModel) {

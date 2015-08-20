@@ -1,10 +1,14 @@
-@(form: Form[org.iatoki.judgels.sandalphon.forms.ClientLessonUpsertForm], id: Long, clients: List[org.iatoki.judgels.sandalphon.Client], clientLessons: List[org.iatoki.judgels.sandalphon.ClientLesson])
-
 @import play.i18n.Messages
+@import org.iatoki.judgels.sandalphon.forms.ClientLessonUpsertForm
+@import org.iatoki.judgels.sandalphon.Client
+@import org.iatoki.judgels.sandalphon.ClientLesson
+@import org.iatoki.judgels.sandalphon.controllers.routes
+
+@(clientLessonUpsertForm: Form[ClientLessonUpsertForm], clientLessonId: Long, clients: List[Client], clientLessons: List[ClientLesson])
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
-@b3.form(org.iatoki.judgels.sandalphon.controllers.routes.LessonClientController.postUpdateClientLessons(id)) {
+@b3.form(routes.LessonClientController.postUpdateClientLessons(clientLessonId)) {
     @helper.CSRF.formField
 
     <div class="form-group" id="clientJid_field">
@@ -17,6 +21,7 @@
             </select>
         </div>
     </div>
+
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.create") }
 }
@@ -36,7 +41,7 @@
             <td>@clientLesson.getId</td>
             <td>@clientLesson.getClientName</td>
             <td>
-                <a href="@org.iatoki.judgels.sandalphon.controllers.routes.LessonClientController.viewClientLesson(id, clientLesson.getId)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
+                <a href="@routes.LessonClientController.viewClientLesson(clientLessonId, clientLesson.getId)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
             </td>
         </tr>
     }

@@ -6,5 +6,6 @@ import org.iatoki.judgels.sandalphon.models.entities.ProblemModel;
 import java.util.List;
 
 public interface ProblemDao extends JudgelsDao<ProblemModel> {
-    List<String> findProblemJidsByAuthorJid(String authorJid);
+
+    List<String> getJidsByAuthorJid(String authorJid);
 }

@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.forms;
 
 public final class LessonPartnerUpsertForm {
+
     public boolean isAllowedToUpdateLesson;
     public boolean isAllowedToUpdateStatement;
     public boolean isAllowedToUploadStatementResources;

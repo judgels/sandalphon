@@ -22,32 +22,32 @@ import java.util.List;
 @Named("bundleProblemGrader")
 public final class BundleProblemGraderImpl implements BundleProblemGrader {
 
-    private final ProblemService problemService;
     private final BundleItemService bundleItemService;
+    private final ProblemService problemService;
 
     @Inject
-    public BundleProblemGraderImpl(ProblemService problemService, BundleItemService bundleItemService) {
-        this.problemService = problemService;
+    public BundleProblemGraderImpl(BundleItemService bundleItemService, ProblemService problemService) {
         this.bundleItemService = bundleItemService;
+        this.problemService = problemService;
     }
 
     @Override
     public BundleGradingResult gradeBundleProblem(String problemJid, BundleAnswer bundleAnswer) throws IOException {
-        List<BundleItem> bundleItems = bundleItemService.findAllItems(problemJid, null);
+        List<BundleItem> bundleItems = bundleItemService.getBundleItemsInProblemWithClone(problemJid, null);
         ImmutableMap.Builder<String, BundleDetailResult> detailResultBuilder = ImmutableMap.builder();
 
         double totalScore = 0;
         for (BundleItem bundleItem : bundleItems) {
             String conf = "";
             try {
-                conf = bundleItemService.getItemConfByItemJid(problemJid, null, bundleItem.getJid(), bundleAnswer.getLanguageCode());
+                conf = bundleItemService.getItemConfInProblemWithCloneByJid(problemJid, null, bundleItem.getJid(), bundleAnswer.getLanguageCode());
             } catch (IOException e) {
-                conf = bundleItemService.getItemConfByItemJid(problemJid, null, bundleItem.getJid(), problemService.getDefaultLanguage(null, problemJid));
+                conf = bundleItemService.getItemConfInProblemWithCloneByJid(problemJid, null, bundleItem.getJid(), problemService.getDefaultLanguage(null, problemJid));
             }
 
             BundleItemConfAdapter confAdapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
             BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
-            if ((adapter instanceof BundleItemHasScore) && (bundleAnswer.getAnswers().containsKey(bundleItem.getJid()))) {
+            if ((adapter instanceof BundleItemHasScore) && bundleAnswer.getAnswers().containsKey(bundleItem.getJid())) {
                 double score = ((BundleItemHasScore) adapter).calculateScore(confAdapter.parseConfString(conf), bundleAnswer.getAnswers().get(bundleItem.getJid()));
                 detailResultBuilder.put(bundleItem.getJid(), new BundleDetailResult(bundleItem.getNumber(), score));
                 totalScore += score;

@@ -11,5 +11,5 @@ public interface ProblemPartnerDao extends Dao<Long, ProblemPartnerModel> {
 
     ProblemPartnerModel findByProblemJidAndPartnerJid(String problemJid, String partnerJid);
 
-    List<String> findProblemJidsByPartnerJid(String partnerJid);
+    List<String> getProblemJidsByPartnerJid(String partnerJid);
 }

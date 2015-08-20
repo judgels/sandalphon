@@ -53,9 +53,9 @@ public final class GraderController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     public Result list(long pageIndex, String orderBy, String orderDir, String filterString) {
-        Page<Grader> currentPage = graderService.pageGraders(pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
+        Page<Grader> pageOfGraders = graderService.getPageOfGraders(pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
-        LazyHtml content = new LazyHtml(listView.render(currentPage, orderBy, orderDir, filterString));
+        LazyHtml content = new LazyHtml(listView.render(pageOfGraders, orderBy, orderDir, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.list"), new InternalLink(Messages.get("commons.create"), routes.GraderController.create()), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
@@ -72,33 +72,34 @@ public final class GraderController extends AbstractJudgelsController {
     @Transactional(readOnly = true)
     @AddCSRFToken
     public Result create() {
-        Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class);
+        Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class);
 
         ControllerUtils.getInstance().addActivityLog("Try to create grader <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showCreate(form);
+        return showCreate(graderUpsertForm);
     }
 
     @Transactional
     @RequireCSRFCheck
     public Result postCreate() {
-        Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).bindFromRequest();
+        Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class).bindFromRequest();
 
-        if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showCreate(form);
-        } else {
-            GraderUpsertForm graderUpsertForm = form.get();
-            graderService.createGrader(graderUpsertForm.name);
-
-            ControllerUtils.getInstance().addActivityLog("Create grader " + graderUpsertForm.name + ".");
-
-            return redirect(routes.GraderController.index());
+        if (formHasErrors(graderUpsertForm)) {
+            return showCreate(graderUpsertForm);
         }
+
+        GraderUpsertForm graderUpsertData = graderUpsertForm.get();
+        graderService.createGrader(graderUpsertData.name);
+
+        ControllerUtils.getInstance().addActivityLog("Create grader " + graderUpsertData.name + ".");
+
+        return redirect(routes.GraderController.index());
     }
 
     @Transactional(readOnly = true)
     public Result view(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
+
         LazyHtml content = new LazyHtml(viewView.render(grader));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), new InternalLink(Messages.get("commons.update"), routes.GraderController.update(graderId)), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
@@ -117,34 +118,34 @@ public final class GraderController extends AbstractJudgelsController {
     @AddCSRFToken
     public Result update(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
-        GraderUpsertForm graderUpsertForm = new GraderUpsertForm();
-        graderUpsertForm.name = grader.getName();
-        Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).fill(graderUpsertForm);
+        GraderUpsertForm graderUpsertData = new GraderUpsertForm();
+        graderUpsertData.name = grader.getName();
+        Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class).fill(graderUpsertData);
 
         ControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdate(form, grader);
+        return showUpdate(graderUpsertForm, grader);
     }
 
     @Transactional
     public Result postUpdate(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
-        Form<GraderUpsertForm> form = Form.form(GraderUpsertForm.class).bindFromRequest();
+        Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class).bindFromRequest();
 
-        if (form.hasErrors() || form.hasGlobalErrors()) {
-            return showUpdate(form, grader);
-        } else {
-            GraderUpsertForm graderUpsertForm = form.get();
-            graderService.updateGrader(graderId, graderUpsertForm.name);
-
-            ControllerUtils.getInstance().addActivityLog("Update grader " + grader.getName() + ".");
-
-            return redirect(routes.GraderController.index());
+        if (formHasErrors(graderUpsertForm)) {
+            return showUpdate(graderUpsertForm, grader);
         }
+
+        GraderUpsertForm graderUpsertData = graderUpsertForm.get();
+        graderService.updateGrader(graderId, graderUpsertData.name);
+
+        ControllerUtils.getInstance().addActivityLog("Update grader " + grader.getName() + ".");
+
+        return redirect(routes.GraderController.index());
     }
 
-    private Result showCreate(Form<GraderUpsertForm> form) {
-        LazyHtml content = new LazyHtml(createView.render(form));
+    private Result showCreate(Form<GraderUpsertForm> graderUpsertForm) {
+        LazyHtml content = new LazyHtml(createView.render(graderUpsertForm));
         content.appendLayout(c -> headingLayout.render(Messages.get("grader.create"), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
@@ -156,8 +157,8 @@ public final class GraderController extends AbstractJudgelsController {
         return ControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdate(Form<GraderUpsertForm> form, Grader grader) {
-        LazyHtml content = new LazyHtml(updateView.render(form, grader.getId()));
+    private Result showUpdate(Form<GraderUpsertForm> graderUpsertForm, Grader grader) {
+        LazyHtml content = new LazyHtml(updateView.render(graderUpsertForm, grader.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), c));
         ControllerUtils.getInstance().appendSidebarLayout(content);
         ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(

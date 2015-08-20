@@ -11,5 +11,5 @@ public interface ClientLessonDao extends Dao<Long, ClientLessonModel> {
 
     ClientLessonModel findByClientJidAndLessonJid(String clientJid, String lessonJid);
 
-    List<ClientLessonModel> findByLessonJid(String lessonJid);
+    List<ClientLessonModel> getByLessonJid(String lessonJid);
 }

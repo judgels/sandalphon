@@ -6,13 +6,13 @@ import org.iatoki.judgels.sandalphon.GraderNotFoundException;
 
 public interface GraderService {
 
-    boolean existsByJid(String graderJid);
+    boolean graderExistsByJid(String graderJid);
 
     Grader findGraderById(long graderId) throws GraderNotFoundException;
 
     Grader findGraderByJid(String graderJid);
 
-    Page<Grader> pageGraders(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
+    Page<Grader> getPageOfGraders(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
     void createGrader(String name);
 

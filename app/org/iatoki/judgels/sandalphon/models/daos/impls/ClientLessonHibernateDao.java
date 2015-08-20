@@ -47,7 +47,7 @@ public final class ClientLessonHibernateDao extends AbstractHibernateDao<Long, C
     }
 
     @Override
-    public List<ClientLessonModel> findByLessonJid(String lessonJid) {
+    public List<ClientLessonModel> getByLessonJid(String lessonJid) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<ClientLessonModel> query = cb.createQuery(ClientLessonModel.class);
         Root<ClientLessonModel> root = query.from(ClientLessonModel.class);

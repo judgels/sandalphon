@@ -3,13 +3,9 @@ package org.iatoki.judgels.sandalphon;
 public final class ClientLesson {
 
     private final long id;
-
     private final String clientJid;
-
     private final String clientName;
-
     private final String lessonJid;
-
     private final String secret;
 
     public ClientLesson(long id, String clientJid, String clientName, String lessonJid, String secret) {

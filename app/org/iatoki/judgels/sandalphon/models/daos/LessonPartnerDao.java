@@ -11,5 +11,5 @@ public interface LessonPartnerDao extends Dao<Long, LessonPartnerModel> {
 
     LessonPartnerModel findByLessonJidAndPartnerJid(String lessonJid, String partnerJid);
 
-    List<String> findLessonJidsByPartnerJid(String partnerJid);
+    List<String> getLessonJidsByPartnerJid(String partnerJid);
 }

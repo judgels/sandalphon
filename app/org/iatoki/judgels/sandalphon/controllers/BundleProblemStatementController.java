@@ -35,13 +35,13 @@ import java.util.Set;
 @Named
 public final class BundleProblemStatementController extends AbstractJudgelsController {
 
-    private final ProblemService problemService;
     private final BundleItemService bundleItemService;
+    private final ProblemService problemService;
 
     @Inject
-    public BundleProblemStatementController(ProblemService problemService, BundleItemService bundleItemService) {
-        this.problemService = problemService;
+    public BundleProblemStatementController(BundleItemService bundleItemService, ProblemService problemService) {
         this.bundleItemService = bundleItemService;
+        this.problemService = problemService;
     }
 
     @Transactional(readOnly = true)
@@ -53,61 +53,73 @@ public final class BundleProblemStatementController extends AbstractJudgelsContr
             return notFound();
         }
 
-        if (ProblemControllerUtils.isAllowedToViewStatement(problemService, problem)) {
-            String statement;
-            try {
-                statement = problemService.getStatement(IdentityUtils.getUserJid(), problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
-            } catch (IOException e) {
-                statement = BundleProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getCurrentStatementLanguage());
-            }
-
-            boolean isAllowedToSubmitByPartner = ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem);
-            boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
-
-            String reasonNotAllowedToSubmit = null;
-
-            if (!isAllowedToSubmitByPartner) {
-                reasonNotAllowedToSubmit = Messages.get("problem.programming.cantSubmit");
-            } else if (!isClean) {
-                reasonNotAllowedToSubmit = Messages.get("problem.programming.cantSubmitNotClean");
-            }
-
-            try {
-                List<BundleItem> bundleItemList = bundleItemService.findAllItems(problem.getJid(), IdentityUtils.getUserJid());
-                ImmutableList.Builder<Html> htmlBuilder = ImmutableList.builder();
-                for (BundleItem bundleItem : bundleItemList) {
-                    BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
-                    try {
-                        htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage())));
-                    } catch (IOException e) {
-                        ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem));
-                        htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfByItemJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage())));
-                    }
-                }
-
-                LazyHtml content = new LazyHtml(bundleStatementView.render(routes.BundleProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, htmlBuilder.build(), reasonNotAllowedToSubmit));
-
-                Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToView(problemService, problem);
-
-                ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemStatementController.viewStatementSwitchLanguage(problem.getId()));
-
-                ProblemStatementControllerUtils.appendSubtabsLayout(content, problemService, problem);
-                BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
-                ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
-                ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-                ControllerUtils.getInstance().appendSidebarLayout(content);
-                ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.view"), routes.ProblemStatementController.viewStatement(problemId)));
-                ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
-
-                ControllerUtils.getInstance().addActivityLog("View statement of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-                return ControllerUtils.getInstance().lazyOk(content);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return notFound();
-            }
-        } else {
+        if (!ProblemControllerUtils.isAllowedToViewStatement(problemService, problem)) {
             return notFound();
         }
+
+        String statement;
+        try {
+            statement = problemService.getStatement(IdentityUtils.getUserJid(), problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
+        } catch (IOException e) {
+            statement = BundleProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getCurrentStatementLanguage());
+        }
+
+        boolean isAllowedToSubmitByPartner = ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem);
+        boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
+
+        String reasonNotAllowedToSubmit = null;
+
+        if (!isAllowedToSubmitByPartner) {
+            reasonNotAllowedToSubmit = Messages.get("problem.programming.cantSubmit");
+        } else if (!isClean) {
+            reasonNotAllowedToSubmit = Messages.get("problem.programming.cantSubmitNotClean");
+        }
+
+        List<BundleItem> bundleItemList;
+        try {
+            bundleItemList = bundleItemService.getBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return notFound();
+        }
+
+        ImmutableList.Builder<Html> htmlBuilder = ImmutableList.builder();
+        for (BundleItem bundleItem : bundleItemList) {
+            BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
+            try {
+                htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage())));
+            } catch (IOException e) {
+                try {
+                    ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getDefaultStatementLanguage(problemService, problem));
+                    htmlBuilder.add(adapter.renderViewHtml(bundleItem, bundleItemService.getItemConfInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), bundleItem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage())));
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                    return notFound();
+                }
+            }
+        }
+
+        LazyHtml content = new LazyHtml(bundleStatementView.render(routes.BundleProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, htmlBuilder.build(), reasonNotAllowedToSubmit));
+
+        Set<String> allowedLanguages;
+        try {
+            allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToView(problemService, problem);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return notFound();
+        }
+        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemStatementController.viewStatementSwitchLanguage(problem.getId()));
+
+        ProblemStatementControllerUtils.appendSubtabsLayout(content, problemService, problem);
+        BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
+        ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
+        ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
+        ControllerUtils.getInstance().appendSidebarLayout(content);
+        ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.view"), routes.ProblemStatementController.viewStatement(problemId)));
+        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+
+        ControllerUtils.getInstance().addActivityLog("View statement of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return ControllerUtils.getInstance().lazyOk(content);
     }
 }
