@@ -11,7 +11,7 @@ import org.iatoki.judgels.gabriel.GradingConfig;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.adapters.impls.GradingConfigAdapterRegistry;
+import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapterRegistry;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.LanguageRestrictionAdapter;
@@ -21,7 +21,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.UploadFileForm;
 import org.iatoki.judgels.sandalphon.forms.GradingEngineUpdateForm;
 import org.iatoki.judgels.sandalphon.forms.LanguageRestrictionUpdateForm;
-import org.iatoki.judgels.sandalphon.adapters.GradingConfigAdapter;
+import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapter;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.adapters.ConfigurableWithAutoPopulation;
 import org.iatoki.judgels.sandalphon.adapters.ConfigurableWithTokilibFormat;
@@ -152,7 +152,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
         List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
-        Form<?> gradingEngineConfForm = GradingConfigAdapterRegistry.getInstance().getByGradingEngineName(engine).createFormFromConfig(config);
+        Form<?> gradingEngineConfForm = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).createFormFromConfig(config);
 
         ControllerUtils.getInstance().addActivityLog("Try to update grading config of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -173,7 +173,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         } catch (IOException e) {
             engine = GradingEngineRegistry.getInstance().getDefaultEngine();
         }
-        Form<?> gradingEngineConfForm = GradingConfigAdapterRegistry.getInstance().getByGradingEngineName(engine).createEmptyForm().bindFromRequest(request());
+        Form<?> gradingEngineConfForm = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).createEmptyForm().bindFromRequest(request());
 
         if (formHasErrors(gradingEngineConfForm)) {
             List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
@@ -185,7 +185,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
         try {
-            GradingConfig config = GradingConfigAdapterRegistry.getInstance().getByGradingEngineName(engine).createConfigFromForm(gradingEngineConfForm);
+            GradingConfig config = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).createConfigFromForm(gradingEngineConfForm);
             programmingProblemService.updateGradingConfig(IdentityUtils.getUserJid(), problem.getJid(), config);
         } catch (IOException e) {
             gradingEngineConfForm.reject("problem.programming.grading.config.error.cantUpdate");
@@ -217,7 +217,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             engine = GradingEngineRegistry.getInstance().getDefaultEngine();
         }
 
-        GradingConfigAdapter adapter = GradingConfigAdapterRegistry.getInstance().getByGradingEngineName(engine);
+        GradingEngineAdapter adapter = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine);
 
         if (!(adapter instanceof ConfigurableWithTokilibFormat)) {
             return forbidden();
@@ -260,7 +260,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             engine = GradingEngineRegistry.getInstance().getDefaultEngine();
         }
         List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
-        GradingConfigAdapter adapter = GradingConfigAdapterRegistry.getInstance().getByGradingEngineName(engine);
+        GradingEngineAdapter adapter = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine);
 
         if (!(adapter instanceof ConfigurableWithAutoPopulation)) {
             return forbidden();
@@ -544,7 +544,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
     }
 
     private Result showUpdateGradingConfig(Form<?> gradingConfForm, Problem problem, String gradingEngine, List<FileInfo> testDataFiles, List<FileInfo> helperFiles) {
-        GradingConfigAdapter adapter = GradingConfigAdapterRegistry.getInstance().getByGradingEngineName(gradingEngine);
+        GradingEngineAdapter adapter = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(gradingEngine);
         Call postUpdateGradingConfigCall = routes.ProgrammingProblemGradingController.postUpdateGradingConfig(problem.getId());
         LazyHtml content = new LazyHtml(adapter.renderUpdateGradingConfig(gradingConfForm, postUpdateGradingConfigCall, testDataFiles, helperFiles));
 

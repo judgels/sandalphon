@@ -23,7 +23,7 @@ import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemAdapters;
-import org.iatoki.judgels.sandalphon.adapters.impls.SubmissionAdapterRegistry;
+import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapterRegistry;
 import org.iatoki.judgels.sandalphon.services.BundleItemService;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
@@ -243,9 +243,9 @@ public final class ProblemAPIController extends AbstractJudgelsAPIController {
             config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
         }
 
-        Html html = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames, reasonNotAllowedToSubmit);
+        Html html = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames, reasonNotAllowedToSubmit);
         if (switchLanguageUri != null) {
-            html = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).renderStatementLanguageSelection(switchLanguageUri, allowedStatementLanguages, lang, html);
+            html = statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, lang, html);
         }
         return ok(html);
     }

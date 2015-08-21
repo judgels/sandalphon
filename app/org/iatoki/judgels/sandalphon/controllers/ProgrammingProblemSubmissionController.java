@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.FileSystemProvider;
+import org.iatoki.judgels.gabriel.SubmissionSource;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
@@ -10,13 +11,13 @@ import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
-import org.iatoki.judgels.gabriel.GradingSource;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmission;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmissionException;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmissionNotFoundException;
-import org.iatoki.judgels.sandalphon.adapters.impls.SubmissionAdapterRegistry;
+import org.iatoki.judgels.sandalphon.ProgrammingSubmissionUtils;
+import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapterRegistry;
 import org.iatoki.judgels.sandalphon.config.SubmissionFileSystemProvider;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
@@ -90,9 +91,9 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         Set<String> allowedLanguageNames = LanguageRestrictionAdapter.getFinalAllowedLanguageNames(ImmutableList.of(languageRestriction));
 
         try {
-            GradingSource source = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).createGradingSourceFromNewSubmission(body);
-            String submissionJid = programmingSubmissionService.submit(problem.getJid(), null, engine, gradingLanguage, allowedLanguageNames, source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-            SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).storeSubmissionFiles(programmingSubmissionFileSystemProvider, null, submissionJid, source);
+            SubmissionSource submissionSource = ProgrammingSubmissionUtils.createSubmissionSourceFromNewSubmission(body);
+            String submissionJid = programmingSubmissionService.submit(problem.getJid(), null, engine, gradingLanguage, allowedLanguageNames, submissionSource, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            ProgrammingSubmissionUtils.storeSubmissionFiles(programmingSubmissionFileSystemProvider, null, submissionJid, submissionSource);
         } catch (ProgrammingSubmissionException e) {
             flash("submissionError", e.getMessage());
             return redirect(routes.ProgrammingProblemStatementController.viewStatement(problem.getId()));
@@ -148,9 +149,9 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         } catch (IOException e) {
             engine = GradingEngineRegistry.getInstance().getDefaultEngine();
         }
-        GradingSource source = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).createGradingSourceFromPastSubmission(programmingSubmissionFileSystemProvider, null, programmingSubmission.getJid());
+        SubmissionSource submissionSource = ProgrammingSubmissionUtils.createSubmissionSourceFromPastSubmission(programmingSubmissionFileSystemProvider, null, programmingSubmission.getJid());
 
-        LazyHtml content = new LazyHtml(SubmissionAdapterRegistry.getInstance().getByGradingEngineName(engine).renderViewSubmission(programmingSubmission, source, JidCacheServiceImpl.getInstance().getDisplayName(programmingSubmission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(programmingSubmission.getGradingLanguage()).getName(), null));
+        LazyHtml content = new LazyHtml(GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).renderViewSubmission(programmingSubmission, submissionSource, JidCacheServiceImpl.getInstance().getDisplayName(programmingSubmission.getAuthorJid()), null, problem.getName(), GradingLanguageRegistry.getInstance().getLanguage(programmingSubmission.getGradingLanguage()).getName(), null));
 
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
@@ -173,8 +174,8 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         }
 
         ProgrammingSubmission programmingSubmission = programmingSubmissionService.findProgrammingSubmissionById(submissionId);
-        GradingSource source = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(programmingSubmission.getGradingEngine()).createGradingSourceFromPastSubmission(programmingSubmissionFileSystemProvider, null, programmingSubmission.getJid());
-        programmingSubmissionService.regrade(programmingSubmission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        SubmissionSource submissionSource = ProgrammingSubmissionUtils.createSubmissionSourceFromPastSubmission(programmingSubmissionFileSystemProvider, null, programmingSubmission.getJid());
+        programmingSubmissionService.regrade(programmingSubmission.getJid(), submissionSource, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -202,8 +203,8 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         }
 
         for (ProgrammingSubmission programmingSubmission : programmingSubmissions) {
-            GradingSource source = SubmissionAdapterRegistry.getInstance().getByGradingEngineName(programmingSubmission.getGradingEngine()).createGradingSourceFromPastSubmission(programmingSubmissionFileSystemProvider, null, programmingSubmission.getJid());
-            programmingSubmissionService.regrade(programmingSubmission.getJid(), source, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            SubmissionSource submissionSource = ProgrammingSubmissionUtils.createSubmissionSourceFromPastSubmission(programmingSubmissionFileSystemProvider, null, programmingSubmission.getJid());
+            programmingSubmissionService.regrade(programmingSubmission.getJid(), submissionSource, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         }
 
         ControllerUtils.getInstance().addActivityLog("Regrade submissions of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
