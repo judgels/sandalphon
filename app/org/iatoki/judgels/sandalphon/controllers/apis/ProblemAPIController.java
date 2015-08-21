@@ -29,7 +29,7 @@ import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.bundle.statement.bundleStatementView;
-import org.iatoki.judgels.sandalphon.views.html.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.views.html.problem.statement.statementLanguageSelectionLayout;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
 import play.mvc.Result;

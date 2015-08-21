@@ -12,7 +12,7 @@ import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.views.html.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.views.html.problem.statement.statementLanguageSelectionLayout;
 import org.iatoki.judgels.sandalphon.views.html.lesson.version.versionLocalChangesWarningLayout;
 import play.i18n.Messages;
 import play.mvc.Call;
