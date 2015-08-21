@@ -34,6 +34,7 @@ public final class SandalphonDataMigrationServiceImpl extends AbstractBaseDataMi
         Statement statement = connection.createStatement();
 
         statement.execute("ALTER TABLE " + programmingSubmissionTable + " CHANGE contestJid containerJid VARCHAR(255);");
+        statement.execute("ALTER TABLE " + bundleSubmissionTable + " CHANGE contestJid containerJid VARCHAR(255);");
 
         statement.execute("DROP TABLE " + newProgrammingSubmissionTable + ";");
         statement.execute("DROP TABLE " + newBundleSubmissionTable + ";");
