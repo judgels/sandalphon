@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @JidChildPrefixes({"PROG", "BUND"})
 public final class ProblemModel extends AbstractJudgelsModel {
 
-    public String name;
+    public String slug;
 
     @Column(columnDefinition = "TEXT")
     public String additionalNote;
