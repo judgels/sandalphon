@@ -14,7 +14,7 @@
 
     @helper.CSRF.formField
 
-    @b3.text(problemUpdateForm("name"), '_label -> Messages.get("problem.name"))
+    @b3.text(problemUpdateForm("slug"), '_label -> Messages.get("problem.slug"))
 
     @b3.textarea(problemUpdateForm("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
 

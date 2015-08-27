@@ -37,7 +37,20 @@ public final class ProblemHibernateDao extends AbstractJudgelsHibernateDao<Probl
     }
 
     @Override
+    public boolean existsBySlug(String slug) {
+        CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<ProblemModel> root = query.from(getModelClass());
+
+        query
+                .select(cb.count(root))
+                .where(cb.equal(root.get(ProblemModel_.slug), slug));
+
+        return JPA.em().createQuery(query).getSingleResult() > 0;
+    }
+
+    @Override
     protected List<SingularAttribute<ProblemModel, String>> getColumnsFilterableByString() {
-        return ImmutableList.of(ProblemModel_.name, ProblemModel_.additionalNote);
+        return ImmutableList.of(ProblemModel_.slug, ProblemModel_.additionalNote);
     }
 }

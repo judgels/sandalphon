@@ -19,7 +19,7 @@
 @tableView() {
     @tableHeadersView(pageOfProblems.getPageIndex, orderBy, orderDir, filterString, routes.ProblemController.listProblems)(
         "id" -> Messages.get("commons.id"),
-        "name" -> Messages.get("problem.name"),
+        "slug" -> Messages.get("problem.slug"),
         "type" -> Messages.get("problem.type"),
         "userCreate" -> Messages.get("problem.author"),
         "timeUpdate" -> Messages.get("problem.lastUpdateTime")
@@ -29,7 +29,7 @@
         @for(problem <- pageOfProblems.getData) {
             <tr>
                 <td>@problem.getId</td>
-                <td>@problem.getName</td>
+                <td>@problem.getSlug</td>
                 <td>@problem.getType</td>
                 <td>@JudgelsPlayUtils.getOnlyUsername(displayNamesMap.get(problem.getAuthorJid))</td>
                 <td><time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(problem.getLastUpdateTime.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(problem.getLastUpdateTime.getTime)</time></td>

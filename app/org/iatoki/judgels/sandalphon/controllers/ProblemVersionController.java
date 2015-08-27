@@ -63,7 +63,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.version.history"), routes.ProblemVersionController.listVersionHistory(problem.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -79,7 +79,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         problemService.restore(problem.getJid(), hash);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemVersionController.listVersionHistory(problem.getId()));
     }
@@ -97,7 +97,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         Form<VersionCommitForm> versionCommitForm = Form.form(VersionCommitForm.class);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showViewVersionLocalChanges(versionCommitForm, problem, isClean);
     }
@@ -133,7 +133,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
             }
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
     }
@@ -152,7 +152,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
             flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
     }
@@ -167,7 +167,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         try {
             problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
-            SandalphonControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+            SandalphonControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } catch (IOException e) {

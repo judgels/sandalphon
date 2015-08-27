@@ -87,15 +87,19 @@ public final class ProblemController extends AbstractJudgelsController {
     public Result postCreateProblem() {
         Form<ProblemCreateForm> problemCreateForm = Form.form(ProblemCreateForm.class).bindFromRequest();
 
+        if (problemService.problemExistsBySlug(problemCreateForm.get().slug)) {
+            problemCreateForm.reject("slug", Messages.get("error.problem.slugExists"));
+        }
+
         if (formHasErrors(problemCreateForm)) {
             return showCreateProblem(problemCreateForm);
         }
 
         ProblemCreateForm problemCreateData = problemCreateForm.get();
-        ProblemControllerUtils.setJustCreatedProblem(problemCreateData.name, problemCreateData.additionalNote, problemCreateData.initLanguageCode);
+        ProblemControllerUtils.setJustCreatedProblem(problemCreateData.slug, problemCreateData.additionalNote, problemCreateData.initLanguageCode);
 
         if (problemCreateData.type.equals(ProblemType.PROGRAMMING.name())) {
-            SandalphonControllerUtils.getInstance().addActivityLog("Create problem " + problemCreateData.name + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+            SandalphonControllerUtils.getInstance().addActivityLog("Create problem " + problemCreateData.slug + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProgrammingProblemController.createProgrammingProblem());
         } else if (problemCreateData.type.equals(ProblemType.BUNDLE.name())) {
@@ -142,7 +146,7 @@ public final class ProblemController extends AbstractJudgelsController {
         LazyHtml content = new LazyHtml(viewProblemView.render(problem));
         appendSubtabs(content, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
-        content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
+        content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getSlug(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
               ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
@@ -151,7 +155,7 @@ public final class ProblemController extends AbstractJudgelsController {
         );
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -166,12 +170,12 @@ public final class ProblemController extends AbstractJudgelsController {
         }
 
         ProblemUpdateForm problemUpdateData = new ProblemUpdateForm();
-        problemUpdateData.name = problem.getName();
+        problemUpdateData.slug = problem.getSlug();
         problemUpdateData.additionalNote = problem.getAdditionalNote();
 
         Form<ProblemUpdateForm> problemUpdateForm = Form.form(ProblemUpdateForm.class).fill(problemUpdateData);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateProblem(problemUpdateForm, problem);
     }
@@ -181,19 +185,24 @@ public final class ProblemController extends AbstractJudgelsController {
     public Result postUpdateProblem(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAllowedToUpdateProblem(problemService, problem)) {
+        if (!ProblemControllerUtils.isAllowedToUpdateProblem(problemService, problem)) {
             return notFound();
         }
 
         Form<ProblemUpdateForm> problemUpdateForm = Form.form(ProblemUpdateForm.class).bindFromRequest();
+
+        if (!problem.getSlug().equals(problemUpdateForm.get().slug) && problemService.problemExistsBySlug(problemUpdateForm.get().slug)) {
+            problemUpdateForm.reject("slug", Messages.get("error.problem.slugExists"));
+        }
+
         if (formHasErrors(problemUpdateForm)) {
             return showUpdateProblem(problemUpdateForm, problem);
         }
 
         ProblemUpdateForm problemUpdateData = problemUpdateForm.get();
-        problemService.updateProblem(problemId, problemUpdateData.name, problemUpdateData.additionalNote);
+        problemService.updateProblem(problemId, problemUpdateData.slug, problemUpdateData.additionalNote);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update problem " + problem.getSlug() + ".");
 
         return redirect(routes.ProblemController.viewProblem(problem.getId()));
     }
@@ -224,7 +233,7 @@ public final class ProblemController extends AbstractJudgelsController {
         LazyHtml content = new LazyHtml(updateProblemView.render(problemUpdateForm, problem));
         appendSubtabs(content, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
-        content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
+        content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getSlug(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)

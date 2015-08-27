@@ -52,9 +52,9 @@ public final class LessonControllerUtils {
 
     static void appendTitleLayout(LazyHtml content, LessonService lessonService, Lesson lesson) {
         if (isAllowedToUpdateLesson(lessonService, lesson)) {
-            content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getName(), new InternalLink(Messages.get("lesson.update"), routes.LessonController.updateLesson(lesson.getId())), c));
+            content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getSlug(), new InternalLink(Messages.get("lesson.update"), routes.LessonController.updateLesson(lesson.getId())), c));
         } else {
-            content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getName(), new InternalLink(Messages.get("lesson.view"), routes.LessonController.viewLesson(lesson.getId())), c));
+            content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getSlug(), new InternalLink(Messages.get("lesson.view"), routes.LessonController.viewLesson(lesson.getId())), c));
         }
     }
 
@@ -94,7 +94,7 @@ public final class LessonControllerUtils {
         ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
         internalLinks
                 .add(new InternalLink(Messages.get("lesson.lessons"), routes.LessonController.index()))
-                .add(new InternalLink(lesson.getName(), routes.LessonController.enterLesson(lesson.getId())));
+                .add(new InternalLink(lesson.getSlug(), routes.LessonController.enterLesson(lesson.getId())));
 
         return internalLinks;
     }

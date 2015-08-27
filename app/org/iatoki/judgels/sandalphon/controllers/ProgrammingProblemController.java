@@ -7,6 +7,8 @@ import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
+import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
@@ -70,12 +72,16 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
             return showCreateProgrammingProblem(programmingProblemCreateForm);
         }
 
+        String slug = ProblemControllerUtils.getJustCreatedProblemSlug();
+        String additionalNote = ProblemControllerUtils.getJustCreatedProblemAdditionalNote();
+        String languageCode = ProblemControllerUtils.getJustCreatedProblemInitLanguageCode();
+
         ProgrammingProblemCreateForm programmingProblemCreateData = programmingProblemCreateForm.get();
 
         Problem problem;
         try {
-            problem = problemService.createProblem(ProblemType.PROGRAMMING, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
-            problemService.updateStatement(null, problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), ProgrammingProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
+            problem = problemService.createProblem(ProblemType.PROGRAMMING, slug, additionalNote, languageCode);
+            problemService.updateStatement(null, problem.getId(), languageCode, new ProblemStatement(ProblemStatementUtils.getDefaultTitle(languageCode), ProgrammingProblemStatementUtils.getDefaultText(languageCode)));
             programmingProblemService.initProgrammingProblem(problem.getJid(), programmingProblemCreateData.gradingEngineName);
         } catch (IOException e) {
             programmingProblemCreateForm.reject("problem.programming.error.cantCreate");
@@ -87,7 +93,7 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
         ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
         ProblemControllerUtils.removeJustCreatedProblem();
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Create programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Create programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemController.enterProblem(problem.getId()));
     }
@@ -105,7 +111,7 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
     }
 
     private Result showCreateProgrammingProblem(Form<ProgrammingProblemCreateForm> programmingProblemCreateForm) {
-        LazyHtml content = new LazyHtml(createProgrammingProblemView.render(programmingProblemCreateForm, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
+        LazyHtml content = new LazyHtml(createProgrammingProblemView.render(programmingProblemCreateForm, ProblemControllerUtils.getJustCreatedProblemSlug(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
         content.appendLayout(c -> headingLayout.render(Messages.get("problem.programming.create"), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(

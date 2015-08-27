@@ -6,14 +6,14 @@
 @import org.iatoki.judgels.sandalphon.WorldLanguageRegistry
 @import org.iatoki.judgels.sandalphon.forms.ProgrammingProblemCreateForm
 
-@(programmingProblemCreateForm: Form[ProgrammingProblemCreateForm], problemName: String, problemAdditionalNote: String, initLanguageCode: String)
+@(programmingProblemCreateForm: Form[ProgrammingProblemCreateForm], problemSlug: String, problemAdditionalNote: String, initLanguageCode: String)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
 
 @b3.form(routes.ProgrammingProblemController.postCreateProgrammingProblem()) {
     @helper.CSRF.formField
 
-    @b3.static(Messages.get("problem.name")) { @problemName }
+    @b3.static(Messages.get("problem.slug")) { @problemSlug }
 
     @b3.static(Messages.get("problem.additionalNote")) { @Html(JudgelsPlayUtils.escapeHtmlString(problemAdditionalNote)) }
 

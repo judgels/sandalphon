@@ -6,7 +6,7 @@ import java.util.Map;
 
 public final class ProgrammingProblemStatementUtils {
 
-    private static final Map<String, String> DEFAULT_STATEMENTS = ImmutableMap.of(
+    private static final Map<String, String> DEFAULT_TEXTS = ImmutableMap.of(
             "id-ID",
                     "<h3>Deskripsi</h3>\n"
                     + "\n"
@@ -73,11 +73,11 @@ public final class ProgrammingProblemStatementUtils {
         // prevent instantiation
     }
 
-    public static String getDefaultStatement(String languageCode) {
-        if (DEFAULT_STATEMENTS.containsKey(languageCode)) {
-            return DEFAULT_STATEMENTS.get(languageCode);
+    public static String getDefaultText(String languageCode) {
+        if (DEFAULT_TEXTS.containsKey(languageCode)) {
+            return DEFAULT_TEXTS.get(languageCode);
         } else {
-            return DEFAULT_STATEMENTS.get("en-US");
+            return DEFAULT_TEXTS.get("en-US");
         }
     }
 }

@@ -99,7 +99,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
         Form<LessonPartnerUsernameForm> usernameForm = Form.form(LessonPartnerUsernameForm.class);
         Form<LessonPartnerUpsertForm> lessonForm = Form.form(LessonPartnerUpsertForm.class);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to add partner of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to add partner of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showAddPartner(usernameForm, lessonForm, lesson);
     }
@@ -163,7 +163,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
         lessonService.createLessonPartner(lesson.getId(), userJid, partnerConfig);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of lesson " + lesson.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of lesson " + lesson.getSlug() + ".");
 
         return redirect(routes.LessonPartnerController.viewPartners(lesson.getId()));
     }
@@ -194,7 +194,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
         Form<LessonPartnerUpsertForm> lessonForm = Form.form(LessonPartnerUpsertForm.class).fill(lessonData);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdatePartner(lessonForm, lesson, lessonPartner);
     }
@@ -232,7 +232,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
         lessonService.updateLessonPartner(partnerId, lessonConfig);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getSlug() + ".");
 
         return redirect(routes.LessonPartnerController.updatePartner(lesson.getId(), lessonPartner.getId()));
     }

@@ -6,17 +6,17 @@ public final class Problem {
 
     private final long id;
     private final String jid;
-    private final String name;
+    private final String slug;
     private final String authorJid;
     private final String additionalNote;
     private final Date lastUpdateTime;
 
     private final ProblemType type;
 
-    public Problem(long id, String jid, String name, String authorJid, String additionalNote, Date lastUpdateTime, ProblemType type) {
+    public Problem(long id, String jid, String slug, String authorJid, String additionalNote, Date lastUpdateTime, ProblemType type) {
         this.id = id;
         this.jid = jid;
-        this.name = name;
+        this.slug = slug;
         this.authorJid = authorJid;
         this.additionalNote = additionalNote;
         this.lastUpdateTime = lastUpdateTime;
@@ -31,8 +31,8 @@ public final class Problem {
         return jid;
     }
 
-    public String getName() {
-        return name;
+    public String getSlug() {
+        return slug;
     }
 
     public String getAuthorJid() {

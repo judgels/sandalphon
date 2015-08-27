@@ -1,6 +1,5 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
-import com.google.common.collect.ImmutableMap;
 import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
@@ -8,6 +7,8 @@ import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
+import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.LessonStatementUtils;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
@@ -66,14 +67,14 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        String statement;
+        ProblemStatement statement;
         try {
             statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), LessonControllerUtils.getCurrentStatementLanguage());
         } catch (IOException e) {
-            statement = LessonStatementUtils.getDefaultStatement(LessonControllerUtils.getCurrentStatementLanguage());
+            statement = new ProblemStatement(ProblemStatementUtils.getDefaultTitle(LessonControllerUtils.getCurrentStatementLanguage()), LessonStatementUtils.getDefaultText(LessonControllerUtils.getCurrentStatementLanguage()));
         }
 
-        LazyHtml content = new LazyHtml(lessonStatementView.render(lesson.getName(), statement));
+        LazyHtml content = new LazyHtml(lessonStatementView.render(statement));
 
         Set<String> allowedLanguages;
         try {
@@ -92,7 +93,7 @@ public class LessonStatementController extends AbstractJudgelsController {
         LessonStatementControllerUtils.appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.statement.view"), routes.LessonStatementController.viewStatement(lessonId)));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Statement");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View statement of programming lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View statement of programming lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -129,15 +130,18 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        String statement;
+        ProblemStatement statement;
         try {
-            statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), LessonControllerUtils.getCurrentStatementLanguage());
+            statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        Form<UpdateStatementForm> updateStatementForm = Form.form(UpdateStatementForm.class);
-        updateStatementForm = updateStatementForm.bind(ImmutableMap.of("statement", statement));
+        UpdateStatementForm updateStatementData = new UpdateStatementForm();
+        updateStatementData.title = statement.getTitle();
+        updateStatementData.text = statement.getText();
+
+        Form<UpdateStatementForm> updateStatementForm = Form.form(UpdateStatementForm.class).fill(updateStatementData);
 
         Set<String> allowedLanguages;
         try {
@@ -146,7 +150,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update statement of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update statement of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateStatement(updateStatementForm, lesson, allowedLanguages);
     }
@@ -178,7 +182,8 @@ public class LessonStatementController extends AbstractJudgelsController {
         lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
 
         try {
-            lessonService.updateStatement(IdentityUtils.getUserJid(), lessonId, LessonControllerUtils.getCurrentStatementLanguage(), updateStatementForm.get().statement);
+            UpdateStatementForm updateStatementData = updateStatementForm.get();
+            lessonService.updateStatement(IdentityUtils.getUserJid(), lessonId, LessonControllerUtils.getCurrentStatementLanguage(), new ProblemStatement(updateStatementData.title, updateStatementData.text));
         } catch (IOException e) {
             try {
                 updateStatementForm.reject("lesson.statement.error.cantUpload");
@@ -189,7 +194,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             }
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update statement of lesson " + lesson.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update statement of lesson " + lesson.getSlug() + ".");
 
         return redirect(routes.LessonStatementController.updateStatement(lesson.getId()));
     }
@@ -203,7 +208,7 @@ public class LessonStatementController extends AbstractJudgelsController {
         boolean isAllowedToUploadMediaFiles = LessonControllerUtils.isAllowedToUploadStatementResources(lessonService, lesson);
         List<FileInfo> mediaFiles = lessonService.getStatementMediaFiles(IdentityUtils.getUserJid(), lesson.getJid());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List statement media files of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List statement media files of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showListStatementMediaFiles(uploadFileForm, lesson, mediaFiles, isAllowedToUploadMediaFiles);
     }
@@ -236,7 +241,7 @@ public class LessonStatementController extends AbstractJudgelsController {
                 return showListStatementMediaFiles(form, lesson, mediaFiles, isAllowedToUploadMediaFiles);
             }
 
-            SandalphonControllerUtils.getInstance().addActivityLog("Upload statement media file of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+            SandalphonControllerUtils.getInstance().addActivityLog("Upload statement media file of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.LessonStatementController.listStatementMediaFiles(lesson.getId()));
         }
@@ -257,7 +262,7 @@ public class LessonStatementController extends AbstractJudgelsController {
                 return showListStatementMediaFiles(form, lesson, mediaFiles, isAllowedToUploadMediaFiles);
             }
 
-            SandalphonControllerUtils.getInstance().addActivityLog("Upload statement zipped media files of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+            SandalphonControllerUtils.getInstance().addActivityLog("Upload statement zipped media files of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.LessonStatementController.listStatementMediaFiles(lesson.getId()));
         }
@@ -270,7 +275,7 @@ public class LessonStatementController extends AbstractJudgelsController {
         Lesson lesson = lessonService.findLessonById(id);
         String mediaURL = lessonService.getStatementMediaFileURL(IdentityUtils.getUserJid(), lesson.getJid(), filename);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Download media file " + filename + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Download media file " + filename + " of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         try {
             new URL(mediaURL);
@@ -307,7 +312,7 @@ public class LessonStatementController extends AbstractJudgelsController {
         LessonStatementControllerUtils.appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.statement.language.list"), routes.LessonStatementController.listStatementLanguages(lesson.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Statement Languages");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List statement languages of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List statement languages of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -336,7 +341,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             throw new IllegalStateException(e);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add statement language " + languageCode + " of lesson " + lesson.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add statement language " + languageCode + " of lesson " + lesson.getSlug() + ".");
 
         return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }
@@ -362,7 +367,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             throw new IllegalStateException("Statement language probably hasn't been added.", e);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Enable statement language " + languageCode + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Enable statement language " + languageCode + " of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }
@@ -392,7 +397,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             throw new IllegalStateException("Statement language probably hasn't been added.", e);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Disable statement language " + languageCode + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Disable statement language " + languageCode + " of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }
@@ -418,7 +423,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             throw new IllegalStateException("Statement language probably hasn't been added.", e);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Make statement language " + languageCode + " default of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Make statement language " + languageCode + " default of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }

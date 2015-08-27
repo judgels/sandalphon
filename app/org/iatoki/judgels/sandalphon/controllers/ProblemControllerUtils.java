@@ -43,9 +43,9 @@ public final class ProblemControllerUtils {
 
     static void appendTitleLayout(LazyHtml content, ProblemService problemService, Problem problem) {
         if (isAllowedToUpdateProblem(problemService, problem)) {
-            content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.update"), routes.ProblemController.updateProblem(problem.getId())), c));
+            content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getSlug(), new InternalLink(Messages.get("problem.update"), routes.ProblemController.updateProblem(problem.getId())), c));
         } else {
-            content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.view"), routes.ProblemController.viewProblem(problem.getId())), c));
+            content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getSlug(), new InternalLink(Messages.get("problem.view"), routes.ProblemController.viewProblem(problem.getId())), c));
         }
     }
 
@@ -81,20 +81,20 @@ public final class ProblemControllerUtils {
         return Controller.session("currentStatementLanguage");
     }
 
-    static void setJustCreatedProblem(String name, String additionalNote, String initLanguageCode) {
-        Controller.session("problemName", name);
+    static void setJustCreatedProblem(String slug, String additionalNote, String initLanguageCode) {
+        Controller.session("problemSlug", slug);
         Controller.session("problemAdditionalNote", additionalNote);
         Controller.session("initLanguageCode", initLanguageCode);
     }
 
     static void removeJustCreatedProblem() {
-        Controller.session().remove("problemName");
+        Controller.session().remove("problemSlug");
         Controller.session().remove("problemAdditionalNote");
         Controller.session().remove("initLanguageCode");
     }
 
-    static String getJustCreatedProblemName() {
-        return Controller.session("problemName");
+    static String getJustCreatedProblemSlug() {
+        return Controller.session("problemSlug");
     }
 
     static String getJustCreatedProblemAdditionalNote() {
@@ -106,7 +106,7 @@ public final class ProblemControllerUtils {
     }
 
     static boolean wasProblemJustCreated() {
-        return getJustCreatedProblemName() != null
+        return getJustCreatedProblemSlug() != null
                 && getJustCreatedProblemAdditionalNote() != null
                 && getJustCreatedProblemInitLanguageCode() != null;
     }
@@ -115,7 +115,7 @@ public final class ProblemControllerUtils {
         ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
         internalLinks
                 .add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()))
-                .add(new InternalLink(problem.getName(), routes.ProblemController.enterProblem(problem.getId())));
+                .add(new InternalLink(problem.getSlug(), routes.ProblemController.enterProblem(problem.getId())));
 
         return internalLinks;
     }

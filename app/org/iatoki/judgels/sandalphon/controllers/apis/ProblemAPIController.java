@@ -11,6 +11,7 @@ import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
+import org.iatoki.judgels.sandalphon.ResourceDisplayName;
 import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.Client;
@@ -19,6 +20,7 @@ import org.iatoki.judgels.sandalphon.LanguageRestriction;
 import org.iatoki.judgels.sandalphon.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
@@ -139,29 +141,41 @@ public final class ProblemAPIController extends AbstractJudgelsAPIController {
     public Result verifyProblem() {
         UsernamePasswordCredentials credentials = JudgelsPlayUtils.parseBasicAuthFromRequest(request());
 
-        if (credentials != null) {
-            String clientJid = credentials.getUserName();
-            String clientSecret = credentials.getPassword();
-            if (clientService.clientExistsByJid(clientJid)) {
-                Client client = clientService.findClientByJid(clientJid);
-                if (client.getSecret().equals(clientSecret)) {
-                    DynamicForm form = DynamicForm.form().bindFromRequest();
-
-                    String problemJid = form.get("problemJid");
-                    if (problemService.problemExistsByJid(problemJid)) {
-                        return ok(problemService.findProblemByJid(problemJid).getName());
-                    } else {
-                        return notFound();
-                    }
-                } else {
-                    return forbidden();
-                }
-            } else {
-                return notFound();
-            }
-        } else {
+        if (credentials == null) {
             response().setHeader("WWW-Authenticate", "Basic realm=\"" + request().host() + "\"");
             return unauthorized();
+        }
+
+        String clientJid = credentials.getUserName();
+        String clientSecret = credentials.getPassword();
+
+        if (!clientService.clientExistsByJid(clientJid)) {
+            return notFound();
+        }
+
+        Client client = clientService.findClientByJid(clientJid);
+        if (!client.getSecret().equals(clientSecret)) {
+            return forbidden();
+        }
+
+        DynamicForm form = DynamicForm.form().bindFromRequest();
+
+        String problemJid = form.get("problemJid");
+        if (!problemService.problemExistsByJid(problemJid)) {
+            return notFound();
+        }
+
+        try {
+            Problem problem = problemService.findProblemByJid(problemJid);
+
+            ResourceDisplayName displayName = new ResourceDisplayName();
+            displayName.defaultLanguage = problemService.getDefaultLanguage(null, problemJid);
+            displayName.titlesByLanguage = problemService.getTitlesByLanguage(null, problemJid);
+            displayName.slug = problem.getSlug();
+
+            return ok(new Gson().toJson(displayName));
+        } catch (IOException e) {
+            return internalServerError();
         }
     }
 
@@ -200,7 +214,7 @@ public final class ProblemAPIController extends AbstractJudgelsAPIController {
                 lang = problemService.getDefaultLanguage(null, problemJid);
             }
 
-            String statement = problemService.getStatement(null, problemJid, lang);
+            ProblemStatement statement = problemService.getStatement(null, problemJid, lang);
 
             Set<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toSet());
 
@@ -217,7 +231,7 @@ public final class ProblemAPIController extends AbstractJudgelsAPIController {
         }
     }
 
-    private Result processProgrammingProblem(Problem problem, String statement, Set<String> allowedStatementLanguages, String lang, String postSubmitUri, String switchLanguageUri, LanguageRestriction languageRestriction, String reasonNotAllowedToSubmit) {
+    private Result processProgrammingProblem(Problem problem, ProblemStatement statement, Set<String> allowedStatementLanguages, String lang, String postSubmitUri, String switchLanguageUri, LanguageRestriction languageRestriction, String reasonNotAllowedToSubmit) {
         if (languageRestriction == null) {
             return badRequest();
         }
@@ -243,14 +257,14 @@ public final class ProblemAPIController extends AbstractJudgelsAPIController {
             config = GradingEngineRegistry.getInstance().getEngine(engine).createDefaultGradingConfig();
         }
 
-        Html html = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).renderViewStatement(postSubmitUri, problem.getName(), statement, config, engine, allowedGradingLanguageNames, reasonNotAllowedToSubmit);
+        Html html = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).renderViewStatement(postSubmitUri, statement, config, engine, allowedGradingLanguageNames, reasonNotAllowedToSubmit);
         if (switchLanguageUri != null) {
             html = statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, lang, html);
         }
         return ok(html);
     }
 
-    private Result processBundleProblem(Problem problem, String statement, Set<String> allowedStatementLanguages, String lang, String postSubmitUri, String switchLanguageUri, String reasonNotAllowedToSubmit) throws IOException {
+    private Result processBundleProblem(Problem problem, ProblemStatement statement, Set<String> allowedStatementLanguages, String lang, String postSubmitUri, String switchLanguageUri, String reasonNotAllowedToSubmit) throws IOException {
         List<BundleItem> bundleItemList = bundleItemService.getBundleItemsInProblemWithClone(problem.getJid(), IdentityUtils.getUserJid());
         ImmutableList.Builder<Html> htmlBuilder = ImmutableList.builder();
         for (BundleItem bundleItem : bundleItemList) {
@@ -260,7 +274,7 @@ public final class ProblemAPIController extends AbstractJudgelsAPIController {
 
         String language = lang;
 
-        Html html = bundleStatementView.render(postSubmitUri, problem.getName(), statement, htmlBuilder.build(), reasonNotAllowedToSubmit);
+        Html html = bundleStatementView.render(postSubmitUri, statement, htmlBuilder.build(), reasonNotAllowedToSubmit);
         LazyHtml content = new LazyHtml(html);
         if (switchLanguageUri != null) {
             content.appendLayout(c -> statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, language, c));

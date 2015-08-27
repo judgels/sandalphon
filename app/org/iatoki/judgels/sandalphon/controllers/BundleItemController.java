@@ -353,7 +353,7 @@ public final class BundleItemController extends AbstractJudgelsController {
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Items");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List items of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List items of programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -370,7 +370,7 @@ public final class BundleItemController extends AbstractJudgelsController {
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Items - Create");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to create bundle item on " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to create bundle item on " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -388,7 +388,7 @@ public final class BundleItemController extends AbstractJudgelsController {
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Item - Update");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update bundle item on " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update bundle item on " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }

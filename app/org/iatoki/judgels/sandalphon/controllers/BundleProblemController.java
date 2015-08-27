@@ -3,6 +3,8 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
+import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
@@ -39,10 +41,14 @@ public final class BundleProblemController extends AbstractJudgelsController {
             return badRequest();
         }
 
+        String slug = ProblemControllerUtils.getJustCreatedProblemSlug();
+        String additionalNote = ProblemControllerUtils.getJustCreatedProblemAdditionalNote();
+        String languageCode = ProblemControllerUtils.getJustCreatedProblemInitLanguageCode();
+
         Problem problem;
         try {
-            problem = problemService.createProblem(ProblemType.BUNDLE, ProblemControllerUtils.getJustCreatedProblemName(), ProblemControllerUtils.getJustCreatedProblemAdditionalNote(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
-            problemService.updateStatement(null, problem.getId(), ProblemControllerUtils.getJustCreatedProblemInitLanguageCode(), BundleProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode()));
+            problem = problemService.createProblem(ProblemType.BUNDLE, slug, additionalNote, languageCode);
+            problemService.updateStatement(null, problem.getId(), languageCode, new ProblemStatement(ProblemStatementUtils.getDefaultTitle(languageCode), BundleProblemStatementUtils.getDefaultStatement(languageCode)));
             bundleProblemService.initBundleProblem(problem.getJid());
         } catch (IOException e) {
             e.printStackTrace();

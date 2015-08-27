@@ -7,14 +7,19 @@
 
 @*<script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/ckeditor.js")"></script>*@
 
-<small>
-To insert image, add the image as a media file and then insert it as "render/&lt;imageFilename&gt;".
-</small>
 @b3.form(routes.LessonStatementController.postUpdateStatement(lessonId)) {
     @helper.CSRF.formField
 
+    @b3.text(updateStatementForm("title"), '_label -> Messages.get("lesson.title"))
+
+    <label class="control-label">Text</label>
+    <div></div>
+    <small>
+        To insert image, add the image as a media file and then insert it as "render/&lt;imageFilename&gt;".
+    </small>
+
     <div class="form-group">
-        <textarea class="ckeditor form-control" name="statement">@updateStatementForm("statement").value</textarea>
+        <textarea class="ckeditor form-control" name="text">@updateStatementForm("text").value</textarea>
     </div>
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }

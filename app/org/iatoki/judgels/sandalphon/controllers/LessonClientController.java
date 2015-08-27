@@ -55,7 +55,7 @@ public final class LessonClientController extends AbstractJudgelsController {
         List<ClientLesson> clientLessons = clientService.getClientLessonsByLessonJid(lesson.getJid());
         List<Client> clients = clientService.getClients();
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update client on lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update client on lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
     }
@@ -86,7 +86,7 @@ public final class LessonClientController extends AbstractJudgelsController {
 
         clientService.createClientLesson(lesson.getJid(), clientLessonUpsertData.clientJid);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientLessonUpsertData.clientJid + " to lesson " + lesson.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientLessonUpsertData.clientJid + " to lesson " + lesson.getSlug() + ".");
 
         return redirect(routes.LessonClientController.updateClientLessons(lesson.getId()));
     }
@@ -107,7 +107,7 @@ public final class LessonClientController extends AbstractJudgelsController {
         appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.client.client"), routes.LessonClientController.viewClientLesson(lessonId, clientLessonId)));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Statement");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View client " + clientLesson.getClientName() + " to lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View client " + clientLesson.getClientName() + " to lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }

@@ -19,7 +19,7 @@
 @tableView() {
     @tableHeadersView(pageOfLessons.getPageIndex, orderBy, orderDir, filterString, routes.LessonController.listLessons)(
         "id" -> Messages.get("commons.id"),
-        "name" -> Messages.get("problem.name"),
+        "slug" -> Messages.get("lesson.slug"),
         "userCreate" -> Messages.get("problem.author"),
         "timeUpdate" -> Messages.get("problem.lastUpdateTime")
     )
@@ -28,7 +28,7 @@
         @for(lesson <- pageOfLessons.getData) {
             <tr>
                 <td>@lesson.getId</td>
-                <td>@lesson.getName</td>
+                <td>@lesson.getSlug</td>
                 <td>@JudgelsPlayUtils.getOnlyUsername(displayNamesMap.get(lesson.getAuthorJid))</td>
                 <td><time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(lesson.getLastUpdateTime.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(lesson.getLastUpdateTime.getTime)</time></td>
                 <td class="text-center">

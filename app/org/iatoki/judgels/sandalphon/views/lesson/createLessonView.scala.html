@@ -11,7 +11,7 @@
 @b3.form(routes.LessonController.postCreateLesson()) {
     @helper.CSRF.formField
 
-    @b3.text(lessonCreateForm("name"), '_label -> Messages.get("lesson.name"))
+    @b3.text(lessonCreateForm("slug"), '_label -> Messages.get("lesson.slug"))
     @b3.textarea(lessonCreateForm("additionalNote"), '_label -> Messages.get("lesson.additionalNote"))
 
 

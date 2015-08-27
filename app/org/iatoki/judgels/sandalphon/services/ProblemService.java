@@ -9,6 +9,7 @@ import org.iatoki.judgels.sandalphon.ProblemPartner;
 import org.iatoki.judgels.sandalphon.ProblemPartnerChildConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerNotFoundException;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 
@@ -19,9 +20,11 @@ import java.util.Map;
 
 public interface ProblemService {
 
-    Problem createProblem(ProblemType type, String name, String additionalNote, String initialLanguageCode) throws IOException;
+    Problem createProblem(ProblemType type, String slug, String additionalNote, String initialLanguageCode) throws IOException;
 
     boolean problemExistsByJid(String problemJid);
+
+    boolean problemExistsBySlug(String slug);
 
     Problem findProblemById(long problemId) throws ProblemNotFoundException;
 
@@ -39,7 +42,7 @@ public interface ProblemService {
 
     ProblemPartner findProblemPartnerByProblemJidAndPartnerJid(String problemJid, String partnerJid);
 
-    void updateProblem(long problemId, String name, String additionalNote);
+    void updateProblem(long problemId, String slug, String additionalNote);
 
     Page<Problem> getPageOfProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin);
 
@@ -55,9 +58,11 @@ public interface ProblemService {
 
     String getDefaultLanguage(String userJid, String problemJid) throws IOException;
 
-    String getStatement(String userJid, String problemJid, String languageCode) throws IOException;
+    ProblemStatement getStatement(String userJid, String problemJid, String languageCode) throws IOException;
 
-    void updateStatement(String userJid, long problemId, String languageCode, String statement) throws IOException;
+    Map<String, String> getTitlesByLanguage(String userJid, String problemJid) throws IOException;
+
+    void updateStatement(String userJid, long problemId, String languageCode, ProblemStatement statement) throws IOException;
 
     void uploadStatementMediaFile(String userJid, long problemId, File mediaFile, String filename) throws IOException;
 
@@ -75,7 +80,7 @@ public interface ProblemService {
 
     void createUserCloneIfNotExists(String userJid, String problemJid);
 
-    boolean commitThenMergeUserClone(String userJid, String problemJid, String title, String description);
+    boolean commitThenMergeUserClone(String userJid, String problemJid, String title, String text);
 
     boolean updateUserClone(String userJid, String problemJid);
 

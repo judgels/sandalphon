@@ -2,5 +2,6 @@ package org.iatoki.judgels.sandalphon.forms;
 
 public final class UpdateStatementForm {
 
-    public String statement;
+    public String title;
+    public String text;
 }

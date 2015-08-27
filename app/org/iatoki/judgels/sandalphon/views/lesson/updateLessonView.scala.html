@@ -14,7 +14,7 @@
 
     @helper.CSRF.formField
 
-    @b3.text(lessonUpdateForm("name"), '_label -> Messages.get("lesson.name"))
+    @b3.text(lessonUpdateForm("slug"), '_label -> Messages.get("lesson.slug"))
 
     @b3.textarea(lessonUpdateForm("additionalNote"), '_label -> Messages.get("lesson.additionalNote"))
 

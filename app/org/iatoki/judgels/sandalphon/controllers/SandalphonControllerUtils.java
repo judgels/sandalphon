@@ -89,14 +89,14 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
 
     public static synchronized void buildInstance(Jophiel jophiel) {
         if (INSTANCE != null) {
-            throw new UnsupportedOperationException("ControllerUtils instance has already been built");
+            throw new UnsupportedOperationException("SandalphonControllerUtils instance has already been built");
         }
         INSTANCE = new SandalphonControllerUtils(jophiel);
     }
 
     static SandalphonControllerUtils getInstance() {
         if (INSTANCE == null) {
-            throw new UnsupportedOperationException("ControllerUtils instance has not been built");
+            throw new UnsupportedOperationException("SandalphonControllerUtils instance has not been built");
         }
         return INSTANCE;
     }

@@ -63,7 +63,7 @@ public final class LessonVersionController extends AbstractJudgelsController {
         appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.version.history"), routes.LessonVersionController.listVersionHistory(lesson.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Versions - History");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List version history of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List version history of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -79,7 +79,7 @@ public final class LessonVersionController extends AbstractJudgelsController {
 
         lessonService.restore(lesson.getJid(), hash);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.LessonVersionController.listVersionHistory(lesson.getId()));
     }
@@ -97,7 +97,7 @@ public final class LessonVersionController extends AbstractJudgelsController {
 
         Form<VersionCommitForm> versionCommitForm = Form.form(VersionCommitForm.class);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View version changes of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showViewVersionLocalChanges(versionCommitForm, lesson, isClean);
     }
@@ -133,7 +133,7 @@ public final class LessonVersionController extends AbstractJudgelsController {
             }
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Commit version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Commit version changes of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
     }
@@ -152,7 +152,7 @@ public final class LessonVersionController extends AbstractJudgelsController {
             flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update version changes of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
     }
@@ -167,7 +167,7 @@ public final class LessonVersionController extends AbstractJudgelsController {
 
         try {
             lessonService.discardUserClone(IdentityUtils.getUserJid(), lesson.getJid());
-            SandalphonControllerUtils.getInstance().addActivityLog("Discard version changes of lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+            SandalphonControllerUtils.getInstance().addActivityLog("Discard version changes of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.LessonVersionController.viewVersionLocalChanges(lesson.getId()));
         } catch (IOException e) {

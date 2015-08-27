@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @JidPrefix("LESS")
 public final class LessonModel extends AbstractJudgelsModel {
 
-    public String name;
+    public String slug;
 
     @Column(columnDefinition = "TEXT")
     public String additionalNote;

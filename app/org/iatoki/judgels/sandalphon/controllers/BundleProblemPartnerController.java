@@ -68,7 +68,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
         Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class);
         Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showAddPartner(usernameForm, problemForm, bundleForm, problem);
     }
@@ -136,7 +136,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
         problemService.createProblemPartner(problem.getId(), userJid, problemConfig, bundleConfig);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getSlug() + ".");
 
         return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
     }
@@ -174,7 +174,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
         Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class).fill(bundleData);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdatePartner(problemForm, bundleForm, problem, problemPartner);
     }
@@ -217,7 +217,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
         problemService.updateProblemPartner(partnerId, problemConfig, bundleConfig);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getSlug() + ".");
 
         return redirect(routes.ProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId()));
     }

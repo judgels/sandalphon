@@ -8,4 +8,6 @@ import java.util.List;
 public interface ProblemDao extends JudgelsDao<ProblemModel> {
 
     List<String> getJidsByAuthorJid(String authorJid);
+
+    boolean existsBySlug(String slug);
 }

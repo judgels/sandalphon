@@ -12,6 +12,7 @@ import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientLesson;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.LessonService;
@@ -138,7 +139,7 @@ public final class LessonAPIController extends AbstractJudgelsAPIController {
             return notFound();
         }
 
-        return ok(lessonService.findLessonByJid(lessonJid).getName());
+        return ok(lessonService.findLessonByJid(lessonJid).getSlug());
     }
 
     @Transactional(readOnly = true)
@@ -177,11 +178,11 @@ public final class LessonAPIController extends AbstractJudgelsAPIController {
             }
 
             String language = lang;
-            String statement = lessonService.getStatement(null, lessonJid, lang);
+            ProblemStatement statement = lessonService.getStatement(null, lessonJid, lang);
 
             Set<String> allowedStatementLanguages = availableStatementLanguages.entrySet().stream().filter(e -> e.getValue() == StatementLanguageStatus.ENABLED).map(e -> e.getKey()).collect(Collectors.toSet());
 
-            Html html = lessonStatementView.render(lesson.getName(), statement);
+            Html html = lessonStatementView.render(statement);
             content = new LazyHtml(html);
             if (switchLanguageUri != null) {
                 content.appendLayout(c -> statementLanguageSelectionLayout.render(switchLanguageUri, allowedStatementLanguages, language, c));

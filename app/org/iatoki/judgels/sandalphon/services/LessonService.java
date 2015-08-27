@@ -8,6 +8,7 @@ import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 
 import java.io.File;
@@ -17,9 +18,11 @@ import java.util.Map;
 
 public interface LessonService {
 
-    Lesson createLesson(String name, String additionalNote, String initialLanguageCode) throws IOException;
+    Lesson createLesson(String slug, String additionalNote, String initialLanguageCode) throws IOException;
 
     boolean lessonExistsByJid(String lessonJid);
+
+    boolean lessonExistsBySlug(String slug);
 
     Lesson findLessonById(long lessonId) throws LessonNotFoundException;
 
@@ -37,7 +40,7 @@ public interface LessonService {
 
     LessonPartner findLessonPartnerByLessonJidAndPartnerJid(String lessonJid, String partnerJid);
 
-    void updateLesson(long lessonId, String name, String additionalNote);
+    void updateLesson(long lessonId, String slug, String additionalNote);
 
     Page<Lesson> getPageOfLessons(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin);
 
@@ -53,9 +56,9 @@ public interface LessonService {
 
     String getDefaultLanguage(String userJid, String lessonJid) throws IOException;
 
-    String getStatement(String userJid, String lessonJid, String languageCode) throws IOException;
+    ProblemStatement getStatement(String userJid, String lessonJid, String languageCode) throws IOException;
 
-    void updateStatement(String userJid, long lessonId, String languageCode, String statement) throws IOException;
+    void updateStatement(String userJid, long lessonId, String languageCode, ProblemStatement statement) throws IOException;
 
     void uploadStatementMediaFile(String userJid, long lessonId, File mediaFile, String filename) throws IOException;
 

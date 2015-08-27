@@ -12,7 +12,7 @@
     @helper.CSRF.formField
 
     @b3.select(problemCreateForm("type"), ProblemType.values.map(e => (e.name() -> e.name())).toSeq, '_label -> Messages.get("problem.type"), 'class -> "form-control selectpicker")
-    @b3.text(problemCreateForm("name"), '_label -> Messages.get("problem.name"))
+    @b3.text(problemCreateForm("slug"), '_label -> Messages.get("problem.slug"))
     @b3.textarea(problemCreateForm("additionalNote"), '_label -> Messages.get("problem.additionalNote"))
 
 

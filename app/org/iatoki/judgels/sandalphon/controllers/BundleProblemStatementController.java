@@ -8,6 +8,8 @@ import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.BundleItem;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
+import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemAdapters;
 import org.iatoki.judgels.sandalphon.adapters.impls.BundleProblemStatementUtils;
@@ -57,11 +59,11 @@ public final class BundleProblemStatementController extends AbstractJudgelsContr
             return notFound();
         }
 
-        String statement;
+        ProblemStatement statement;
         try {
             statement = problemService.getStatement(IdentityUtils.getUserJid(), problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
         } catch (IOException e) {
-            statement = BundleProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getCurrentStatementLanguage());
+            statement = new ProblemStatement(ProblemStatementUtils.getDefaultTitle(ProblemControllerUtils.getCurrentStatementLanguage()), BundleProblemStatementUtils.getDefaultStatement(ProblemControllerUtils.getCurrentStatementLanguage()));
         }
 
         boolean isAllowedToSubmitByPartner = ProgrammingProblemControllerUtils.isAllowedToSubmit(problemService, problem);
@@ -99,7 +101,7 @@ public final class BundleProblemStatementController extends AbstractJudgelsContr
             }
         }
 
-        LazyHtml content = new LazyHtml(bundleStatementView.render(routes.BundleProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), problem.getName(), statement, htmlBuilder.build(), reasonNotAllowedToSubmit));
+        LazyHtml content = new LazyHtml(bundleStatementView.render(routes.BundleProblemSubmissionController.postSubmit(problemId).absoluteURL(request(), request().secure()), statement, htmlBuilder.build(), reasonNotAllowedToSubmit));
 
         Set<String> allowedLanguages;
         try {
@@ -118,7 +120,7 @@ public final class BundleProblemStatementController extends AbstractJudgelsContr
         ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.view"), routes.ProblemStatementController.viewStatement(problemId)));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View statement of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View statement of programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }

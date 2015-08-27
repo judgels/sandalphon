@@ -2,7 +2,9 @@ problem.problems=Problems
 problem.list=Problems
 
 problem.type=Type
-problem.name=Name
+problem.slug=Slug
+problem.title=Title
+problem.text=Text
 problem.additionalNote=Additional Note
 problem.author=Author
 problem.lastUpdateTime=Last Update Time
@@ -141,6 +143,8 @@ problem.bundle.submission.score=Score
 problem.bundle.partner.isAllowedToSubmit=Allowed to submit?
 problem.bundle.partner.isAllowedToManageItems=Allowed to manage bundle items?
 
+error.problem.slugExists=Slug already exists
+
 error.problem.bundle.item.undefined=Item undefined.
 error.problem.bundle.item.duplicateMeta=Duplicate meta on item.
 error.problem.bundle.item.multipleChoice.duplicateAlias=Duplicate choice aliases.
@@ -199,7 +203,9 @@ lesson.lessons=Lessons
 lesson.list=Lessons
 
 lesson.type=Type
-lesson.name=Name
+lesson.slug=Slug
+lesson.title=Title
+lesson.text=Text
 lesson.additionalNote=Additional Note
 lesson.author=Author
 lesson.lastUpdateTime=Last Update Time
@@ -224,6 +230,8 @@ lesson.statement.language.available=Available Languages
 lesson.statement.language.language=Language
 lesson.statement.language.status=Status
 lesson.statement.language.initial=Initial Language
+
+error.lesson.slugExists=Slug already exists
 
 lesson.statement.error.cantUpload=Statement can't be uploaded into system
 lesson.statement.error.cantUploadMedia=Statement media can't be uploaded into system

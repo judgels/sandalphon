@@ -16,6 +16,7 @@ import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
+import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.config.LessonFileSystemProvider;
 import org.iatoki.judgels.sandalphon.config.LessonGitProvider;
@@ -55,9 +56,9 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public Lesson createLesson(String name, String additionalNote, String initialLanguageCode) throws IOException {
+    public Lesson createLesson(String slug, String additionalNote, String initialLanguageCode) throws IOException {
         LessonModel lessonModel = new LessonModel();
-        lessonModel.name = name;
+        lessonModel.slug = slug;
         lessonModel.additionalNote = additionalNote;
 
         lessonDao.persist(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
@@ -71,6 +72,11 @@ public final class LessonServiceImpl implements LessonService {
     @Override
     public boolean lessonExistsByJid(String lessonJid) {
         return lessonDao.existsByJid(lessonJid);
+    }
+
+    @Override
+    public boolean lessonExistsBySlug(String slug) {
+        return lessonDao.existsBySlug(slug);
     }
 
     @Override
@@ -142,9 +148,9 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public void updateLesson(long lessonId, String name, String additionalNote) {
+    public void updateLesson(long lessonId, String slug, String additionalNote) {
         LessonModel lessonModel = lessonDao.findById(lessonId);
-        lessonModel.name = name;
+        lessonModel.slug = slug;
         lessonModel.additionalNote = additionalNote;
 
         lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
@@ -190,8 +196,9 @@ public final class LessonServiceImpl implements LessonService {
 
         availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
 
-        String defaultLanguageStatement = lessonFileSystemProvider.readFromFile(getStatementFilePath(userJid, lessonJid, getDefaultLanguage(userJid, lessonJid)));
-        lessonFileSystemProvider.writeToFile(getStatementFilePath(userJid, lessonJid, languageCode), defaultLanguageStatement);
+        ProblemStatement defaultLanguageStatement = getStatement(userJid, lessonJid, getDefaultLanguage(userJid, lessonJid));
+        lessonFileSystemProvider.writeToFile(getStatementTitleFilePath(userJid, lessonJid, languageCode), defaultLanguageStatement.getTitle());
+        lessonFileSystemProvider.writeToFile(getStatementTextFilePath(userJid, lessonJid, languageCode), defaultLanguageStatement.getText());
         lessonFileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid), new Gson().toJson(availableLanguages));
     }
 
@@ -226,14 +233,18 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public String getStatement(String userJid, String lessonJid, String languageCode) throws IOException {
-        return lessonFileSystemProvider.readFromFile(getStatementFilePath(userJid, lessonJid, languageCode));
+    public ProblemStatement getStatement(String userJid, String lessonJid, String languageCode) throws IOException {
+        String title = lessonFileSystemProvider.readFromFile(getStatementTitleFilePath(userJid, lessonJid, languageCode));
+        String text = lessonFileSystemProvider.readFromFile(getStatementTextFilePath(userJid, lessonJid, languageCode));
+
+        return new ProblemStatement(title, text);
     }
 
     @Override
-    public void updateStatement(String userJid, long lessonId, String languageCode, String statement) throws IOException {
+    public void updateStatement(String userJid, long lessonId, String languageCode, ProblemStatement statement) throws IOException {
         LessonModel lessonModel = lessonDao.findById(lessonId);
-        lessonFileSystemProvider.writeToFile(getStatementFilePath(userJid, lessonModel.jid, languageCode), statement);
+        lessonFileSystemProvider.writeToFile(getStatementTitleFilePath(userJid, lessonModel.jid, languageCode), statement.getTitle());
+        lessonFileSystemProvider.writeToFile(getStatementTextFilePath(userJid, lessonModel.jid, languageCode), statement.getText());
 
         lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
@@ -362,18 +373,22 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     private Lesson createLessonFromModel(LessonModel lessonModel) {
-        return new Lesson(lessonModel.id, lessonModel.jid, lessonModel.name, lessonModel.userCreate, lessonModel.additionalNote, new Date(lessonModel.timeUpdate));
+        return new Lesson(lessonModel.id, lessonModel.jid, lessonModel.slug, lessonModel.userCreate, lessonModel.additionalNote, new Date(lessonModel.timeUpdate));
     }
 
     private void initStatements(String lessonJid, String initialLanguageCode) throws IOException {
         List<String> statementsDirPath = getStatementsDirPath(null, lessonJid);
         lessonFileSystemProvider.createDirectory(statementsDirPath);
 
+        List<String> statementDirPath = getStatementDirPath(null, lessonJid, initialLanguageCode);
+        lessonFileSystemProvider.createDirectory(statementDirPath);
+
         List<String> mediaDirPath = getStatementMediaDirPath(null, lessonJid);
         lessonFileSystemProvider.createDirectory(mediaDirPath);
         lessonFileSystemProvider.createFile(LessonServiceUtils.appendPath(mediaDirPath, ".gitkeep"));
 
-        lessonFileSystemProvider.createFile(getStatementFilePath(null, lessonJid, initialLanguageCode));
+        lessonFileSystemProvider.createFile(getStatementTitleFilePath(null, lessonJid, initialLanguageCode));
+        lessonFileSystemProvider.createFile(getStatementTextFilePath(null, lessonJid, initialLanguageCode));
         lessonFileSystemProvider.writeToFile(getStatementDefaultLanguageFilePath(null, lessonJid), initialLanguageCode);
 
         Map<String, StatementLanguageStatus> initialLanguage = ImmutableMap.of(initialLanguageCode, StatementLanguageStatus.ENABLED);
@@ -384,8 +399,16 @@ public final class LessonServiceImpl implements LessonService {
         return LessonServiceUtils.appendPath(LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid), "statements");
     }
 
-    private List<String> getStatementFilePath(String userJid, String lessonJid, String languageCode) {
-        return LessonServiceUtils.appendPath(getStatementsDirPath(userJid, lessonJid), languageCode + ".html");
+    private List<String> getStatementDirPath(String userJid, String lessonJid, String languageCode) {
+        return LessonServiceUtils.appendPath(getStatementsDirPath(userJid, lessonJid), languageCode);
+    }
+
+    private List<String> getStatementTitleFilePath(String userJid, String lessonJid, String languageCode) {
+        return LessonServiceUtils.appendPath(getStatementDirPath(userJid, lessonJid, languageCode), "title.txt");
+    }
+
+    private List<String> getStatementTextFilePath(String userJid, String lessonJid, String languageCode) {
+        return LessonServiceUtils.appendPath(getStatementDirPath(userJid, lessonJid, languageCode), "text.html");
     }
 
     private List<String> getStatementDefaultLanguageFilePath(String userJid, String lessonJid) {

@@ -10,6 +10,6 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(ProblemModel.class)
 public abstract class ProblemModel_ extends AbstractJudgelsModel_ {
 
-    public static volatile SingularAttribute<ProblemModel, String> name;
+    public static volatile SingularAttribute<ProblemModel, String> slug;
     public static volatile SingularAttribute<ProblemModel, String> additionalNote;
 }
