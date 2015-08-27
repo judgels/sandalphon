@@ -54,19 +54,19 @@ public final class BundleProblemController extends AbstractJudgelsController {
         ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
         ProblemControllerUtils.removeJustCreatedProblem();
 
-        ControllerUtils.getInstance().addActivityLog("Create bundle problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Create bundle problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemController.enterProblem(problem.getId()));
     }
 
     public Result jumpToItems(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to bundle problem items " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Jump to bundle problem items " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.BundleItemController.viewItems(problemId));
     }
 
     public Result jumpToSubmissions(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to bundle problem submissions " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Jump to bundle problem submissions " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.BundleProblemSubmissionController.viewSubmissions(problemId));
     }

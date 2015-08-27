@@ -6,7 +6,7 @@ import org.iatoki.judgels.jophiel.runnables.UserActivityMessagePusher;
 import org.iatoki.judgels.jophiel.services.impls.DefaultUserActivityMessageServiceImpl;
 import org.iatoki.judgels.play.AbstractGlobal;
 import org.iatoki.judgels.play.services.BaseDataMigrationService;
-import org.iatoki.judgels.sandalphon.controllers.ControllerUtils;
+import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.models.daos.JidCacheDao;
 import org.iatoki.judgels.sandalphon.runnables.GradingResponsePoller;
 import org.iatoki.judgels.sandalphon.services.ProgrammingSubmissionService;
@@ -45,7 +45,7 @@ public final class Global extends AbstractGlobal {
     }
 
     private void buildUtils(Injector injector) {
-        ControllerUtils.buildInstance(injector.instanceOf(Jophiel.class));
+        SandalphonControllerUtils.buildInstance(injector.instanceOf(Jophiel.class));
     }
 
     private void scheduleThreads(Injector injector) {

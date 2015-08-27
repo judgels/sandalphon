@@ -20,13 +20,13 @@ import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;
 
-public final class ControllerUtils extends AbstractJudgelsControllerUtils {
+public final class SandalphonControllerUtils extends AbstractJudgelsControllerUtils {
 
-    private static ControllerUtils INSTANCE;
+    private static SandalphonControllerUtils INSTANCE;
 
     private final Jophiel jophiel;
 
-    private ControllerUtils(Jophiel jophiel) {
+    private SandalphonControllerUtils(Jophiel jophiel) {
         this.jophiel = jophiel;
     }
 
@@ -45,7 +45,7 @@ public final class ControllerUtils extends AbstractJudgelsControllerUtils {
         LazyHtml sidebarContent = new LazyHtml(profileView.render(
                 IdentityUtils.getUsername(),
                 IdentityUtils.getUserRealName(),
-                org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.profile(org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterProfile(routes.ProblemController.index().absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure()),
+                org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.profile().absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure()),
                 org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.logout(routes.ApplicationController.index().absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure())
         ));
         if (SandalphonUtils.trullyHasRole("admin")) {
@@ -83,10 +83,10 @@ public final class ControllerUtils extends AbstractJudgelsControllerUtils {
         if (INSTANCE != null) {
             throw new UnsupportedOperationException("ControllerUtils instance has already been built");
         }
-        INSTANCE = new ControllerUtils(jophiel);
+        INSTANCE = new SandalphonControllerUtils(jophiel);
     }
 
-    static ControllerUtils getInstance() {
+    static SandalphonControllerUtils getInstance() {
         if (INSTANCE == null) {
             throw new UnsupportedOperationException("ControllerUtils instance has not been built");
         }

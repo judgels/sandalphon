@@ -55,7 +55,7 @@ public final class ProblemClientController extends AbstractJudgelsController {
         List<ClientProblem> clientProblems = clientService.getClientProblemsByProblemJid(problem.getJid());
         List<Client> clients = clientService.getClients();
 
-        ControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
     }
@@ -88,7 +88,7 @@ public final class ProblemClientController extends AbstractJudgelsController {
 
         clientService.createClientProblem(problem.getJid(), clientProblemUpsertData.clientJid);
 
-        ControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertData.clientJid + " to problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertData.clientJid + " to problem " + problem.getName() + ".");
 
         return redirect(routes.ProblemClientController.updateClientProblems(problem.getId()));
     }
@@ -105,13 +105,13 @@ public final class ProblemClientController extends AbstractJudgelsController {
         ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.client"), routes.ProblemClientController.viewClientProblem(problemId, clientProblemId)));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 
-        ControllerUtils.getInstance().addActivityLog("View client " + clientProblem.getClientName() + " to problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View client " + clientProblem.getClientName() + " to problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> clientProblemUpsertForm, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
@@ -119,15 +119,15 @@ public final class ProblemClientController extends AbstractJudgelsController {
         ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.list"), routes.ProblemClientController.updateClientProblems(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Client");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Client");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                 .add(new InternalLink(Messages.get("problem.client"), routes.ProblemController.jumpToClients(problem.getId())))
                 .add(lastLink)

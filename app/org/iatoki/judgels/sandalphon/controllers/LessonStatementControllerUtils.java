@@ -33,7 +33,7 @@ public final class LessonStatementControllerUtils {
     }
 
     static void appendBreadcrumbsLayout(LazyHtml content, Lesson lesson, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 LessonControllerUtils.getLessonBreadcrumbsBuilder(lesson)
                         .add(new InternalLink(Messages.get("lesson.statement"), routes.LessonController.jumpToStatement(lesson.getId())))
                         .add(lastLink)

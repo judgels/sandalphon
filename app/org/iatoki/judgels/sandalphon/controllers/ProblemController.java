@@ -56,20 +56,20 @@ public final class ProblemController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     public Result listProblems(long pageIndex, String sortBy, String orderBy, String filterString) {
-        Page<Problem> pageOfProblems = problemService.getPageOfProblems(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString, IdentityUtils.getUserJid(), ControllerUtils.getInstance().isAdmin());
+        Page<Problem> pageOfProblems = problemService.getPageOfProblems(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString, IdentityUtils.getUserJid(), SandalphonControllerUtils.getInstance().isAdmin());
 
         LazyHtml content = new LazyHtml(listProblemsView.render(pageOfProblems, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("problem.list"), new InternalLink(Messages.get("commons.create"), routes.ProblemController.createProblem()), c));
 
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
               new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index())
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problems");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problems");
 
-        ControllerUtils.getInstance().addActivityLog("Open allowed problems <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Open allowed problems <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -77,7 +77,7 @@ public final class ProblemController extends AbstractJudgelsController {
     public Result createProblem() {
         Form<ProblemCreateForm> problemCreateForm = Form.form(ProblemCreateForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("Try to create problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to create problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreateProblem(problemCreateForm);
     }
@@ -95,7 +95,7 @@ public final class ProblemController extends AbstractJudgelsController {
         ProblemControllerUtils.setJustCreatedProblem(problemCreateData.name, problemCreateData.additionalNote, problemCreateData.initLanguageCode);
 
         if (problemCreateData.type.equals(ProblemType.PROGRAMMING.name())) {
-            ControllerUtils.getInstance().addActivityLog("Create problem " + problemCreateData.name + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+            SandalphonControllerUtils.getInstance().addActivityLog("Create problem " + problemCreateData.name + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProgrammingProblemController.createProgrammingProblem());
         } else if (problemCreateData.type.equals(ProblemType.BUNDLE.name())) {
@@ -106,31 +106,31 @@ public final class ProblemController extends AbstractJudgelsController {
     }
 
     public Result enterProblem(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Enter problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Enter problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemController.jumpToStatement(problemId));
     }
 
     public Result jumpToStatement(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to problem statement " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Jump to problem statement " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemStatementController.viewStatement(problemId));
     }
 
     public Result jumpToVersions(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to problem version " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Jump to problem version " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problemId));
     }
 
     public Result jumpToPartners(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to problem partner " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Jump to problem partner " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemPartnerController.viewPartners(problemId));
     }
 
     public Result jumpToClients(long problemId) {
-        ControllerUtils.getInstance().addActivityLog("Jump to problem client " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Jump to problem client " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemClientController.updateClientProblems(problemId));
     }
@@ -143,17 +143,17 @@ public final class ProblemController extends AbstractJudgelsController {
         appendSubtabs(content, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
               ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                     .add(new InternalLink(Messages.get("problem.view"), routes.ProblemController.viewProblem(problem.getId())))
                     .build()
         );
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View");
 
-        ControllerUtils.getInstance().addActivityLog("View problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -171,7 +171,7 @@ public final class ProblemController extends AbstractJudgelsController {
 
         Form<ProblemUpdateForm> problemUpdateForm = Form.form(ProblemUpdateForm.class).fill(problemUpdateData);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateProblem(problemUpdateForm, problem);
     }
@@ -193,7 +193,7 @@ public final class ProblemController extends AbstractJudgelsController {
         ProblemUpdateForm problemUpdateData = problemUpdateForm.get();
         problemService.updateProblem(problemId, problemUpdateData.name, problemUpdateData.additionalNote);
 
-        ControllerUtils.getInstance().addActivityLog("Update problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update problem " + problem.getName() + ".");
 
         return redirect(routes.ProblemController.viewProblem(problem.getId()));
     }
@@ -202,7 +202,7 @@ public final class ProblemController extends AbstractJudgelsController {
         String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
         ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
 
-        ControllerUtils.getInstance().addActivityLog("Switch language to " + languageCode + " of problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Switch language to " + languageCode + " of problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(request().getHeader("Referer"));
     }
@@ -210,14 +210,14 @@ public final class ProblemController extends AbstractJudgelsController {
     private Result showCreateProblem(Form<ProblemCreateForm> problemCreateForm) {
         LazyHtml content = new LazyHtml(createProblemView.render(problemCreateForm));
         content.appendLayout(c -> headingLayout.render(Messages.get("problem.create"), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()),
                 new InternalLink(Messages.get("problem.create"), routes.ProblemController.createProblem())
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Create");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Create");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdateProblem(Form<ProblemUpdateForm> problemUpdateForm, Problem problem) {
@@ -225,15 +225,15 @@ public final class ProblemController extends AbstractJudgelsController {
         appendSubtabs(content, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getName(), new InternalLink(Messages.get("problem.enter"), routes.ProblemController.enterProblem(problem.getId())), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                 .add(new InternalLink(Messages.get("problem.update"), routes.ProblemController.updateProblem(problem.getId())))
                 .build()
         );
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private void appendSubtabs(LazyHtml content, Problem problem) {

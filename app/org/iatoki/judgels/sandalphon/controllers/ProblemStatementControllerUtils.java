@@ -33,7 +33,7 @@ public final class ProblemStatementControllerUtils {
     }
 
     static void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                         .add(new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())))
                         .add(lastLink)

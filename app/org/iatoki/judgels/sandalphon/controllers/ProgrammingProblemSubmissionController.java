@@ -99,7 +99,7 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
             return redirect(routes.ProgrammingProblemStatementController.viewStatement(problem.getId()));
         }
 
-        ControllerUtils.getInstance().addActivityLog("Submit to programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Submit to programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemSubmissionController.viewSubmissions(problem.getId()));
     }
@@ -124,13 +124,13 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.submission.list"), routes.ProgrammingProblemSubmissionController.viewSubmissions(problemId)));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Submissions");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Submissions");
 
-        ControllerUtils.getInstance().addActivityLog("List submissions of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List submissions of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -156,13 +156,13 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.submission.view"), routes.ProgrammingProblemSubmissionController.viewSubmission(problemId, submissionId)));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View Submission");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View Submission");
 
-        ControllerUtils.getInstance().addActivityLog("View submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional
@@ -177,7 +177,7 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         SubmissionSource submissionSource = ProgrammingSubmissionUtils.createSubmissionSourceFromPastSubmission(programmingSubmissionFileSystemProvider, null, programmingSubmission.getJid());
         programmingSubmissionService.regrade(programmingSubmission.getJid(), submissionSource, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }
@@ -207,13 +207,13 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
             programmingSubmissionService.regrade(programmingSubmission.getJid(), submissionSource, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         }
 
-        ControllerUtils.getInstance().addActivityLog("Regrade submissions of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Regrade submissions of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                 .add(new InternalLink(Messages.get("problem.programming.submission"), routes.ProgrammingProblemController.jumpToSubmissions(problem.getId())))
                         .add(lastLink)

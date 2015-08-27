@@ -347,15 +347,15 @@ public final class BundleItemController extends AbstractJudgelsController {
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, ImmutableList.of(
               new InternalLink(Messages.get("problem.bundle.item.list"), routes.BundleItemController.viewItems(problem.getId()))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Items");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Items");
 
-        ControllerUtils.getInstance().addActivityLog("List items of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List items of programming problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showCreateItem(Problem problem, String itemType, Html html, long page, String orderBy, String orderDir, String filterString) {
@@ -363,16 +363,16 @@ public final class BundleItemController extends AbstractJudgelsController {
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, ImmutableList.of(
               new InternalLink(Messages.get("problem.bundle.item.list"), routes.BundleItemController.viewItems(problem.getId())),
               new InternalLink(Messages.get("problem.bundle.item.create"), routes.BundleItemController.createItem(problem.getId(), itemType, page, orderBy, orderDir, filterString))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Items - Create");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Items - Create");
 
-        ControllerUtils.getInstance().addActivityLog("Try to create bundle item on " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to create bundle item on " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdateItem(Problem problem, BundleItem bundleItem, Html html, Set<String> allowedLanguages) {
@@ -381,20 +381,20 @@ public final class BundleItemController extends AbstractJudgelsController {
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, ImmutableList.of(
               new InternalLink(Messages.get("problem.bundle.item.list"), routes.BundleItemController.viewItems(problem.getId())),
               new InternalLink(Messages.get("problem.bundle.item.update"), routes.BundleItemController.updateItem(problem.getId(), bundleItem.getJid()))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Item - Update");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Item - Update");
 
-        ControllerUtils.getInstance().addActivityLog("Try to update bundle item on " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update bundle item on " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Problem problem, List<InternalLink> lastLinks) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
               ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                     .add(new InternalLink(Messages.get("problem.bundle.item"), routes.BundleProblemController.jumpToItems(problem.getId())))
                     .addAll(lastLinks)

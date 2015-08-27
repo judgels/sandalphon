@@ -57,16 +57,16 @@ public final class GraderController extends AbstractJudgelsController {
 
         LazyHtml content = new LazyHtml(listView.render(pageOfGraders, orderBy, orderDir, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.list"), new InternalLink(Messages.get("commons.create"), routes.GraderController.create()), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index())
         ));
 
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Graders - List");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Graders - List");
 
-        ControllerUtils.getInstance().addActivityLog("Open graders <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Open graders <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -74,7 +74,7 @@ public final class GraderController extends AbstractJudgelsController {
     public Result create() {
         Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("Try to create grader <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to create grader <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreate(graderUpsertForm);
     }
@@ -91,7 +91,7 @@ public final class GraderController extends AbstractJudgelsController {
         GraderUpsertForm graderUpsertData = graderUpsertForm.get();
         graderService.createGrader(graderUpsertData.name);
 
-        ControllerUtils.getInstance().addActivityLog("Create grader " + graderUpsertData.name + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Create grader " + graderUpsertData.name + ".");
 
         return redirect(routes.GraderController.index());
     }
@@ -102,16 +102,16 @@ public final class GraderController extends AbstractJudgelsController {
 
         LazyHtml content = new LazyHtml(viewView.render(grader));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), new InternalLink(Messages.get("commons.update"), routes.GraderController.update(graderId)), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
                 new InternalLink(Messages.get("grader.view"), routes.GraderController.view(graderId))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - View");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Grader - View");
 
-        ControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -122,7 +122,7 @@ public final class GraderController extends AbstractJudgelsController {
         graderUpsertData.name = grader.getName();
         Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class).fill(graderUpsertData);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdate(graderUpsertForm, grader);
     }
@@ -139,7 +139,7 @@ public final class GraderController extends AbstractJudgelsController {
         GraderUpsertForm graderUpsertData = graderUpsertForm.get();
         graderService.updateGrader(graderId, graderUpsertData.name);
 
-        ControllerUtils.getInstance().addActivityLog("Update grader " + grader.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update grader " + grader.getName() + ".");
 
         return redirect(routes.GraderController.index());
     }
@@ -147,26 +147,26 @@ public final class GraderController extends AbstractJudgelsController {
     private Result showCreate(Form<GraderUpsertForm> graderUpsertForm) {
         LazyHtml content = new LazyHtml(createView.render(graderUpsertForm));
         content.appendLayout(c -> headingLayout.render(Messages.get("grader.create"), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
                 new InternalLink(Messages.get("grader.create"), routes.GraderController.create())
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Create");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Create");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdate(Form<GraderUpsertForm> graderUpsertForm, Grader grader) {
         LazyHtml content = new LazyHtml(updateView.render(graderUpsertForm, grader.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
                 new InternalLink(Messages.get("grader.update"), routes.GraderController.update(grader.getId()))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Update");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Update");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 }

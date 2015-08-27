@@ -97,12 +97,6 @@ public final class ApplicationController extends AbstractJudgelsController {
         return redirect(returnUri);
     }
 
-    @Transactional
-    public Result afterProfile(String returnUri) {
-        JudgelsPlayUtils.updateUserJidCache(JidCacheServiceImpl.getInstance());
-        return redirect(returnUri);
-    }
-
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Transactional
     public Result postViewAs() {
@@ -121,7 +115,7 @@ public final class ApplicationController extends AbstractJudgelsController {
                         JudgelsPlayUtils.setViewPointInSession(userJid);
                         SandalphonUtils.setUserSession(jophiel.getUserByUserJid(userJid), userService.findUserByJid(userJid));
 
-                        ControllerUtils.getInstance().addActivityLog("View as user " + viewpointData.username + ".");
+                        SandalphonControllerUtils.getInstance().addActivityLog("View as user " + viewpointData.username + ".");
 
                     } catch (IOException e) {
                         JudgelsPlayUtils.removeViewPoint();

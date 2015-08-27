@@ -55,7 +55,7 @@ public final class LessonClientController extends AbstractJudgelsController {
         List<ClientLesson> clientLessons = clientService.getClientLessonsByLessonJid(lesson.getJid());
         List<Client> clients = clientService.getClients();
 
-        ControllerUtils.getInstance().addActivityLog("Try to update client on lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update client on lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
     }
@@ -86,7 +86,7 @@ public final class LessonClientController extends AbstractJudgelsController {
 
         clientService.createClientLesson(lesson.getJid(), clientLessonUpsertData.clientJid);
 
-        ControllerUtils.getInstance().addActivityLog("Add client " + clientLessonUpsertData.clientJid + " to lesson " + lesson.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientLessonUpsertData.clientJid + " to lesson " + lesson.getName() + ".");
 
         return redirect(routes.LessonClientController.updateClientLessons(lesson.getId()));
     }
@@ -103,13 +103,13 @@ public final class LessonClientController extends AbstractJudgelsController {
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.client.client"), routes.LessonClientController.viewClientLesson(lessonId, clientLessonId)));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Statement");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Statement");
 
-        ControllerUtils.getInstance().addActivityLog("View client " + clientLesson.getClientName() + " to lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View client " + clientLesson.getClientName() + " to lesson " + lesson.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdateClientLessons(Form<ClientLessonUpsertForm> clientLessonUpsertForm, Lesson lesson, List<Client> clients, List<ClientLesson> clientLessons) {
@@ -117,15 +117,15 @@ public final class LessonClientController extends AbstractJudgelsController {
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.client.list"), routes.LessonClientController.updateClientLessons(lesson.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Client");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Client");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Lesson lesson, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 LessonControllerUtils.getLessonBreadcrumbsBuilder(lesson)
                 .add(new InternalLink(Messages.get("lesson.client"), routes.LessonController.jumpToClients(lesson.getId())))
                 .add(lastLink)

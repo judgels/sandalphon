@@ -57,16 +57,16 @@ public final class ClientController extends AbstractJudgelsController {
 
         LazyHtml content = new LazyHtml(listView.render(pageOfClients, sortBy, orderBy, filterString));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.list"), new InternalLink(Messages.get("commons.create"), routes.ClientController.create()), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index())
         ));
 
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Clients - List");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Clients - List");
 
-        ControllerUtils.getInstance().addActivityLog("List all clients <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List all clients <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -74,7 +74,7 @@ public final class ClientController extends AbstractJudgelsController {
     public Result create() {
         Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("Try to create client <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to create client <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreate(clientUpsertForm);
     }
@@ -91,7 +91,7 @@ public final class ClientController extends AbstractJudgelsController {
         ClientUpsertForm clientUpsertData = clientUpsertForm.get();
         clientService.createClient(clientUpsertData.name);
 
-        ControllerUtils.getInstance().addActivityLog("Create client " + clientUpsertData.name + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Create client " + clientUpsertData.name + ".");
 
         return redirect(routes.ClientController.index());
     }
@@ -102,16 +102,16 @@ public final class ClientController extends AbstractJudgelsController {
 
         LazyHtml content = new LazyHtml(viewView.render(client));
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), new InternalLink(Messages.get("commons.update"), routes.ClientController.update(clientId)), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.view"), routes.ClientController.view(clientId))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Client - View");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Client - View");
 
-        ControllerUtils.getInstance().addActivityLog("View client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -122,7 +122,7 @@ public final class ClientController extends AbstractJudgelsController {
         clientUpsertData.name = client.getName();
         Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class).fill(clientUpsertData);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdate(clientUpsertForm, client);
     }
@@ -140,7 +140,7 @@ public final class ClientController extends AbstractJudgelsController {
         ClientUpsertForm clientUpsertData = clientUpsertForm.get();
         clientService.updateClient(clientId, clientUpsertData.name);
 
-        ControllerUtils.getInstance().addActivityLog("Update client " + client.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update client " + client.getName() + ".");
 
         return redirect(routes.ClientController.index());
     }
@@ -150,7 +150,7 @@ public final class ClientController extends AbstractJudgelsController {
         Client client = clientService.findClientById(clientId);
         clientService.deleteClient(client.getId());
 
-        ControllerUtils.getInstance().addActivityLog("Delete client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Delete client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ClientController.index());
     }
@@ -158,26 +158,26 @@ public final class ClientController extends AbstractJudgelsController {
     private Result showCreate(Form<ClientUpsertForm> clientUpsertForm) {
         LazyHtml content = new LazyHtml(createView.render(clientUpsertForm));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.create"), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.create"), routes.ClientController.create())
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Client - Create");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Client - Create");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdate(Form<ClientUpsertForm> clientUpsertForm, Client client) {
         LazyHtml content = new LazyHtml(updateView.render(clientUpsertForm, client.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), c));
-        ControllerUtils.getInstance().appendSidebarLayout(content);
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
                 new InternalLink(Messages.get("client.update"), routes.ClientController.update(client.getId()))
         ));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Client - Update");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Client - Update");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 }

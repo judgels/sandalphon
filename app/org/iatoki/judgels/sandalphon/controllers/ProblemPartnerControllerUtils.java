@@ -12,7 +12,7 @@ public final class ProblemPartnerControllerUtils {
     }
 
     static void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                 .add(new InternalLink(Messages.get("problem.partner"), routes.ProblemController.jumpToPartners(problem.getId())))
                 .add(lastLink)

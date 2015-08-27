@@ -134,7 +134,7 @@ public final class ProblemControllerUtils {
     }
 
     static boolean isAuthorOrAbove(Problem problem) {
-        return ControllerUtils.getInstance().isAdmin() || isAuthor(problem);
+        return SandalphonControllerUtils.getInstance().isAdmin() || isAuthor(problem);
     }
 
     static boolean isPartner(ProblemService problemService, Problem problem) {

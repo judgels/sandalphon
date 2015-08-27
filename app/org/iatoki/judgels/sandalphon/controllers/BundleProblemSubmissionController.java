@@ -71,7 +71,7 @@ public final class BundleProblemSubmissionController extends AbstractJudgelsCont
         String submissionJid = bundleSubmissionService.submit(problem.getJid(), null, bundleAnswer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         bundleSubmissionService.storeSubmissionFiles(bundleSubmissionFileSystemProvider, null, submissionJid, bundleAnswer);
 
-        ControllerUtils.getInstance().addActivityLog("Submit to bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Submit to bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.BundleProblemSubmissionController.viewSubmissions(problem.getId()));
     }
@@ -95,13 +95,13 @@ public final class BundleProblemSubmissionController extends AbstractJudgelsCont
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.bundle.submission.list"), routes.BundleProblemSubmissionController.viewSubmissions(problemId)));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Submissions");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Submissions");
 
-        ControllerUtils.getInstance().addActivityLog("List submissions of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List submissions of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -125,13 +125,13 @@ public final class BundleProblemSubmissionController extends AbstractJudgelsCont
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.submission.view"), routes.ProgrammingProblemSubmissionController.viewSubmission(problemId, submissionId)));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View Submission");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View Submission");
 
-        ControllerUtils.getInstance().addActivityLog("View submission " + submissionId + " of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View submission " + submissionId + " of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional
@@ -151,7 +151,7 @@ public final class BundleProblemSubmissionController extends AbstractJudgelsCont
         }
         bundleSubmissionService.regrade(bundleSubmission.getJid(), bundleAnswer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        ControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.BundleProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }
@@ -186,13 +186,13 @@ public final class BundleProblemSubmissionController extends AbstractJudgelsCont
             bundleSubmissionService.regrade(submission.getJid(), bundleAnswer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         }
 
-        ControllerUtils.getInstance().addActivityLog("Regrade submissions of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Regrade submissions of bundle problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.BundleProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                 .add(new InternalLink(Messages.get("problem.bundle.submission"), routes.BundleProblemController.jumpToSubmissions(problem.getId())))
                         .add(lastLink)

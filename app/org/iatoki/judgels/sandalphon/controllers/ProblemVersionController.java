@@ -59,13 +59,13 @@ public final class ProblemVersionController extends AbstractJudgelsController {
         ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.version.history"), routes.ProblemVersionController.listVersionHistory(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
 
-        ControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     @Transactional(readOnly = true)
@@ -79,7 +79,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         problemService.restore(problem.getJid(), hash);
 
-        ControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemVersionController.listVersionHistory(problem.getId()));
     }
@@ -97,7 +97,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         Form<VersionCommitForm> versionCommitForm = Form.form(VersionCommitForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showViewVersionLocalChanges(versionCommitForm, problem, isClean);
     }
@@ -133,7 +133,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
             }
         }
 
-        ControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
     }
@@ -152,7 +152,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
             flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
         }
 
-        ControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
     }
@@ -167,7 +167,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         try {
             problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
-            ControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+            SandalphonControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } catch (IOException e) {
@@ -181,11 +181,11 @@ public final class ProblemVersionController extends AbstractJudgelsController {
         ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.version.local"), routes.ProblemVersionController.viewVersionLocalChanges(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - Local Changes");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - Local Changes");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private void appendSubtabsLayout(LazyHtml content, Problem problem) {
@@ -200,7 +200,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                 .add(new InternalLink(Messages.get("problem.version"), routes.ProblemController.jumpToVersions(problem.getId())))
                 .add(lastLink)

@@ -81,7 +81,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         Form<GradingEngineUpdateForm> gradingEngineUpdateForm = Form.form(GradingEngineUpdateForm.class).fill(gradingEngineUpdateData);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update grading engine of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update grading engine of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateGradingEngine(gradingEngineUpdateForm, problem);
     }
@@ -123,7 +123,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             return showUpdateGradingEngine(gradingEngineUpdateForm, problem);
         }
 
-        ControllerUtils.getInstance().addActivityLog("Update grading engine of problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update grading engine of problem " + problem.getName() + ".");
 
         return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
     }
@@ -154,7 +154,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         Form<?> gradingEngineConfForm = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).createFormFromConfig(config);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update grading config of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update grading config of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
     }
@@ -195,7 +195,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             return showUpdateGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
         }
 
-        ControllerUtils.getInstance().addActivityLog("Update grading config of problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update grading config of problem " + problem.getName() + ".");
 
         return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
     }
@@ -238,7 +238,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             throw new IllegalStateException("Can't update grading config using tokilib format", e);
         }
 
-        ControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
     }
@@ -280,7 +280,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             throw new IllegalStateException("Can't update grading config using auto population", e);
         }
 
-        ControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
     }
@@ -297,7 +297,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         Form<UploadFileForm> uploadFileForm = Form.form(UploadFileForm.class);
         List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
 
-        ControllerUtils.getInstance().addActivityLog("List grading test data files of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List grading test data files of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showListGradingTestDataFiles(uploadFileForm, problem, testDataFiles);
     }
@@ -329,7 +329,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
                 return showListGradingTestDataFiles(form, problem, testDataFiles);
             }
 
-            ControllerUtils.getInstance().addActivityLog("Upload test data file of problem " + problem.getName() + ".");
+            SandalphonControllerUtils.getInstance().addActivityLog("Upload test data file of problem " + problem.getName() + ".");
 
             return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
         }
@@ -349,7 +349,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
                 return showListGradingTestDataFiles(form, problem, testDataFiles);
             }
 
-            ControllerUtils.getInstance().addActivityLog("Upload zipped test data files of problem " + problem.getName() + ".");
+            SandalphonControllerUtils.getInstance().addActivityLog("Upload zipped test data files of problem " + problem.getName() + ".");
 
             return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
         }
@@ -369,7 +369,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         Form<UploadFileForm> uploadFileForm = Form.form(UploadFileForm.class);
         List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
-        ControllerUtils.getInstance().addActivityLog("List grading helper files of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("List grading helper files of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showListGradingHelperFiles(uploadFileForm, problem, helperFiles);
     }
@@ -401,7 +401,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
                 return showListGradingHelperFiles(form, problem, helperFiles);
             }
 
-            ControllerUtils.getInstance().addActivityLog("Upload helper file of problem " + problem.getName() + ".");
+            SandalphonControllerUtils.getInstance().addActivityLog("Upload helper file of problem " + problem.getName() + ".");
 
             return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
         }
@@ -421,7 +421,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
                 return showListGradingHelperFiles(form, problem, helperFiles);
             }
 
-            ControllerUtils.getInstance().addActivityLog("Upload zipped helper files of problem " + problem.getName() + ".");
+            SandalphonControllerUtils.getInstance().addActivityLog("Upload zipped helper files of problem " + problem.getName() + ".");
 
             return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
         }
@@ -439,7 +439,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         String testDataURL = programmingProblemService.getGradingTestDataFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
 
-        ControllerUtils.getInstance().addActivityLog("Download test data file " + filename + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Download test data file " + filename + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         try {
             new URL(testDataURL);
@@ -460,7 +460,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         String helperURL = programmingProblemService.getGradingHelperFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
 
-        ControllerUtils.getInstance().addActivityLog("Download helper file " + filename + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Download helper file " + filename + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         try {
             new URL(helperURL);
@@ -493,7 +493,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         Form<LanguageRestrictionUpdateForm> languageRestrictionUpdateForm = Form.form(LanguageRestrictionUpdateForm.class).fill(languageRestrictionUpdateData);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update language restriction of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update language restriction of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateLanguageRestriction(languageRestrictionUpdateForm, problem);
     }
@@ -525,7 +525,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             return showUpdateLanguageRestriction(languageRestrictionUpdateForm, problem);
         }
 
-        ControllerUtils.getInstance().addActivityLog("Update language restriction of problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update language restriction of problem " + problem.getName() + ".");
 
         return redirect(routes.ProgrammingProblemGradingController.updateLanguageRestriction(problem.getId()));
     }
@@ -536,11 +536,11 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.engine.update"), routes.ProgrammingProblemGradingController.updateGradingEngine(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Grading Engine");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Grading Engine");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdateGradingConfig(Form<?> gradingConfForm, Problem problem, String gradingEngine, List<FileInfo> testDataFiles, List<FileInfo> helperFiles) {
@@ -561,11 +561,11 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.config.update"), routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Grading Config");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Grading Config");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showListGradingTestDataFiles(Form<UploadFileForm> uploadFileForm, Problem problem, List<FileInfo> testDataFiles) {
@@ -574,11 +574,11 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.testData.list"), routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - List Grading Test Data Files");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - List Grading Test Data Files");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showListGradingHelperFiles(Form<UploadFileForm> uploadFileForm, Problem problem, List<FileInfo> helperFiles) {
@@ -587,11 +587,11 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.helper.list"), routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - List Grading Helper Files");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - List Grading Helper Files");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdateLanguageRestriction(Form<LanguageRestrictionUpdateForm> languageRestrictionUpdateForm, Problem problem) {
@@ -600,11 +600,11 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.languageRestriction.update"), routes.ProgrammingProblemGradingController.updateLanguageRestriction(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Language Restriction");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Language Restriction");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private void appendSubtabsLayout(LazyHtml content, Problem problem) {
@@ -618,7 +618,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Problem problem, InternalLink lastLink) {
-        ControllerUtils.getInstance().appendBreadcrumbsLayout(content,
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 ProblemControllerUtils.getProblemBreadcrumbsBuilder(problem)
                 .add(new InternalLink(Messages.get("problem.programming.grading"), routes.ProgrammingProblemController.jumpToGrading(problem.getId())))
                 .add(lastLink)

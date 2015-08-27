@@ -9,7 +9,7 @@ import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.heading3Layout;
 import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.UserInfo;
+import org.iatoki.judgels.jophiel.PublicUser;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemPartner;
@@ -69,7 +69,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
         Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class);
         Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class);
 
-        ControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showAddPartner(usernameForm, problemForm, programmingForm, problem);
     }
@@ -107,14 +107,14 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
             return showAddPartner(usernameForm, problemForm, programmingForm, problem);
         }
 
-        UserInfo userInfo;
+        PublicUser userInfo;
         try {
             userInfo = jophiel.getUserByUserJid(userJid);
         } catch (IOException e) {
             return notFound();
         }
 
-        JidCacheServiceImpl.getInstance().putDisplayName(userInfo.getJid(), JudgelsPlayUtils.getUserDisplayName(userInfo.getUsername(), userInfo.getName()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        JidCacheServiceImpl.getInstance().putDisplayName(userInfo.getJid(), JudgelsPlayUtils.getUserDisplayName(userInfo.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         if (problemService.isUserPartnerForProblem(problem.getJid(), userJid)) {
             usernameForm.reject("username", Messages.get("problem.partner.already"));
@@ -140,7 +140,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
 
         problemService.createProblemPartner(problem.getId(), userJid, problemConfig, programmingConfig);
 
-        ControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getName() + ".");
 
         return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
     }
@@ -179,7 +179,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
 
         Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).fill(programmingData);
 
-        ControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdatePartner(problemForm, programmingForm, problem, problemPartner);
     }
@@ -226,7 +226,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
 
         problemService.updateProblemPartner(partnerId, problemConfig, programmingConfig);
 
-        ControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getName() + ".");
 
         return redirect(routes.ProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId()));
     }
@@ -238,11 +238,11 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         ProblemPartnerControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.partner.add"), routes.ProgrammingProblemPartnerController.addPartner(problem.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Add Partner");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Add Partner");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Result showUpdatePartner(Form<ProblemPartnerUpsertForm> problemForm, Form<ProgrammingPartnerUpsertForm> programmingForm, Problem problem, ProblemPartner problemPartner) {
@@ -252,11 +252,11 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
-        ControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         ProblemPartnerControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.partner.update"), routes.ProgrammingProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId())));
-        ControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Partner");
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Partner");
 
-        return ControllerUtils.getInstance().lazyOk(content);
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
     private Set<String> splitByComma(String s) {

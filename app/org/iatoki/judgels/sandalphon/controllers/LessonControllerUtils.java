@@ -113,7 +113,7 @@ public final class LessonControllerUtils {
     }
 
     static boolean isAuthorOrAbove(Lesson lesson) {
-        return ControllerUtils.getInstance().isAdmin() || isAuthor(lesson);
+        return SandalphonControllerUtils.getInstance().isAdmin() || isAuthor(lesson);
     }
 
     static boolean isPartner(LessonService lessonService, Lesson lesson) {
