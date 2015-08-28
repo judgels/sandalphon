@@ -135,14 +135,14 @@ public class LessonPartnerController extends AbstractJudgelsController {
             return showAddPartner(usernameForm, lessonForm, lesson);
         }
 
-        PublicUser userInfo;
+        PublicUser publicUser;
         try {
-            userInfo = jophiel.getUserByUserJid(userJid);
+            publicUser = jophiel.getPublicUserByJid(userJid);
         } catch (IOException e) {
             return notFound();
         }
 
-        JidCacheServiceImpl.getInstance().putDisplayName(userInfo.getJid(), JudgelsPlayUtils.getUserDisplayName(userInfo.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        JidCacheServiceImpl.getInstance().putDisplayName(publicUser.getJid(), JudgelsPlayUtils.getUserDisplayName(publicUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         if (lessonService.isUserPartnerForLesson(lesson.getJid(), userJid)) {
             usernameForm.reject("username", Messages.get("lesson.partner.already"));

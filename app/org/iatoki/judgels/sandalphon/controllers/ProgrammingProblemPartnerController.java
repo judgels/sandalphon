@@ -107,14 +107,14 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
             return showAddPartner(usernameForm, problemForm, programmingForm, problem);
         }
 
-        PublicUser userInfo;
+        PublicUser publicUser;
         try {
-            userInfo = jophiel.getUserByUserJid(userJid);
+            publicUser = jophiel.getPublicUserByJid(userJid);
         } catch (IOException e) {
             return notFound();
         }
 
-        JidCacheServiceImpl.getInstance().putDisplayName(userInfo.getJid(), JudgelsPlayUtils.getUserDisplayName(userInfo.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        JidCacheServiceImpl.getInstance().putDisplayName(publicUser.getJid(), JudgelsPlayUtils.getUserDisplayName(publicUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         if (problemService.isUserPartnerForProblem(problem.getJid(), userJid)) {
             usernameForm.reject("username", Messages.get("problem.partner.already"));

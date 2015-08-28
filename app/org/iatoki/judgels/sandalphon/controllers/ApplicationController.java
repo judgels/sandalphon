@@ -87,7 +87,7 @@ public final class ApplicationController extends AbstractJudgelsController {
         if (JudgelsPlayUtils.hasViewPoint()) {
             try {
                 SandalphonUtils.backupSession();
-                SandalphonUtils.setUserSession(jophiel.getUserByUserJid(JudgelsPlayUtils.getViewPoint()), userService.findUserByJid(JudgelsPlayUtils.getViewPoint()));
+                SandalphonUtils.setUserSession(jophiel.getPublicUserByJid(JudgelsPlayUtils.getViewPoint()), userService.findUserByJid(JudgelsPlayUtils.getViewPoint()));
             } catch (IOException e) {
                 JudgelsPlayUtils.removeViewPoint();
                 SandalphonUtils.restoreSession();
@@ -113,7 +113,7 @@ public final class ApplicationController extends AbstractJudgelsController {
                             SandalphonUtils.backupSession();
                         }
                         JudgelsPlayUtils.setViewPointInSession(userJid);
-                        SandalphonUtils.setUserSession(jophiel.getUserByUserJid(userJid), userService.findUserByJid(userJid));
+                        SandalphonUtils.setUserSession(jophiel.getPublicUserByJid(userJid), userService.findUserByJid(userJid));
 
                         SandalphonControllerUtils.getInstance().addActivityLog("View as user " + viewpointData.username + ".");
 
