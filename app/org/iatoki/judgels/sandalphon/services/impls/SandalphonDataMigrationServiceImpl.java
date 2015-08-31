@@ -93,6 +93,12 @@ public final class SandalphonDataMigrationServiceImpl extends AbstractBaseDataMi
                 updateStatement.executeUpdate();
 
                 File entityDir = FileUtils.getFile(baseDirs[i], jid);
+
+                if (!entityDir.exists()) {
+                    System.out.println("Directory not found: " + entityDir.getAbsolutePath());
+                    break;
+                }
+
                 File statementsDir = FileUtils.getFile(entityDir, "statements");
                 File availableLanguagesFile = FileUtils.getFile(statementsDir, "availableLanguages.txt");
 
