@@ -1,6 +1,8 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.jophiel.views.html.isLoggedInLayout;
+import org.iatoki.judgels.jophiel.views.html.isLoggedOutLayout;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
@@ -9,6 +11,7 @@ import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.UserActivityMessage;
 import org.iatoki.judgels.jophiel.forms.ViewpointForm;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsControllerUtils;
+import org.iatoki.judgels.play.controllers.ControllerUtils;
 import org.iatoki.judgels.play.views.html.layouts.menusLayout;
 import org.iatoki.judgels.play.views.html.layouts.profileView;
 import org.iatoki.judgels.play.views.html.layouts.sidebarLayout;
@@ -61,6 +64,11 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
         sidebarContent.appendLayout(c -> linkedClientsLayout.render(jophiel.getLinkedClientsEndPoint(), "lib/jophielcommons/javascripts/linkedClients.js", c));
 
         content.appendLayout(c -> sidebarLayout.render(sidebarContent.render(), c));
+        if (IdentityUtils.getUserJid() == null) {
+            content.appendLayout(c -> isLoggedInLayout.render(jophiel.getIsLoggedInEndPoint(), routes.ApplicationController.auth(ControllerUtils.getCurrentUrl(Http.Context.current().request())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure()), "lib/jophielcommons/javascripts/isLoggedIn.js", c));
+        } else {
+            content.appendLayout(c -> isLoggedOutLayout.render(jophiel.getIsLoggedInEndPoint(), org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.logout(ControllerUtils.getCurrentUrl(Http.Context.current().request())).absoluteURL(Http.Context.current().request(), Http.Context.current().request().secure()), "lib/jophielcommons/javascripts/isLoggedOut.js", c));
+        }
     }
 
     boolean isAdmin() {
