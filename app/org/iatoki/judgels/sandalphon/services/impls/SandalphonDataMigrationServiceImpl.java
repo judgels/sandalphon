@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.services.impls;
 
-import com.beust.jcommander.internal.Maps;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
@@ -96,7 +96,7 @@ public final class SandalphonDataMigrationServiceImpl extends AbstractBaseDataMi
 
                 if (!entityDir.exists()) {
                     System.out.println("Directory not found: " + entityDir.getAbsolutePath());
-                    break;
+                    continue;
                 }
 
                 File statementsDir = FileUtils.getFile(entityDir, "statements");
