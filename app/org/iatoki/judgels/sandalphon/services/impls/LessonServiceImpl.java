@@ -241,6 +241,22 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
+    public Map<String, String> getTitlesByLanguage(String userJid, String lessonJid) throws IOException {
+        Map<String, StatementLanguageStatus> availableLanguages = getAvailableLanguages(userJid, lessonJid);
+
+        ImmutableMap.Builder<String, String> titlesByLanguageBuilder = ImmutableMap.builder();
+
+        for (Map.Entry<String, StatementLanguageStatus> entry : availableLanguages.entrySet()) {
+            if (entry.getValue() == StatementLanguageStatus.ENABLED) {
+                String title = lessonFileSystemProvider.readFromFile(getStatementTitleFilePath(userJid, lessonJid, entry.getKey()));
+                titlesByLanguageBuilder.put(entry.getKey(), title);
+            }
+        }
+
+        return titlesByLanguageBuilder.build();
+    }
+
+    @Override
     public void updateStatement(String userJid, long lessonId, String languageCode, ProblemStatement statement) throws IOException {
         LessonModel lessonModel = lessonDao.findById(lessonId);
         lessonFileSystemProvider.writeToFile(getStatementTitleFilePath(userJid, lessonModel.jid, languageCode), statement.getTitle());

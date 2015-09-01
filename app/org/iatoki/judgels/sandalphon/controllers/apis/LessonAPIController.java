@@ -1,5 +1,6 @@
 package org.iatoki.judgels.sandalphon.controllers.apis;
 
+import com.google.gson.Gson;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FileUtils;
@@ -13,6 +14,7 @@ import org.iatoki.judgels.sandalphon.ClientLesson;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemStatement;
+import org.iatoki.judgels.sandalphon.ResourceDisplayName;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.LessonService;
@@ -139,7 +141,18 @@ public final class LessonAPIController extends AbstractJudgelsAPIController {
             return notFound();
         }
 
-        return ok(lessonService.findLessonByJid(lessonJid).getSlug());
+        try {
+            Lesson lesson = lessonService.findLessonByJid(lessonJid);
+
+            ResourceDisplayName displayName = new ResourceDisplayName();
+            displayName.defaultLanguage = lessonService.getDefaultLanguage(null, lessonJid);
+            displayName.titlesByLanguage = lessonService.getTitlesByLanguage(null, lessonJid);
+            displayName.slug = lesson.getSlug();
+
+            return ok(new Gson().toJson(displayName));
+        } catch (IOException e) {
+            return internalServerError();
+        }
     }
 
     @Transactional(readOnly = true)

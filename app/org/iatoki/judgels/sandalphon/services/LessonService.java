@@ -58,6 +58,8 @@ public interface LessonService {
 
     ProblemStatement getStatement(String userJid, String lessonJid, String languageCode) throws IOException;
 
+    Map<String, String> getTitlesByLanguage(String userJid, String lessonJid) throws IOException;
+
     void updateStatement(String userJid, long lessonId, String languageCode, ProblemStatement statement) throws IOException;
 
     void uploadStatementMediaFile(String userJid, long lessonId, File mediaFile, String filename) throws IOException;
