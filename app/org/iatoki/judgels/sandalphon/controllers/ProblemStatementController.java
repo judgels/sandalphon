@@ -194,7 +194,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
     public Result postUploadStatementMediaFiles(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAllowedToUploadStatementResources(problemService, problem)) {
+        if (!ProblemControllerUtils.isAllowedToUploadStatementResources(problemService, problem)) {
             return notFound();
         }
 
