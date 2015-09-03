@@ -6,20 +6,20 @@ import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
-import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
+import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
-import org.iatoki.judgels.sandalphon.ProblemStatement;
-import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
-import org.iatoki.judgels.sandalphon.services.LessonService;
+import org.iatoki.judgels.sandalphon.LessonStatement;
 import org.iatoki.judgels.sandalphon.LessonStatementUtils;
+import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.LessonCreateForm;
 import org.iatoki.judgels.sandalphon.forms.LessonUpdateForm;
+import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.views.html.lesson.createLessonView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.listLessonsView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.updateLessonView;
@@ -103,7 +103,7 @@ public final class LessonController extends AbstractJudgelsController {
         Lesson lesson;
         try {
             lesson = lessonService.createLesson(lessonCreateData.slug, lessonCreateData.additionalNote, lessonCreateData.initLanguageCode);
-            lessonService.updateStatement(null, lesson.getId(), lessonCreateData.initLanguageCode, new ProblemStatement(ProblemStatementUtils.getDefaultTitle(lessonCreateData.initLanguageCode), LessonStatementUtils.getDefaultText(lessonCreateData.initLanguageCode)));
+            lessonService.updateStatement(null, lesson.getId(), lessonCreateData.initLanguageCode, new LessonStatement(ProblemStatementUtils.getDefaultTitle(lessonCreateData.initLanguageCode), LessonStatementUtils.getDefaultText(lessonCreateData.initLanguageCode)));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

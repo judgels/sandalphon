@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
@@ -156,7 +157,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
 
         try {
             UpdateStatementForm updateStatementData = updateStatementForm.get();
-            ProblemStatement statement = new ProblemStatement(updateStatementData.title, updateStatementData.text);
+            ProblemStatement statement = new ProblemStatement(updateStatementData.title, JudgelsPlayUtils.toSafeHtml(updateStatementData.text));
 
             problemService.updateStatement(IdentityUtils.getUserJid(), problemId, ProblemControllerUtils.getCurrentStatementLanguage(), statement);
         } catch (IOException e) {

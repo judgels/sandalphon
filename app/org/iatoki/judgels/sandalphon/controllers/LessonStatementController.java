@@ -3,10 +3,12 @@ package org.iatoki.judgels.sandalphon.controllers;
 import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
+import org.iatoki.judgels.sandalphon.LessonStatement;
 import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.services.LessonService;
@@ -183,7 +185,7 @@ public class LessonStatementController extends AbstractJudgelsController {
 
         try {
             UpdateStatementForm updateStatementData = updateStatementForm.get();
-            lessonService.updateStatement(IdentityUtils.getUserJid(), lessonId, LessonControllerUtils.getCurrentStatementLanguage(), new ProblemStatement(updateStatementData.title, updateStatementData.text));
+            lessonService.updateStatement(IdentityUtils.getUserJid(), lessonId, LessonControllerUtils.getCurrentStatementLanguage(), new LessonStatement(updateStatementData.title, JudgelsPlayUtils.toSafeHtml(updateStatementData.text)));
         } catch (IOException e) {
             try {
                 updateStatementForm.reject("lesson.statement.error.cantUpload");

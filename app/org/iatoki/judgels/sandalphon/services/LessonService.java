@@ -8,6 +8,7 @@ import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
+import org.iatoki.judgels.sandalphon.LessonStatement;
 import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 
@@ -60,7 +61,7 @@ public interface LessonService {
 
     Map<String, String> getTitlesByLanguage(String userJid, String lessonJid) throws IOException;
 
-    void updateStatement(String userJid, long lessonId, String languageCode, ProblemStatement statement) throws IOException;
+    void updateStatement(String userJid, long lessonId, String languageCode, LessonStatement statement) throws IOException;
 
     void uploadStatementMediaFile(String userJid, long lessonId, File mediaFile, String filename) throws IOException;
 
