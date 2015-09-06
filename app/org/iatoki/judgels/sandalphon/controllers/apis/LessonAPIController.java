@@ -8,7 +8,6 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientLesson;
 import org.iatoki.judgels.sandalphon.Lesson;
@@ -22,6 +21,7 @@ import org.iatoki.judgels.sandalphon.views.html.lesson.statement.lessonStatement
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.statementLanguageSelectionLayout;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
+import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 @Singleton
 @Named
-public final class LessonAPIController extends AbstractJudgelsAPIController {
+public final class LessonAPIController extends Controller {
 
     private final ClientService clientService;
     private final LessonService lessonService;
