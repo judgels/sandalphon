@@ -1,11 +1,11 @@
 package org.iatoki.judgels.sandalphon.controllers.apis;
 
+import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.services.GraderService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
-import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -17,7 +17,7 @@ import java.util.Date;
 
 @Singleton
 @Named
-public final class ProgrammingProblemAPIController extends Controller {
+public final class ProgrammingProblemAPIController extends AbstractJudgelsAPIController {
 
     private final GraderService graderService;
     private final ProblemService problemService;

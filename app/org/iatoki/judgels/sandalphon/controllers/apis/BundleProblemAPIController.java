@@ -3,6 +3,7 @@ package org.iatoki.judgels.sandalphon.controllers.apis;
 import com.google.gson.Gson;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
+import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.BundleAnswer;
 import org.iatoki.judgels.sandalphon.BundleGradingResult;
 import org.iatoki.judgels.sandalphon.Client;
@@ -13,7 +14,6 @@ import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.impls.BundleProblemGraderImpl;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
-import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -23,7 +23,7 @@ import java.io.IOException;
 
 @Singleton
 @Named
-public final class BundleProblemAPIController extends Controller {
+public final class BundleProblemAPIController extends AbstractJudgelsAPIController {
 
     private final BundleProblemGraderImpl bundleProblemGrader;
     private final ClientService clientService;

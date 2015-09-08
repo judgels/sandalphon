@@ -11,6 +11,7 @@ import org.iatoki.judgels.gabriel.GradingEngineRegistry;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
+import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.ResourceDisplayName;
 import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.Client;
@@ -33,7 +34,6 @@ import org.iatoki.judgels.sandalphon.views.html.problem.bundle.statement.bundleS
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.statementLanguageSelectionLayout;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
-import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Results;
 import play.twirl.api.Html;
@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 
 @Singleton
 @Named
-public final class ProblemAPIController extends Controller {
+public final class ProblemAPIController extends AbstractJudgelsAPIController {
 
     private final BundleItemService bundleItemService;
     private final ClientService clientService;
