@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
@@ -107,7 +108,7 @@ public final class ClientController extends AbstractJudgelsController {
         }
 
         ClientUpsertForm clientUpsertData = clientUpsertForm.get();
-        clientService.createClient(clientUpsertData.name);
+        clientService.createClient(clientUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Create client " + clientUpsertData.name + ".");
 
@@ -138,7 +139,7 @@ public final class ClientController extends AbstractJudgelsController {
         }
 
         ClientUpsertForm clientUpsertData = clientUpsertForm.get();
-        clientService.updateClient(clientId, clientUpsertData.name);
+        clientService.updateClient(client.getJid(), clientUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update client " + client.getName() + ".");
 

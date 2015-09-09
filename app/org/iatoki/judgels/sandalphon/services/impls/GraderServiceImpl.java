@@ -2,13 +2,12 @@ package org.iatoki.judgels.sandalphon.services.impls;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.sandalphon.models.daos.programming.GraderDao;
-import org.iatoki.judgels.sandalphon.models.entities.programming.GraderModel;
 import org.iatoki.judgels.sandalphon.Grader;
 import org.iatoki.judgels.sandalphon.GraderNotFoundException;
+import org.iatoki.judgels.sandalphon.models.daos.programming.GraderDao;
+import org.iatoki.judgels.sandalphon.models.entities.programming.GraderModel;
 import org.iatoki.judgels.sandalphon.services.GraderService;
 
 import javax.inject.Inject;
@@ -50,20 +49,20 @@ public final class GraderServiceImpl implements GraderService {
     }
 
     @Override
-    public void createGrader(String name) {
+    public void createGrader(String name, String userJid, String userIpAddress) {
         GraderModel graderModel = new GraderModel();
         graderModel.name = name;
         graderModel.secret = JudgelsPlayUtils.generateNewSecret();
 
-        graderDao.persist(graderModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        graderDao.persist(graderModel, userJid, userIpAddress);
     }
 
     @Override
-    public void updateGrader(long clientId, String name) {
-        GraderModel clientModel = graderDao.findById(clientId);
-        clientModel.name = name;
+    public void updateGrader(String graderJid, String name, String userJid, String userIpAddress) {
+        GraderModel graderModel = graderDao.findByJid(graderJid);
+        graderModel.name = name;
 
-        graderDao.edit(clientModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        graderDao.edit(graderModel, userJid, userIpAddress);
     }
 
     @Override

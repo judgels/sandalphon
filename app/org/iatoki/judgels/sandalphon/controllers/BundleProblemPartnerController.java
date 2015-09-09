@@ -131,7 +131,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
         BundleProblemPartnerConfig bundleConfig = new BundleProblemPartnerConfig(bundleData.isAllowedToSubmit, bundleData.isAllowedToManageItems);
 
-        problemService.createProblemPartner(problem.getId(), userJid, problemConfig, bundleConfig);
+        problemService.createProblemPartner(problem.getJid(), userJid, problemConfig, bundleConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getSlug() + ".");
 
@@ -212,7 +212,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
         BundleProblemPartnerConfig bundleConfig = new BundleProblemPartnerConfig(bundleData.isAllowedToSubmit, bundleData.isAllowedToManageItems);
 
-        problemService.updateProblemPartner(partnerId, problemConfig, bundleConfig);
+        problemService.updateProblemPartner(partnerId, problemConfig, bundleConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getSlug() + ".");
 

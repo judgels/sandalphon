@@ -25,9 +25,9 @@ public final class BundleProblemServiceImpl implements BundleProblemService {
 
     @Override
     public void initBundleProblem(String problemJid) throws IOException {
-        problemFileSystemProvider.createDirectory(BundleServiceUtils.getItemsDirPath(problemFileSystemProvider, problemJid, null));
+        problemFileSystemProvider.createDirectory(BundleItemServiceUtils.getItemsDirPath(problemFileSystemProvider, problemJid, null));
 
         BundleItemsConfig config = BundleItemUtils.createDefaultItemConfig();
-        problemFileSystemProvider.writeToFile(BundleServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, null), new Gson().toJson(config));
+        problemFileSystemProvider.writeToFile(BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, null), new Gson().toJson(config));
     }
 }

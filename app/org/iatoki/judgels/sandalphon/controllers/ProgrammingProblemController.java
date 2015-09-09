@@ -80,8 +80,8 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
 
         Problem problem;
         try {
-            problem = problemService.createProblem(ProblemType.PROGRAMMING, slug, additionalNote, languageCode);
-            problemService.updateStatement(null, problem.getId(), languageCode, new ProblemStatement(ProblemStatementUtils.getDefaultTitle(languageCode), ProgrammingProblemStatementUtils.getDefaultText(languageCode)));
+            problem = problemService.createProblem(ProblemType.PROGRAMMING, slug, additionalNote, languageCode, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            problemService.updateStatement(null, problem.getJid(), languageCode, new ProblemStatement(ProblemStatementUtils.getDefaultTitle(languageCode), ProgrammingProblemStatementUtils.getDefaultText(languageCode)));
             programmingProblemService.initProgrammingProblem(problem.getJid(), programmingProblemCreateData.gradingEngineName);
         } catch (IOException e) {
             programmingProblemCreateForm.reject("problem.programming.error.cantCreate");

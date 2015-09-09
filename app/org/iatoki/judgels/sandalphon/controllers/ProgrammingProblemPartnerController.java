@@ -135,7 +135,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
               .setIsAllowedToManageGrading(programmingData.isAllowedToManageGrading)
               .build();
 
-        problemService.createProblemPartner(problem.getId(), userJid, problemConfig, programmingConfig);
+        problemService.createProblemPartner(problem.getJid(), userJid, problemConfig, programmingConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getSlug() + ".");
 
@@ -221,7 +221,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
                 .build();
 
 
-        problemService.updateProblemPartner(partnerId, problemConfig, programmingConfig);
+        problemService.updateProblemPartner(partnerId, problemConfig, programmingConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getSlug() + ".");
 

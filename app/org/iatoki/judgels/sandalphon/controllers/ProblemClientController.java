@@ -1,5 +1,6 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
+import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
@@ -86,7 +87,7 @@ public final class ProblemClientController extends AbstractJudgelsController {
             return showUpdateClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
         }
 
-        clientService.createClientProblem(problem.getJid(), clientProblemUpsertData.clientJid);
+        clientService.createClientProblem(problem.getJid(), clientProblemUpsertData.clientJid, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertData.clientJid + " to problem " + problem.getSlug() + ".");
 

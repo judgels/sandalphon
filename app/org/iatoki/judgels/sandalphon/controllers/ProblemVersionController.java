@@ -77,7 +77,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
             return notFound();
         }
 
-        problemService.restore(problem.getJid(), hash);
+        problemService.restore(problem.getJid(), hash, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -121,9 +121,9 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         if (problemService.fetchUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
             flash("localChangesError", Messages.get("problem.version.local.cantCommit"));
-        } else if (!problemService.commitThenMergeUserClone(IdentityUtils.getUserJid(), problem.getJid(), versionCommitData.title, versionCommitData.description)) {
+        } else if (!problemService.commitThenMergeUserClone(IdentityUtils.getUserJid(), problem.getJid(), versionCommitData.title, versionCommitData.description, IdentityUtils.getIpAddress())) {
             flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
-        } else if (!problemService.pushUserClone(IdentityUtils.getUserJid(), problem.getJid())) {
+        } else if (!problemService.pushUserClone(IdentityUtils.getUserJid(), problem.getJid(), IdentityUtils.getIpAddress())) {
             flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
         } else {
             try {

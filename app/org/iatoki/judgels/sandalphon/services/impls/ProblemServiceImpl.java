@@ -10,7 +10,6 @@ import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.GitCommit;
 import org.iatoki.judgels.GitProvider;
-import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
@@ -57,12 +56,12 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public Problem createProblem(ProblemType type, String slug, String additionalNote, String initialLanguageCode) throws IOException {
+    public Problem createProblem(ProblemType type, String slug, String additionalNote, String initialLanguageCode, String userJid, String userIpAddress) throws IOException {
         ProblemModel problemModel = new ProblemModel();
         problemModel.slug = slug;
         problemModel.additionalNote = additionalNote;
 
-        problemDao.persist(problemModel, type.ordinal(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        problemDao.persist(problemModel, type.ordinal(), userJid, userIpAddress);
 
         initStatements(problemModel.jid, initialLanguageCode);
         problemFileSystemProvider.createDirectory(ProblemServiceUtils.getClonesDirPath(problemModel.jid));
@@ -103,8 +102,8 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void createProblemPartner(long problemId, String userJid, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig) {
-        ProblemModel problemModel = problemDao.findById(problemId);
+    public void createProblemPartner(String problemJid, String userJid, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig, String createUserJid, String createUserIpAddress) {
+        ProblemModel problemModel = problemDao.findByJid(problemJid);
 
         ProblemPartnerModel problemPartnerModel = new ProblemPartnerModel();
         problemPartnerModel.problemJid = problemModel.jid;
@@ -112,16 +111,22 @@ public final class ProblemServiceImpl implements ProblemService {
         problemPartnerModel.baseConfig = new Gson().toJson(baseConfig);
         problemPartnerModel.childConfig = new Gson().toJson(childConfig);
 
-        problemPartnerDao.persist(problemPartnerModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        problemPartnerDao.persist(problemPartnerModel, createUserJid, createUserIpAddress);
+
+        problemDao.edit(problemModel, createUserJid, createUserIpAddress);
     }
 
     @Override
-    public void updateProblemPartner(long problemPartnerId, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig) {
+    public void updateProblemPartner(long problemPartnerId, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig, String userJid, String userIpAddress) {
         ProblemPartnerModel problemPartnerModel = problemPartnerDao.findById(problemPartnerId);
         problemPartnerModel.baseConfig = new Gson().toJson(baseConfig);
         problemPartnerModel.childConfig = new Gson().toJson(childConfig);
 
-        problemPartnerDao.edit(problemPartnerModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        problemPartnerDao.edit(problemPartnerModel, userJid, userIpAddress);
+
+        ProblemModel problemModel = problemDao.findByJid(problemPartnerModel.problemJid);
+
+        problemDao.edit(problemModel, userJid, userIpAddress);
     }
 
     @Override
@@ -151,12 +156,12 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void updateProblem(long problemId, String slug, String additionalNote) {
-        ProblemModel problemModel = problemDao.findById(problemId);
+    public void updateProblem(String problemJid, String slug, String additionalNote, String userJid, String userIpAddress) {
+        ProblemModel problemModel = problemDao.findByJid(problemJid);
         problemModel.slug = slug;
         problemModel.additionalNote = additionalNote;
 
-        problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        problemDao.edit(problemModel, userJid, userIpAddress);
     }
 
     @Override
@@ -189,8 +194,8 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public Map<String, StatementLanguageStatus> getAvailableLanguages(String userJid, String problemJid) throws IOException {
         String langs = problemFileSystemProvider.readFromFile(getStatementAvailableLanguagesFilePath(userJid, problemJid));
-        return new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() {
-        }.getType());
+
+        return new Gson().fromJson(langs, new TypeToken<Map<String, StatementLanguageStatus>>() { }.getType());
     }
 
     @Override
@@ -261,30 +266,24 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void updateStatement(String userJid, long problemId, String languageCode, ProblemStatement statement) throws IOException {
-        ProblemModel problemModel = problemDao.findById(problemId);
+    public void updateStatement(String userJid, String problemJid, String languageCode, ProblemStatement statement) throws IOException {
+        ProblemModel problemModel = problemDao.findByJid(problemJid);
         problemFileSystemProvider.writeToFile(getStatementTitleFilePath(userJid, problemModel.jid, languageCode), statement.getTitle());
         problemFileSystemProvider.writeToFile(getStatementTextFilePath(userJid, problemModel.jid, languageCode), statement.getText());
-
-        problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
-    public void uploadStatementMediaFile(String userJid, long id, File mediaFile, String filename) throws IOException {
-        ProblemModel problemModel = problemDao.findById(id);
+    public void uploadStatementMediaFile(String userJid, String problemJid, File mediaFile, String filename) throws IOException {
+        ProblemModel problemModel = problemDao.findByJid(problemJid);
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, problemModel.jid);
         problemFileSystemProvider.uploadFile(mediaDirPath, mediaFile, filename);
-
-        problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
-    public void uploadStatementMediaFileZipped(String userJid, long id, File mediaFileZipped) throws IOException {
-        ProblemModel problemModel = problemDao.findById(id);
+    public void uploadStatementMediaFileZipped(String userJid, String problemJid, File mediaFileZipped) throws IOException {
+        ProblemModel problemModel = problemDao.findByJid(problemJid);
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, problemModel.jid);
         problemFileSystemProvider.uploadZippedFiles(mediaDirPath, mediaFileZipped, false);
-
-        problemDao.edit(problemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
@@ -332,7 +331,7 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public boolean commitThenMergeUserClone(String userJid, String problemJid, String title, String text) {
+    public boolean commitThenMergeUserClone(String userJid, String problemJid, String title, String text, String userIpAddress) {
         List<String> root = ProblemServiceUtils.getCloneDirPath(userJid, problemJid);
 
         problemGitProvider.addAll(root);
@@ -341,6 +340,10 @@ public final class ProblemServiceImpl implements ProblemService {
 
         if (!success) {
             problemGitProvider.resetToParent(root);
+        } else {
+            ProblemModel problemModel = problemDao.findByJid(problemJid);
+
+            problemDao.edit(problemModel, userJid, userIpAddress);
         }
 
         return success;
@@ -360,12 +363,17 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public boolean pushUserClone(String userJid, String problemJid) {
+    public boolean pushUserClone(String userJid, String problemJid, String userIpAddress) {
         List<String> origin = ProblemServiceUtils.getOriginDirPath(problemJid);
         List<String> root = ProblemServiceUtils.getRootDirPath(problemFileSystemProvider, userJid, problemJid);
 
         if (problemGitProvider.push(root)) {
             problemGitProvider.resetHard(origin);
+
+            ProblemModel problemModel = problemDao.findByJid(problemJid);
+
+            problemDao.edit(problemModel, userJid, userIpAddress);
+
             return true;
         }
         return false;
@@ -386,10 +394,14 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public void restore(String problemJid, String hash) {
+    public void restore(String problemJid, String hash, String userJid, String userIpAddress) {
         List<String> root = ProblemServiceUtils.getOriginDirPath(problemJid);
 
         problemGitProvider.restore(root, hash);
+
+        ProblemModel problemModel = problemDao.findByJid(problemJid);
+
+        problemDao.edit(problemModel, userJid, userIpAddress);
     }
 
     private void initStatements(String problemJid, String initialLanguageCode) throws IOException {

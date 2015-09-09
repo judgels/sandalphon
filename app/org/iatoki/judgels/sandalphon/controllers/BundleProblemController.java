@@ -47,8 +47,8 @@ public final class BundleProblemController extends AbstractJudgelsController {
 
         Problem problem;
         try {
-            problem = problemService.createProblem(ProblemType.BUNDLE, slug, additionalNote, languageCode);
-            problemService.updateStatement(null, problem.getId(), languageCode, new ProblemStatement(ProblemStatementUtils.getDefaultTitle(languageCode), BundleProblemStatementUtils.getDefaultStatement(languageCode)));
+            problem = problemService.createProblem(ProblemType.BUNDLE, slug, additionalNote, languageCode, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            problemService.updateStatement(null, problem.getJid(), languageCode, new ProblemStatement(ProblemStatementUtils.getDefaultTitle(languageCode), BundleProblemStatementUtils.getDefaultStatement(languageCode)));
             bundleProblemService.initBundleProblem(problem.getJid());
         } catch (IOException e) {
             e.printStackTrace();

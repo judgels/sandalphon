@@ -4,9 +4,9 @@ import org.iatoki.judgels.FileSystemProvider;
 
 import java.util.List;
 
-public final class BundleServiceUtils {
+public final class BundleItemServiceUtils {
 
-    private BundleServiceUtils() {
+    private BundleItemServiceUtils() {
         // prevent instantiation
     }
 
@@ -25,5 +25,4 @@ public final class BundleServiceUtils {
     static List<String> getItemConfigFilePath(FileSystemProvider fileSystemProvider, String problemJid, String userJid, String itemJid, String languageCode) {
         return ProblemServiceUtils.appendPath(getItemDirPath(fileSystemProvider, problemJid, userJid, itemJid), languageCode + ".json");
     }
-
 }

@@ -14,9 +14,9 @@ public interface GraderService {
 
     Page<Grader> getPageOfGraders(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    void createGrader(String name);
+    void createGrader(String name, String userJid, String userIpAddress);
 
-    void updateGrader(long graderId, String name);
+    void updateGrader(String graderJid, String name, String userJid, String userIpAddress);
 
     boolean verifyGrader(String graderJid, String clientSecret);
 }

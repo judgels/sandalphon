@@ -77,7 +77,7 @@ public final class LessonVersionController extends AbstractJudgelsController {
             return notFound();
         }
 
-        lessonService.restore(lesson.getJid(), hash);
+        lessonService.restore(lesson.getJid(), hash, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -121,9 +121,9 @@ public final class LessonVersionController extends AbstractJudgelsController {
 
         if (lessonService.fetchUserClone(IdentityUtils.getUserJid(), lesson.getJid())) {
             flash("localChangesError", Messages.get("lesson.version.local.cantCommit"));
-        } else if (!lessonService.commitThenMergeUserClone(IdentityUtils.getUserJid(), lesson.getJid(), versionCommitData.title, versionCommitData.description)) {
+        } else if (!lessonService.commitThenMergeUserClone(IdentityUtils.getUserJid(), lesson.getJid(), versionCommitData.title, versionCommitData.description, IdentityUtils.getIpAddress())) {
             flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
-        } else if (!lessonService.pushUserClone(IdentityUtils.getUserJid(), lesson.getJid())) {
+        } else if (!lessonService.pushUserClone(IdentityUtils.getUserJid(), lesson.getJid(), IdentityUtils.getIpAddress())) {
             flash("localChangesError", Messages.get("lesson.version.local.cantMerge"));
         } else {
             try {

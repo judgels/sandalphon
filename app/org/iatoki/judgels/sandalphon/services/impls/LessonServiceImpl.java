@@ -9,7 +9,6 @@ import org.iatoki.judgels.FileInfo;
 import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.GitCommit;
 import org.iatoki.judgels.GitProvider;
-import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
@@ -56,12 +55,12 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public Lesson createLesson(String slug, String additionalNote, String initialLanguageCode) throws IOException {
+    public Lesson createLesson(String slug, String additionalNote, String initialLanguageCode, String userJid, String userIpAddress) throws IOException {
         LessonModel lessonModel = new LessonModel();
         lessonModel.slug = slug;
         lessonModel.additionalNote = additionalNote;
 
-        lessonDao.persist(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        lessonDao.persist(lessonModel, userJid, userIpAddress);
 
         initStatements(lessonModel.jid, initialLanguageCode);
         lessonFileSystemProvider.createDirectory(LessonServiceUtils.getClonesDirPath(lessonModel.jid));
@@ -102,23 +101,29 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public void createLessonPartner(long lessonId, String userJid, LessonPartnerConfig config) {
-        LessonModel lessonModel = lessonDao.findById(lessonId);
+    public void createLessonPartner(String lessonJid, String userJid, LessonPartnerConfig config, String createUserJid, String createUserIpAddress) {
+        LessonModel lessonModel = lessonDao.findByJid(lessonJid);
 
         LessonPartnerModel lessonPartnerModel = new LessonPartnerModel();
         lessonPartnerModel.lessonJid = lessonModel.jid;
         lessonPartnerModel.userJid = userJid;
         lessonPartnerModel.config = new Gson().toJson(config);
 
-        lessonPartnerDao.persist(lessonPartnerModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        lessonPartnerDao.persist(lessonPartnerModel, createUserJid, createUserIpAddress);
+
+        lessonDao.edit(lessonModel, createUserJid, createUserIpAddress);
     }
 
     @Override
-    public void updateLessonPartner(long lessonPartnerId, LessonPartnerConfig config) {
+    public void updateLessonPartner(long lessonPartnerId, LessonPartnerConfig config, String userJid, String userIpAddress) {
         LessonPartnerModel lessonPartnerModel = lessonPartnerDao.findById(lessonPartnerId);
         lessonPartnerModel.config = new Gson().toJson(config);
 
-        lessonPartnerDao.edit(lessonPartnerModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        lessonPartnerDao.edit(lessonPartnerModel, userJid, userIpAddress);
+
+        LessonModel lessonModel = lessonDao.findByJid(lessonPartnerModel.lessonJid);
+
+        lessonDao.edit(lessonModel, userJid, userIpAddress);
     }
 
     @Override
@@ -148,12 +153,12 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public void updateLesson(long lessonId, String slug, String additionalNote) {
-        LessonModel lessonModel = lessonDao.findById(lessonId);
+    public void updateLesson(String lessonJid, String slug, String additionalNote, String userJid, String userIpAddress) {
+        LessonModel lessonModel = lessonDao.findByJid(lessonJid);
         lessonModel.slug = slug;
         lessonModel.additionalNote = additionalNote;
 
-        lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        lessonDao.edit(lessonModel, userJid, userIpAddress);
     }
 
     @Override
@@ -257,30 +262,24 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public void updateStatement(String userJid, long lessonId, String languageCode, LessonStatement statement) throws IOException {
-        LessonModel lessonModel = lessonDao.findById(lessonId);
+    public void updateStatement(String userJid, String lessonJid, String languageCode, LessonStatement statement) throws IOException {
+        LessonModel lessonModel = lessonDao.findByJid(lessonJid);
         lessonFileSystemProvider.writeToFile(getStatementTitleFilePath(userJid, lessonModel.jid, languageCode), statement.getTitle());
         lessonFileSystemProvider.writeToFile(getStatementTextFilePath(userJid, lessonModel.jid, languageCode), statement.getText());
-
-        lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
-    public void uploadStatementMediaFile(String userJid, long id, File mediaFile, String filename) throws IOException {
-        LessonModel lessonModel = lessonDao.findById(id);
+    public void uploadStatementMediaFile(String userJid, String lessonJid, File mediaFile, String filename) throws IOException {
+        LessonModel lessonModel = lessonDao.findByJid(lessonJid);
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, lessonModel.jid);
         lessonFileSystemProvider.uploadFile(mediaDirPath, mediaFile, filename);
-
-        lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
-    public void uploadStatementMediaFileZipped(String userJid, long id, File mediaFileZipped) throws IOException {
-        LessonModel lessonModel = lessonDao.findById(id);
+    public void uploadStatementMediaFileZipped(String userJid, String lessonJid, File mediaFileZipped) throws IOException {
+        LessonModel lessonModel = lessonDao.findByJid(lessonJid);
         List<String> mediaDirPath = getStatementMediaDirPath(userJid, lessonModel.jid);
         lessonFileSystemProvider.uploadZippedFiles(mediaDirPath, mediaFileZipped, false);
-
-        lessonDao.edit(lessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override
@@ -328,7 +327,7 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public boolean commitThenMergeUserClone(String userJid, String lessonJid, String title, String description) {
+    public boolean commitThenMergeUserClone(String userJid, String lessonJid, String title, String description, String userIpAddress) {
         List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
 
         lessonGitProvider.addAll(root);
@@ -337,6 +336,9 @@ public final class LessonServiceImpl implements LessonService {
 
         if (!success) {
             lessonGitProvider.resetToParent(root);
+        } else {
+            LessonModel lessonModel = lessonDao.findByJid(lessonJid);
+            lessonDao.edit(lessonModel, userJid, userIpAddress);
         }
 
         return success;
@@ -356,12 +358,16 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public boolean pushUserClone(String userJid, String lessonJid) {
+    public boolean pushUserClone(String userJid, String lessonJid, String userIpAddress) {
         List<String> origin = LessonServiceUtils.getOriginDirPath(lessonJid);
         List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
 
         if (lessonGitProvider.push(root)) {
             lessonGitProvider.resetHard(origin);
+
+            LessonModel lessonModel = lessonDao.findByJid(lessonJid);
+            lessonDao.edit(lessonModel, userJid, userIpAddress);
+
             return true;
         }
         return false;
@@ -382,10 +388,13 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public void restore(String lessonJid, String hash) {
+    public void restore(String lessonJid, String hash, String userJid, String userIpAddress) {
         List<String> root = LessonServiceUtils.getOriginDirPath(lessonJid);
 
         lessonGitProvider.restore(root, hash);
+
+        LessonModel lessonModel = lessonDao.findByJid(lessonJid);
+        lessonDao.edit(lessonModel, userJid, userIpAddress);
     }
 
     private void initStatements(String lessonJid, String initialLanguageCode) throws IOException {

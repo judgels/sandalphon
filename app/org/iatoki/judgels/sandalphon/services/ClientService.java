@@ -18,11 +18,9 @@ public interface ClientService {
 
     Client findClientByJid(String clientJid);
 
-    void createClient(String name);
+    void createClient(String name, String userJid, String userIpAddress);
 
-    void updateClient(long clientId, String name);
-
-    void deleteClient(long clientId);
+    void updateClient(String clientJid, String name, String userJid, String userIpAddress);
 
     Page<Client> getPageOfClients(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
@@ -34,9 +32,7 @@ public interface ClientService {
 
     List<ClientProblem> getClientProblemsByProblemJid(String problemJid);
 
-    void createClientProblem(String problemJid, String clientJid);
-
-    void deleteClientProblem(long clientProblemId);
+    void createClientProblem(String problemJid, String clientJid, String userJid, String userIpAddress);
 
     boolean isClientAuthorizedForLesson(String lessonJid, String clientJid);
 
@@ -46,7 +42,5 @@ public interface ClientService {
 
     List<ClientLesson> getClientLessonsByLessonJid(String lessonJid);
 
-    void createClientLesson(String lessonJid, String clientJid);
-
-    void deleteClientLesson(long clientLessonId);
+    void createClientLesson(String lessonJid, String clientJid, String userJid, String userIpAddress);
 }

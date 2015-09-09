@@ -3,7 +3,6 @@ package org.iatoki.judgels.sandalphon.services.impls;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.Client;
@@ -13,9 +12,13 @@ import org.iatoki.judgels.sandalphon.ClientProblem;
 import org.iatoki.judgels.sandalphon.models.daos.ClientDao;
 import org.iatoki.judgels.sandalphon.models.daos.ClientLessonDao;
 import org.iatoki.judgels.sandalphon.models.daos.ClientProblemDao;
+import org.iatoki.judgels.sandalphon.models.daos.LessonDao;
+import org.iatoki.judgels.sandalphon.models.daos.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.entities.ClientLessonModel;
 import org.iatoki.judgels.sandalphon.models.entities.ClientModel;
 import org.iatoki.judgels.sandalphon.models.entities.ClientProblemModel;
+import org.iatoki.judgels.sandalphon.models.entities.LessonModel;
+import org.iatoki.judgels.sandalphon.models.entities.ProblemModel;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 
 import javax.inject.Inject;
@@ -31,12 +34,16 @@ public final class ClientServiceImpl implements ClientService {
     private final ClientDao clientDao;
     private final ClientLessonDao clientLessonDao;
     private final ClientProblemDao clientProblemDao;
+    private final LessonDao lessonDao;
+    private final ProblemDao problemDao;
 
     @Inject
-    public ClientServiceImpl(ClientDao clientDao, ClientLessonDao clientLessonDao, ClientProblemDao clientProblemDao) {
+    public ClientServiceImpl(ClientDao clientDao, ClientLessonDao clientLessonDao, ClientProblemDao clientProblemDao, LessonDao lessonDao, ProblemDao problemDao) {
         this.clientDao = clientDao;
         this.clientLessonDao = clientLessonDao;
         this.clientProblemDao = clientProblemDao;
+        this.lessonDao = lessonDao;
+        this.problemDao = problemDao;
     }
 
     @Override
@@ -70,27 +77,20 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void createClient(String name) {
+    public void createClient(String name, String userJid, String userIpAddress) {
         ClientModel clientModel = new ClientModel();
         clientModel.name = name;
         clientModel.secret = JudgelsPlayUtils.generateNewSecret();
 
-        clientDao.persist(clientModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        clientDao.persist(clientModel, userJid, userIpAddress);
     }
 
     @Override
-    public void updateClient(long clientId, String name) {
-        ClientModel clientModel = clientDao.findById(clientId);
+    public void updateClient(String clientJid, String name, String userJid, String userIpAddress) {
+        ClientModel clientModel = clientDao.findByJid(clientJid);
         clientModel.name = name;
 
-        clientDao.edit(clientModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-    }
-
-    @Override
-    public void deleteClient(long clientId) {
-        ClientModel clientModel = clientDao.findById(clientId);
-
-        clientDao.remove(clientModel);
+        clientDao.edit(clientModel, userJid, userIpAddress);
     }
 
     @Override
@@ -138,19 +138,17 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void createClientProblem(String problemJid, String clientJid) {
+    public void createClientProblem(String problemJid, String clientJid, String userJid, String userIpAddress) {
         ClientProblemModel clientProblemModel = new ClientProblemModel();
         clientProblemModel.problemJid = problemJid;
         clientProblemModel.clientJid = clientJid;
         clientProblemModel.secret = JudgelsPlayUtils.generateNewSecret();
 
-        clientProblemDao.persist(clientProblemModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-    }
+        clientProblemDao.persist(clientProblemModel, userJid, userIpAddress);
 
-    @Override
-    public void deleteClientProblem(long clientProblemId) {
-        ClientProblemModel clientProblemModel = clientProblemDao.findById(clientProblemId);
-        clientProblemDao.remove(clientProblemModel);
+        ProblemModel problemModel = problemDao.findByJid(problemJid);
+
+        problemDao.edit(problemModel, userJid, userIpAddress);
     }
 
     @Override
@@ -188,18 +186,16 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void createClientLesson(String lessonJid, String clientJid) {
+    public void createClientLesson(String lessonJid, String clientJid, String userJid, String userIpAddress) {
         ClientLessonModel clientLessonModel = new ClientLessonModel();
         clientLessonModel.lessonJid = lessonJid;
         clientLessonModel.clientJid = clientJid;
         clientLessonModel.secret = JudgelsPlayUtils.generateNewSecret();
 
-        clientLessonDao.persist(clientLessonModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-    }
+        clientLessonDao.persist(clientLessonModel, userJid, userIpAddress);
 
-    @Override
-    public void deleteClientLesson(long clientLessonId) {
-        ClientLessonModel clientLessonModel = clientLessonDao.findById(clientLessonId);
-        clientLessonDao.remove(clientLessonModel);
+        LessonModel lessonModel = lessonDao.findByJid(lessonJid);
+
+        lessonDao.edit(lessonModel, userJid, userIpAddress);
     }
 }

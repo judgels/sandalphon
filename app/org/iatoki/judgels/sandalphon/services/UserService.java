@@ -13,15 +13,15 @@ public interface UserService extends BaseUserService {
 
     User findUserByJid(String userJid);
 
-    void createUser(String userJid, List<String> roles);
+    void createUser(String userJid, List<String> roles, String createUserJid, String createUserIpAddress);
 
-    void updateUser(long userId, List<String> roles);
+    void updateUser(String userJid, List<String> roles, String updateUserJid, String updateUserIpAddress);
 
-    void deleteUser(long userId);
+    void deleteUser(String userJid);
 
     Page<User> getPageOfUsers(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    void upsertUserFromJophielUserJid(String userJid);
+    void upsertUserFromJophielUserJid(String userJid, String upsertUserJid, String upsertUserIpAddress);
 
-    void upsertUserFromJophielUserJid(String userJid, List<String> roles);
+    void upsertUserFromJophielUserJid(String userJid, List<String> roles, String upsertUserJid, String upsertUserIpAddress);
 }

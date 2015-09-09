@@ -102,8 +102,8 @@ public final class LessonController extends AbstractJudgelsController {
 
         Lesson lesson;
         try {
-            lesson = lessonService.createLesson(lessonCreateData.slug, lessonCreateData.additionalNote, lessonCreateData.initLanguageCode);
-            lessonService.updateStatement(null, lesson.getId(), lessonCreateData.initLanguageCode, new LessonStatement(ProblemStatementUtils.getDefaultTitle(lessonCreateData.initLanguageCode), LessonStatementUtils.getDefaultText(lessonCreateData.initLanguageCode)));
+            lesson = lessonService.createLesson(lessonCreateData.slug, lessonCreateData.additionalNote, lessonCreateData.initLanguageCode, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            lessonService.updateStatement(null, lesson.getJid(), lessonCreateData.initLanguageCode, new LessonStatement(ProblemStatementUtils.getDefaultTitle(lessonCreateData.initLanguageCode), LessonStatementUtils.getDefaultText(lessonCreateData.initLanguageCode)));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -205,7 +205,7 @@ public final class LessonController extends AbstractJudgelsController {
         }
 
         LessonUpdateForm lessonUpdateData = lessonUpdateForm.get();
-        lessonService.updateLesson(lessonId, lessonUpdateData.slug, lessonUpdateData.additionalNote);
+        lessonService.updateLesson(lesson.getJid(), lessonUpdateData.slug, lessonUpdateData.additionalNote, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update lesson " + lesson.getSlug() + ".");
 

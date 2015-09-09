@@ -200,7 +200,7 @@ public final class ProblemController extends AbstractJudgelsController {
         }
 
         ProblemUpdateForm problemUpdateData = problemUpdateForm.get();
-        problemService.updateProblem(problemId, problemUpdateData.slug, problemUpdateData.additionalNote);
+        problemService.updateProblem(problem.getJid(), problemUpdateData.slug, problemUpdateData.additionalNote, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update problem " + problem.getSlug() + ".");
 

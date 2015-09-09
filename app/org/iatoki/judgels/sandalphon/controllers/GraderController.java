@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
@@ -107,7 +108,7 @@ public final class GraderController extends AbstractJudgelsController {
         }
 
         GraderUpsertForm graderUpsertData = graderUpsertForm.get();
-        graderService.createGrader(graderUpsertData.name);
+        graderService.createGrader(graderUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Create grader " + graderUpsertData.name + ".");
 
@@ -137,7 +138,7 @@ public final class GraderController extends AbstractJudgelsController {
         }
 
         GraderUpsertForm graderUpsertData = graderUpsertForm.get();
-        graderService.updateGrader(graderId, graderUpsertData.name);
+        graderService.updateGrader(grader.getJid(), graderUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update grader " + grader.getName() + ".");
 

@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
+import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
@@ -116,7 +117,7 @@ public final class UserController extends AbstractJudgelsController {
             return showCreateUser(userCreateForm);
         }
 
-        userService.upsertUserFromJophielUserJid(userJid, userCreateData.getRolesAsList());
+        userService.upsertUserFromJophielUserJid(userJid, userCreateData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Create user " + userJid + ".");
 
@@ -165,7 +166,7 @@ public final class UserController extends AbstractJudgelsController {
         }
 
         UserUpdateForm userUpdateData = userUpdateForm.get();
-        userService.updateUser(user.getId(), userUpdateData.getRolesAsList());
+        userService.updateUser(user.getUserJid(), userUpdateData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update user " + user.getUserJid() + ".");
 
@@ -175,7 +176,7 @@ public final class UserController extends AbstractJudgelsController {
     @Transactional
     public Result deleteUser(long userId) throws UserNotFoundException {
         User user = userService.findUserById(userId);
-        userService.deleteUser(user.getId());
+        userService.deleteUser(user.getUserJid());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Delete user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 

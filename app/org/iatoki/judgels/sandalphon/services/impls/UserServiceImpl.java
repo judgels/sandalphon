@@ -82,25 +82,25 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createUser(String userJid, List<String> roles) {
+    public void createUser(String userJid, List<String> roles, String createUserJid, String createUserIpAddress) {
         UserModel userModel = new UserModel();
         userModel.userJid = userJid;
         userModel.roles = StringUtils.join(roles, ",");
 
-        userDao.persist(userModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userDao.persist(userModel, createUserJid, createUserIpAddress);
     }
 
     @Override
-    public void updateUser(long userId, List<String> roles) {
-        UserModel userModel = userDao.findById(userId);
+    public void updateUser(String userJid, List<String> roles, String updateUserJid, String updateUserIpAddress) {
+        UserModel userModel = userDao.findByJid(userJid);
         userModel.roles = StringUtils.join(roles, ",");
 
-        userDao.edit(userModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userDao.edit(userModel, updateUserJid, updateUserIpAddress);
     }
 
     @Override
-    public void deleteUser(long userId) {
-        UserModel userModel = userDao.findById(userId);
+    public void deleteUser(String userJid) {
+        UserModel userModel = userDao.findByJid(userJid);
         userDao.remove(userModel);
     }
 
@@ -113,17 +113,17 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void upsertUserFromJophielUserJid(String userJid) {
-        upsertUserFromJophielUserJid(userJid, SandalphonUtils.getDefaultRoles());
+    public void upsertUserFromJophielUserJid(String userJid, String upsertUserJid, String upsertUserIpAddress) {
+        upsertUserFromJophielUserJid(userJid, SandalphonUtils.getDefaultRoles(), upsertUserJid, upsertUserIpAddress);
     }
 
     @Override
-    public void upsertUserFromJophielUserJid(String userJid, List<String> roles) {
+    public void upsertUserFromJophielUserJid(String userJid, List<String> roles, String upsertUserJid, String upsertUserIpAddress) {
         try {
             PublicUser publicUser = jophiel.getPublicUserByJid(userJid);
 
             if (!userDao.existsByJid(userJid)) {
-                createUser(publicUser.getJid(), roles);
+                createUser(publicUser.getJid(), roles, upsertUserJid, upsertUserIpAddress);
             }
 
             JidCacheServiceImpl.getInstance().putDisplayName(publicUser.getJid(), JudgelsPlayUtils.getUserDisplayName(publicUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());

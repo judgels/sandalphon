@@ -159,7 +159,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
             UpdateStatementForm updateStatementData = updateStatementForm.get();
             ProblemStatement statement = new ProblemStatement(updateStatementData.title, JudgelsPlayUtils.toSafeHtml(updateStatementData.text));
 
-            problemService.updateStatement(IdentityUtils.getUserJid(), problemId, ProblemControllerUtils.getCurrentStatementLanguage(), statement);
+            problemService.updateStatement(IdentityUtils.getUserJid(), problem.getJid(), ProblemControllerUtils.getCurrentStatementLanguage(), statement);
         } catch (IOException e) {
             try {
                 updateStatementForm.reject("problem.statement.error.cantUpload");
@@ -208,7 +208,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
             try {
-                problemService.uploadStatementMediaFile(IdentityUtils.getUserJid(), problem.getId(), mediaFile, file.getFilename());
+                problemService.uploadStatementMediaFile(IdentityUtils.getUserJid(), problem.getJid(), mediaFile, file.getFilename());
             } catch (IOException e) {
                 Form<UploadFileForm> form = Form.form(UploadFileForm.class);
                 form.reject("problem.statement.error.cantUploadMedia");
@@ -229,7 +229,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
             problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
             try {
-                problemService.uploadStatementMediaFileZipped(IdentityUtils.getUserJid(), problem.getId(), mediaFile);
+                problemService.uploadStatementMediaFileZipped(IdentityUtils.getUserJid(), problem.getJid(), mediaFile);
             } catch (IOException e) {
                 Form<UploadFileForm> form = Form.form(UploadFileForm.class);
                 form.reject("problem.statement.error.cantUploadMediaZipped");

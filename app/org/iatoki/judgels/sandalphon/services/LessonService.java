@@ -19,7 +19,7 @@ import java.util.Map;
 
 public interface LessonService {
 
-    Lesson createLesson(String slug, String additionalNote, String initialLanguageCode) throws IOException;
+    Lesson createLesson(String slug, String additionalNote, String initialLanguageCode, String userJid, String userIpAddress) throws IOException;
 
     boolean lessonExistsByJid(String lessonJid);
 
@@ -31,9 +31,9 @@ public interface LessonService {
 
     boolean isUserPartnerForLesson(String lessonJid, String userJid);
 
-    void createLessonPartner(long lessonId, String userJid, LessonPartnerConfig config);
+    void createLessonPartner(String lessonJid, String userJid, LessonPartnerConfig config, String createUserJid, String createUserIpAddress);
 
-    void updateLessonPartner(long lessonPartnerId, LessonPartnerConfig config);
+    void updateLessonPartner(long lessonPartnerId, LessonPartnerConfig config, String userJid, String userIpAddress);
 
     Page<LessonPartner> getPageOfLessonPartners(String lessonJid, long pageIndex, long pageSize, String orderBy, String orderDir);
 
@@ -41,7 +41,7 @@ public interface LessonService {
 
     LessonPartner findLessonPartnerByLessonJidAndPartnerJid(String lessonJid, String partnerJid);
 
-    void updateLesson(long lessonId, String slug, String additionalNote);
+    void updateLesson(String lessonJid, String slug, String additionalNote, String userJid, String userIpAddress);
 
     Page<Lesson> getPageOfLessons(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin);
 
@@ -61,11 +61,11 @@ public interface LessonService {
 
     Map<String, String> getTitlesByLanguage(String userJid, String lessonJid) throws IOException;
 
-    void updateStatement(String userJid, long lessonId, String languageCode, LessonStatement statement) throws IOException;
+    void updateStatement(String userJid, String lessonJid, String languageCode, LessonStatement statement) throws IOException;
 
-    void uploadStatementMediaFile(String userJid, long lessonId, File mediaFile, String filename) throws IOException;
+    void uploadStatementMediaFile(String userJid, String lessonJid, File mediaFile, String filename) throws IOException;
 
-    void uploadStatementMediaFileZipped(String userJid, long lessonId, File mediaFileZipped) throws IOException;
+    void uploadStatementMediaFileZipped(String userJid, String lessonJid, File mediaFileZipped) throws IOException;
 
     List<FileInfo> getStatementMediaFiles(String userJid, String lessonJid);
 
@@ -79,15 +79,15 @@ public interface LessonService {
 
     void createUserCloneIfNotExists(String userJid, String lessonJid);
 
-    boolean commitThenMergeUserClone(String userJid, String lessonJid, String title, String description);
+    boolean commitThenMergeUserClone(String userJid, String lessonJid, String title, String description, String userIpAddress);
 
     boolean updateUserClone(String userJid, String lessonJid);
 
-    boolean pushUserClone(String userJid, String lessonJid);
+    boolean pushUserClone(String userJid, String lessonJid, String userIpAddress);
 
     boolean fetchUserClone(String userJid, String lessonJid);
 
     void discardUserClone(String userJid, String lessonJid) throws IOException;
 
-    void restore(String lessonJid, String hash);
+    void restore(String lessonJid, String hash, String userJid, String userIpAddress);
 }

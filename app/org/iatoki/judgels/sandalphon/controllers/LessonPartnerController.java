@@ -158,7 +158,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
               .setIsAllowedToManageLessonClients(lessonData.isAllowedToManageLessonClients)
               .build();
 
-        lessonService.createLessonPartner(lesson.getId(), userJid, partnerConfig);
+        lessonService.createLessonPartner(lesson.getJid(), userJid, partnerConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of lesson " + lesson.getSlug() + ".");
 
@@ -227,7 +227,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
               .setIsAllowedToManageLessonClients(lessonData.isAllowedToManageLessonClients)
               .build();
 
-        lessonService.updateLessonPartner(partnerId, lessonConfig);
+        lessonService.updateLessonPartner(partnerId, lessonConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getSlug() + ".");
 

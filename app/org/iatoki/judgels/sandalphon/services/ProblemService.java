@@ -20,7 +20,7 @@ import java.util.Map;
 
 public interface ProblemService {
 
-    Problem createProblem(ProblemType type, String slug, String additionalNote, String initialLanguageCode) throws IOException;
+    Problem createProblem(ProblemType type, String slug, String additionalNote, String initialLanguageCode, String userJid, String userIpAddress) throws IOException;
 
     boolean problemExistsByJid(String problemJid);
 
@@ -32,9 +32,9 @@ public interface ProblemService {
 
     boolean isUserPartnerForProblem(String problemJid, String userJid);
 
-    void createProblemPartner(long problemId, String userJid, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig);
+    void createProblemPartner(String problemJid, String userJid, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig, String createUserJid, String createUserIpAddress);
 
-    void updateProblemPartner(long problemPartnerId, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig);
+    void updateProblemPartner(long problemPartnerId, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig, String userJid, String userIpAddress);
 
     Page<ProblemPartner> getPageOfProblemPartners(String problemJid, long pageIndex, long pageSize, String orderBy, String orderDir);
 
@@ -42,7 +42,7 @@ public interface ProblemService {
 
     ProblemPartner findProblemPartnerByProblemJidAndPartnerJid(String problemJid, String partnerJid);
 
-    void updateProblem(long problemId, String slug, String additionalNote);
+    void updateProblem(String problemJid, String slug, String additionalNote, String userJid, String userIpAddress);
 
     Page<Problem> getPageOfProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin);
 
@@ -62,11 +62,11 @@ public interface ProblemService {
 
     Map<String, String> getTitlesByLanguage(String userJid, String problemJid) throws IOException;
 
-    void updateStatement(String userJid, long problemId, String languageCode, ProblemStatement statement) throws IOException;
+    void updateStatement(String userJid, String problemJid, String languageCode, ProblemStatement statement) throws IOException;
 
-    void uploadStatementMediaFile(String userJid, long problemId, File mediaFile, String filename) throws IOException;
+    void uploadStatementMediaFile(String userJid, String problemJid, File mediaFile, String filename) throws IOException;
 
-    void uploadStatementMediaFileZipped(String userJid, long problemId, File mediaFileZipped) throws IOException;
+    void uploadStatementMediaFileZipped(String userJid, String problemJid, File mediaFileZipped) throws IOException;
 
     List<FileInfo> getStatementMediaFiles(String userJid, String problemJid);
 
@@ -80,15 +80,15 @@ public interface ProblemService {
 
     void createUserCloneIfNotExists(String userJid, String problemJid);
 
-    boolean commitThenMergeUserClone(String userJid, String problemJid, String title, String text);
+    boolean commitThenMergeUserClone(String userJid, String problemJid, String title, String text, String userIpAddress);
 
     boolean updateUserClone(String userJid, String problemJid);
 
-    boolean pushUserClone(String userJid, String problemJid);
+    boolean pushUserClone(String userJid, String problemJid, String userIpAddress);
 
     boolean fetchUserClone(String userJid, String problemJid);
 
     void discardUserClone(String userJid, String problemJid) throws IOException;
 
-    void restore(String problemJid, String hash);
+    void restore(String problemJid, String hash, String userJid, String userIpAddress);
 }

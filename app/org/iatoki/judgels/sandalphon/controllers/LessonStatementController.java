@@ -185,7 +185,7 @@ public class LessonStatementController extends AbstractJudgelsController {
 
         try {
             UpdateStatementForm updateStatementData = updateStatementForm.get();
-            lessonService.updateStatement(IdentityUtils.getUserJid(), lessonId, LessonControllerUtils.getCurrentStatementLanguage(), new LessonStatement(updateStatementData.title, JudgelsPlayUtils.toSafeHtml(updateStatementData.text)));
+            lessonService.updateStatement(IdentityUtils.getUserJid(), lesson.getJid(), LessonControllerUtils.getCurrentStatementLanguage(), new LessonStatement(updateStatementData.title, JudgelsPlayUtils.toSafeHtml(updateStatementData.text)));
         } catch (IOException e) {
             try {
                 updateStatementForm.reject("lesson.statement.error.cantUpload");
@@ -233,7 +233,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
 
             try {
-                lessonService.uploadStatementMediaFile(IdentityUtils.getUserJid(), lesson.getId(), mediaFile, file.getFilename());
+                lessonService.uploadStatementMediaFile(IdentityUtils.getUserJid(), lesson.getJid(), mediaFile, file.getFilename());
             } catch (IOException e) {
                 Form<UploadFileForm> form = Form.form(UploadFileForm.class);
                 form.reject("lesson.statement.error.cantUploadMedia");
@@ -254,7 +254,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             lessonService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), lesson.getJid());
 
             try {
-                lessonService.uploadStatementMediaFileZipped(IdentityUtils.getUserJid(), lesson.getId(), mediaFile);
+                lessonService.uploadStatementMediaFileZipped(IdentityUtils.getUserJid(), lesson.getJid(), mediaFile);
             } catch (IOException e) {
                 Form<UploadFileForm> form = Form.form(UploadFileForm.class);
                 form.reject("lesson.statement.error.cantUploadMediaZipped");
