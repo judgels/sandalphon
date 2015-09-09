@@ -5,7 +5,7 @@ import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.sandalphon.Problem;
 import play.i18n.Messages;
 
-public final class ProblemPartnerControllerUtils {
+final class ProblemPartnerControllerUtils {
 
     private ProblemPartnerControllerUtils() {
         // prevent instantiation

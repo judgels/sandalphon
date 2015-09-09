@@ -207,5 +207,4 @@ public final class LessonVersionController extends AbstractJudgelsController {
                 .build()
         );
     }
-
 }

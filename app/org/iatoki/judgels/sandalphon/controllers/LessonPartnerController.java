@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
+import org.iatoki.judgels.jophiel.Jophiel;
+import org.iatoki.judgels.jophiel.PublicUser;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
@@ -10,8 +10,6 @@ import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.heading3Layout;
 import org.iatoki.judgels.play.views.html.layouts.heading3WithActionLayout;
-import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.PublicUser;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonPartner;
@@ -23,8 +21,8 @@ import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.LessonPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.LessonPartnerUsernameForm;
-import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.services.LessonService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.addPartnerView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.listPartnersView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.updatePartnerView;
@@ -40,7 +38,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.util.Set;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
@@ -153,8 +150,8 @@ public class LessonPartnerController extends AbstractJudgelsController {
               .setIsAllowedToUpdateLesson(lessonData.isAllowedToUpdateLesson)
               .setIsAllowedToUpdateStatement(lessonData.isAllowedToUpdateStatement)
               .setIsAllowedToUploadStatementResources(lessonData.isAllowedToUploadStatementResources)
-              .setAllowedStatementLanguagesToView(splitByComma(lessonData.allowedStatementLanguagesToView))
-              .setAllowedStatementLanguagesToUpdate(splitByComma(lessonData.allowedStatementLanguagesToUpdate))
+              .setAllowedStatementLanguagesToView(PartnerControllerUtils.splitByComma(lessonData.allowedStatementLanguagesToView))
+              .setAllowedStatementLanguagesToUpdate(PartnerControllerUtils.splitByComma(lessonData.allowedStatementLanguagesToUpdate))
               .setIsAllowedToManageStatementLanguages(lessonData.isAllowedToManageStatementLanguages)
               .setIsAllowedToViewVersionHistory(lessonData.isAllowedToViewVersionHistory)
               .setIsAllowedToRestoreVersionHistory(lessonData.isAllowedToRestoreVersionHistory)
@@ -185,8 +182,8 @@ public class LessonPartnerController extends AbstractJudgelsController {
         lessonData.isAllowedToUpdateLesson = lessonConfig.isAllowedToUpdateLesson();
         lessonData.isAllowedToUpdateStatement = lessonConfig.isAllowedToUpdateStatement();
         lessonData.isAllowedToUploadStatementResources = lessonConfig.isAllowedToUploadStatementResources();
-        lessonData.allowedStatementLanguagesToView = combineByComma(lessonConfig.getAllowedStatementLanguagesToView());
-        lessonData.allowedStatementLanguagesToUpdate = combineByComma(lessonConfig.getAllowedStatementLanguagesToUpdate());
+        lessonData.allowedStatementLanguagesToView = PartnerControllerUtils.combineByComma(lessonConfig.getAllowedStatementLanguagesToView());
+        lessonData.allowedStatementLanguagesToUpdate = PartnerControllerUtils.combineByComma(lessonConfig.getAllowedStatementLanguagesToUpdate());
         lessonData.isAllowedToManageStatementLanguages = lessonConfig.isAllowedToManageStatementLanguages();
         lessonData.isAllowedToViewVersionHistory = lessonConfig.isAllowedToViewVersionHistory();
         lessonData.isAllowedToRestoreVersionHistory = lessonConfig.isAllowedToRestoreVersionHistory();
@@ -222,8 +219,8 @@ public class LessonPartnerController extends AbstractJudgelsController {
               .setIsAllowedToUpdateLesson(lessonData.isAllowedToUpdateLesson)
               .setIsAllowedToUpdateStatement(lessonData.isAllowedToUpdateStatement)
               .setIsAllowedToUploadStatementResources(lessonData.isAllowedToUploadStatementResources)
-              .setAllowedStatementLanguagesToView(splitByComma(lessonData.allowedStatementLanguagesToView))
-              .setAllowedStatementLanguagesToUpdate(splitByComma(lessonData.allowedStatementLanguagesToUpdate))
+              .setAllowedStatementLanguagesToView(PartnerControllerUtils.splitByComma(lessonData.allowedStatementLanguagesToView))
+              .setAllowedStatementLanguagesToUpdate(PartnerControllerUtils.splitByComma(lessonData.allowedStatementLanguagesToUpdate))
               .setIsAllowedToManageStatementLanguages(lessonData.isAllowedToManageStatementLanguages)
               .setIsAllowedToViewVersionHistory(lessonData.isAllowedToViewVersionHistory)
               .setIsAllowedToRestoreVersionHistory(lessonData.isAllowedToRestoreVersionHistory)
@@ -239,10 +236,10 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
     private void appendBreadcrumbsLayout(LazyHtml content, Lesson lesson, InternalLink lastLink) {
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
-              LessonControllerUtils.getLessonBreadcrumbsBuilder(lesson)
-                    .add(new InternalLink(Messages.get("lesson.partner"), routes.LessonController.jumpToPartners(lesson.getId())))
-                    .add(lastLink)
-                    .build()
+                LessonControllerUtils.getLessonBreadcrumbsBuilder(lesson)
+                        .add(new InternalLink(Messages.get("lesson.partner"), routes.LessonController.jumpToPartners(lesson.getId())))
+                        .add(lastLink)
+                        .build()
         );
     }
 
@@ -272,19 +269,5 @@ public class LessonPartnerController extends AbstractJudgelsController {
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Partner");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
-    }
-
-    private Set<String> splitByComma(String s) {
-        if (s == null || s.isEmpty()) {
-            return null;
-        }
-        return Sets.newHashSet(s.split(","));
-    }
-
-    private String combineByComma(Set<String> list) {
-        if (list == null) {
-            return null;
-        }
-        return Joiner.on(",").join(list);
     }
 }

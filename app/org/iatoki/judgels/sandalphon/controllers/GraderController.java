@@ -9,16 +9,16 @@ import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.Grader;
 import org.iatoki.judgels.sandalphon.GraderNotFoundException;
-import org.iatoki.judgels.sandalphon.services.GraderService;
-import org.iatoki.judgels.sandalphon.forms.GraderUpsertForm;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.views.html.grader.createView;
-import org.iatoki.judgels.sandalphon.views.html.grader.listView;
-import org.iatoki.judgels.sandalphon.views.html.grader.updateView;
-import org.iatoki.judgels.sandalphon.views.html.grader.viewView;
+import org.iatoki.judgels.sandalphon.forms.GraderUpsertForm;
+import org.iatoki.judgels.sandalphon.services.GraderService;
+import org.iatoki.judgels.sandalphon.views.html.grader.createGraderView;
+import org.iatoki.judgels.sandalphon.views.html.grader.listGradersView;
+import org.iatoki.judgels.sandalphon.views.html.grader.updateGraderView;
+import org.iatoki.judgels.sandalphon.views.html.grader.viewGraderView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -48,15 +48,15 @@ public final class GraderController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     public Result index() {
-        return list(0, "id", "asc", "");
+        return listGraders(0, "id", "asc", "");
     }
 
     @Transactional(readOnly = true)
-    public Result list(long pageIndex, String orderBy, String orderDir, String filterString) {
+    public Result listGraders(long pageIndex, String orderBy, String orderDir, String filterString) {
         Page<Grader> pageOfGraders = graderService.getPageOfGraders(pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
-        LazyHtml content = new LazyHtml(listView.render(pageOfGraders, orderBy, orderDir, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.list"), new InternalLink(Messages.get("commons.create"), routes.GraderController.create()), c));
+        LazyHtml content = new LazyHtml(listGradersView.render(pageOfGraders, orderBy, orderDir, filterString));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.list"), new InternalLink(Messages.get("commons.create"), routes.GraderController.createGrader()), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index())
@@ -70,22 +70,40 @@ public final class GraderController extends AbstractJudgelsController {
     }
 
     @Transactional(readOnly = true)
+    public Result viewGrader(long graderId) throws GraderNotFoundException {
+        Grader grader = graderService.findGraderById(graderId);
+
+        LazyHtml content = new LazyHtml(viewGraderView.render(grader));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), new InternalLink(Messages.get("commons.update"), routes.GraderController.updateGrader(graderId)), c));
+        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
+        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
+                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
+                new InternalLink(Messages.get("grader.view"), routes.GraderController.viewGrader(graderId))
+        ));
+        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Grader - View");
+
+        SandalphonControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return SandalphonControllerUtils.getInstance().lazyOk(content);
+    }
+
+    @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result create() {
+    public Result createGrader() {
         Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class);
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to create grader <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showCreate(graderUpsertForm);
+        return showCreateGrader(graderUpsertForm);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postCreate() {
+    public Result postCreateGrader() {
         Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class).bindFromRequest();
 
         if (formHasErrors(graderUpsertForm)) {
-            return showCreate(graderUpsertForm);
+            return showCreateGrader(graderUpsertForm);
         }
 
         GraderUpsertForm graderUpsertData = graderUpsertForm.get();
@@ -97,26 +115,8 @@ public final class GraderController extends AbstractJudgelsController {
     }
 
     @Transactional(readOnly = true)
-    public Result view(long graderId) throws GraderNotFoundException {
-        Grader grader = graderService.findGraderById(graderId);
-
-        LazyHtml content = new LazyHtml(viewView.render(grader));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), new InternalLink(Messages.get("commons.update"), routes.GraderController.update(graderId)), c));
-        SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
-                new InternalLink(Messages.get("grader.view"), routes.GraderController.view(graderId))
-        ));
-        SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Grader - View");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-        return SandalphonControllerUtils.getInstance().lazyOk(content);
-    }
-
-    @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result update(long graderId) throws GraderNotFoundException {
+    public Result updateGrader(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
         GraderUpsertForm graderUpsertData = new GraderUpsertForm();
         graderUpsertData.name = grader.getName();
@@ -124,16 +124,16 @@ public final class GraderController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdate(graderUpsertForm, grader);
+        return showUpdateGrader(graderUpsertForm, grader);
     }
 
     @Transactional
-    public Result postUpdate(long graderId) throws GraderNotFoundException {
+    public Result postUpdateGrader(long graderId) throws GraderNotFoundException {
         Grader grader = graderService.findGraderById(graderId);
         Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class).bindFromRequest();
 
         if (formHasErrors(graderUpsertForm)) {
-            return showUpdate(graderUpsertForm, grader);
+            return showUpdateGrader(graderUpsertForm, grader);
         }
 
         GraderUpsertForm graderUpsertData = graderUpsertForm.get();
@@ -144,26 +144,26 @@ public final class GraderController extends AbstractJudgelsController {
         return redirect(routes.GraderController.index());
     }
 
-    private Result showCreate(Form<GraderUpsertForm> graderUpsertForm) {
-        LazyHtml content = new LazyHtml(createView.render(graderUpsertForm));
+    private Result showCreateGrader(Form<GraderUpsertForm> graderUpsertForm) {
+        LazyHtml content = new LazyHtml(createGraderView.render(graderUpsertForm));
         content.appendLayout(c -> headingLayout.render(Messages.get("grader.create"), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
-                new InternalLink(Messages.get("grader.create"), routes.GraderController.create())
+                new InternalLink(Messages.get("grader.create"), routes.GraderController.createGrader())
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Create");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdate(Form<GraderUpsertForm> graderUpsertForm, Grader grader) {
-        LazyHtml content = new LazyHtml(updateView.render(graderUpsertForm, grader.getId()));
+    private Result showUpdateGrader(Form<GraderUpsertForm> graderUpsertForm, Grader grader) {
+        LazyHtml content = new LazyHtml(updateGraderView.render(graderUpsertForm, grader.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("grader.grader") + " #" + grader.getId() + ": " + grader.getName(), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()),
-                new InternalLink(Messages.get("grader.update"), routes.GraderController.update(grader.getId()))
+                new InternalLink(Messages.get("grader.update"), routes.GraderController.updateGrader(grader.getId()))
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Grader - Update");
 

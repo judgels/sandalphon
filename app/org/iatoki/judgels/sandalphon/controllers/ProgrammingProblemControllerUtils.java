@@ -10,7 +10,7 @@ import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.ProgrammingProblemPartnerConfig;
 import play.i18n.Messages;
 
-public final class ProgrammingProblemControllerUtils {
+final class ProgrammingProblemControllerUtils {
 
     private ProgrammingProblemControllerUtils() {
         // prevent instantiation

@@ -76,5 +76,4 @@ public final class BundleProblemController extends AbstractJudgelsController {
 
         return redirect(routes.BundleProblemSubmissionController.viewSubmissions(problemId));
     }
-
 }

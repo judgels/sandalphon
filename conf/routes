@@ -194,20 +194,20 @@ POST        /lesson/totp/statement                                              
 
 
 GET         /client                                                                    @org.iatoki.judgels.sandalphon.controllers.ClientController.index()
-GET         /client/                                                                   @org.iatoki.judgels.sandalphon.controllers.ClientController.list(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
-GET         /client/create                                                             @org.iatoki.judgels.sandalphon.controllers.ClientController.create()
-POST        /client/create                                                             @org.iatoki.judgels.sandalphon.controllers.ClientController.postCreate()
-GET         /client/:cId                                                               @org.iatoki.judgels.sandalphon.controllers.ClientController.view(cId: Long)
-GET         /client/:cId/update                                                        @org.iatoki.judgels.sandalphon.controllers.ClientController.update(cId: Long)
-POST        /client/:cId/update                                                        @org.iatoki.judgels.sandalphon.controllers.ClientController.postUpdate(cId: Long)
+GET         /client/                                                                   @org.iatoki.judgels.sandalphon.controllers.ClientController.listClients(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+GET         /client/create                                                             @org.iatoki.judgels.sandalphon.controllers.ClientController.createClient()
+POST        /client/create                                                             @org.iatoki.judgels.sandalphon.controllers.ClientController.postCreateClient()
+GET         /client/:cId                                                               @org.iatoki.judgels.sandalphon.controllers.ClientController.viewClient(cId: Long)
+GET         /client/:cId/update                                                        @org.iatoki.judgels.sandalphon.controllers.ClientController.updateClient(cId: Long)
+POST        /client/:cId/update                                                        @org.iatoki.judgels.sandalphon.controllers.ClientController.postUpdateClient(cId: Long)
 
 GET         /grader                                                                    @org.iatoki.judgels.sandalphon.controllers.GraderController.index()
-GET         /grader/                                                                   @org.iatoki.judgels.sandalphon.controllers.GraderController.list(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
-GET         /grader/create                                                             @org.iatoki.judgels.sandalphon.controllers.GraderController.create()
-POST        /grader/create                                                             @org.iatoki.judgels.sandalphon.controllers.GraderController.postCreate()
-GET         /grader/:gId                                                               @org.iatoki.judgels.sandalphon.controllers.GraderController.view(gId: Long)
-GET         /grader/:gId/update                                                        @org.iatoki.judgels.sandalphon.controllers.GraderController.update(gId: Long)
-POST        /grader/:gId/update                                                        @org.iatoki.judgels.sandalphon.controllers.GraderController.postUpdate(gId: Long)
+GET         /grader/                                                                   @org.iatoki.judgels.sandalphon.controllers.GraderController.listGraders(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+GET         /grader/create                                                             @org.iatoki.judgels.sandalphon.controllers.GraderController.createGrader()
+POST        /grader/create                                                             @org.iatoki.judgels.sandalphon.controllers.GraderController.postCreateGrader()
+GET         /grader/:gId                                                               @org.iatoki.judgels.sandalphon.controllers.GraderController.viewGrader(gId: Long)
+GET         /grader/:gId/update                                                        @org.iatoki.judgels.sandalphon.controllers.GraderController.updateGrader(gId: Long)
+POST        /grader/:gId/update                                                        @org.iatoki.judgels.sandalphon.controllers.GraderController.postUpdateGrader(gId: Long)
 
 
 GET         /users                                                                     @org.iatoki.judgels.sandalphon.controllers.UserController.index()

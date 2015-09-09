@@ -11,7 +11,6 @@ import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.GitCommit;
 import org.iatoki.judgels.GitProvider;
 import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.JidService;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
@@ -36,7 +35,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,7 +67,7 @@ public final class ProblemServiceImpl implements ProblemService {
         initStatements(problemModel.jid, initialLanguageCode);
         problemFileSystemProvider.createDirectory(ProblemServiceUtils.getClonesDirPath(problemModel.jid));
 
-        return createProblemFromModel(problemModel);
+        return ProblemServiceUtils.createProblemFromModel(problemModel);
     }
 
     @Override
@@ -89,14 +87,14 @@ public final class ProblemServiceImpl implements ProblemService {
             throw new ProblemNotFoundException("Problem not found.");
         }
 
-        return createProblemFromModel(problemModel);
+        return ProblemServiceUtils.createProblemFromModel(problemModel);
     }
 
     @Override
     public Problem findProblemByJid(String problemJid) {
         ProblemModel problemModel = problemDao.findByJid(problemJid);
 
-        return createProblemFromModel(problemModel);
+        return ProblemServiceUtils.createProblemFromModel(problemModel);
     }
 
     @Override
@@ -130,7 +128,7 @@ public final class ProblemServiceImpl implements ProblemService {
     public Page<ProblemPartner> getPageOfProblemPartners(String problemJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
         long totalRows = problemPartnerDao.countByFilters("", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), ImmutableMap.of());
         List<ProblemPartnerModel> problemPartnerModels = problemPartnerDao.findSortedByFilters(orderBy, orderDir, "", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), ImmutableMap.of(), pageIndex, pageIndex * pageSize);
-        List<ProblemPartner> problemPartners = Lists.transform(problemPartnerModels, m -> createProblemPartnerFromModel(m));
+        List<ProblemPartner> problemPartners = Lists.transform(problemPartnerModels, m -> ProblemServiceUtils.createProblemPartnerFromModel(m));
 
         return new Page<>(problemPartners, totalRows, pageIndex, pageSize);
     }
@@ -142,14 +140,14 @@ public final class ProblemServiceImpl implements ProblemService {
             throw new ProblemPartnerNotFoundException("Problem partner not found.");
         }
 
-        return createProblemPartnerFromModel(problemPartnerModel);
+        return ProblemServiceUtils.createProblemPartnerFromModel(problemPartnerModel);
     }
 
     @Override
     public ProblemPartner findProblemPartnerByProblemJidAndPartnerJid(String problemJid, String partnerJid) {
         ProblemPartnerModel problemPartnerModel = problemPartnerDao.findByProblemJidAndPartnerJid(problemJid, partnerJid);
 
-        return createProblemPartnerFromModel(problemPartnerModel);
+        return ProblemServiceUtils.createProblemPartnerFromModel(problemPartnerModel);
     }
 
     @Override
@@ -167,7 +165,7 @@ public final class ProblemServiceImpl implements ProblemService {
             long totalRows = problemDao.countByFilters(filterString);
             List<ProblemModel> problemModels = problemDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
-            List<Problem> problems = Lists.transform(problemModels, m -> createProblemFromModel(m));
+            List<Problem> problems = Lists.transform(problemModels, m -> ProblemServiceUtils.createProblemFromModel(m));
             return new Page<>(problems, totalRows, pageIndex, pageSize);
         } else {
             List<String> problemJidsWhereIsAuthor = problemDao.getJidsByAuthorJid(userJid);
@@ -182,7 +180,7 @@ public final class ProblemServiceImpl implements ProblemService {
             long totalRows = problemDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of(ProblemModel_.jid, allowedProblemJids));
             List<ProblemModel> problemModels = problemDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(ProblemModel_.jid, allowedProblemJids), pageIndex * pageSize, pageSize);
 
-            List<Problem> problems = Lists.transform(problemModels, m -> createProblemFromModel(m));
+            List<Problem> problems = Lists.transform(problemModels, m -> ProblemServiceUtils.createProblemFromModel(m));
             return new Page<>(problems, totalRows, pageIndex, pageSize);
         }
 
@@ -394,22 +392,6 @@ public final class ProblemServiceImpl implements ProblemService {
         problemGitProvider.restore(root, hash);
     }
 
-    private ProblemType getProblemType(ProblemModel problemModel) {
-        String prefix = JidService.getInstance().parsePrefix(problemModel.jid);
-
-        if (prefix.equals("PROG")) {
-            return ProblemType.PROGRAMMING;
-        } else if (prefix.equals("BUND")) {
-            return ProblemType.BUNDLE;
-        } else {
-            throw new IllegalStateException("Unknown problem type: " + prefix);
-        }
-    }
-
-    private Problem createProblemFromModel(ProblemModel problemModel) {
-        return new Problem(problemModel.id, problemModel.jid, problemModel.slug, problemModel.userCreate, problemModel.additionalNote, new Date(problemModel.timeUpdate), getProblemType(problemModel));
-    }
-
     private void initStatements(String problemJid, String initialLanguageCode) throws IOException {
         List<String> statementsDirPath = getStatementsDirPath(null, problemJid);
         problemFileSystemProvider.createDirectory(statementsDirPath);
@@ -455,9 +437,5 @@ public final class ProblemServiceImpl implements ProblemService {
 
     private List<String> getStatementMediaDirPath(String userJid, String problemJid) {
         return ProblemServiceUtils.appendPath(getStatementsDirPath(userJid, problemJid), "resources");
-    }
-
-    private ProblemPartner createProblemPartnerFromModel(ProblemPartnerModel problemPartnerModel) {
-        return new ProblemPartner(problemPartnerModel.id, problemPartnerModel.problemJid, problemPartnerModel.userJid, problemPartnerModel.baseConfig, problemPartnerModel.childConfig);
     }
 }

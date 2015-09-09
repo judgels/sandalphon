@@ -8,7 +8,7 @@ import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import play.i18n.Messages;
 
-public final class ProblemStatementControllerUtils {
+final class ProblemStatementControllerUtils {
 
     private ProblemStatementControllerUtils() {
         // prevent instantiation

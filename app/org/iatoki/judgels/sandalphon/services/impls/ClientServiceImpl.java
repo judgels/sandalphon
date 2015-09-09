@@ -58,7 +58,7 @@ public final class ClientServiceImpl implements ClientService {
             throw new ClientNotFoundException("Client not found.");
         }
 
-        return createClientFromModel(clientModel);
+        return ClientServiceUtils.createClientFromModel(clientModel);
     }
 
 
@@ -66,7 +66,7 @@ public final class ClientServiceImpl implements ClientService {
     public Client findClientByJid(String clientJid) {
         ClientModel clientModel = clientDao.findByJid(clientJid);
 
-        return createClientFromModel(clientModel);
+        return ClientServiceUtils.createClientFromModel(clientModel);
     }
 
     @Override
@@ -98,7 +98,7 @@ public final class ClientServiceImpl implements ClientService {
         long totalPages = clientDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
         List<ClientModel> clientModels = clientDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
-        List<Client> clients = Lists.transform(clientModels, m -> createClientFromModel(m));
+        List<Client> clients = Lists.transform(clientModels, m -> ClientServiceUtils.createClientFromModel(m));
 
         return new Page<>(clients, totalPages, pageIndex, pageSize);
     }
@@ -201,9 +201,5 @@ public final class ClientServiceImpl implements ClientService {
     public void deleteClientLesson(long clientLessonId) {
         ClientLessonModel clientLessonModel = clientLessonDao.findById(clientLessonId);
         clientLessonDao.remove(clientLessonModel);
-    }
-
-    private Client createClientFromModel(ClientModel clientModel) {
-        return new Client(clientModel.id, clientModel.jid, clientModel.name, clientModel.secret);
     }
 }

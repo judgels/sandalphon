@@ -1,19 +1,18 @@
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.formErrorView
-@import org.iatoki.judgels.sandalphon.views.html.client.upsertView
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.sandalphon.forms.ClientUpsertForm
 
-@(clientUpsertForm: Form[ClientUpsertForm], clientId: Long)
+@(clientUpsertForm: Form[ClientUpsertForm])
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
 @formErrorView(clientUpsertForm)
 
-@b3.form(routes.ClientController.postUpdate(clientId)) {
+@b3.form(routes.ClientController.postCreateClient()) {
     @helper.CSRF.formField
 
-    @upsertView(clientUpsertForm)
+    @upsertClientView(clientUpsertForm)
 
-    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.create") }
 }

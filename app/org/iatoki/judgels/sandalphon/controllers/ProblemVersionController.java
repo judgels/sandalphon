@@ -207,5 +207,4 @@ public final class ProblemVersionController extends AbstractJudgelsController {
                 .build()
         );
     }
-
 }

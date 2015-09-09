@@ -34,7 +34,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +66,7 @@ public final class LessonServiceImpl implements LessonService {
         initStatements(lessonModel.jid, initialLanguageCode);
         lessonFileSystemProvider.createDirectory(LessonServiceUtils.getClonesDirPath(lessonModel.jid));
 
-        return createLessonFromModel(lessonModel);
+        return LessonServiceUtils.createLessonFromModel(lessonModel);
     }
 
     @Override
@@ -87,14 +86,14 @@ public final class LessonServiceImpl implements LessonService {
             throw new LessonNotFoundException("Lesson not found.");
         }
 
-        return createLessonFromModel(lessonModel);
+        return LessonServiceUtils.createLessonFromModel(lessonModel);
     }
 
     @Override
     public Lesson findLessonByJid(String lessonJid) {
         LessonModel lessonModel = lessonDao.findByJid(lessonJid);
 
-        return createLessonFromModel(lessonModel);
+        return LessonServiceUtils.createLessonFromModel(lessonModel);
     }
 
     @Override
@@ -126,7 +125,7 @@ public final class LessonServiceImpl implements LessonService {
     public Page<LessonPartner> getPageOfLessonPartners(String lessonJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
         long totalRows = lessonPartnerDao.countByFilters("", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), ImmutableMap.of());
         List<LessonPartnerModel> lessonPartnerModels = lessonPartnerDao.findSortedByFilters(orderBy, orderDir, "", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), ImmutableMap.of(), pageIndex, pageIndex * pageSize);
-        List<LessonPartner> lessonPartners = Lists.transform(lessonPartnerModels, m -> createLessonPartnerFromModel(m));
+        List<LessonPartner> lessonPartners = Lists.transform(lessonPartnerModels, m -> LessonServiceUtils.createLessonPartnerFromModel(m));
 
         return new Page<>(lessonPartners, totalRows, pageIndex, pageSize);
     }
@@ -138,14 +137,14 @@ public final class LessonServiceImpl implements LessonService {
             throw new LessonPartnerNotFoundException("Lesson partner not found.");
         }
 
-        return createLessonPartnerFromModel(lessonPartnerModel);
+        return LessonServiceUtils.createLessonPartnerFromModel(lessonPartnerModel);
     }
 
     @Override
     public LessonPartner findLessonPartnerByLessonJidAndPartnerJid(String lessonJid, String partnerJid) {
         LessonPartnerModel lessonPartnerModel = lessonPartnerDao.findByLessonJidAndPartnerJid(lessonJid, partnerJid);
 
-        return createLessonPartnerFromModel(lessonPartnerModel);
+        return LessonServiceUtils.createLessonPartnerFromModel(lessonPartnerModel);
     }
 
     @Override
@@ -163,7 +162,7 @@ public final class LessonServiceImpl implements LessonService {
             long totalRows = lessonDao.countByFilters(filterString);
             List<LessonModel> lessonModels = lessonDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
-            List<Lesson> lessons = Lists.transform(lessonModels, m -> createLessonFromModel(m));
+            List<Lesson> lessons = Lists.transform(lessonModels, m -> LessonServiceUtils.createLessonFromModel(m));
             return new Page<>(lessons, totalRows, pageIndex, pageSize);
         } else {
             List<String> lessonJidsWhereIsAuthor = lessonDao.getJidsByAuthorJid(userJid);
@@ -178,7 +177,7 @@ public final class LessonServiceImpl implements LessonService {
             long totalRows = lessonDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of(LessonModel_.jid, allowedLessonJids));
             List<LessonModel> lessonModels = lessonDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(LessonModel_.jid, allowedLessonJids), pageIndex * pageSize, pageSize);
 
-            List<Lesson> lessons = Lists.transform(lessonModels, m -> createLessonFromModel(m));
+            List<Lesson> lessons = Lists.transform(lessonModels, m -> LessonServiceUtils.createLessonFromModel(m));
             return new Page<>(lessons, totalRows, pageIndex, pageSize);
         }
 
@@ -389,10 +388,6 @@ public final class LessonServiceImpl implements LessonService {
         lessonGitProvider.restore(root, hash);
     }
 
-    private Lesson createLessonFromModel(LessonModel lessonModel) {
-        return new Lesson(lessonModel.id, lessonModel.jid, lessonModel.slug, lessonModel.userCreate, lessonModel.additionalNote, new Date(lessonModel.timeUpdate));
-    }
-
     private void initStatements(String lessonJid, String initialLanguageCode) throws IOException {
         List<String> statementsDirPath = getStatementsDirPath(null, lessonJid);
         lessonFileSystemProvider.createDirectory(statementsDirPath);
@@ -438,9 +433,5 @@ public final class LessonServiceImpl implements LessonService {
 
     private List<String> getStatementMediaDirPath(String userJid, String lessonJid) {
         return LessonServiceUtils.appendPath(getStatementsDirPath(userJid, lessonJid), "resources");
-    }
-
-    private LessonPartner createLessonPartnerFromModel(LessonPartnerModel lessonPartnerModel) {
-        return new LessonPartner(lessonPartnerModel.id, lessonPartnerModel.lessonJid, lessonPartnerModel.userJid, lessonPartnerModel.config);
     }
 }

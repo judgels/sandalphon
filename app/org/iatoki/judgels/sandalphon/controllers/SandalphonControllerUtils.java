@@ -1,25 +1,25 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
+import org.iatoki.judgels.jophiel.Jophiel;
+import org.iatoki.judgels.jophiel.UserActivityMessage;
 import org.iatoki.judgels.jophiel.forms.SearchProfileForm;
+import org.iatoki.judgels.jophiel.forms.ViewpointForm;
+import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
+import org.iatoki.judgels.jophiel.views.html.client.linkedClientsLayout;
 import org.iatoki.judgels.jophiel.views.html.isLoggedInLayout;
 import org.iatoki.judgels.jophiel.views.html.isLoggedOutLayout;
 import org.iatoki.judgels.jophiel.views.html.profile.searchProfileLayout;
+import org.iatoki.judgels.jophiel.views.html.viewas.viewAsLayout;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.UserActivityMessage;
-import org.iatoki.judgels.jophiel.forms.ViewpointForm;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsControllerUtils;
 import org.iatoki.judgels.play.controllers.ControllerUtils;
 import org.iatoki.judgels.play.views.html.layouts.menusLayout;
 import org.iatoki.judgels.play.views.html.layouts.profileView;
 import org.iatoki.judgels.play.views.html.layouts.sidebarLayout;
-import org.iatoki.judgels.jophiel.views.html.client.linkedClientsLayout;
-import org.iatoki.judgels.jophiel.views.html.viewas.viewAsLayout;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import play.data.Form;
 import play.i18n.Messages;
@@ -79,7 +79,7 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
         return SandalphonUtils.hasRole("admin");
     }
 
-    public void addActivityLog(String log) {
+    void addActivityLog(String log) {
         String newLog = log;
         try {
             if (JudgelsPlayUtils.hasViewPoint()) {

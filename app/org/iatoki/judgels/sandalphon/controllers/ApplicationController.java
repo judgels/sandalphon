@@ -127,7 +127,7 @@ public final class ApplicationController extends AbstractJudgelsController {
                 e.printStackTrace();
             }
         }
-        return redirect(request().getHeader("Referer"));
+        return redirectToReferer();
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -135,6 +135,6 @@ public final class ApplicationController extends AbstractJudgelsController {
         JudgelsPlayUtils.removeViewPoint();
         SandalphonUtils.restoreSession();
 
-        return redirect(request().getHeader("Referer"));
+        return redirectToReferer();
     }
 }

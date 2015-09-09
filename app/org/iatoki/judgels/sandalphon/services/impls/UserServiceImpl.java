@@ -3,12 +3,12 @@ package org.iatoki.judgels.sandalphon.services.impls;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.JudgelsPlayUtils;
-import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.PublicUser;
 import org.iatoki.judgels.jophiel.UserTokens;
+import org.iatoki.judgels.play.IdentityUtils;
+import org.iatoki.judgels.play.JudgelsPlayUtils;
+import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.UserNotFoundException;
 import org.iatoki.judgels.sandalphon.models.daos.UserDao;
@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 @Singleton
@@ -72,14 +71,14 @@ public final class UserServiceImpl implements UserService {
             throw new UserNotFoundException("User not found.");
         }
 
-        return createUserFromUserModel(userModel);
+        return UserServiceUtils.createUserFromUserModel(userModel);
     }
 
     @Override
     public org.iatoki.judgels.sandalphon.User findUserByJid(String userJid) {
         UserModel userModel = userDao.findByJid(userJid);
 
-        return createUserFromUserModel(userModel);
+        return UserServiceUtils.createUserFromUserModel(userModel);
     }
 
     @Override
@@ -109,7 +108,7 @@ public final class UserServiceImpl implements UserService {
     public Page<org.iatoki.judgels.sandalphon.User> getPageOfUsers(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalPages = userDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
         List<UserModel> userModels = userDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
-        List<org.iatoki.judgels.sandalphon.User> users = Lists.transform(userModels, m -> createUserFromUserModel(m));
+        List<org.iatoki.judgels.sandalphon.User> users = Lists.transform(userModels, m -> UserServiceUtils.createUserFromUserModel(m));
         return new Page<>(users, totalPages, pageIndex, pageSize);
     }
 
@@ -137,14 +136,6 @@ public final class UserServiceImpl implements UserService {
     public UserTokens getUserTokensByUserJid(String userJid) {
         UserModel userModel = userDao.findByJid(userJid);
 
-        return createUserTokensFromUserModel(userModel);
-    }
-
-    private UserTokens createUserTokensFromUserModel(UserModel userModel) {
-        return new UserTokens(userModel.userJid, userModel.accessToken, userModel.refreshToken, userModel.idToken, userModel.expirationTime);
-    }
-
-    private org.iatoki.judgels.sandalphon.User createUserFromUserModel(UserModel userModel) {
-        return new org.iatoki.judgels.sandalphon.User(userModel.id, userModel.userJid, Arrays.asList(userModel.roles.split(",")));
+        return UserServiceUtils.createUserTokensFromUserModel(userModel);
     }
 }

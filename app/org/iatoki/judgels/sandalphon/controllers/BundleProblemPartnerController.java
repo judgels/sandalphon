@@ -1,28 +1,26 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
+import org.iatoki.judgels.jophiel.Jophiel;
+import org.iatoki.judgels.jophiel.PublicUser;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.heading3Layout;
-import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.PublicUser;
+import org.iatoki.judgels.sandalphon.BundleProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemPartner;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.ProblemPartnerConfigBuilder;
 import org.iatoki.judgels.sandalphon.ProblemPartnerNotFoundException;
-import org.iatoki.judgels.sandalphon.BundleProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.forms.BundlePartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm;
-import org.iatoki.judgels.sandalphon.forms.BundlePartnerUpsertForm;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.problem.bundle.partner.addPartnerView;
@@ -39,7 +37,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.util.Set;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
@@ -124,8 +121,8 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
               .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
               .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
               .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
-              .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
-              .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
+              .setAllowedStatementLanguagesToView(PartnerControllerUtils.splitByComma(problemData.allowedStatementLanguagesToView))
+              .setAllowedStatementLanguagesToUpdate(PartnerControllerUtils.splitByComma(problemData.allowedStatementLanguagesToUpdate))
               .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
               .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
               .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
@@ -158,8 +155,8 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
         problemData.isAllowedToUpdateProblem = problemConfig.isAllowedToUpdateProblem();
         problemData.isAllowedToUpdateStatement = problemConfig.isAllowedToUpdateStatement();
         problemData.isAllowedToUploadStatementResources = problemConfig.isAllowedToUploadStatementResources();
-        problemData.allowedStatementLanguagesToView = combineByComma(problemConfig.getAllowedStatementLanguagesToView());
-        problemData.allowedStatementLanguagesToUpdate = combineByComma(problemConfig.getAllowedStatementLanguagesToUpdate());
+        problemData.allowedStatementLanguagesToView = PartnerControllerUtils.combineByComma(problemConfig.getAllowedStatementLanguagesToView());
+        problemData.allowedStatementLanguagesToUpdate = PartnerControllerUtils.combineByComma(problemConfig.getAllowedStatementLanguagesToUpdate());
         problemData.isAllowedToManageStatementLanguages = problemConfig.isAllowedToManageStatementLanguages();
         problemData.isAllowedToViewVersionHistory = problemConfig.isAllowedToViewVersionHistory();
         problemData.isAllowedToRestoreVersionHistory = problemConfig.isAllowedToRestoreVersionHistory();
@@ -203,8 +200,8 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
               .setIsAllowedToUpdateProblem(problemData.isAllowedToUpdateProblem)
               .setIsAllowedToUpdateStatement(problemData.isAllowedToUpdateStatement)
               .setIsAllowedToUploadStatementResources(problemData.isAllowedToUploadStatementResources)
-              .setAllowedStatementLanguagesToView(splitByComma(problemData.allowedStatementLanguagesToView))
-              .setAllowedStatementLanguagesToUpdate(splitByComma(problemData.allowedStatementLanguagesToUpdate))
+              .setAllowedStatementLanguagesToView(PartnerControllerUtils.splitByComma(problemData.allowedStatementLanguagesToView))
+              .setAllowedStatementLanguagesToUpdate(PartnerControllerUtils.splitByComma(problemData.allowedStatementLanguagesToUpdate))
               .setIsAllowedToManageStatementLanguages(problemData.isAllowedToManageStatementLanguages)
               .setIsAllowedToViewVersionHistory(problemData.isAllowedToViewVersionHistory)
               .setIsAllowedToRestoreVersionHistory(problemData.isAllowedToRestoreVersionHistory)
@@ -248,19 +245,5 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Partner");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
-    }
-
-    private Set<String> splitByComma(String s) {
-        if (s == null || s.isEmpty()) {
-            return null;
-        }
-        return Sets.newHashSet(s.split(","));
-    }
-
-    private String combineByComma(Set<String> list) {
-        if (list == null) {
-            return null;
-        }
-        return Joiner.on(",").join(list);
     }
 }
