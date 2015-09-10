@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
-import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.PublicUser;
+import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.api.jophiel.JophielUser;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
@@ -37,7 +37,6 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
@@ -46,12 +45,12 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
 
-    private final Jophiel jophiel;
+    private final JophielPublicAPI jophielPublicAPI;
     private final LessonService lessonService;
 
     @Inject
-    public LessonPartnerController(Jophiel jophiel, LessonService lessonService) {
-        this.jophiel = jophiel;
+    public LessonPartnerController(JophielPublicAPI jophielPublicAPI, LessonService lessonService) {
+        this.jophielPublicAPI = jophielPublicAPI;
         this.lessonService = lessonService;
     }
 
@@ -120,28 +119,16 @@ public class LessonPartnerController extends AbstractJudgelsController {
         String username = usernameForm.get().username;
         LessonPartnerUpsertForm lessonData = lessonForm.get();
 
-        String userJid;
-        try {
-            userJid = jophiel.verifyUsername(username);
-        } catch (IOException e) {
-            return notFound();
-        }
+        JophielUser jophielUser = jophielPublicAPI.findUserByUsername(username);
 
-        if (userJid == null) {
+        if (jophielUser == null) {
             usernameForm.reject("username", Messages.get("lesson.partner.usernameNotFound"));
             return showAddPartner(usernameForm, lessonForm, lesson);
         }
 
-        PublicUser publicUser;
-        try {
-            publicUser = jophiel.getPublicUserByJid(userJid);
-        } catch (IOException e) {
-            return notFound();
-        }
+        JidCacheServiceImpl.getInstance().putDisplayName(jophielUser.getJid(), JudgelsPlayUtils.getUserDisplayName(jophielUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        JidCacheServiceImpl.getInstance().putDisplayName(publicUser.getJid(), JudgelsPlayUtils.getUserDisplayName(publicUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
-        if (lessonService.isUserPartnerForLesson(lesson.getJid(), userJid)) {
+        if (lessonService.isUserPartnerForLesson(lesson.getJid(), jophielUser.getJid())) {
             usernameForm.reject("username", Messages.get("lesson.partner.already"));
             return showAddPartner(usernameForm, lessonForm, lesson);
         }
@@ -158,9 +145,9 @@ public class LessonPartnerController extends AbstractJudgelsController {
               .setIsAllowedToManageLessonClients(lessonData.isAllowedToManageLessonClients)
               .build();
 
-        lessonService.createLessonPartner(lesson.getJid(), userJid, partnerConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        lessonService.createLessonPartner(lesson.getJid(), jophielUser.getJid(), partnerConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of lesson " + lesson.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + jophielUser.getJid() + " of lesson " + lesson.getSlug() + ".");
 
         return redirect(routes.LessonPartnerController.viewPartners(lesson.getId()));
     }
@@ -244,7 +231,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
     }
 
     private Result showAddPartner(Form<LessonPartnerUsernameForm> usernameForm, Form<LessonPartnerUpsertForm> lessonForm, Lesson lesson) {
-        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, lessonForm, lesson, jophiel.getAutoCompleteEndPoint()));
+        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, lessonForm, lesson, jophielPublicAPI.getUserAutocompleteAPIEndpoint()));
 
         content.appendLayout(c -> heading3Layout.render(Messages.get("lesson.partner.add"), c));
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);

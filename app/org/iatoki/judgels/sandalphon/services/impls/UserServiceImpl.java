@@ -3,8 +3,7 @@ package org.iatoki.judgels.sandalphon.services.impls;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.PublicUser;
+import org.iatoki.judgels.api.jophiel.JophielUser;
 import org.iatoki.judgels.jophiel.UserTokens;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
@@ -18,19 +17,16 @@ import org.iatoki.judgels.sandalphon.services.UserService;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
 import java.util.List;
 
 @Singleton
 @Named("userService")
 public final class UserServiceImpl implements UserService {
 
-    private final Jophiel jophiel;
     private final UserDao userDao;
 
     @Inject
-    public UserServiceImpl(Jophiel jophiel, UserDao userDao) {
-        this.jophiel = jophiel;
+    public UserServiceImpl(UserDao userDao) {
         this.userDao = userDao;
     }
 
@@ -113,23 +109,17 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void upsertUserFromJophielUserJid(String userJid, String upsertUserJid, String upsertUserIpAddress) {
-        upsertUserFromJophielUserJid(userJid, SandalphonUtils.getDefaultRoles(), upsertUserJid, upsertUserIpAddress);
+    public void upsertUserFromJophielUser(JophielUser jophielUser, String upsertUserJid, String upsertUserIpAddress) {
+        upsertUserFromJophielUser(jophielUser, SandalphonUtils.getDefaultRoles(), upsertUserJid, upsertUserIpAddress);
     }
 
     @Override
-    public void upsertUserFromJophielUserJid(String userJid, List<String> roles, String upsertUserJid, String upsertUserIpAddress) {
-        try {
-            PublicUser publicUser = jophiel.getPublicUserByJid(userJid);
-
-            if (!userDao.existsByJid(userJid)) {
-                createUser(publicUser.getJid(), roles, upsertUserJid, upsertUserIpAddress);
-            }
-
-            JidCacheServiceImpl.getInstance().putDisplayName(publicUser.getJid(), JudgelsPlayUtils.getUserDisplayName(publicUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-        } catch (IOException e) {
-            // do nothing
+    public void upsertUserFromJophielUser(JophielUser jophielUser, List<String> roles, String upsertUserJid, String upsertUserIpAddress) {
+        if (!userDao.existsByJid(jophielUser.getJid())) {
+            createUser(jophielUser.getJid(), roles, upsertUserJid, upsertUserIpAddress);
         }
+
+        JidCacheServiceImpl.getInstance().putDisplayName(jophielUser.getJid(), JudgelsPlayUtils.getUserDisplayName(jophielUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
     }
 
     @Override

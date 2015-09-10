@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
-import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.PublicUser;
+import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.api.jophiel.JophielUser;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
@@ -37,19 +37,18 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
 public final class ProgrammingProblemPartnerController extends AbstractJudgelsController {
 
-    private final Jophiel jophiel;
+    private final JophielPublicAPI jophielPublicAPI;
     private final ProblemService problemService;
 
     @Inject
-    public ProgrammingProblemPartnerController(Jophiel jophiel, ProblemService problemService) {
-        this.jophiel = jophiel;
+    public ProgrammingProblemPartnerController(JophielPublicAPI jophielPublicAPI, ProblemService problemService) {
+        this.jophielPublicAPI = jophielPublicAPI;
         this.problemService = problemService;
     }
 
@@ -92,28 +91,16 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
         ProblemPartnerUpsertForm problemData = problemForm.get();
         ProgrammingPartnerUpsertForm programmingData = programmingForm.get();
 
-        String userJid;
-        try {
-            userJid = jophiel.verifyUsername(username);
-        } catch (IOException e) {
-            return notFound();
-        }
+        JophielUser jophielUser = jophielPublicAPI.findUserByUsername(username);
 
-        if (userJid == null) {
+        if (jophielUser == null) {
             usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
             return showAddPartner(usernameForm, problemForm, programmingForm, problem);
         }
 
-        PublicUser publicUser;
-        try {
-            publicUser = jophiel.getPublicUserByJid(userJid);
-        } catch (IOException e) {
-            return notFound();
-        }
+        JidCacheServiceImpl.getInstance().putDisplayName(jophielUser.getJid(), JudgelsPlayUtils.getUserDisplayName(jophielUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        JidCacheServiceImpl.getInstance().putDisplayName(publicUser.getJid(), JudgelsPlayUtils.getUserDisplayName(publicUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
-        if (problemService.isUserPartnerForProblem(problem.getJid(), userJid)) {
+        if (problemService.isUserPartnerForProblem(problem.getJid(), jophielUser.getJid())) {
             usernameForm.reject("username", Messages.get("problem.partner.already"));
             return showAddPartner(usernameForm, problemForm, programmingForm, problem);
         }
@@ -135,9 +122,9 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
               .setIsAllowedToManageGrading(programmingData.isAllowedToManageGrading)
               .build();
 
-        problemService.createProblemPartner(problem.getJid(), userJid, problemConfig, programmingConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        problemService.createProblemPartner(problem.getJid(), jophielUser.getJid(), problemConfig, programmingConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + jophielUser.getJid() + " of problem " + problem.getSlug() + ".");
 
         return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
     }
@@ -229,7 +216,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
     }
 
     private Result showAddPartner(Form<ProblemPartnerUsernameForm> usernameForm, Form<ProblemPartnerUpsertForm> problemForm, Form<ProgrammingPartnerUpsertForm> programmingForm, Problem problem) {
-        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, problemForm, programmingForm, problem, jophiel.getAutoCompleteEndPoint()));
+        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, problemForm, programmingForm, problem, jophielPublicAPI.getUserAutocompleteAPIEndpoint()));
 
         content.appendLayout(c -> heading3Layout.render(Messages.get("problem.partner.add"), c));
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);

@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
-import org.iatoki.judgels.jophiel.Jophiel;
-import org.iatoki.judgels.jophiel.PublicUser;
+import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.api.jophiel.JophielUser;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
@@ -36,19 +36,18 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
 @Named
 public final class BundleProblemPartnerController extends AbstractJudgelsController {
 
-    private final Jophiel jophiel;
+    private final JophielPublicAPI jophielPublicAPI;
     private final ProblemService problemService;
 
     @Inject
-    public BundleProblemPartnerController(Jophiel jophiel, ProblemService problemService) {
-        this.jophiel = jophiel;
+    public BundleProblemPartnerController(JophielPublicAPI jophielPublicAPI, ProblemService problemService) {
+        this.jophielPublicAPI = jophielPublicAPI;
         this.problemService = problemService;
     }
 
@@ -91,28 +90,16 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
         ProblemPartnerUpsertForm problemData = problemForm.get();
         BundlePartnerUpsertForm bundleData = bundleForm.get();
 
-        String userJid;
-        try {
-            userJid = jophiel.verifyUsername(username);
-        } catch (IOException e) {
-            return notFound();
-        }
+        JophielUser jophielUser = jophielPublicAPI.findUserByUsername(username);
 
-        if (userJid == null) {
+        if (jophielUser == null) {
             usernameForm.reject("username", Messages.get("problem.partner.usernameNotFound"));
             return showAddPartner(usernameForm, problemForm, bundleForm, problem);
         }
 
-        PublicUser publicUser;
-        try {
-            publicUser = jophiel.getPublicUserByJid(userJid);
-        } catch (IOException e) {
-            return notFound();
-        }
+        JidCacheServiceImpl.getInstance().putDisplayName(jophielUser.getJid(), JudgelsPlayUtils.getUserDisplayName(jophielUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        JidCacheServiceImpl.getInstance().putDisplayName(publicUser.getJid(), JudgelsPlayUtils.getUserDisplayName(publicUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-
-        if (problemService.isUserPartnerForProblem(problem.getJid(), userJid)) {
+        if (problemService.isUserPartnerForProblem(problem.getJid(), jophielUser.getJid())) {
             usernameForm.reject("username", Messages.get("problem.partner.already"));
             return showAddPartner(usernameForm, problemForm, bundleForm, problem);
         }
@@ -131,9 +118,9 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
         BundleProblemPartnerConfig bundleConfig = new BundleProblemPartnerConfig(bundleData.isAllowedToSubmit, bundleData.isAllowedToManageItems);
 
-        problemService.createProblemPartner(problem.getJid(), userJid, problemConfig, bundleConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        problemService.createProblemPartner(problem.getJid(), jophielUser.getJid(), problemConfig, bundleConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + userJid + " of problem " + problem.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + jophielUser.getJid() + " of problem " + problem.getSlug() + ".");
 
         return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
     }
@@ -220,7 +207,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
     }
 
     private Result showAddPartner(Form<ProblemPartnerUsernameForm> usernameForm, Form<ProblemPartnerUpsertForm> problemForm, Form<BundlePartnerUpsertForm> bundleForm, Problem problem) {
-        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, problemForm, bundleForm, problem, jophiel.getAutoCompleteEndPoint()));
+        LazyHtml content = new LazyHtml(addPartnerView.render(usernameForm, problemForm, bundleForm, problem, jophielPublicAPI.getUserAutocompleteAPIEndpoint()));
 
         content.appendLayout(c -> heading3Layout.render(Messages.get("problem.partner.add"), c));
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
