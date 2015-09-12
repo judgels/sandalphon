@@ -9,7 +9,6 @@ import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Lesson;
 import org.iatoki.judgels.sandalphon.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonStatement;
-import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.LessonStatementUtils;
@@ -69,11 +68,11 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        ProblemStatement statement;
+        LessonStatement statement;
         try {
             statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), LessonControllerUtils.getCurrentStatementLanguage());
         } catch (IOException e) {
-            statement = new ProblemStatement(ProblemStatementUtils.getDefaultTitle(LessonControllerUtils.getCurrentStatementLanguage()), LessonStatementUtils.getDefaultText(LessonControllerUtils.getCurrentStatementLanguage()));
+            statement = new LessonStatement(ProblemStatementUtils.getDefaultTitle(LessonControllerUtils.getCurrentStatementLanguage()), LessonStatementUtils.getDefaultText(LessonControllerUtils.getCurrentStatementLanguage()));
         }
 
         LazyHtml content = new LazyHtml(lessonStatementView.render(statement));
@@ -132,7 +131,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        ProblemStatement statement;
+        LessonStatement statement;
         try {
             statement = lessonService.getStatement(IdentityUtils.getUserJid(), lesson.getJid(), ProblemControllerUtils.getCurrentStatementLanguage());
         } catch (IOException e) {

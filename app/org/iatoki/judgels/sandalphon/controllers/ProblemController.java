@@ -87,12 +87,12 @@ public final class ProblemController extends AbstractJudgelsController {
     public Result postCreateProblem() {
         Form<ProblemCreateForm> problemCreateForm = Form.form(ProblemCreateForm.class).bindFromRequest();
 
-        if (problemService.problemExistsBySlug(problemCreateForm.get().slug)) {
-            problemCreateForm.reject("slug", Messages.get("error.problem.slugExists"));
-        }
-
         if (formHasErrors(problemCreateForm)) {
             return showCreateProblem(problemCreateForm);
+        }
+
+        if (problemService.problemExistsBySlug(problemCreateForm.get().slug)) {
+            problemCreateForm.reject("slug", Messages.get("error.problem.slugExists"));
         }
 
         ProblemCreateForm problemCreateData = problemCreateForm.get();
@@ -191,12 +191,12 @@ public final class ProblemController extends AbstractJudgelsController {
 
         Form<ProblemUpdateForm> problemUpdateForm = Form.form(ProblemUpdateForm.class).bindFromRequest();
 
-        if (!problem.getSlug().equals(problemUpdateForm.get().slug) && problemService.problemExistsBySlug(problemUpdateForm.get().slug)) {
-            problemUpdateForm.reject("slug", Messages.get("error.problem.slugExists"));
-        }
-
         if (formHasErrors(problemUpdateForm)) {
             return showUpdateProblem(problemUpdateForm, problem);
+        }
+
+        if (!problem.getSlug().equals(problemUpdateForm.get().slug) && problemService.problemExistsBySlug(problemUpdateForm.get().slug)) {
+            problemUpdateForm.reject("slug", Messages.get("error.problem.slugExists"));
         }
 
         ProblemUpdateForm problemUpdateData = problemUpdateForm.get();

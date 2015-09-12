@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.services;
 
 import org.iatoki.judgels.play.Page;
+import org.iatoki.judgels.play.services.JudgelsAppClientService;
 import org.iatoki.judgels.sandalphon.Client;
 import org.iatoki.judgels.sandalphon.ClientLesson;
 import org.iatoki.judgels.sandalphon.ClientNotFoundException;
@@ -8,7 +9,7 @@ import org.iatoki.judgels.sandalphon.ClientProblem;
 
 import java.util.List;
 
-public interface ClientService {
+public interface ClientService extends JudgelsAppClientService {
 
     boolean clientExistsByJid(String clientJid);
 

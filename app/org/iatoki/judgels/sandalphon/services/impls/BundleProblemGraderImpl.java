@@ -32,7 +32,7 @@ public final class BundleProblemGraderImpl implements BundleProblemGrader {
     }
 
     @Override
-    public BundleGradingResult gradeBundleProblem(String problemJid, BundleAnswer bundleAnswer) throws IOException {
+    public BundleGradingResult gradeBundleProblem(String problemJid, BundleAnswer answer) throws IOException {
         List<BundleItem> bundleItems = bundleItemService.getBundleItemsInProblemWithClone(problemJid, null);
         ImmutableMap.Builder<String, BundleDetailResult> detailResultBuilder = ImmutableMap.builder();
 
@@ -40,15 +40,15 @@ public final class BundleProblemGraderImpl implements BundleProblemGrader {
         for (BundleItem bundleItem : bundleItems) {
             String conf = "";
             try {
-                conf = bundleItemService.getItemConfInProblemWithCloneByJid(problemJid, null, bundleItem.getJid(), bundleAnswer.getLanguageCode());
+                conf = bundleItemService.getItemConfInProblemWithCloneByJid(problemJid, null, bundleItem.getJid(), answer.getLanguageCode());
             } catch (IOException e) {
                 conf = bundleItemService.getItemConfInProblemWithCloneByJid(problemJid, null, bundleItem.getJid(), problemService.getDefaultLanguage(null, problemJid));
             }
 
             BundleItemConfAdapter confAdapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
             BundleItemAdapter adapter = BundleItemAdapters.fromItemType(bundleItem.getType());
-            if ((adapter instanceof BundleItemHasScore) && bundleAnswer.getAnswers().containsKey(bundleItem.getJid())) {
-                double score = ((BundleItemHasScore) adapter).calculateScore(confAdapter.parseConfString(conf), bundleAnswer.getAnswers().get(bundleItem.getJid()));
+            if ((adapter instanceof BundleItemHasScore) && answer.getAnswers().containsKey(bundleItem.getJid())) {
+                double score = ((BundleItemHasScore) adapter).calculateScore(confAdapter.parseConfString(conf), answer.getAnswers().get(bundleItem.getJid()));
                 detailResultBuilder.put(bundleItem.getJid(), new BundleDetailResult(bundleItem.getNumber(), score));
                 totalScore += score;
             }

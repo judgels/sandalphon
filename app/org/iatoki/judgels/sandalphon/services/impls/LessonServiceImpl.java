@@ -16,7 +16,6 @@ import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonStatement;
-import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.config.LessonFileSystemProvider;
 import org.iatoki.judgels.sandalphon.config.LessonGitProvider;
@@ -201,7 +200,7 @@ public final class LessonServiceImpl implements LessonService {
 
         availableLanguages.put(languageCode, StatementLanguageStatus.ENABLED);
 
-        ProblemStatement defaultLanguageStatement = getStatement(userJid, lessonJid, getDefaultLanguage(userJid, lessonJid));
+        LessonStatement defaultLanguageStatement = getStatement(userJid, lessonJid, getDefaultLanguage(userJid, lessonJid));
         lessonFileSystemProvider.writeToFile(getStatementTitleFilePath(userJid, lessonJid, languageCode), defaultLanguageStatement.getTitle());
         lessonFileSystemProvider.writeToFile(getStatementTextFilePath(userJid, lessonJid, languageCode), defaultLanguageStatement.getText());
         lessonFileSystemProvider.writeToFile(getStatementAvailableLanguagesFilePath(userJid, lessonJid), new Gson().toJson(availableLanguages));
@@ -238,11 +237,11 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public ProblemStatement getStatement(String userJid, String lessonJid, String languageCode) throws IOException {
+    public LessonStatement getStatement(String userJid, String lessonJid, String languageCode) throws IOException {
         String title = lessonFileSystemProvider.readFromFile(getStatementTitleFilePath(userJid, lessonJid, languageCode));
         String text = lessonFileSystemProvider.readFromFile(getStatementTextFilePath(userJid, lessonJid, languageCode));
 
-        return new ProblemStatement(title, text);
+        return new LessonStatement(title, text);
     }
 
     @Override

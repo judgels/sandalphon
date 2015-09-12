@@ -1,10 +1,11 @@
 package org.iatoki.judgels.sandalphon.services;
 
 import org.iatoki.judgels.play.Page;
+import org.iatoki.judgels.play.services.JudgelsAppClientService;
 import org.iatoki.judgels.sandalphon.Grader;
 import org.iatoki.judgels.sandalphon.GraderNotFoundException;
 
-public interface GraderService {
+public interface GraderService extends JudgelsAppClientService {
 
     boolean graderExistsByJid(String graderJid);
 
@@ -17,6 +18,4 @@ public interface GraderService {
     void createGrader(String name, String userJid, String userIpAddress);
 
     void updateGrader(String graderJid, String name, String userJid, String userIpAddress);
-
-    boolean verifyGrader(String graderJid, String clientSecret);
 }

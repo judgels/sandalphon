@@ -90,12 +90,12 @@ public final class LessonController extends AbstractJudgelsController {
     public Result postCreateLesson() {
         Form<LessonCreateForm> lessonCreateForm = Form.form(LessonCreateForm.class).bindFromRequest();
 
-        if (lessonService.lessonExistsBySlug(lessonCreateForm.get().slug)) {
-            lessonCreateForm.reject("slug", Messages.get("error.lesson.slugExists"));
-        }
-
         if (formHasErrors(lessonCreateForm)) {
             return showCreateLesson(lessonCreateForm);
+        }
+
+        if (lessonService.lessonExistsBySlug(lessonCreateForm.get().slug)) {
+            lessonCreateForm.reject("slug", Messages.get("error.lesson.slugExists"));
         }
 
         LessonCreateForm lessonCreateData = lessonCreateForm.get();
@@ -196,12 +196,12 @@ public final class LessonController extends AbstractJudgelsController {
 
         Form<LessonUpdateForm> lessonUpdateForm = Form.form(LessonUpdateForm.class).bindFromRequest();
 
-        if (!lesson.getSlug().equals(lessonUpdateForm.get().slug) && lessonService.lessonExistsBySlug(lessonUpdateForm.get().slug)) {
-            lessonUpdateForm.reject("slug", Messages.get("error.lesson.slugExists"));
-        }
-
         if (formHasErrors(lessonUpdateForm)) {
             return showUpdateLesson(lessonUpdateForm, lesson);
+        }
+
+        if (!lesson.getSlug().equals(lessonUpdateForm.get().slug) && lessonService.lessonExistsBySlug(lessonUpdateForm.get().slug)) {
+            lessonUpdateForm.reject("slug", Messages.get("error.lesson.slugExists"));
         }
 
         LessonUpdateForm lessonUpdateData = lessonUpdateForm.get();

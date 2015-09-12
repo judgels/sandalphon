@@ -1,6 +1,8 @@
 package org.iatoki.judgels.sandalphon;
 
-public final class Grader {
+import org.iatoki.judgels.play.JudgelsAppClient;
+
+public final class Grader implements JudgelsAppClient {
 
     private final long id;
     private final String jid;
@@ -18,14 +20,17 @@ public final class Grader {
         return id;
     }
 
+    @Override
     public String getJid() {
         return jid;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getSecret() {
         return secret;
     }

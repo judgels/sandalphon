@@ -9,7 +9,6 @@ import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonStatement;
-import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 
 import java.io.File;
@@ -57,7 +56,7 @@ public interface LessonService {
 
     String getDefaultLanguage(String userJid, String lessonJid) throws IOException;
 
-    ProblemStatement getStatement(String userJid, String lessonJid, String languageCode) throws IOException;
+    LessonStatement getStatement(String userJid, String lessonJid, String languageCode) throws IOException;
 
     Map<String, String> getTitlesByLanguage(String userJid, String lessonJid) throws IOException;
 

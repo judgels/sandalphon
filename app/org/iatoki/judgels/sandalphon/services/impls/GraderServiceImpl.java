@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.services.impls;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import org.iatoki.judgels.play.JudgelsAppClient;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.Grader;
@@ -76,9 +77,12 @@ public final class GraderServiceImpl implements GraderService {
     }
 
     @Override
-    public boolean verifyGrader(String graderJid, String graderSecret) {
-        GraderModel graderModel = graderDao.findByJid(graderJid);
+    public boolean clientExistsByJid(String clientJid) {
+        return graderExistsByJid(clientJid);
+    }
 
-        return (graderModel != null) && graderModel.secret.equals(graderSecret);
+    @Override
+    public JudgelsAppClient findClientByJid(String clientJid) {
+        return findGraderByJid(clientJid);
     }
 }
