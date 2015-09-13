@@ -101,7 +101,7 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
     public Result jumpToGrading(long id) {
         SandalphonControllerUtils.getInstance().addActivityLog("Jump to programming problem grading " + id + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(id));
+        return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(id));
     }
 
     public Result jumpToSubmissions(long id) {

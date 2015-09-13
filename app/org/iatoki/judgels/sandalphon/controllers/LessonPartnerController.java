@@ -25,7 +25,7 @@ import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.addPartnerView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.listPartnersView;
-import org.iatoki.judgels.sandalphon.views.html.lesson.partner.updatePartnerView;
+import org.iatoki.judgels.sandalphon.views.html.lesson.partner.editPartnerView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -154,7 +154,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updatePartner(long lessonId, long partnerId) throws LessonNotFoundException, LessonPartnerNotFoundException {
+    public Result editPartner(long lessonId, long partnerId) throws LessonNotFoundException, LessonPartnerNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
         if (!LessonControllerUtils.isAuthorOrAbove(lesson)) {
@@ -180,12 +180,12 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdatePartner(lessonForm, lesson, lessonPartner);
+        return showEditPartner(lessonForm, lesson, lessonPartner);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdatePartner(long lessonId, long partnerId) throws LessonNotFoundException, LessonPartnerNotFoundException {
+    public Result postEditPartner(long lessonId, long partnerId) throws LessonNotFoundException, LessonPartnerNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
         if (!LessonControllerUtils.isAuthorOrAbove(lesson)) {
@@ -197,7 +197,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
         Form<LessonPartnerUpsertForm> lessonForm = Form.form(LessonPartnerUpsertForm.class).bindFromRequest();
 
         if (formHasErrors(lessonForm)) {
-            return showUpdatePartner(lessonForm, lesson, lessonPartner);
+            return showEditPartner(lessonForm, lesson, lessonPartner);
         }
 
         LessonPartnerUpsertForm lessonData = lessonForm.get();
@@ -218,7 +218,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getSlug() + ".");
 
-        return redirect(routes.LessonPartnerController.updatePartner(lesson.getId(), lessonPartner.getId()));
+        return redirect(routes.LessonPartnerController.editPartner(lesson.getId(), lessonPartner.getId()));
     }
 
     private void appendBreadcrumbsLayout(LazyHtml content, Lesson lesson, InternalLink lastLink) {
@@ -244,15 +244,15 @@ public class LessonPartnerController extends AbstractJudgelsController {
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdatePartner(Form<LessonPartnerUpsertForm> lessonForm, Lesson lesson, LessonPartner lessonPartner) {
-        LazyHtml content = new LazyHtml(updatePartnerView.render(lessonForm, lesson, lessonPartner));
+    private Result showEditPartner(Form<LessonPartnerUpsertForm> lessonForm, Lesson lesson, LessonPartner lessonPartner) {
+        LazyHtml content = new LazyHtml(editPartnerView.render(lessonForm, lesson, lessonPartner));
 
         content.appendLayout(c -> heading3Layout.render(Messages.get("lesson.partner.update") + ": " + JidCacheServiceImpl.getInstance().getDisplayName(lessonPartner.getPartnerJid()), c));
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.partner.update"), routes.LessonPartnerController.updatePartner(lesson.getId(), lessonPartner.getId())));
+        appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.partner.update"), routes.LessonPartnerController.editPartner(lesson.getId(), lessonPartner.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Partner");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);

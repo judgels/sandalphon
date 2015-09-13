@@ -14,7 +14,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ClientProblemUpsertForm;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
-import org.iatoki.judgels.sandalphon.views.html.problem.client.updateClientProblemsView;
+import org.iatoki.judgels.sandalphon.views.html.problem.client.editClientProblemsView;
 import org.iatoki.judgels.sandalphon.views.html.problem.client.viewClientProblemView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -45,7 +45,7 @@ public final class ProblemClientController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateClientProblems(long problemId) throws ProblemNotFoundException {
+    public Result editClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProblemControllerUtils.isAllowedToManageClients(problemService, problem)) {
@@ -58,12 +58,12 @@ public final class ProblemClientController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
+        return showEditClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateClientProblems(long problemId) throws ProblemNotFoundException {
+    public Result postEditClientProblems(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProblemControllerUtils.isAllowedToManageClients(problemService, problem)) {
@@ -76,7 +76,7 @@ public final class ProblemClientController extends AbstractJudgelsController {
             List<ClientProblem> clientProblems = clientService.getClientProblemsByProblemJid(problem.getJid());
             List<Client> clients = clientService.getClients();
 
-            return showUpdateClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
+            return showEditClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
         }
 
         ClientProblemUpsertForm clientProblemUpsertData = clientProblemUpsertForm.get();
@@ -84,14 +84,14 @@ public final class ProblemClientController extends AbstractJudgelsController {
             List<ClientProblem> clientProblems = clientService.getClientProblemsByProblemJid(problem.getJid());
             List<Client> clients = clientService.getClients();
 
-            return showUpdateClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
+            return showEditClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
         }
 
         clientService.createClientProblem(problem.getJid(), clientProblemUpsertData.clientJid, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertData.clientJid + " to problem " + problem.getSlug() + ".");
 
-        return redirect(routes.ProblemClientController.updateClientProblems(problem.getId()));
+        return redirect(routes.ProblemClientController.editClientProblems(problem.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -115,13 +115,13 @@ public final class ProblemClientController extends AbstractJudgelsController {
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateClientProblems(Form<ClientProblemUpsertForm> clientProblemUpsertForm, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
-        LazyHtml content = new LazyHtml(updateClientProblemsView.render(clientProblemUpsertForm, problem.getId(), clients, clientProblems));
+    private Result showEditClientProblems(Form<ClientProblemUpsertForm> clientProblemUpsertForm, Problem problem, List<Client> clients, List<ClientProblem> clientProblems) {
+        LazyHtml content = new LazyHtml(editClientProblemsView.render(clientProblemUpsertForm, problem.getId(), clients, clientProblems));
         ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.list"), routes.ProblemClientController.updateClientProblems(problem.getId())));
+        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.list"), routes.ProblemClientController.editClientProblems(problem.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Client");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);

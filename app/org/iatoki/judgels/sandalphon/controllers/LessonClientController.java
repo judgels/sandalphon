@@ -14,7 +14,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ClientLessonUpsertForm;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.LessonService;
-import org.iatoki.judgels.sandalphon.views.html.lesson.client.updateClientLessonsView;
+import org.iatoki.judgels.sandalphon.views.html.lesson.client.editClientLessonsView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.client.viewClientLessonView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -45,7 +45,7 @@ public final class LessonClientController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateClientLessons(long lessonId) throws LessonNotFoundException {
+    public Result editClientLessons(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
         if (!LessonControllerUtils.isAllowedToManageClients(lessonService, lesson)) {
@@ -58,12 +58,12 @@ public final class LessonClientController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update client on lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
+        return showEditClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateClientLessons(long lessonId) throws LessonNotFoundException {
+    public Result postEditClientLessons(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
         if (!LessonControllerUtils.isAllowedToManageClients(lessonService, lesson)) {
@@ -75,21 +75,21 @@ public final class LessonClientController extends AbstractJudgelsController {
         if (formHasErrors(clientLessonUpsertForm)) {
             List<ClientLesson> clientLessons = clientService.getClientLessonsByLessonJid(lesson.getJid());
             List<Client> clients = clientService.getClients();
-            return showUpdateClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
+            return showEditClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
         }
 
         ClientLessonUpsertForm clientLessonUpsertData = clientLessonUpsertForm.get();
         if (!clientService.clientExistsByJid(clientLessonUpsertData.clientJid) || clientService.isClientAuthorizedForLesson(lesson.getJid(), clientLessonUpsertData.clientJid)) {
             List<ClientLesson> clientLessons = clientService.getClientLessonsByLessonJid(lesson.getJid());
             List<Client> clients = clientService.getClients();
-            return showUpdateClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
+            return showEditClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
         }
 
         clientService.createClientLesson(lesson.getJid(), clientLessonUpsertData.clientJid, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientLessonUpsertData.clientJid + " to lesson " + lesson.getSlug() + ".");
 
-        return redirect(routes.LessonClientController.updateClientLessons(lesson.getId()));
+        return redirect(routes.LessonClientController.editClientLessons(lesson.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -113,13 +113,13 @@ public final class LessonClientController extends AbstractJudgelsController {
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateClientLessons(Form<ClientLessonUpsertForm> clientLessonUpsertForm, Lesson lesson, List<Client> clients, List<ClientLesson> clientLessons) {
-        LazyHtml content = new LazyHtml(updateClientLessonsView.render(clientLessonUpsertForm, lesson.getId(), clients, clientLessons));
+    private Result showEditClientLessons(Form<ClientLessonUpsertForm> clientLessonUpsertForm, Lesson lesson, List<Client> clients, List<ClientLesson> clientLessons) {
+        LazyHtml content = new LazyHtml(editClientLessonsView.render(clientLessonUpsertForm, lesson.getId(), clients, clientLessons));
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.client.list"), routes.LessonClientController.updateClientLessons(lesson.getId())));
+        appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.client.list"), routes.LessonClientController.editClientLessons(lesson.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Client");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);

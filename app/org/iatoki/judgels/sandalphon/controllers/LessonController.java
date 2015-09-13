@@ -18,11 +18,11 @@ import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.LessonCreateForm;
-import org.iatoki.judgels.sandalphon.forms.LessonUpdateForm;
+import org.iatoki.judgels.sandalphon.forms.LessonEditForm;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.views.html.lesson.createLessonView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.listLessonsView;
-import org.iatoki.judgels.sandalphon.views.html.lesson.updateLessonView;
+import org.iatoki.judgels.sandalphon.views.html.lesson.editLessonView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.viewLessonView;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -141,7 +141,7 @@ public final class LessonController extends AbstractJudgelsController {
     public Result jumpToClients(long lessonId) {
         SandalphonControllerUtils.getInstance().addActivityLog("Jump to lesson client " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return redirect(routes.LessonClientController.updateClientLessons(lessonId));
+        return redirect(routes.LessonClientController.editClientLessons(lessonId));
     }
 
     @Transactional(readOnly = true)
@@ -167,45 +167,45 @@ public final class LessonController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateLesson(long lessonId) throws LessonNotFoundException {
+    public Result editLesson(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
         if (!LessonControllerUtils.isAllowedToUpdateLesson(lessonService, lesson)) {
             return redirect(routes.LessonController.viewLesson(lesson.getId()));
         }
 
-        LessonUpdateForm lessonUpdateData = new LessonUpdateForm();
-        lessonUpdateData.slug = lesson.getSlug();
-        lessonUpdateData.additionalNote = lesson.getAdditionalNote();
+        LessonEditForm lessonEditData = new LessonEditForm();
+        lessonEditData.slug = lesson.getSlug();
+        lessonEditData.additionalNote = lesson.getAdditionalNote();
 
-        Form<LessonUpdateForm> lessonUpdateForm = Form.form(LessonUpdateForm.class).fill(lessonUpdateData);
+        Form<LessonEditForm> lessonEditForm = Form.form(LessonEditForm.class).fill(lessonEditData);
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateLesson(lessonUpdateForm, lesson);
+        return showEditLesson(lessonEditForm, lesson);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateLesson(long lessonId) throws LessonNotFoundException {
+    public Result postEditLesson(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
         if (!LessonControllerUtils.isAllowedToUpdateLesson(lessonService, lesson)) {
             return notFound();
         }
 
-        Form<LessonUpdateForm> lessonUpdateForm = Form.form(LessonUpdateForm.class).bindFromRequest();
+        Form<LessonEditForm> lessonEditForm = Form.form(LessonEditForm.class).bindFromRequest();
 
-        if (formHasErrors(lessonUpdateForm)) {
-            return showUpdateLesson(lessonUpdateForm, lesson);
+        if (formHasErrors(lessonEditForm)) {
+            return showEditLesson(lessonEditForm, lesson);
         }
 
-        if (!lesson.getSlug().equals(lessonUpdateForm.get().slug) && lessonService.lessonExistsBySlug(lessonUpdateForm.get().slug)) {
-            lessonUpdateForm.reject("slug", Messages.get("error.lesson.slugExists"));
+        if (!lesson.getSlug().equals(lessonEditForm.get().slug) && lessonService.lessonExistsBySlug(lessonEditForm.get().slug)) {
+            lessonEditForm.reject("slug", Messages.get("error.lesson.slugExists"));
         }
 
-        LessonUpdateForm lessonUpdateData = lessonUpdateForm.get();
-        lessonService.updateLesson(lesson.getJid(), lessonUpdateData.slug, lessonUpdateData.additionalNote, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        LessonEditForm lessonEditData = lessonEditForm.get();
+        lessonService.updateLesson(lesson.getJid(), lessonEditData.slug, lessonEditData.additionalNote, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update lesson " + lesson.getSlug() + ".");
 
@@ -234,15 +234,15 @@ public final class LessonController extends AbstractJudgelsController {
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateLesson(Form<LessonUpdateForm> lessonUpdateForm, Lesson lesson) {
-        LazyHtml content = new LazyHtml(updateLessonView.render(lessonUpdateForm, lesson));
+    private Result showEditLesson(Form<LessonEditForm> lessonEditForm, Lesson lesson) {
+        LazyHtml content = new LazyHtml(editLessonView.render(lessonEditForm, lesson));
         appendSubtabs(content, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
         content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getSlug(), new InternalLink(Messages.get("lesson.enter"), routes.LessonController.enterLesson(lesson.getId())), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
                 LessonControllerUtils.getLessonBreadcrumbsBuilder(lesson)
-                .add(new InternalLink(Messages.get("lesson.update"), routes.LessonController.updateLesson(lesson.getId())))
+                .add(new InternalLink(Messages.get("lesson.update"), routes.LessonController.editLesson(lesson.getId())))
                 .build()
         );
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update");
@@ -256,7 +256,7 @@ public final class LessonController extends AbstractJudgelsController {
         internalLinks.add(new InternalLink(Messages.get("commons.view"), routes.LessonController.viewLesson(lesson.getId())));
 
         if (LessonControllerUtils.isAllowedToUpdateLesson(lessonService, lesson)) {
-            internalLinks.add(new InternalLink(Messages.get("commons.update"), routes.LessonController.updateLesson(lesson.getId())));
+            internalLinks.add(new InternalLink(Messages.get("commons.update"), routes.LessonController.editLesson(lesson.getId())));
         }
 
         content.appendLayout(c -> subtabLayout.render(internalLinks.build(), c));

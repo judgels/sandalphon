@@ -30,6 +30,6 @@
 
     <h3>@Messages.get("lesson.version.local.modify")</h3>
 
-    <a type="button" href="@routes.LessonVersionController.updateVersionLocalChanges(lesson.getId())" class="btn btn-primary">@Messages.get("lesson.version.local.update")</a>
+    <a type="button" href="@routes.LessonVersionController.editVersionLocalChanges(lesson.getId())" class="btn btn-primary">@Messages.get("lesson.version.local.update")</a>
     <a type="button" href="@routes.LessonVersionController.discardVersionLocalChanges(lesson.getId())" class="btn btn-primary">@Messages.get("lesson.version.local.discard")</a>
 }

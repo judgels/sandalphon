@@ -110,7 +110,7 @@ public final class BundleProblemStatementController extends AbstractJudgelsContr
             e.printStackTrace();
             return notFound();
         }
-        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemStatementController.viewStatementSwitchLanguage(problem.getId()));
+        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemController.switchLanguage(problem.getId()));
 
         ProblemStatementControllerUtils.appendSubtabsLayout(content, problemService, problem);
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);

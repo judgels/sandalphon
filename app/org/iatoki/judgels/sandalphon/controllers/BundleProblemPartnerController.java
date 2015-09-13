@@ -24,7 +24,7 @@ import org.iatoki.judgels.sandalphon.forms.ProblemPartnerUsernameForm;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.problem.bundle.partner.addPartnerView;
-import org.iatoki.judgels.sandalphon.views.html.problem.bundle.partner.updatePartnerView;
+import org.iatoki.judgels.sandalphon.views.html.problem.bundle.partner.editPartnerView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -127,7 +127,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
+    public Result editPartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
@@ -160,12 +160,12 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdatePartner(problemForm, bundleForm, problem, problemPartner);
+        return showEditPartner(problemForm, bundleForm, problem, problemPartner);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdatePartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
+    public Result postEditPartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
@@ -178,7 +178,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
         Form<BundlePartnerUpsertForm> bundleForm = Form.form(BundlePartnerUpsertForm.class).bindFromRequest();
 
         if (formHasErrors(problemForm) || formHasErrors(bundleForm)) {
-            return showUpdatePartner(problemForm, bundleForm, problem, problemPartner);
+            return showEditPartner(problemForm, bundleForm, problem, problemPartner);
         }
 
         ProblemPartnerUpsertForm problemData = problemForm.get();
@@ -203,7 +203,7 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getSlug() + ".");
 
-        return redirect(routes.ProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId()));
+        return redirect(routes.ProblemPartnerController.editPartner(problem.getId(), problemPartner.getId()));
     }
 
     private Result showAddPartner(Form<ProblemPartnerUsernameForm> usernameForm, Form<ProblemPartnerUpsertForm> problemForm, Form<BundlePartnerUpsertForm> bundleForm, Problem problem) {
@@ -220,15 +220,15 @@ public final class BundleProblemPartnerController extends AbstractJudgelsControl
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdatePartner(Form<ProblemPartnerUpsertForm> problemForm, Form<BundlePartnerUpsertForm> bundleForm, Problem problem, ProblemPartner problemPartner) {
-        LazyHtml content = new LazyHtml(updatePartnerView.render(problemForm, bundleForm, problem, problemPartner));
+    private Result showEditPartner(Form<ProblemPartnerUpsertForm> problemForm, Form<BundlePartnerUpsertForm> bundleForm, Problem problem, ProblemPartner problemPartner) {
+        LazyHtml content = new LazyHtml(editPartnerView.render(problemForm, bundleForm, problem, problemPartner));
 
         content.appendLayout(c -> heading3Layout.render(Messages.get("problem.partner.update") + ": " + JidCacheServiceImpl.getInstance().getDisplayName(problemPartner.getPartnerJid()), c));
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        ProblemPartnerControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.partner.update"), routes.BundleProblemPartnerController.updatePartner(problem.getId(), problemPartner.getId())));
+        ProblemPartnerControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.partner.update"), routes.BundleProblemPartnerController.editPartner(problem.getId(), problemPartner.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Partner");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);

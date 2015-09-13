@@ -17,14 +17,14 @@ import org.iatoki.judgels.sandalphon.User;
 import org.iatoki.judgels.sandalphon.forms.UserCreateForm;
 import org.iatoki.judgels.sandalphon.UserNotFoundException;
 import org.iatoki.judgels.sandalphon.services.UserService;
-import org.iatoki.judgels.sandalphon.forms.UserUpdateForm;
+import org.iatoki.judgels.sandalphon.forms.UserEditForm;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.views.html.user.createUserView;
 import org.iatoki.judgels.sandalphon.views.html.user.listUsersView;
-import org.iatoki.judgels.sandalphon.views.html.user.updateUserView;
+import org.iatoki.judgels.sandalphon.views.html.user.editUserView;
 import org.iatoki.judgels.sandalphon.views.html.user.viewUserView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -123,7 +123,7 @@ public final class UserController extends AbstractJudgelsController {
         User user = userService.findUserById(userId);
 
         LazyHtml content = new LazyHtml(viewUserView.render(user));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("user.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()), new InternalLink(Messages.get("commons.update"), routes.UserController.updateUser(user.getId())), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("user.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()), new InternalLink(Messages.get("commons.update"), routes.UserController.editUser(user.getId())), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("user.users"), routes.UserController.index()),
@@ -138,29 +138,29 @@ public final class UserController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateUser(long userId) throws UserNotFoundException {
+    public Result editUser(long userId) throws UserNotFoundException {
         User user = userService.findUserById(userId);
-        UserUpdateForm userUpdateData = new UserUpdateForm();
-        userUpdateData.roles = StringUtils.join(user.getRoles(), ",");
-        Form<UserUpdateForm> userUpdateForm = Form.form(UserUpdateForm.class).fill(userUpdateData);
+        UserEditForm userEditData = new UserEditForm();
+        userEditData.roles = StringUtils.join(user.getRoles(), ",");
+        Form<UserEditForm> userEditForm = Form.form(UserEditForm.class).fill(userEditData);
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateUser(userUpdateForm, user);
+        return showEditUser(userEditForm, user);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateUser(long userId) throws UserNotFoundException {
+    public Result postEditUser(long userId) throws UserNotFoundException {
         User user = userService.findUserById(userId);
-        Form<UserUpdateForm> userUpdateForm = Form.form(UserUpdateForm.class).bindFromRequest();
+        Form<UserEditForm> userEditForm = Form.form(UserEditForm.class).bindFromRequest();
 
-        if (formHasErrors(userUpdateForm)) {
-            return showUpdateUser(userUpdateForm, user);
+        if (formHasErrors(userEditForm)) {
+            return showEditUser(userEditForm, user);
         }
 
-        UserUpdateForm userUpdateData = userUpdateForm.get();
-        userService.updateUser(user.getUserJid(), userUpdateData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        UserEditForm userEditData = userEditForm.get();
+        userService.updateUser(user.getUserJid(), userEditData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update user " + user.getUserJid() + ".");
 
@@ -190,13 +190,13 @@ public final class UserController extends AbstractJudgelsController {
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateUser(Form<UserUpdateForm> userUpdateForm, User user) {
-        LazyHtml content = new LazyHtml(updateUserView.render(userUpdateForm, user.getId()));
+    private Result showEditUser(Form<UserEditForm> userEditForm, User user) {
+        LazyHtml content = new LazyHtml(editUserView.render(userEditForm, user.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("user.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("user.users"), routes.UserController.index()),
-                new InternalLink(Messages.get("user.update"), routes.UserController.updateUser(user.getId()))
+                new InternalLink(Messages.get("user.update"), routes.UserController.editUser(user.getId()))
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "User - Update");
 

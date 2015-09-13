@@ -52,7 +52,7 @@ public final class LessonControllerUtils {
 
     static void appendTitleLayout(LazyHtml content, LessonService lessonService, Lesson lesson) {
         if (isAllowedToUpdateLesson(lessonService, lesson)) {
-            content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getSlug(), new InternalLink(Messages.get("lesson.update"), routes.LessonController.updateLesson(lesson.getId())), c));
+            content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getSlug(), new InternalLink(Messages.get("lesson.update"), routes.LessonController.editLesson(lesson.getId())), c));
         } else {
             content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getSlug(), new InternalLink(Messages.get("lesson.view"), routes.LessonController.viewLesson(lesson.getId())), c));
         }

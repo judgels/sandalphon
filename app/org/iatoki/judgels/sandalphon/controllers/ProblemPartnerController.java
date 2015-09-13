@@ -84,7 +84,7 @@ public class ProblemPartnerController extends AbstractJudgelsController {
     }
 
     @Transactional(readOnly = true)
-    public Result updatePartner(long problemId, long partnerId) throws ProblemNotFoundException {
+    public Result editPartner(long problemId, long partnerId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
@@ -93,9 +93,9 @@ public class ProblemPartnerController extends AbstractJudgelsController {
 
         switch (problem.getType()) {
             case PROGRAMMING:
-                return redirect(routes.ProgrammingProblemPartnerController.updatePartner(problem.getId(), partnerId));
+                return redirect(routes.ProgrammingProblemPartnerController.editPartner(problem.getId(), partnerId));
             case BUNDLE:
-                return redirect(routes.BundleProblemPartnerController.updatePartner(problem.getId(), partnerId));
+                return redirect(routes.BundleProblemPartnerController.editPartner(problem.getId(), partnerId));
             default:
                 return badRequest();
         }

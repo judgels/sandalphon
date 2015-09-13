@@ -2,7 +2,7 @@ package org.iatoki.judgels.sandalphon.forms;
 
 import play.data.validation.Constraints;
 
-public final class ProblemUpdateForm {
+public final class ProblemEditForm {
 
     @Constraints.Required
     @Constraints.Pattern("^[a-z0-9]+(-[a-z0-9]+)*$")

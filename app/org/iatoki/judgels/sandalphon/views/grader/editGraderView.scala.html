@@ -9,7 +9,7 @@
 
 @formErrorView(graderUpsertForm)
 
-@b3.form(routes.GraderController.postUpdateGrader(graderId)) {
+@b3.form(routes.GraderController.postEditGrader(graderId)) {
     @helper.CSRF.formField
 
     @upsertGraderView(graderUpsertForm)

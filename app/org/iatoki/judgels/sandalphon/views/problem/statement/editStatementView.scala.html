@@ -7,7 +7,7 @@
 
 <script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/ckeditor.js")"></script>
 
-@b3.form(routes.ProblemStatementController.postUpdateStatement(problemId)) {
+@b3.form(routes.ProblemStatementController.postEditStatement(problemId)) {
     @helper.CSRF.formField
 
     @b3.text(updateStatementForm("title"), '_label -> Messages.get("problem.title"))

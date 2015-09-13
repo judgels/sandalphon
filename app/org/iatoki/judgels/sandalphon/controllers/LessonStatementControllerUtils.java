@@ -20,7 +20,7 @@ public final class LessonStatementControllerUtils {
         internalLinks.add(new InternalLink(Messages.get("commons.view"), routes.LessonStatementController.viewStatement(lesson.getId())));
 
         if (LessonControllerUtils.isAllowedToUpdateStatement(lessonService, lesson)) {
-            internalLinks.add(new InternalLink(Messages.get("commons.update"), routes.LessonStatementController.updateStatement(lesson.getId())));
+            internalLinks.add(new InternalLink(Messages.get("commons.update"), routes.LessonStatementController.editStatement(lesson.getId())));
         }
 
         internalLinks.add(new InternalLink(Messages.get("lesson.statement.media"), routes.LessonStatementController.listStatementMediaFiles(lesson.getId())));

@@ -22,7 +22,7 @@ import org.iatoki.judgels.sandalphon.forms.UploadFileForm;
 import org.iatoki.judgels.sandalphon.views.html.lesson.statement.lessonStatementView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.statement.listStatementLanguagesView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.statement.listStatementMediaFilesView;
-import org.iatoki.judgels.sandalphon.views.html.lesson.statement.updateStatementView;
+import org.iatoki.judgels.sandalphon.views.html.lesson.statement.editStatementView;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -84,7 +84,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        LessonControllerUtils.appendStatementLanguageSelectionLayout(content, LessonControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.LessonStatementController.viewStatementSwitchLanguage(lesson.getId()));
+        LessonControllerUtils.appendStatementLanguageSelectionLayout(content, LessonControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.LessonController.switchLanguage(lesson.getId()));
 
         LessonStatementControllerUtils.appendSubtabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
@@ -99,27 +99,9 @@ public class LessonStatementController extends AbstractJudgelsController {
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    public Result viewStatementSwitchLanguage(long lessonId) {
-        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
-        LessonControllerUtils.setCurrentStatementLanguage(languageCode);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Switch view statement to " + languageCode + " of lesson " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-        return redirect(routes.LessonStatementController.viewStatement(lessonId));
-    }
-
-    public Result updateStatementSwitchLanguage(long lessonId) {
-        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
-        LessonControllerUtils.setCurrentStatementLanguage(languageCode);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Switch update statement to " + languageCode + " of lesson " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-        return redirect(routes.LessonStatementController.updateStatement(lessonId));
-    }
-
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateStatement(long lessonId) throws LessonNotFoundException {
+    public Result editStatement(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
         try {
             LessonControllerUtils.establishStatementLanguage(lessonService, lesson);
@@ -153,12 +135,12 @@ public class LessonStatementController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update statement of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateStatement(updateStatementForm, lesson, allowedLanguages);
+        return showEditStatement(updateStatementForm, lesson, allowedLanguages);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateStatement(long lessonId) throws LessonNotFoundException {
+    public Result postEditStatement(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
         try {
             LessonControllerUtils.establishStatementLanguage(lessonService, lesson);
@@ -174,7 +156,7 @@ public class LessonStatementController extends AbstractJudgelsController {
         if (formHasErrors(updateStatementForm)) {
             try {
                 Set<String> allowedLanguages = LessonControllerUtils.getAllowedLanguagesToUpdate(lessonService, lesson);
-                return showUpdateStatement(updateStatementForm, lesson, allowedLanguages);
+                return showEditStatement(updateStatementForm, lesson, allowedLanguages);
             } catch (IOException e) {
                 return notFound();
             }
@@ -189,7 +171,7 @@ public class LessonStatementController extends AbstractJudgelsController {
             try {
                 updateStatementForm.reject("lesson.statement.error.cantUpload");
                 Set<String> allowedLanguages = LessonControllerUtils.getAllowedLanguagesToUpdate(lessonService, lesson);
-                return showUpdateStatement(updateStatementForm, lesson, allowedLanguages);
+                return showEditStatement(updateStatementForm, lesson, allowedLanguages);
             } catch (IOException e2) {
                 return notFound();
             }
@@ -197,7 +179,7 @@ public class LessonStatementController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update statement of lesson " + lesson.getSlug() + ".");
 
-        return redirect(routes.LessonStatementController.updateStatement(lesson.getId()));
+        return redirect(routes.LessonStatementController.editStatement(lesson.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -429,15 +411,15 @@ public class LessonStatementController extends AbstractJudgelsController {
         return redirect(routes.LessonStatementController.listStatementLanguages(lesson.getId()));
     }
 
-    private Result showUpdateStatement(Form<UpdateStatementForm> updateStatementForm, Lesson lesson, Set<String> allowedLanguages) {
-        LazyHtml content = new LazyHtml(updateStatementView.render(updateStatementForm, lesson.getId()));
-        LessonControllerUtils.appendStatementLanguageSelectionLayout(content, LessonControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.LessonStatementController.updateStatementSwitchLanguage(lesson.getId()));
+    private Result showEditStatement(Form<UpdateStatementForm> updateStatementForm, Lesson lesson, Set<String> allowedLanguages) {
+        LazyHtml content = new LazyHtml(editStatementView.render(updateStatementForm, lesson.getId()));
+        LessonControllerUtils.appendStatementLanguageSelectionLayout(content, LessonControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.LessonController.switchLanguage(lesson.getId()));
         LessonStatementControllerUtils.appendSubtabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTabsLayout(content, lessonService, lesson);
         LessonControllerUtils.appendVersionLocalChangesWarningLayout(content, lessonService, lesson);
         LessonControllerUtils.appendTitleLayout(content, lessonService, lesson);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        LessonStatementControllerUtils.appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.statement.update"), routes.LessonStatementController.updateStatement(lesson.getId())));
+        LessonStatementControllerUtils.appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.statement.update"), routes.LessonStatementController.editStatement(lesson.getId())));
 
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Statement");
 

@@ -18,7 +18,7 @@ import org.iatoki.judgels.sandalphon.forms.ClientUpsertForm;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.views.html.client.createClientView;
 import org.iatoki.judgels.sandalphon.views.html.client.listClientsView;
-import org.iatoki.judgels.sandalphon.views.html.client.updateClientView;
+import org.iatoki.judgels.sandalphon.views.html.client.editClientView;
 import org.iatoki.judgels.sandalphon.views.html.client.viewClientView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -75,7 +75,7 @@ public final class ClientController extends AbstractJudgelsController {
         Client client = clientService.findClientById(clientId);
 
         LazyHtml content = new LazyHtml(viewClientView.render(client));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), new InternalLink(Messages.get("commons.update"), routes.ClientController.updateClient(clientId)), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), new InternalLink(Messages.get("commons.update"), routes.ClientController.editClient(clientId)), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
@@ -117,7 +117,7 @@ public final class ClientController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateClient(long clientId) throws ClientNotFoundException {
+    public Result editClient(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
         ClientUpsertForm clientUpsertData = new ClientUpsertForm();
         clientUpsertData.name = client.getName();
@@ -125,17 +125,17 @@ public final class ClientController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateClient(clientUpsertForm, client);
+        return showEditClient(clientUpsertForm, client);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateClient(long clientId) throws ClientNotFoundException {
+    public Result postEditClient(long clientId) throws ClientNotFoundException {
         Client client = clientService.findClientById(clientId);
         Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class).bindFromRequest();
 
         if (formHasErrors(clientUpsertForm)) {
-            return showUpdateClient(clientUpsertForm, client);
+            return showEditClient(clientUpsertForm, client);
         }
 
         ClientUpsertForm clientUpsertData = clientUpsertForm.get();
@@ -159,13 +159,13 @@ public final class ClientController extends AbstractJudgelsController {
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateClient(Form<ClientUpsertForm> clientUpsertForm, Client client) {
-        LazyHtml content = new LazyHtml(updateClientView.render(clientUpsertForm, client.getId()));
+    private Result showEditClient(Form<ClientUpsertForm> clientUpsertForm, Client client) {
+        LazyHtml content = new LazyHtml(editClientView.render(clientUpsertForm, client.getId()));
         content.appendLayout(c -> headingLayout.render(Messages.get("client.client") + " #" + client.getId() + ": " + client.getName(), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("client.clients"), routes.ClientController.index()),
-                new InternalLink(Messages.get("client.update"), routes.ClientController.updateClient(client.getId()))
+                new InternalLink(Messages.get("client.update"), routes.ClientController.editClient(client.getId()))
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Client - Update");
 

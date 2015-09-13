@@ -1,16 +1,16 @@
 @import play.i18n.Messages
 @import org.iatoki.judgels.sandalphon.controllers.routes
 @import org.iatoki.judgels.gabriel.GradingLanguageRegistry
-@import org.iatoki.judgels.sandalphon.forms.LanguageRestrictionUpdateForm
+@import org.iatoki.judgels.sandalphon.forms.LanguageRestrictionEditForm
 @import org.iatoki.judgels.sandalphon.Problem
 
-@(languageRestrictionUpdateForm: Form[LanguageRestrictionUpdateForm], problem: Problem)
+@(languageRestrictionEditForm: Form[LanguageRestrictionEditForm], problem: Problem)
 
 <script type="text/javascript" src="@controllers.routes.Assets.versioned("lib/sandalphoncommons/javascripts/languageRestriction.js")"></script>
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
 
-@b3.form(routes.ProgrammingProblemGradingController.postUpdateLanguageRestriction(problem.getId)) {
+@b3.form(routes.ProgrammingProblemGradingController.postEditLanguageRestriction(problem.getId)) {
 
       @helper.CSRF.formField
 
@@ -22,14 +22,14 @@
 
               <div class="checkbox">
                   <label>
-                      <input type="checkbox" id="isAllowedAll" name="isAllowedAll" value="true" @if(languageRestrictionUpdateForm("isAllowedAll").value && languageRestrictionUpdateForm("isAllowedAll").value.equals("true")){ checked="checked" }> @Messages.get("problem.programming.allowAll")
+                      <input type="checkbox" id="isAllowedAll" name="isAllowedAll" value="true" @if(languageRestrictionEditForm("isAllowedAll").value && languageRestrictionEditForm("isAllowedAll").value.equals("true")){ checked="checked" }> @Messages.get("problem.programming.allowAll")
                   </label>
               </div>
 
               @for((k, v) <- GradingLanguageRegistry.getInstance().getGradingLanguages) {
                   <div class="checkbox">
                       <label>
-                          <input type="checkbox" class="allowedLanguageName" name="allowedLanguageNames[@k]" value="@k" @if(languageRestrictionUpdateForm("allowedLanguageNames[" + k + "]").value && languageRestrictionUpdateForm("allowedLanguageNames[" + k + "]").value.equals(k)){ checked="checked" }> @v
+                          <input type="checkbox" class="allowedLanguageName" name="allowedLanguageNames[@k]" value="@k" @if(languageRestrictionEditForm("allowedLanguageNames[" + k + "]").value && languageRestrictionEditForm("allowedLanguageNames[" + k + "]").value.equals(k)){ checked="checked" }> @v
                       </label>
                   </div>
               }

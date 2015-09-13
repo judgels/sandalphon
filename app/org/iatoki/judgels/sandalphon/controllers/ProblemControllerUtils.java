@@ -43,7 +43,7 @@ public final class ProblemControllerUtils {
 
     static void appendTitleLayout(LazyHtml content, ProblemService problemService, Problem problem) {
         if (isAllowedToUpdateProblem(problemService, problem)) {
-            content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getSlug(), new InternalLink(Messages.get("problem.update"), routes.ProblemController.updateProblem(problem.getId())), c));
+            content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getSlug(), new InternalLink(Messages.get("problem.update"), routes.ProblemController.editProblem(problem.getId())), c));
         } else {
             content.appendLayout(c -> headingWithActionLayout.render("#" + problem.getId() + ": " + problem.getSlug(), new InternalLink(Messages.get("problem.view"), routes.ProblemController.viewProblem(problem.getId())), c));
         }

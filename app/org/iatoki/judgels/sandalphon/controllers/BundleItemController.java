@@ -180,7 +180,7 @@ public final class BundleItemController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateItem(long problemId, String itemJid) throws ProblemNotFoundException {
+    public Result editItem(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!BundleProblemControllerUtils.isAllowedToUpdateItemInLanguage(problemService, problem)) {
@@ -225,12 +225,12 @@ public final class BundleItemController extends AbstractJudgelsController {
             }
         }
 
-        return showUpdateItem(problem, bundleItem, bundleItemConfAdapter.getConfHtml(bundleItemConfForm, routes.BundleItemController.postUpdateItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
+        return showEditItem(problem, bundleItem, bundleItemConfAdapter.getConfHtml(bundleItemConfForm, routes.BundleItemController.postEditItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateItem(long problemId, String itemJid) throws ProblemNotFoundException {
+    public Result postEditItem(long problemId, String itemJid) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!BundleProblemControllerUtils.isAllowedToUpdateItemInLanguage(problemService, problem)) {
@@ -266,7 +266,7 @@ public final class BundleItemController extends AbstractJudgelsController {
 
         Form bundleItemConfForm = bundleItemConfAdapter.bindFormFromRequest(request());
         if (formHasErrors(bundleItemConfForm)) {
-            return showUpdateItem(problem, bundleItem, bundleItemConfAdapter.getConfHtml(bundleItemConfForm, routes.BundleItemController.postUpdateItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
+            return showEditItem(problem, bundleItem, bundleItemConfAdapter.getConfHtml(bundleItemConfForm, routes.BundleItemController.postEditItem(problem.getId(), itemJid), Messages.get("commons.update")), allowedLanguages);
         }
 
         problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
@@ -375,7 +375,7 @@ public final class BundleItemController extends AbstractJudgelsController {
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateItem(Problem problem, BundleItem bundleItem, Html html, Set<String> allowedLanguages) {
+    private Result showEditItem(Problem problem, BundleItem bundleItem, Html html, Set<String> allowedLanguages) {
         LazyHtml content = new LazyHtml(html);
         ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemController.switchLanguage(problem.getId()));
         BundleProblemControllerUtils.appendTabsLayout(content, problemService, problem);
@@ -384,7 +384,7 @@ public final class BundleItemController extends AbstractJudgelsController {
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, ImmutableList.of(
               new InternalLink(Messages.get("problem.bundle.item.list"), routes.BundleItemController.viewItems(problem.getId())),
-              new InternalLink(Messages.get("problem.bundle.item.update"), routes.BundleItemController.updateItem(problem.getId(), bundleItem.getJid()))
+              new InternalLink(Messages.get("problem.bundle.item.update"), routes.BundleItemController.editItem(problem.getId(), bundleItem.getJid()))
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Item - Update");
 

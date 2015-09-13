@@ -139,7 +139,7 @@ public final class LessonVersionController extends AbstractJudgelsController {
     }
 
     @Transactional(readOnly = true)
-    public Result updateVersionLocalChanges(long lessonId) throws LessonNotFoundException {
+    public Result editVersionLocalChanges(long lessonId) throws LessonNotFoundException {
         Lesson lesson = lessonService.findLessonById(lessonId);
 
         if (!LessonControllerUtils.isPartnerOrAbove(lessonService, lesson)) {

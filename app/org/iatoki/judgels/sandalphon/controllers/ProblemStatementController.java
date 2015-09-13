@@ -22,7 +22,7 @@ import org.iatoki.judgels.sandalphon.forms.UploadFileForm;
 import org.iatoki.judgels.sandalphon.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.listStatementLanguagesView;
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.listStatementMediaFilesView;
-import org.iatoki.judgels.sandalphon.views.html.problem.statement.updateStatementView;
+import org.iatoki.judgels.sandalphon.views.html.problem.statement.editStatementView;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -68,27 +68,9 @@ public class ProblemStatementController extends AbstractJudgelsController {
         return badRequest();
     }
 
-    public Result viewStatementSwitchLanguage(long problemId) {
-        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
-        ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Switch view statement to " + languageCode + " of problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-        return redirect(routes.ProblemStatementController.viewStatement(problemId));
-    }
-
-    public Result updateStatementSwitchLanguage(long problemId) {
-        String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
-        ProblemControllerUtils.setCurrentStatementLanguage(languageCode);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Switch update statement to " + languageCode + " of problem " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-        return redirect(routes.ProblemStatementController.updateStatement(problemId));
-    }
-
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateStatement(long problemId) throws ProblemNotFoundException {
+    public Result editStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         try {
             ProblemControllerUtils.establishStatementLanguage(problemService, problem);
@@ -126,12 +108,12 @@ public class ProblemStatementController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update statement of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateStatement(updateStatementForm, problem, allowedLanguages);
+        return showEditStatement(updateStatementForm, problem, allowedLanguages);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateStatement(long problemId) throws ProblemNotFoundException {
+    public Result postEditStatement(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         try {
             ProblemControllerUtils.establishStatementLanguage(problemService, problem);
@@ -147,7 +129,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
         if (formHasErrors(updateStatementForm)) {
             try {
                 Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToUpdate(problemService, problem);
-                return showUpdateStatement(updateStatementForm, problem, allowedLanguages);
+                return showEditStatement(updateStatementForm, problem, allowedLanguages);
             } catch (IOException e) {
                 return notFound();
             }
@@ -164,7 +146,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
             try {
                 updateStatementForm.reject("problem.statement.error.cantUpload");
                 Set<String> allowedLanguages = ProblemControllerUtils.getAllowedLanguagesToUpdate(problemService, problem);
-                return showUpdateStatement(updateStatementForm, problem, allowedLanguages);
+                return showEditStatement(updateStatementForm, problem, allowedLanguages);
             } catch (IOException e2) {
                 return notFound();
             }
@@ -172,7 +154,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update statement of problem " + problem.getSlug() + ".");
 
-        return redirect(routes.ProblemStatementController.updateStatement(problem.getId()));
+        return redirect(routes.ProblemStatementController.editStatement(problem.getId()));
     }
 
 
@@ -405,15 +387,15 @@ public class ProblemStatementController extends AbstractJudgelsController {
         return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
     }
 
-    private Result showUpdateStatement(Form<UpdateStatementForm> updateStatementForm, Problem problem, Set<String> allowedLanguages) {
-        LazyHtml content = new LazyHtml(updateStatementView.render(updateStatementForm, problem.getId()));
-        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemStatementController.updateStatementSwitchLanguage(problem.getId()));
+    private Result showEditStatement(Form<UpdateStatementForm> updateStatementForm, Problem problem, Set<String> allowedLanguages) {
+        LazyHtml content = new LazyHtml(editStatementView.render(updateStatementForm, problem.getId()));
+        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemController.switchLanguage(problem.getId()));
         ProblemStatementControllerUtils.appendSubtabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.update"), routes.ProblemStatementController.updateStatement(problem.getId())));
+        ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.update"), routes.ProblemStatementController.editStatement(problem.getId())));
 
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
 

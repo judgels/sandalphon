@@ -139,7 +139,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
     }
 
     @Transactional(readOnly = true)
-    public Result updateVersionLocalChanges(long problemId) throws ProblemNotFoundException {
+    public Result editVersionLocalChanges(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProblemControllerUtils.isPartnerOrAbove(problemService, problem)) {

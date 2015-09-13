@@ -19,8 +19,8 @@ import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.UploadFileForm;
-import org.iatoki.judgels.sandalphon.forms.GradingEngineUpdateForm;
-import org.iatoki.judgels.sandalphon.forms.LanguageRestrictionUpdateForm;
+import org.iatoki.judgels.sandalphon.forms.GradingEngineEditForm;
+import org.iatoki.judgels.sandalphon.forms.LanguageRestrictionEditForm;
 import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapter;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.adapters.ConfigurableWithAutoPopulation;
@@ -29,8 +29,8 @@ import org.iatoki.judgels.sandalphon.views.html.problem.programming.grading.auto
 import org.iatoki.judgels.sandalphon.views.html.problem.programming.grading.tokilibLayout;
 import org.iatoki.judgels.sandalphon.views.html.problem.programming.grading.listGradingHelperFilesView;
 import org.iatoki.judgels.sandalphon.views.html.problem.programming.grading.listGradingTestDataFilesView;
-import org.iatoki.judgels.sandalphon.views.html.problem.programming.grading.updateGradingEngineView;
-import org.iatoki.judgels.sandalphon.views.html.problem.programming.grading.updateLanguageRestrictionView;
+import org.iatoki.judgels.sandalphon.views.html.problem.programming.grading.editGradingEngineView;
+import org.iatoki.judgels.sandalphon.views.html.problem.programming.grading.editLanguageRestrictionView;
 import play.api.mvc.Call;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -65,45 +65,45 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateGradingEngine(long problemId) throws ProblemNotFoundException {
+    public Result editGradingEngine(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             return notFound();
         }
 
-        GradingEngineUpdateForm gradingEngineUpdateData = new GradingEngineUpdateForm();
+        GradingEngineEditForm gradingEngineEditData = new GradingEngineEditForm();
         try  {
-            gradingEngineUpdateData.gradingEngineName = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
+            gradingEngineEditData.gradingEngineName = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
         } catch (IOException e) {
-            gradingEngineUpdateData.gradingEngineName = GradingEngineRegistry.getInstance().getDefaultEngine();
+            gradingEngineEditData.gradingEngineName = GradingEngineRegistry.getInstance().getDefaultEngine();
         }
 
-        Form<GradingEngineUpdateForm> gradingEngineUpdateForm = Form.form(GradingEngineUpdateForm.class).fill(gradingEngineUpdateData);
+        Form<GradingEngineEditForm> gradingEngineEditForm = Form.form(GradingEngineEditForm.class).fill(gradingEngineEditData);
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update grading engine of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateGradingEngine(gradingEngineUpdateForm, problem);
+        return showEditGradingEngine(gradingEngineEditForm, problem);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateGradingEngine(long problemId) throws ProblemNotFoundException {
+    public Result postEditGradingEngine(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             return notFound();
         }
 
-        Form<GradingEngineUpdateForm> gradingEngineUpdateForm = Form.form(GradingEngineUpdateForm.class).bindFromRequest(request());
+        Form<GradingEngineEditForm> gradingEngineEditForm = Form.form(GradingEngineEditForm.class).bindFromRequest(request());
 
-        if (formHasErrors(gradingEngineUpdateForm)) {
-            return showUpdateGradingEngine(gradingEngineUpdateForm, problem);
+        if (formHasErrors(gradingEngineEditForm)) {
+            return showEditGradingEngine(gradingEngineEditForm, problem);
         }
 
         problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
-        String gradingEngine = gradingEngineUpdateForm.get().gradingEngineName;
+        String gradingEngine = gradingEngineEditForm.get().gradingEngineName;
         String originalGradingEngine;
         try {
             originalGradingEngine = programmingProblemService.getGradingEngine(IdentityUtils.getUserJid(), problem.getJid());
@@ -119,18 +119,18 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
             programmingProblemService.updateGradingEngine(IdentityUtils.getUserJid(), problem.getJid(), gradingEngine);
         } catch (IOException e) {
-            gradingEngineUpdateForm.reject("problem.programming.grading.engine.error.cantUpdate");
-            return showUpdateGradingEngine(gradingEngineUpdateForm, problem);
+            gradingEngineEditForm.reject("problem.programming.grading.engine.error.cantUpdate");
+            return showEditGradingEngine(gradingEngineEditForm, problem);
         }
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update grading engine of problem " + problem.getSlug() + ".");
 
-        return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+        return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId()));
     }
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateGradingConfig(long problemId) throws ProblemNotFoundException {
+    public Result editGradingConfig(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -156,12 +156,12 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update grading config of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
+        return showEditGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateGradingConfig(long problemId) throws ProblemNotFoundException {
+    public Result postEditGradingConfig(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
         if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             return notFound();
@@ -179,7 +179,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
             List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
-            return showUpdateGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
+            return showEditGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
         }
 
         problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
@@ -192,16 +192,16 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
             List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
-            return showUpdateGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
+            return showEditGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
         }
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update grading config of problem " + problem.getSlug() + ".");
 
-        return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+        return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId()));
     }
 
     @Transactional
-    public Result updateGradingConfigByTokilibFormat(long problemId) throws ProblemNotFoundException {
+    public Result editGradingConfigByTokilibFormat(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -240,11 +240,11 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+        return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId()));
     }
 
     @Transactional
-    public Result updateGradingConfigByAutoPopulation(long problemId) throws ProblemNotFoundException {
+    public Result editGradingConfigByAutoPopulation(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -282,7 +282,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return redirect(routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId()));
+        return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -473,7 +473,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateLanguageRestriction(long problemId) throws ProblemNotFoundException {
+    public Result editLanguageRestriction(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
@@ -487,72 +487,72 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             languageRestriction = LanguageRestriction.defaultRestriction();
         }
 
-        LanguageRestrictionUpdateForm languageRestrictionUpdateData = new LanguageRestrictionUpdateForm();
-        languageRestrictionUpdateData.allowedLanguageNames = LanguageRestrictionAdapter.getFormAllowedLanguageNamesFromLanguageRestriction(languageRestriction);
-        languageRestrictionUpdateData.isAllowedAll = LanguageRestrictionAdapter.getFormIsAllowedAllFromLanguageRestriction(languageRestriction);
+        LanguageRestrictionEditForm languageRestrictionEditData = new LanguageRestrictionEditForm();
+        languageRestrictionEditData.allowedLanguageNames = LanguageRestrictionAdapter.getFormAllowedLanguageNamesFromLanguageRestriction(languageRestriction);
+        languageRestrictionEditData.isAllowedAll = LanguageRestrictionAdapter.getFormIsAllowedAllFromLanguageRestriction(languageRestriction);
 
-        Form<LanguageRestrictionUpdateForm> languageRestrictionUpdateForm = Form.form(LanguageRestrictionUpdateForm.class).fill(languageRestrictionUpdateData);
+        Form<LanguageRestrictionEditForm> languageRestrictionEditForm = Form.form(LanguageRestrictionEditForm.class).fill(languageRestrictionEditData);
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to update language restriction of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showUpdateLanguageRestriction(languageRestrictionUpdateForm, problem);
+        return showEditLanguageRestriction(languageRestrictionEditForm, problem);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateLanguageRestriction(long problemId) throws ProblemNotFoundException {
+    public Result postEditLanguageRestriction(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
         if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             return notFound();
         }
 
-        Form<LanguageRestrictionUpdateForm> languageRestrictionUpdateForm = Form.form(LanguageRestrictionUpdateForm.class).bindFromRequest(request());
+        Form<LanguageRestrictionEditForm> languageRestrictionEditForm = Form.form(LanguageRestrictionEditForm.class).bindFromRequest(request());
 
-        if (formHasErrors(languageRestrictionUpdateForm)) {
-            return showUpdateLanguageRestriction(languageRestrictionUpdateForm, problem);
+        if (formHasErrors(languageRestrictionEditForm)) {
+            return showEditLanguageRestriction(languageRestrictionEditForm, problem);
         }
 
         problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
-        LanguageRestrictionUpdateForm data = languageRestrictionUpdateForm.get();
+        LanguageRestrictionEditForm data = languageRestrictionEditForm.get();
         LanguageRestriction languageRestriction = LanguageRestrictionAdapter.createLanguageRestrictionFromForm(data.allowedLanguageNames, data.isAllowedAll);
 
         try {
             programmingProblemService.updateLanguageRestriction(IdentityUtils.getUserJid(), problem.getJid(), languageRestriction);
         } catch (IOException e) {
-            languageRestrictionUpdateForm.reject("problem.programming.language.error.cantUpdate");
-            return showUpdateLanguageRestriction(languageRestrictionUpdateForm, problem);
+            languageRestrictionEditForm.reject("problem.programming.language.error.cantUpdate");
+            return showEditLanguageRestriction(languageRestrictionEditForm, problem);
         }
 
         SandalphonControllerUtils.getInstance().addActivityLog("Update language restriction of problem " + problem.getSlug() + ".");
 
-        return redirect(routes.ProgrammingProblemGradingController.updateLanguageRestriction(problem.getId()));
+        return redirect(routes.ProgrammingProblemGradingController.editLanguageRestriction(problem.getId()));
     }
 
-    private Result showUpdateGradingEngine(Form<GradingEngineUpdateForm> gradingEngineUpdateForm, Problem problem) {
-        LazyHtml content = new LazyHtml(updateGradingEngineView.render(gradingEngineUpdateForm, problem));
+    private Result showEditGradingEngine(Form<GradingEngineEditForm> gradingEngineEditForm, Problem problem) {
+        LazyHtml content = new LazyHtml(editGradingEngineView.render(gradingEngineEditForm, problem));
         appendSubtabsLayout(content, problem);
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.engine.update"), routes.ProgrammingProblemGradingController.updateGradingEngine(problem.getId())));
+        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.engine.update"), routes.ProgrammingProblemGradingController.editGradingEngine(problem.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Grading Engine");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateGradingConfig(Form<?> gradingConfForm, Problem problem, String gradingEngine, List<FileInfo> testDataFiles, List<FileInfo> helperFiles) {
+    private Result showEditGradingConfig(Form<?> gradingConfForm, Problem problem, String gradingEngine, List<FileInfo> testDataFiles, List<FileInfo> helperFiles) {
         GradingEngineAdapter adapter = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(gradingEngine);
-        Call postUpdateGradingConfigCall = routes.ProgrammingProblemGradingController.postUpdateGradingConfig(problem.getId());
+        Call postUpdateGradingConfigCall = routes.ProgrammingProblemGradingController.postEditGradingConfig(problem.getId());
         LazyHtml content = new LazyHtml(adapter.renderUpdateGradingConfig(gradingConfForm, postUpdateGradingConfigCall, testDataFiles, helperFiles));
 
         if (adapter instanceof ConfigurableWithTokilibFormat) {
-            Call updateGradingConfigCall = routes.ProgrammingProblemGradingController.updateGradingConfigByTokilibFormat(problem.getId());
+            Call updateGradingConfigCall = routes.ProgrammingProblemGradingController.editGradingConfigByTokilibFormat(problem.getId());
             content.appendLayout(c -> tokilibLayout.render(updateGradingConfigCall, c));
         } else if (adapter instanceof ConfigurableWithAutoPopulation) {
-            Call updateGradingConfigCall = routes.ProgrammingProblemGradingController.updateGradingConfigByAutoPopulation(problem.getId());
+            Call updateGradingConfigCall = routes.ProgrammingProblemGradingController.editGradingConfigByAutoPopulation(problem.getId());
             content.appendLayout(c -> autoPopulationLayout.render(updateGradingConfigCall, c));
         }
 
@@ -562,7 +562,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.config.update"), routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId())));
+        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.config.update"), routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Grading Config");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
@@ -594,14 +594,14 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateLanguageRestriction(Form<LanguageRestrictionUpdateForm> languageRestrictionUpdateForm, Problem problem) {
-        LazyHtml content = new LazyHtml(updateLanguageRestrictionView.render(languageRestrictionUpdateForm, problem));
+    private Result showEditLanguageRestriction(Form<LanguageRestrictionEditForm> languageRestrictionEditForm, Problem problem) {
+        LazyHtml content = new LazyHtml(editLanguageRestrictionView.render(languageRestrictionEditForm, problem));
         appendSubtabsLayout(content, problem);
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
         ProblemControllerUtils.appendVersionLocalChangesWarningLayout(content, problemService, problem);
         ProblemControllerUtils.appendTitleLayout(content, problemService, problem);
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
-        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.languageRestriction.update"), routes.ProgrammingProblemGradingController.updateLanguageRestriction(problem.getId())));
+        appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.grading.languageRestriction.update"), routes.ProgrammingProblemGradingController.editLanguageRestriction(problem.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Language Restriction");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
@@ -609,11 +609,11 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
     private void appendSubtabsLayout(LazyHtml content, Problem problem) {
         content.appendLayout(c -> subtabLayout.render(ImmutableList.of(
-                new InternalLink(Messages.get("problem.programming.grading.engine"), routes.ProgrammingProblemGradingController.updateGradingEngine(problem.getId())),
-                new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemGradingController.updateGradingConfig(problem.getId())),
+                new InternalLink(Messages.get("problem.programming.grading.engine"), routes.ProgrammingProblemGradingController.editGradingEngine(problem.getId())),
+                new InternalLink(Messages.get("problem.programming.grading.config"), routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading.testData"), routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId())),
                 new InternalLink(Messages.get("problem.programming.grading.helper"), routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId())),
-                new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemGradingController.updateLanguageRestriction(problem.getId()))
+                new InternalLink(Messages.get("problem.programming.grading.languageRestriction"), routes.ProgrammingProblemGradingController.editLanguageRestriction(problem.getId()))
         ), c));
     }
 

@@ -20,7 +20,7 @@ final class ProblemStatementControllerUtils {
         internalLinks.add(new InternalLink(Messages.get("commons.view"), routes.ProblemStatementController.viewStatement(problem.getId())));
 
         if (ProblemControllerUtils.isAllowedToUpdateStatement(problemService, problem)) {
-            internalLinks.add(new InternalLink(Messages.get("commons.update"), routes.ProblemStatementController.updateStatement(problem.getId())));
+            internalLinks.add(new InternalLink(Messages.get("commons.update"), routes.ProblemStatementController.editStatement(problem.getId())));
         }
 
         internalLinks.add(new InternalLink(Messages.get("problem.statement.media"), routes.ProblemStatementController.listStatementMediaFiles(problem.getId())));

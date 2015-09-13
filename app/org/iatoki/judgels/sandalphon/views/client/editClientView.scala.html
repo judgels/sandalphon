@@ -9,7 +9,7 @@
 
 @formErrorView(clientUpsertForm)
 
-@b3.form(routes.ClientController.postUpdateClient(clientId)) {
+@b3.form(routes.ClientController.postEditClient(clientId)) {
     @helper.CSRF.formField
 
     @upsertClientView(clientUpsertForm)

@@ -106,7 +106,7 @@ public final class ProgrammingProblemStatementController extends AbstractJudgels
             return notFound();
         }
 
-        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemStatementController.viewStatementSwitchLanguage(problem.getId()));
+        ProblemControllerUtils.appendStatementLanguageSelectionLayout(content, ProblemControllerUtils.getCurrentStatementLanguage(), allowedLanguages, routes.ProblemController.switchLanguage(problem.getId()));
 
         ProblemStatementControllerUtils.appendSubtabsLayout(content, problemService, problem);
         ProgrammingProblemControllerUtils.appendTabsLayout(content, problemService, problem);
