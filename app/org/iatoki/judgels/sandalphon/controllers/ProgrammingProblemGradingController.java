@@ -45,8 +45,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -427,48 +425,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         }
 
         return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
-    }
-
-    @Transactional(readOnly = true)
-    public Result downloadGradingTestDataFile(long problemId, String filename) throws ProblemNotFoundException {
-        Problem problem = problemService.findProblemById(problemId);
-
-        if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
-            return notFound();
-        }
-
-        String testDataURL = programmingProblemService.getGradingTestDataFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Download test data file " + filename + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-        try {
-            new URL(testDataURL);
-            return redirect(testDataURL);
-        } catch (MalformedURLException e) {
-            File testDataFile = new File(testDataURL);
-            return ProblemControllerUtils.downloadFile(testDataFile);
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public Result downloadGradingHelperFile(long problemId, String filename) throws ProblemNotFoundException {
-        Problem problem = problemService.findProblemById(problemId);
-
-        if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
-            return notFound();
-        }
-
-        String helperURL = programmingProblemService.getGradingHelperFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Download helper file " + filename + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-        try {
-            new URL(helperURL);
-            return redirect(helperURL);
-        } catch (MalformedURLException e) {
-            File helperFile = new File(helperURL);
-            return ProblemControllerUtils.downloadFile(helperFile);
-        }
     }
 
     @Transactional(readOnly = true)

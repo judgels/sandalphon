@@ -5,7 +5,7 @@ import play.data.validation.Constraints;
 import java.util.Arrays;
 import java.util.List;
 
-public final class UserCreateForm {
+public final class UserAddForm {
 
     @Constraints.Required
     public String username;

@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.controllers.api.client.v1.problem.programming;
+package org.iatoki.judgels.sandalphon.controllers.api.client.v1;
 
 import org.iatoki.judgels.play.apis.JudgelsAPIInternalServerErrorException;
 import org.iatoki.judgels.play.apis.JudgelsAPINotFoundException;
@@ -13,7 +13,6 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Singleton
@@ -30,22 +29,6 @@ public final class ClientProgrammingProblemAPIControllerV1 extends AbstractJudge
         this.problemService = problemService;
         this.programmingProblemService = programmingProblemService;
     }
-
-    @Transactional(readOnly = true)
-    public Result downloadGradingFiles(String problemJid) {
-        authenticateAsJudgelsAppClient(graderService);
-
-        try {
-            ByteArrayOutputStream os = programmingProblemService.getZippedGradingFilesStream(problemJid);
-            response().setContentType("application/x-download");
-            response().setHeader("Content-disposition", "attachment; filename=" + problemJid + ".zip");
-            return ok(os.toByteArray()).as("application/zip");
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new JudgelsAPIInternalServerErrorException(e);
-        }
-    }
-
 
     @Transactional(readOnly = true)
     public Result getProgrammingProblemInfo(String problemJid) {

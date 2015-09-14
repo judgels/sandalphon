@@ -46,7 +46,7 @@
             <td>@file.getName</td>
             <td><time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(file.getLastModifiedTime.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(file.getLastModifiedTime.getTime)</time></td>
             <td>@JudgelsPlayUtils.formatBytesCount(file.getSize)</td>
-            <td class="text-center"><a href="@routes.ProgrammingProblemGradingController.downloadGradingTestDataFile(problemId, file.getName)"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
+            <td class="text-center"><a href="@org.iatoki.judgels.sandalphon.controllers.api.internal.routes.InternalProgrammingProblemGradingAPIController.downloadGradingTestDataFile(problemId, file.getName)"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
         </tr>
     }
     </tbody>

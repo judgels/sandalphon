@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.controllers.api.client.v1.problem.bundle;
+package org.iatoki.judgels.sandalphon.controllers.api.client.v1;
 
 import org.iatoki.judgels.play.apis.JudgelsAPIForbiddenException;
 import org.iatoki.judgels.play.apis.JudgelsAPIInternalServerErrorException;
@@ -22,14 +22,14 @@ import java.io.IOException;
 
 @Singleton
 @Named
-public final class ClientBundleProblemAPIControllerV1 extends AbstractJudgelsAPIController {
+public final class ClientBundleProblemGradingAPIControllerV1 extends AbstractJudgelsAPIController {
 
     private final BundleProblemGraderImpl bundleProblemGrader;
     private final ClientService clientService;
     private final ProblemService problemService;
 
     @Inject
-    public ClientBundleProblemAPIControllerV1(BundleProblemGraderImpl bundleProblemGrader, ClientService clientService, ProblemService problemService) {
+    public ClientBundleProblemGradingAPIControllerV1(BundleProblemGraderImpl bundleProblemGrader, ClientService clientService, ProblemService problemService) {
         this.bundleProblemGrader = bundleProblemGrader;
         this.clientService = clientService;
         this.problemService = problemService;

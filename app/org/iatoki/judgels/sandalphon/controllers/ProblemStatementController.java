@@ -37,8 +37,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -227,22 +225,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
         }
 
         return redirect(routes.ProblemStatementController.listStatementMediaFiles(problem.getId()));
-    }
-
-    @Transactional(readOnly = true)
-    public Result downloadStatementMediaFile(long id, String filename) throws ProblemNotFoundException {
-        Problem problem = problemService.findProblemById(id);
-        String mediaURL = problemService.getStatementMediaFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Download media file " + filename + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
-        try {
-            new URL(mediaURL);
-            return redirect(mediaURL);
-        } catch (MalformedURLException e) {
-            File mediaFile = new File(mediaURL);
-            return ProblemControllerUtils.downloadFile(mediaFile);
-        }
     }
 
     @Transactional(readOnly = true)

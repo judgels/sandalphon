@@ -14,7 +14,7 @@ import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.User;
-import org.iatoki.judgels.sandalphon.forms.UserCreateForm;
+import org.iatoki.judgels.sandalphon.forms.UserAddForm;
 import org.iatoki.judgels.sandalphon.UserNotFoundException;
 import org.iatoki.judgels.sandalphon.services.UserService;
 import org.iatoki.judgels.sandalphon.forms.UserEditForm;
@@ -22,7 +22,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.views.html.user.createUserView;
+import org.iatoki.judgels.sandalphon.views.html.user.addUserView;
 import org.iatoki.judgels.sandalphon.views.html.user.listUsersView;
 import org.iatoki.judgels.sandalphon.views.html.user.editUserView;
 import org.iatoki.judgels.sandalphon.views.html.user.viewUserView;
@@ -65,7 +65,7 @@ public final class UserController extends AbstractJudgelsController {
         Page<User> pageOfUsers = userService.getPageOfUsers(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString);
 
         LazyHtml content = new LazyHtml(listUsersView.render(pageOfUsers, sortBy, orderBy, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("user.list"), new InternalLink(Messages.get("commons.create"), routes.UserController.createUser()), c));
+        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("user.list"), new InternalLink(Messages.get("commons.create"), routes.UserController.addUser()), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("user.users"), routes.UserController.index())
@@ -79,39 +79,39 @@ public final class UserController extends AbstractJudgelsController {
 
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result createUser() {
-        UserCreateForm userCreateData = new UserCreateForm();
-        userCreateData.roles = StringUtils.join(SandalphonUtils.getDefaultRoles(), ",");
-        Form<UserCreateForm> userCreateForm = Form.form(UserCreateForm.class).fill(userCreateData);
+    public Result addUser() {
+        UserAddForm userAddData = new UserAddForm();
+        userAddData.roles = StringUtils.join(SandalphonUtils.getDefaultRoles(), ",");
+        Form<UserAddForm> userCreateForm = Form.form(UserAddForm.class).fill(userAddData);
 
         SandalphonControllerUtils.getInstance().addActivityLog("Try to create user <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
-        return showCreateUser(userCreateForm);
+        return showAddUser(userCreateForm);
     }
 
     @Transactional
     @RequireCSRFCheck
-    public Result postCreateUser() {
-        Form<UserCreateForm> userCreateForm = Form.form(UserCreateForm.class).bindFromRequest();
+    public Result postAddUser() {
+        Form<UserAddForm> userAddForm = Form.form(UserAddForm.class).bindFromRequest();
 
-        if (formHasErrors(userCreateForm)) {
-            return showCreateUser(userCreateForm);
+        if (formHasErrors(userAddForm)) {
+            return showAddUser(userAddForm);
         }
 
-        UserCreateForm userCreateData = userCreateForm.get();
-        JophielUser jophielUser = jophielPublicAPI.findUserByUsername(userCreateData.username);
+        UserAddForm userAddData = userAddForm.get();
+        JophielUser jophielUser = jophielPublicAPI.findUserByUsername(userAddData.username);
 
         if (jophielUser == null) {
-            userCreateForm.reject(Messages.get("user.create.error.usernameNotFound"));
-            return showCreateUser(userCreateForm);
+            userAddForm.reject(Messages.get("user.create.error.usernameNotFound"));
+            return showAddUser(userAddForm);
         }
 
         if (userService.existsByUserJid(jophielUser.getJid())) {
-            userCreateForm.reject(Messages.get("user.create.error.userAlreadyExists"));
-            return showCreateUser(userCreateForm);
+            userAddForm.reject(Messages.get("user.create.error.userAlreadyExists"));
+            return showAddUser(userAddForm);
         }
 
-        userService.upsertUserFromJophielUser(jophielUser, userCreateData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userService.upsertUserFromJophielUser(jophielUser, userAddData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         SandalphonControllerUtils.getInstance().addActivityLog("Create user " + jophielUser.getJid() + ".");
 
@@ -177,13 +177,13 @@ public final class UserController extends AbstractJudgelsController {
         return redirect(routes.UserController.index());
     }
 
-    private Result showCreateUser(Form<UserCreateForm> userCreateForm) {
-        LazyHtml content = new LazyHtml(createUserView.render(userCreateForm, jophielPublicAPI.getUserAutocompleteAPIEndpoint()));
+    private Result showAddUser(Form<UserAddForm> userCreateForm) {
+        LazyHtml content = new LazyHtml(addUserView.render(userCreateForm, jophielPublicAPI.getUserAutocompleteAPIEndpoint()));
         content.appendLayout(c -> headingLayout.render(Messages.get("user.create"), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
                 new InternalLink(Messages.get("user.users"), routes.UserController.index()),
-                new InternalLink(Messages.get("user.create"), routes.UserController.createUser())
+                new InternalLink(Messages.get("user.create"), routes.UserController.addUser())
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "User - Create");
 

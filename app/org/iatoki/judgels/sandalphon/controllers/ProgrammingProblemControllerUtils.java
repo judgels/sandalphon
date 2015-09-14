@@ -10,13 +10,13 @@ import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.ProgrammingProblemPartnerConfig;
 import play.i18n.Messages;
 
-final class ProgrammingProblemControllerUtils {
+public final class ProgrammingProblemControllerUtils {
 
     private ProgrammingProblemControllerUtils() {
         // prevent instantiation
     }
 
-    static void appendTabsLayout(LazyHtml content, ProblemService problemService, Problem problem) {
+    public static void appendTabsLayout(LazyHtml content, ProblemService problemService, Problem problem) {
         ImmutableList.Builder<InternalLink> internalLinks = ImmutableList.builder();
 
         internalLinks.add(new InternalLink(Messages.get("problem.statement"), routes.ProblemController.jumpToStatement(problem.getId())));
@@ -42,15 +42,15 @@ final class ProgrammingProblemControllerUtils {
         content.appendLayout(c -> tabLayout.render(internalLinks.build(), c));
     }
 
-    static ProgrammingProblemPartnerConfig getPartnerConfig(ProblemService problemService, Problem problem) {
+    public static ProgrammingProblemPartnerConfig getPartnerConfig(ProblemService problemService, Problem problem) {
         return problemService.findProblemPartnerByProblemJidAndPartnerJid(problem.getJid(), IdentityUtils.getUserJid()).getChildConfig(ProgrammingProblemPartnerConfig.class);
     }
 
-    static boolean isAllowedToManageGrading(ProblemService problemService, Problem problem) {
+    public static boolean isAllowedToManageGrading(ProblemService problemService, Problem problem) {
         return ProblemControllerUtils.isAuthorOrAbove(problem) || (ProblemControllerUtils.isPartner(problemService, problem) && getPartnerConfig(problemService, problem).isAllowedToManageGrading());
     }
 
-    static boolean isAllowedToSubmit(ProblemService problemService, Problem problem) {
+    public static boolean isAllowedToSubmit(ProblemService problemService, Problem problem) {
         return ProblemControllerUtils.isAuthorOrAbove(problem) || (ProblemControllerUtils.isPartner(problemService, problem) && getPartnerConfig(problemService, problem).isAllowedToSubmit());
     }
 }

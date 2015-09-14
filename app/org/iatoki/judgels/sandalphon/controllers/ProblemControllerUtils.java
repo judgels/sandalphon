@@ -18,10 +18,7 @@ import org.iatoki.judgels.sandalphon.views.html.problem.version.versionLocalChan
 import play.i18n.Messages;
 import play.mvc.Call;
 import play.mvc.Controller;
-import play.mvc.Result;
-import play.mvc.Results;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -118,15 +115,6 @@ public final class ProblemControllerUtils {
                 .add(new InternalLink(problem.getSlug(), routes.ProblemController.enterProblem(problem.getId())));
 
         return internalLinks;
-    }
-
-    static Result downloadFile(File file) {
-        if (!file.exists()) {
-            return Results.notFound();
-        }
-        Controller.response().setContentType("application/x-download");
-        Controller.response().setHeader("Content-disposition", "attachment; filename=" + file.getName());
-        return Results.ok(file);
     }
 
     static boolean isAuthor(Problem problem) {

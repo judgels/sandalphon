@@ -79,11 +79,11 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
         }
     }
 
-    boolean isAdmin() {
+    public boolean isAdmin() {
         return SandalphonUtils.hasRole("admin");
     }
 
-    void addActivityLog(String log) {
+    public void addActivityLog(String log) {
         String newLog = log;
         try {
             if (JudgelsPlayUtils.hasViewPoint()) {
@@ -102,7 +102,7 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
         INSTANCE = new SandalphonControllerUtils(jophielClientAPI, jophielPublicAPI);
     }
 
-    static SandalphonControllerUtils getInstance() {
+    public static SandalphonControllerUtils getInstance() {
         if (INSTANCE == null) {
             throw new UnsupportedOperationException("SandalphonControllerUtils instance has not been built");
         }

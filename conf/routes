@@ -34,7 +34,6 @@ GET         /problems/:problemId/statements/edit                                
 POST        /problems/:problemId/statements                                         @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.postEditStatement(problemId: Long)
 GET         /problems/:problemId/statements/media                                   @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.listStatementMediaFiles(problemId: Long)
 POST        /problems/:problemId/statements/media                                   @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.postUploadStatementMediaFiles(problemId: Long)
-GET         /problems/:problemId/statements/media/:filename                         @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.downloadStatementMediaFile(problemId: Long, filename)
 GET         /problems/:problemId/statements/languages                               @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.listStatementLanguages(problemId: Long)
 POST        /problems/:problemId/statements/languages                               @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.postAddStatementLanguage(problemId: Long)
 GET         /problems/:problemId/statements/languages/:language/enable              @org.iatoki.judgels.sandalphon.controllers.ProblemStatementController.enableStatementLanguage(problemId: Long, language)
@@ -88,9 +87,6 @@ GET         /problems/programming/:problemId/grading/helpers                    
 POST        /problems/programming/:problemId/grading/helpers                        @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemGradingController.postUploadGradingHelperFiles(problemId: Long)
 GET         /problems/programming/:problemId/grading/languageRestriction            @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemGradingController.editLanguageRestriction(problemId: Long)
 POST        /problems/programming/:problemId/grading/languageRestriction            @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemGradingController.postEditLanguageRestriction(problemId: Long)
-GET         /problems/programming/:problemId/grading/testdata/:filename             @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemGradingController.downloadGradingTestDataFile(problemId: Long, filename)
-GET         /problems/programming/:problemId/grading/helpers/:filename              @org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemGradingController.downloadGradingHelperFile(problemId: Long, filename)
-
 
 GET         /problems/bundle/:problemId/jumpToItems                                 @org.iatoki.judgels.sandalphon.controllers.BundleProblemController.jumpToItems(problemId: Long)
 GET         /problems/bundle/:problemId/jumpToSubmissions                           @org.iatoki.judgels.sandalphon.controllers.BundleProblemController.jumpToSubmissions(problemId: Long)
@@ -142,7 +138,6 @@ GET         /lessons/:lessonId/statements/edit                                  
 POST        /lessons/:lessonId/statements                                           @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.postEditStatement(lessonId: Long)
 GET         /lessons/:lessonId/statements/media                                     @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.listStatementMediaFiles(lessonId: Long)
 POST        /lessons/:lessonId/statements/media                                     @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.postUploadStatementMediaFiles(lessonId: Long)
-GET         /lessons/:lessonId/statements/media/:filename                           @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.downloadStatementMediaFile(lessonId: Long, filename)
 GET         /lessons/:lessonId/statements/languages                                 @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.listStatementLanguages(lessonId: Long)
 POST        /lessons/:lessonId/statements/languages                                 @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.postAddStatementLanguage(lessonId: Long)
 GET         /lessons/:lessonId/statements/languages/:language/enable                @org.iatoki.judgels.sandalphon.controllers.LessonStatementController.enableStatementLanguage(lessonId: Long, language)
@@ -187,33 +182,41 @@ POST        /graders/:graderId                                                  
 
 GET         /users                                                                  @org.iatoki.judgels.sandalphon.controllers.UserController.index()
 GET         /users/                                                                 @org.iatoki.judgels.sandalphon.controllers.UserController.listUsers(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
-GET         /users/new                                                              @org.iatoki.judgels.sandalphon.controllers.UserController.createUser()
-POST        /users                                                                  @org.iatoki.judgels.sandalphon.controllers.UserController.postCreateUser()
+GET         /users/add                                                              @org.iatoki.judgels.sandalphon.controllers.UserController.addUser()
+POST        /users                                                                  @org.iatoki.judgels.sandalphon.controllers.UserController.postAddUser()
 GET         /users/:userId                                                          @org.iatoki.judgels.sandalphon.controllers.UserController.viewUser(userId: Long)
 GET         /users/:userId/edit                                                     @org.iatoki.judgels.sandalphon.controllers.UserController.editUser(userId: Long)
 POST        /users/:userId                                                          @org.iatoki.judgels.sandalphon.controllers.UserController.postEditUser(userId: Long)
-GET         /users/:userId/delete                                                   @org.iatoki.judgels.sandalphon.controllers.UserController.deleteUser(userId: Long)
+GET         /users/:userId/remove                                                   @org.iatoki.judgels.sandalphon.controllers.UserController.deleteUser(userId: Long)
 
 # Internal API
 # Note: cannot use /api prefix
 
-GET         /problems/:problemId/statements/render/:mediaFilename                   @org.iatoki.judgels.sandalphon.controllers.api.internal.problem.InternalProblemAPIController.renderMediaById(problemId: Long, mediaFilename)
-GET         /problems/programming/:problemId/render/:mediaFilename                  @org.iatoki.judgels.sandalphon.controllers.api.internal.problem.InternalProblemAPIController.renderMediaById(problemId: Long, mediaFilename)
-GET         /problems/bundle/:problemId/render/:mediaFilename                       @org.iatoki.judgels.sandalphon.controllers.api.internal.problem.InternalProblemAPIController.renderMediaById(problemId: Long, mediaFilename)
+GET         /problems/:problemId/statements/render/:mediaFilename                   @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProblemStatementAPIController.renderMediaById(problemId: Long, mediaFilename)
+GET         /problems/:problemId/statements/media/:filename                         @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProblemStatementAPIController.downloadStatementMediaFile(problemId: Long, filename)
 
-GET         /lessons/:lessonId/statements/render/:mediaFilename                                @org.iatoki.judgels.sandalphon.controllers.api.internal.lesson.InternalLessonAPIController.renderMediaById(lessonId: Long, mediaFilename)
-GET         /lessons/:lessonId/render/:mediaFilename                                @org.iatoki.judgels.sandalphon.controllers.api.internal.lesson.InternalLessonAPIController.renderMediaById(lessonId: Long, mediaFilename)
+GET         /problems/programming/:problemId/render/:mediaFilename                  @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProblemStatementAPIController.renderMediaById(problemId: Long, mediaFilename)
+GET         /problems/bundle/:problemId/render/:mediaFilename                       @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProblemStatementAPIController.renderMediaById(problemId: Long, mediaFilename)
+
+GET         /lessons/:lessonId/statements/render/:mediaFilename                     @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalLessonStatementAPIController.renderMediaById(lessonId: Long, mediaFilename)
+GET         /lessons/:lessonId/render/:mediaFilename                                @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalLessonStatementAPIController.renderMediaById(lessonId: Long, mediaFilename)
+GET         /lessons/:lessonId/statements/media/:filename                           @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalLessonStatementAPIController.downloadStatementMediaFile(lessonId: Long, filename)
+
+GET         /problems/programming/:problemId/grading/testdata/:filename             @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProgrammingProblemGradingAPIController.downloadGradingTestDataFile(problemId: Long, filename)
+GET         /problems/programming/:problemId/grading/helpers/:filename              @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProgrammingProblemGradingAPIController.downloadGradingHelperFile(problemId: Long, filename)
 
 # Client API
 
-GET         /api/v1/problems/:problemJid                                            @org.iatoki.judgels.sandalphon.controllers.api.client.v1.problem.ClientProblemAPIControllerV1.findProblemByJid(problemJid)
-GET         /api/v1/problems/:problemJid/statements/media/:filename                 @org.iatoki.judgels.sandalphon.controllers.api.client.v1.problem.ClientProblemAPIControllerV1.renderMediaByJid(problemJid, filename)
-POST        /api/v1/problems/:problemJid/statements                                 @org.iatoki.judgels.sandalphon.controllers.api.client.v1.problem.ClientProblemAPIControllerV1.renderStatement(problemJid)
+GET         /api/v1/problems/:problemJid                                            @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientProblemAPIControllerV1.findProblemByJid(problemJid)
+GET         /api/v1/problems/:problemJid/statements/media/:filename                 @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientProblemStatementAPIControllerV1.renderMediaByJid(problemJid, filename)
 
-GET         /api/v1/problems/programming/:problemJid                                @org.iatoki.judgels.sandalphon.controllers.api.client.v1.problem.programming.ClientProgrammingProblemAPIControllerV1.getProgrammingProblemInfo(problemJid)
-GET         /api/v1/problems/programming/:problemJid/grading                        @org.iatoki.judgels.sandalphon.controllers.api.client.v1.problem.programming.ClientProgrammingProblemAPIControllerV1.downloadGradingFiles(problemJid)
-POST        /api/v1/problems/bundle/:problemJid/grade                               @org.iatoki.judgels.sandalphon.controllers.api.client.v1.problem.bundle.ClientBundleProblemAPIControllerV1.grade(problemJid)
+POST        /api/v1/problems/programming/:problemJid/statements                     @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientProgrammingProblemStatementAPIControllerV1.renderStatement(problemJid)
+GET         /api/v1/problems/programming/:problemJid                                @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientProgrammingProblemAPIControllerV1.getProgrammingProblemInfo(problemJid)
+GET         /api/v1/problems/programming/:problemJid/grading                        @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientProgrammingProblemGradingAPIControllerV1.downloadGradingFiles(problemJid)
 
-GET         /api/v1/lessons/:lessonJid                                              @org.iatoki.judgels.sandalphon.controllers.api.client.v1.lesson.ClientLessonAPIControllerV1.findLessonByJid(lessonJid)
-GET         /api/v1/lessons/:lessonJid/statements/media/:filename                   @org.iatoki.judgels.sandalphon.controllers.api.client.v1.lesson.ClientLessonAPIControllerV1.renderMediaByJid(lessonJid, filename)
-POST        /api/v1/lessons/:lessonJid/statements                                   @org.iatoki.judgels.sandalphon.controllers.api.client.v1.lesson.ClientLessonAPIControllerV1.renderStatement(lessonJid)
+POST        /api/v1/problems/bundle/:problemJid/statements                          @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientBundleProblemStatementAPIControllerV1.renderStatement(problemJid)
+POST        /api/v1/problems/bundle/:problemJid/grade                               @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientBundleProblemGradingAPIControllerV1.grade(problemJid)
+
+GET         /api/v1/lessons/:lessonJid                                              @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientLessonAPIControllerV1.findLessonByJid(lessonJid)
+GET         /api/v1/lessons/:lessonJid/statements/media/:filename                   @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientLessonStatementAPIControllerV1.renderMediaByJid(lessonJid, filename)
+POST        /api/v1/lessons/:lessonJid/statements                                   @org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientLessonStatementAPIControllerV1.renderStatement(lessonJid)
