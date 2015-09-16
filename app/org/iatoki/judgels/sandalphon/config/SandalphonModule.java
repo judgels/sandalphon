@@ -15,7 +15,7 @@ import org.iatoki.judgels.jophiel.services.BaseUserService;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.services.impls.UserServiceImpl;
 
-public final class SandalphonModule extends AbstractJudgelsPlayModule {
+public class SandalphonModule extends AbstractJudgelsPlayModule {
 
     @Override
     protected void manualBinding() {
@@ -34,7 +34,7 @@ public final class SandalphonModule extends AbstractJudgelsPlayModule {
 
     @Override
     protected String getDaosImplPackage() {
-        return "org.iatoki.judgels.sandalphon.models.daos.impls";
+        return "org.iatoki.judgels.sandalphon.models.daos.hibernate";
     }
 
     @Override

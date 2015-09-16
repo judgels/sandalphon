@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.services.impls;
 
 import org.iatoki.judgels.sandalphon.Grader;
-import org.iatoki.judgels.sandalphon.models.entities.programming.GraderModel;
+import org.iatoki.judgels.sandalphon.models.entities.GraderModel;
 
 final class GraderServiceUtils {
 
