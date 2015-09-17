@@ -19,6 +19,7 @@ import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsControllerUtils;
 import org.iatoki.judgels.play.controllers.ControllerUtils;
+import org.iatoki.judgels.play.views.html.layouts.contentLayout;
 import org.iatoki.judgels.play.views.html.layouts.menusLayout;
 import org.iatoki.judgels.play.views.html.layouts.profileView;
 import org.iatoki.judgels.play.views.html.layouts.sidebarLayout;
@@ -41,6 +42,8 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
 
     @Override
     public void appendSidebarLayout(LazyHtml content) {
+        content.appendLayout(c -> contentLayout.render(c));
+
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
 
         internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
