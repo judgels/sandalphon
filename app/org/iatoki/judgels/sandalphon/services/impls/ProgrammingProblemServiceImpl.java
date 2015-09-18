@@ -33,10 +33,10 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
         problemFileSystemProvider.createDirectory(getGradingDirPath(null, problemJid));
 
         problemFileSystemProvider.createDirectory(getGradingTestDataDirPath(null, problemJid));
-        problemFileSystemProvider.createFile(ProblemServiceUtils.appendPath(getGradingTestDataDirPath(null, problemJid), ".gitkeep"));
+        problemFileSystemProvider.createFile(ProblemServiceImplUtils.appendPath(getGradingTestDataDirPath(null, problemJid), ".gitkeep"));
 
         problemFileSystemProvider.createDirectory(getGradingHelpersDirPath(null, problemJid));
-        problemFileSystemProvider.createFile(ProblemServiceUtils.appendPath(getGradingHelpersDirPath(null, problemJid), ".gitkeep"));
+        problemFileSystemProvider.createFile(ProblemServiceImplUtils.appendPath(getGradingHelpersDirPath(null, problemJid), ".gitkeep"));
 
         problemFileSystemProvider.writeToFile(getGradingEngineFilePath(null, problemJid), gradingEngine);
         problemFileSystemProvider.writeToFile(getLanguageRestrictionFilePath(null, problemJid), new Gson().toJson(LanguageRestriction.defaultRestriction()));
@@ -133,13 +133,13 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
 
     @Override
     public String getGradingTestDataFileURL(String userJid, String problemJid, String filename) {
-        return problemFileSystemProvider.getURL(ProblemServiceUtils.appendPath(getGradingTestDataDirPath(userJid, problemJid), filename));
+        return problemFileSystemProvider.getURL(ProblemServiceImplUtils.appendPath(getGradingTestDataDirPath(userJid, problemJid), filename));
     }
 
 
     @Override
     public String getGradingHelperFileURL(String userJid, String problemJid, String filename) {
-        return problemFileSystemProvider.getURL(ProblemServiceUtils.appendPath(getGradingHelpersDirPath(userJid, problemJid), filename));
+        return problemFileSystemProvider.getURL(ProblemServiceImplUtils.appendPath(getGradingHelpersDirPath(userJid, problemJid), filename));
     }
 
     @Override
@@ -152,30 +152,30 @@ public final class ProgrammingProblemServiceImpl implements ProgrammingProblemSe
     }
 
     private List<String> getGradingDirPath(String userJid, String problemJid) {
-        return ProblemServiceUtils.appendPath(ProblemServiceUtils.getRootDirPath(problemFileSystemProvider, userJid, problemJid), "grading");
+        return ProblemServiceImplUtils.appendPath(ProblemServiceImplUtils.getRootDirPath(problemFileSystemProvider, userJid, problemJid), "grading");
     }
 
     private List<String> getGradingTestDataDirPath(String userJid, String problemJid) {
-        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "testdata");
+        return ProblemServiceImplUtils.appendPath(getGradingDirPath(userJid, problemJid), "testdata");
     }
 
     private List<String> getGradingHelpersDirPath(String userJid, String problemJid) {
-        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "helpers");
+        return ProblemServiceImplUtils.appendPath(getGradingDirPath(userJid, problemJid), "helpers");
     }
 
     private List<String> getGradingConfigFilePath(String userJid, String problemJid) {
-        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "config.json");
+        return ProblemServiceImplUtils.appendPath(getGradingDirPath(userJid, problemJid), "config.json");
     }
 
     private List<String> getGradingEngineFilePath(String userJid, String problemJid) {
-        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "engine.txt");
+        return ProblemServiceImplUtils.appendPath(getGradingDirPath(userJid, problemJid), "engine.txt");
     }
 
     private List<String> getLanguageRestrictionFilePath(String userJid, String problemJid) {
-        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "languageRestriction.txt");
+        return ProblemServiceImplUtils.appendPath(getGradingDirPath(userJid, problemJid), "languageRestriction.txt");
     }
 
     private List<String> getGradingLastUpdateTimeFilePath(String userJid, String problemJid) {
-        return ProblemServiceUtils.appendPath(getGradingDirPath(userJid, problemJid), "lastUpdateTime.txt");
+        return ProblemServiceImplUtils.appendPath(getGradingDirPath(userJid, problemJid), "lastUpdateTime.txt");
     }
 }

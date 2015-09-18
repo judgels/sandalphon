@@ -39,14 +39,14 @@ public final class GraderServiceImpl implements GraderService {
             throw new GraderNotFoundException("Grader not found.");
         }
 
-        return GraderServiceUtils.createGraderFromModel(graderModel);
+        return createGraderFromModel(graderModel);
     }
 
     @Override
     public Grader findGraderByJid(String graderJid) {
         GraderModel graderModel = graderDao.findByJid(graderJid);
 
-        return GraderServiceUtils.createGraderFromModel(graderModel);
+        return createGraderFromModel(graderModel);
     }
 
     @Override
@@ -71,7 +71,7 @@ public final class GraderServiceImpl implements GraderService {
         long totalPages = graderDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
         List<GraderModel> graderModels = graderDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
-        List<Grader> graders = Lists.transform(graderModels, m -> GraderServiceUtils.createGraderFromModel(m));
+        List<Grader> graders = Lists.transform(graderModels, m -> createGraderFromModel(m));
 
         return new Page<>(graders, totalPages, pageIndex, pageSize);
     }
@@ -84,5 +84,9 @@ public final class GraderServiceImpl implements GraderService {
     @Override
     public JudgelsAppClient findClientByJid(String clientJid) {
         return findGraderByJid(clientJid);
+    }
+
+    private static Grader createGraderFromModel(GraderModel graderModel) {
+        return new Grader(graderModel.id, graderModel.jid, graderModel.name, graderModel.secret);
     }
 }

@@ -16,6 +16,7 @@ import org.iatoki.judgels.sandalphon.LessonPartner;
 import org.iatoki.judgels.sandalphon.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.LessonPartnerNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonStatement;
+import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.config.LessonFileSystemProvider;
 import org.iatoki.judgels.sandalphon.config.LessonGitProvider;
@@ -32,6 +33,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,9 +64,9 @@ public final class LessonServiceImpl implements LessonService {
         lessonDao.persist(lessonModel, userJid, userIpAddress);
 
         initStatements(lessonModel.jid, initialLanguageCode);
-        lessonFileSystemProvider.createDirectory(LessonServiceUtils.getClonesDirPath(lessonModel.jid));
+        lessonFileSystemProvider.createDirectory(getClonesDirPath(lessonModel.jid));
 
-        return LessonServiceUtils.createLessonFromModel(lessonModel);
+        return createLessonFromModel(lessonModel);
     }
 
     @Override
@@ -84,14 +86,14 @@ public final class LessonServiceImpl implements LessonService {
             throw new LessonNotFoundException("Lesson not found.");
         }
 
-        return LessonServiceUtils.createLessonFromModel(lessonModel);
+        return createLessonFromModel(lessonModel);
     }
 
     @Override
     public Lesson findLessonByJid(String lessonJid) {
         LessonModel lessonModel = lessonDao.findByJid(lessonJid);
 
-        return LessonServiceUtils.createLessonFromModel(lessonModel);
+        return createLessonFromModel(lessonModel);
     }
 
     @Override
@@ -129,7 +131,7 @@ public final class LessonServiceImpl implements LessonService {
     public Page<LessonPartner> getPageOfLessonPartners(String lessonJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
         long totalRows = lessonPartnerDao.countByFilters("", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), ImmutableMap.of());
         List<LessonPartnerModel> lessonPartnerModels = lessonPartnerDao.findSortedByFilters(orderBy, orderDir, "", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), ImmutableMap.of(), pageIndex, pageIndex * pageSize);
-        List<LessonPartner> lessonPartners = Lists.transform(lessonPartnerModels, m -> LessonServiceUtils.createLessonPartnerFromModel(m));
+        List<LessonPartner> lessonPartners = Lists.transform(lessonPartnerModels, m -> createLessonPartnerFromModel(m));
 
         return new Page<>(lessonPartners, totalRows, pageIndex, pageSize);
     }
@@ -141,14 +143,14 @@ public final class LessonServiceImpl implements LessonService {
             throw new LessonPartnerNotFoundException("Lesson partner not found.");
         }
 
-        return LessonServiceUtils.createLessonPartnerFromModel(lessonPartnerModel);
+        return createLessonPartnerFromModel(lessonPartnerModel);
     }
 
     @Override
     public LessonPartner findLessonPartnerByLessonJidAndPartnerJid(String lessonJid, String partnerJid) {
         LessonPartnerModel lessonPartnerModel = lessonPartnerDao.findByLessonJidAndPartnerJid(lessonJid, partnerJid);
 
-        return LessonServiceUtils.createLessonPartnerFromModel(lessonPartnerModel);
+        return createLessonPartnerFromModel(lessonPartnerModel);
     }
 
     @Override
@@ -166,7 +168,7 @@ public final class LessonServiceImpl implements LessonService {
             long totalRows = lessonDao.countByFilters(filterString);
             List<LessonModel> lessonModels = lessonDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
 
-            List<Lesson> lessons = Lists.transform(lessonModels, m -> LessonServiceUtils.createLessonFromModel(m));
+            List<Lesson> lessons = Lists.transform(lessonModels, m -> createLessonFromModel(m));
             return new Page<>(lessons, totalRows, pageIndex, pageSize);
         } else {
             List<String> lessonJidsWhereIsAuthor = lessonDao.getJidsByAuthorJid(userJid);
@@ -181,7 +183,7 @@ public final class LessonServiceImpl implements LessonService {
             long totalRows = lessonDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of(LessonModel_.jid, allowedLessonJids));
             List<LessonModel> lessonModels = lessonDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(LessonModel_.jid, allowedLessonJids), pageIndex * pageSize, pageSize);
 
-            List<Lesson> lessons = Lists.transform(lessonModels, m -> LessonServiceUtils.createLessonFromModel(m));
+            List<Lesson> lessons = Lists.transform(lessonModels, m -> createLessonFromModel(m));
             return new Page<>(lessons, totalRows, pageIndex, pageSize);
         }
 
@@ -289,19 +291,19 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public String getStatementMediaFileURL(String userJid, String lessonJid, String filename) {
-        List<String> mediaFilePath = LessonServiceUtils.appendPath(getStatementMediaDirPath(userJid, lessonJid), filename);
+        List<String> mediaFilePath = appendPath(getStatementMediaDirPath(userJid, lessonJid), filename);
         return lessonFileSystemProvider.getURL(mediaFilePath);
     }
 
     @Override
     public List<GitCommit> getVersions(String userJid, String lessonJid) {
-        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
+        List<String> root = getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
         return lessonGitProvider.getLog(root);
     }
 
     @Override
     public void initRepository(String userJid, String lessonJid) {
-        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, null, lessonJid);
+        List<String> root = getRootDirPath(lessonFileSystemProvider, null, lessonJid);
 
         lessonGitProvider.init(root);
         lessonGitProvider.addAll(root);
@@ -310,15 +312,15 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public boolean userCloneExists(String userJid, String lessonJid) {
-        List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
+        List<String> root = getCloneDirPath(userJid, lessonJid);
 
         return lessonFileSystemProvider.directoryExists(root);
     }
 
     @Override
     public void createUserCloneIfNotExists(String userJid, String lessonJid) {
-        List<String> origin = LessonServiceUtils.getOriginDirPath(lessonJid);
-        List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
+        List<String> origin = getOriginDirPath(lessonJid);
+        List<String> root = getCloneDirPath(userJid, lessonJid);
 
         if (!lessonFileSystemProvider.directoryExists(root)) {
             lessonGitProvider.clone(origin, root);
@@ -327,7 +329,7 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public boolean commitThenMergeUserClone(String userJid, String lessonJid, String title, String description, String userIpAddress) {
-        List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
+        List<String> root = getCloneDirPath(userJid, lessonJid);
 
         lessonGitProvider.addAll(root);
         lessonGitProvider.commit(root, userJid, "no@email.com", title, description);
@@ -345,7 +347,7 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public boolean updateUserClone(String userJid, String lessonJid) {
-        List<String> root = LessonServiceUtils.getCloneDirPath(userJid, lessonJid);
+        List<String> root = getCloneDirPath(userJid, lessonJid);
 
         lessonGitProvider.addAll(root);
         lessonGitProvider.commit(root, userJid, "no@email.com", "dummy", "dummy");
@@ -358,8 +360,8 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public boolean pushUserClone(String userJid, String lessonJid, String userIpAddress) {
-        List<String> origin = LessonServiceUtils.getOriginDirPath(lessonJid);
-        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
+        List<String> origin = getOriginDirPath(lessonJid);
+        List<String> root = getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
 
         if (lessonGitProvider.push(root)) {
             lessonGitProvider.resetHard(origin);
@@ -374,21 +376,21 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public boolean fetchUserClone(String userJid, String lessonJid) {
-        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
+        List<String> root = getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
 
         return lessonGitProvider.fetch(root);
     }
 
     @Override
     public void discardUserClone(String userJid, String lessonJid) throws IOException {
-        List<String> root = LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
+        List<String> root = getRootDirPath(lessonFileSystemProvider, userJid, lessonJid);
 
         lessonFileSystemProvider.removeFile(root);
     }
 
     @Override
     public void restore(String lessonJid, String hash, String userJid, String userIpAddress) {
-        List<String> root = LessonServiceUtils.getOriginDirPath(lessonJid);
+        List<String> root = getOriginDirPath(lessonJid);
 
         lessonGitProvider.restore(root, hash);
 
@@ -405,7 +407,7 @@ public final class LessonServiceImpl implements LessonService {
 
         List<String> mediaDirPath = getStatementMediaDirPath(null, lessonJid);
         lessonFileSystemProvider.createDirectory(mediaDirPath);
-        lessonFileSystemProvider.createFile(LessonServiceUtils.appendPath(mediaDirPath, ".gitkeep"));
+        lessonFileSystemProvider.createFile(appendPath(mediaDirPath, ".gitkeep"));
 
         lessonFileSystemProvider.createFile(getStatementTitleFilePath(null, lessonJid, initialLanguageCode));
         lessonFileSystemProvider.createFile(getStatementTextFilePath(null, lessonJid, initialLanguageCode));
@@ -416,30 +418,66 @@ public final class LessonServiceImpl implements LessonService {
     }
 
     private List<String> getStatementsDirPath(String userJid, String lessonJid) {
-        return LessonServiceUtils.appendPath(LessonServiceUtils.getRootDirPath(lessonFileSystemProvider, userJid, lessonJid), "statements");
+        return appendPath(getRootDirPath(lessonFileSystemProvider, userJid, lessonJid), "statements");
     }
 
     private List<String> getStatementDirPath(String userJid, String lessonJid, String languageCode) {
-        return LessonServiceUtils.appendPath(getStatementsDirPath(userJid, lessonJid), languageCode);
+        return appendPath(getStatementsDirPath(userJid, lessonJid), languageCode);
     }
 
     private List<String> getStatementTitleFilePath(String userJid, String lessonJid, String languageCode) {
-        return LessonServiceUtils.appendPath(getStatementDirPath(userJid, lessonJid, languageCode), "title.txt");
+        return appendPath(getStatementDirPath(userJid, lessonJid, languageCode), "title.txt");
     }
 
     private List<String> getStatementTextFilePath(String userJid, String lessonJid, String languageCode) {
-        return LessonServiceUtils.appendPath(getStatementDirPath(userJid, lessonJid, languageCode), "text.html");
+        return appendPath(getStatementDirPath(userJid, lessonJid, languageCode), "text.html");
     }
 
     private List<String> getStatementDefaultLanguageFilePath(String userJid, String lessonJid) {
-        return LessonServiceUtils.appendPath(getStatementsDirPath(userJid, lessonJid), "defaultLanguage.txt");
+        return appendPath(getStatementsDirPath(userJid, lessonJid), "defaultLanguage.txt");
     }
 
     private List<String> getStatementAvailableLanguagesFilePath(String userJid, String lessonJid) {
-        return LessonServiceUtils.appendPath(getStatementsDirPath(userJid, lessonJid), "availableLanguages.txt");
+        return appendPath(getStatementsDirPath(userJid, lessonJid), "availableLanguages.txt");
     }
 
     private List<String> getStatementMediaDirPath(String userJid, String lessonJid) {
-        return LessonServiceUtils.appendPath(getStatementsDirPath(userJid, lessonJid), "resources");
+        return appendPath(getStatementsDirPath(userJid, lessonJid), "resources");
+    }
+
+    private static  List<String> getOriginDirPath(String lessonJid) {
+        return Lists.newArrayList(SandalphonProperties.getInstance().getBaseLessonsDirKey(), lessonJid);
+    }
+
+    private static  List<String> getClonesDirPath(String lessonJid) {
+        return Lists.newArrayList(SandalphonProperties.getInstance().getBaseLessonClonesDirKey(), lessonJid);
+    }
+
+    private static  List<String> getCloneDirPath(String userJid, String lessonJid) {
+        return appendPath(getClonesDirPath(lessonJid), userJid);
+    }
+
+    private static  List<String> getRootDirPath(FileSystemProvider fileSystemProvider, String userJid, String lessonJid) {
+        List<String> origin =  getOriginDirPath(lessonJid);
+        List<String> root = getCloneDirPath(userJid, lessonJid);
+
+        if (userJid == null || !fileSystemProvider.directoryExists(root)) {
+            return origin;
+        } else {
+            return root;
+        }
+    }
+
+    private static  List<String> appendPath(List<String> parentPath, String child) {
+        parentPath.add(child);
+        return parentPath;
+    }
+
+    private static  Lesson createLessonFromModel(LessonModel lessonModel) {
+        return new Lesson(lessonModel.id, lessonModel.jid, lessonModel.slug, lessonModel.userCreate, lessonModel.additionalNote, new Date(lessonModel.timeUpdate));
+    }
+
+    private static  LessonPartner createLessonPartnerFromModel(LessonPartnerModel lessonPartnerModel) {
+        return new LessonPartner(lessonPartnerModel.id, lessonPartnerModel.lessonJid, lessonPartnerModel.userJid, lessonPartnerModel.config);
     }
 }

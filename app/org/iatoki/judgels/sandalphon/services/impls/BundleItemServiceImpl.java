@@ -35,12 +35,12 @@ public final class BundleItemServiceImpl implements BundleItemService {
 
     @Override
     public boolean bundleItemExistsInProblemWithCloneByJid(String problemJid, String userJid, String itemJid) throws IOException {
-        return problemFileSystemProvider.directoryExists(BundleItemServiceUtils.getItemDirPath(problemFileSystemProvider, problemJid, userJid, itemJid));
+        return problemFileSystemProvider.directoryExists(BundleProblemServiceImplUtils.getItemDirPath(problemFileSystemProvider, problemJid, userJid, itemJid));
     }
 
     @Override
     public boolean bundleItemExistsInProblemWithCloneByMeta(String problemJid, String userJid, String meta) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
 
         for (BundleItem bundleItem : bundleItemsConfig.itemList) {
@@ -54,7 +54,7 @@ public final class BundleItemServiceImpl implements BundleItemService {
 
     @Override
     public BundleItem findInProblemWithCloneByItemJid(String problemJid, String userJid, String itemJid) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
 
         for (BundleItem bundleItem : bundleItemsConfig.itemList) {
@@ -68,12 +68,12 @@ public final class BundleItemServiceImpl implements BundleItemService {
 
     @Override
     public String getItemConfInProblemWithCloneByJid(String problemJid, String userJid, String itemJid, String languageCode) throws IOException {
-        return problemFileSystemProvider.readFromFile(BundleItemServiceUtils.getItemConfigFilePath(problemFileSystemProvider, problemJid, userJid, itemJid, languageCode));
+        return problemFileSystemProvider.readFromFile(BundleProblemServiceImplUtils.getItemConfigFilePath(problemFileSystemProvider, problemJid, userJid, itemJid, languageCode));
     }
 
     @Override
     public Page<BundleItem> getPageOfBundleItemsInProblemWithClone(String problemJid, String userJid, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
         List<BundleItem> bundleItems = bundleItemsConfig.itemList;
 
@@ -96,7 +96,7 @@ public final class BundleItemServiceImpl implements BundleItemService {
 
     @Override
     public List<BundleItem> getBundleItemsInProblemWithClone(String problemJid, String userJid) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
 
         List<BundleItem> bundleItems = bundleItemsConfig.itemList.stream().collect(Collectors.toList());
@@ -112,7 +112,7 @@ public final class BundleItemServiceImpl implements BundleItemService {
 
     @Override
     public void createBundleItem(String problemJid, String userJid, BundleItemType itemType, String meta, String conf, String languageCode) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
         List<BundleItem> bundleItems = Lists.newArrayList(bundleItemsConfig.itemList);
 
@@ -121,15 +121,15 @@ public final class BundleItemServiceImpl implements BundleItemService {
         bundleItems.add(bundleItem);
 
         bundleItemsConfig.itemList = bundleItems;
-        problemFileSystemProvider.writeToFile(BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
+        problemFileSystemProvider.writeToFile(BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
 
-        problemFileSystemProvider.createDirectory(BundleItemServiceUtils.getItemDirPath(problemFileSystemProvider, problemJid, userJid, itemJid));
-        problemFileSystemProvider.writeToFile(BundleItemServiceUtils.getItemConfigFilePath(problemFileSystemProvider, problemJid, userJid, itemJid, languageCode), conf);
+        problemFileSystemProvider.createDirectory(BundleProblemServiceImplUtils.getItemDirPath(problemFileSystemProvider, problemJid, userJid, itemJid));
+        problemFileSystemProvider.writeToFile(BundleProblemServiceImplUtils.getItemConfigFilePath(problemFileSystemProvider, problemJid, userJid, itemJid, languageCode), conf);
     }
 
     @Override
     public void updateBundleItem(String problemJid, String userJid, String itemJid, String meta, String conf, String languageCode) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
         List<BundleItem> bundleItems = Lists.newArrayList(bundleItemsConfig.itemList);
 
@@ -145,14 +145,14 @@ public final class BundleItemServiceImpl implements BundleItemService {
         }
 
         bundleItemsConfig.itemList = bundleItems;
-        problemFileSystemProvider.writeToFile(BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
+        problemFileSystemProvider.writeToFile(BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
 
-        problemFileSystemProvider.writeToFile(BundleItemServiceUtils.getItemConfigFilePath(problemFileSystemProvider, problemJid, userJid, itemJid, languageCode), conf);
+        problemFileSystemProvider.writeToFile(BundleProblemServiceImplUtils.getItemConfigFilePath(problemFileSystemProvider, problemJid, userJid, itemJid, languageCode), conf);
     }
 
     @Override
     public void moveBundleItemUp(String problemJid, String userJid, String itemJid) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
         List<BundleItem> bundleItems = Lists.newArrayList(bundleItemsConfig.itemList);
 
@@ -170,12 +170,12 @@ public final class BundleItemServiceImpl implements BundleItemService {
         }
 
         bundleItemsConfig.itemList = bundleItems;
-        problemFileSystemProvider.writeToFile(BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
+        problemFileSystemProvider.writeToFile(BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
     }
 
     @Override
     public void moveBundleItemDown(String problemJid, String userJid, String itemJid) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
         List<BundleItem> bundleItems = Lists.newArrayList(bundleItemsConfig.itemList);
 
@@ -193,12 +193,12 @@ public final class BundleItemServiceImpl implements BundleItemService {
         }
 
         bundleItemsConfig.itemList = bundleItems;
-        problemFileSystemProvider.writeToFile(BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
+        problemFileSystemProvider.writeToFile(BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
     }
 
     @Override
     public void removeBundleItem(String problemJid, String userJid, String itemJid) throws IOException {
-        List<String> itemsConfig = BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
+        List<String> itemsConfig = BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid);
         BundleItemsConfig bundleItemsConfig = new Gson().fromJson(problemFileSystemProvider.readFromFile(itemsConfig), BundleItemsConfig.class);
         List<BundleItem> bundleItems = Lists.newArrayList(bundleItemsConfig.itemList);
 
@@ -218,6 +218,6 @@ public final class BundleItemServiceImpl implements BundleItemService {
         }
 
         bundleItemsConfig.itemList = bundleItems;
-        problemFileSystemProvider.writeToFile(BundleItemServiceUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
+        problemFileSystemProvider.writeToFile(BundleProblemServiceImplUtils.getItemsConfigFilePath(problemFileSystemProvider, problemJid, userJid), new Gson().toJson(bundleItemsConfig));
     }
 }
