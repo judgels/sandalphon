@@ -84,7 +84,7 @@ public final class ClientServiceImpl implements ClientService {
 
         clientDao.persist(clientModel, userJid, userIpAddress);
 
-        return ClientServiceUtils.createClientFromModel(clientModel);
+        return createClientFromModel(clientModel);
     }
 
     @Override

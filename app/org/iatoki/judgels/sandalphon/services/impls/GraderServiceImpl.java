@@ -57,7 +57,7 @@ public final class GraderServiceImpl implements GraderService {
 
         graderDao.persist(graderModel, userJid, userIpAddress);
 
-        return GraderServiceUtils.createGraderFromModel(graderModel);
+        return createGraderFromModel(graderModel);
     }
 
     @Override
