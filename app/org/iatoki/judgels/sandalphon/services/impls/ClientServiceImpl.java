@@ -77,12 +77,14 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void createClient(String name, String userJid, String userIpAddress) {
+    public Client createClient(String name, String userJid, String userIpAddress) {
         ClientModel clientModel = new ClientModel();
         clientModel.name = name;
         clientModel.secret = JudgelsPlayUtils.generateNewSecret();
 
         clientDao.persist(clientModel, userJid, userIpAddress);
+
+        return ClientServiceUtils.createClientFromModel(clientModel);
     }
 
     @Override

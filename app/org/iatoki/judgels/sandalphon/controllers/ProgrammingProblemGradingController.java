@@ -79,8 +79,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         Form<GradingEngineEditForm> gradingEngineEditForm = Form.form(GradingEngineEditForm.class).fill(gradingEngineEditData);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update grading engine of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return showEditGradingEngine(gradingEngineEditForm, problem);
     }
 
@@ -121,8 +119,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             return showEditGradingEngine(gradingEngineEditForm, problem);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update grading engine of problem " + problem.getSlug() + ".");
-
         return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId()));
     }
 
@@ -151,8 +147,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
 
         Form<?> gradingEngineConfForm = GradingEngineAdapterRegistry.getInstance().getByGradingEngineName(engine).createFormFromConfig(config);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update grading config of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
     }
@@ -192,8 +186,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
             return showEditGradingConfig(gradingEngineConfForm, problem, engine, testDataFiles, helperFiles);
         }
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Update grading config of problem " + problem.getSlug() + ".");
 
         return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId()));
     }
@@ -236,8 +228,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             throw new IllegalStateException("Can't update grading config using tokilib format", e);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update grading config using tokilib format of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId()));
     }
 
@@ -278,8 +268,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             throw new IllegalStateException("Can't update grading config using auto population", e);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update grading config by auto population of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(problem.getId()));
     }
 
@@ -294,8 +282,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         Form<UploadFileForm> uploadFileForm = Form.form(UploadFileForm.class);
         List<FileInfo> testDataFiles = programmingProblemService.getGradingTestDataFiles(IdentityUtils.getUserJid(), problem.getJid());
-
-        SandalphonControllerUtils.getInstance().addActivityLog("List grading test data files of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showListGradingTestDataFiles(uploadFileForm, problem, testDataFiles);
     }
@@ -327,8 +313,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
                 return showListGradingTestDataFiles(form, problem, testDataFiles);
             }
 
-            SandalphonControllerUtils.getInstance().addActivityLog("Upload test data file of problem " + problem.getSlug() + ".");
-
             return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
         }
 
@@ -347,8 +331,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
                 return showListGradingTestDataFiles(form, problem, testDataFiles);
             }
 
-            SandalphonControllerUtils.getInstance().addActivityLog("Upload zipped test data files of problem " + problem.getSlug() + ".");
-
             return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
         }
 
@@ -366,8 +348,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
         Form<UploadFileForm> uploadFileForm = Form.form(UploadFileForm.class);
         List<FileInfo> helperFiles = programmingProblemService.getGradingHelperFiles(IdentityUtils.getUserJid(), problem.getJid());
-
-        SandalphonControllerUtils.getInstance().addActivityLog("List grading helper files of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showListGradingHelperFiles(uploadFileForm, problem, helperFiles);
     }
@@ -399,8 +379,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
                 return showListGradingHelperFiles(form, problem, helperFiles);
             }
 
-            SandalphonControllerUtils.getInstance().addActivityLog("Upload helper file of problem " + problem.getSlug() + ".");
-
             return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
         }
 
@@ -418,8 +396,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
 
                 return showListGradingHelperFiles(form, problem, helperFiles);
             }
-
-            SandalphonControllerUtils.getInstance().addActivityLog("Upload zipped helper files of problem " + problem.getSlug() + ".");
 
             return redirect(routes.ProgrammingProblemGradingController.listGradingHelperFiles(problem.getId()));
         }
@@ -448,8 +424,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         languageRestrictionEditData.isAllowedAll = LanguageRestrictionAdapter.getFormIsAllowedAllFromLanguageRestriction(languageRestriction);
 
         Form<LanguageRestrictionEditForm> languageRestrictionEditForm = Form.form(LanguageRestrictionEditForm.class).fill(languageRestrictionEditData);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update language restriction of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditLanguageRestriction(languageRestrictionEditForm, problem);
     }
@@ -480,8 +454,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
             languageRestrictionEditForm.reject("problem.programming.language.error.cantUpdate");
             return showEditLanguageRestriction(languageRestrictionEditForm, problem);
         }
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Update language restriction of problem " + problem.getSlug() + ".");
 
         return redirect(routes.ProgrammingProblemGradingController.editLanguageRestriction(problem.getId()));
     }

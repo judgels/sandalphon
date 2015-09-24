@@ -1,5 +1,6 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
@@ -21,7 +22,6 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -33,6 +33,9 @@ import java.util.List;
 @Singleton
 @Named
 public final class LessonClientController extends AbstractJudgelsController {
+
+    private static final String LESSON = "lesson";
+    private static final String CLIENT = "client";
 
     private final ClientService clientService;
     private final LessonService lessonService;
@@ -55,8 +58,6 @@ public final class LessonClientController extends AbstractJudgelsController {
         Form<ClientLessonUpsertForm> clientLessonUpsertForm = Form.form(ClientLessonUpsertForm.class);
         List<ClientLesson> clientLessons = clientService.getClientLessonsByLessonJid(lesson.getJid());
         List<Client> clients = clientService.getClients();
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update client on lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditClientLessons(clientLessonUpsertForm, lesson, clients, clientLessons);
     }
@@ -87,7 +88,7 @@ public final class LessonClientController extends AbstractJudgelsController {
 
         clientService.createClientLesson(lesson.getJid(), clientLessonUpsertData.clientJid, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientLessonUpsertData.clientJid + " to lesson " + lesson.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.ADD_IN.construct(LESSON, lesson.getJid(), lesson.getSlug(), CLIENT, clientLessonUpsertData.clientJid, clientService.findClientByJid(clientLessonUpsertData.clientJid).getName()));
 
         return redirect(routes.LessonClientController.editClientLessons(lesson.getId()));
     }
@@ -107,8 +108,6 @@ public final class LessonClientController extends AbstractJudgelsController {
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.client.client"), routes.LessonClientController.viewClientLesson(lessonId, clientLessonId)));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Update Statement");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("View client " + clientLesson.getClientName() + " to lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }

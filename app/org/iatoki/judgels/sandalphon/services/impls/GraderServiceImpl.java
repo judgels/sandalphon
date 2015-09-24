@@ -50,12 +50,14 @@ public final class GraderServiceImpl implements GraderService {
     }
 
     @Override
-    public void createGrader(String name, String userJid, String userIpAddress) {
+    public Grader createGrader(String name, String userJid, String userIpAddress) {
         GraderModel graderModel = new GraderModel();
         graderModel.name = name;
         graderModel.secret = JudgelsPlayUtils.generateNewSecret();
 
         graderDao.persist(graderModel, userJid, userIpAddress);
+
+        return GraderServiceUtils.createGraderFromModel(graderModel);
     }
 
     @Override

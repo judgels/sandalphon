@@ -6,14 +6,12 @@ import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.controllers.ProgrammingProblemControllerUtils;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import play.db.jpa.Transactional;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -44,8 +42,6 @@ public final class InternalProgrammingProblemGradingAPIController extends Abstra
 
         String testDataUrl = programmingProblemService.getGradingTestDataFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Download test data file " + filename + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return okAsDownload(testDataUrl);
     }
 
@@ -59,8 +55,6 @@ public final class InternalProgrammingProblemGradingAPIController extends Abstra
         }
 
         String helper = programmingProblemService.getGradingHelperFileURL(IdentityUtils.getUserJid(), problem.getJid(), filename);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Download helper file " + filename + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return okAsDownload(helper);
     }

@@ -2,36 +2,36 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
-import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.api.jophiel.JophielUser;
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
+import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
-import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.User;
-import org.iatoki.judgels.sandalphon.forms.UserAddForm;
 import org.iatoki.judgels.sandalphon.UserNotFoundException;
-import org.iatoki.judgels.sandalphon.services.UserService;
-import org.iatoki.judgels.sandalphon.forms.UserEditForm;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.forms.UserAddForm;
+import org.iatoki.judgels.sandalphon.forms.UserEditForm;
+import org.iatoki.judgels.sandalphon.services.UserService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.user.addUserView;
-import org.iatoki.judgels.sandalphon.views.html.user.listUsersView;
 import org.iatoki.judgels.sandalphon.views.html.user.editUserView;
+import org.iatoki.judgels.sandalphon.views.html.user.listUsersView;
 import org.iatoki.judgels.sandalphon.views.html.user.viewUserView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -45,6 +45,7 @@ import javax.inject.Singleton;
 public final class UserController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
+    private static final String USER = "user";
 
     private final JophielPublicAPI jophielPublicAPI;
     private final UserService userService;
@@ -72,8 +73,6 @@ public final class UserController extends AbstractJudgelsController {
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Users - List");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List all users <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -83,8 +82,6 @@ public final class UserController extends AbstractJudgelsController {
         UserAddForm userAddData = new UserAddForm();
         userAddData.roles = StringUtils.join(SandalphonUtils.getDefaultRoles(), ",");
         Form<UserAddForm> userCreateForm = Form.form(UserAddForm.class).fill(userAddData);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to create user <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showAddUser(userCreateForm);
     }
@@ -113,7 +110,7 @@ public final class UserController extends AbstractJudgelsController {
 
         userService.upsertUserFromJophielUser(jophielUser, userAddData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Create user " + jophielUser.getJid() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.ADD.construct(USER, jophielUser.getJid(), jophielUser.getUsername()));
 
         return redirect(routes.UserController.index());
     }
@@ -131,8 +128,6 @@ public final class UserController extends AbstractJudgelsController {
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "User - View");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -143,8 +138,6 @@ public final class UserController extends AbstractJudgelsController {
         UserEditForm userEditData = new UserEditForm();
         userEditData.roles = StringUtils.join(user.getRoles(), ",");
         Form<UserEditForm> userEditForm = Form.form(UserEditForm.class).fill(userEditData);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditUser(userEditForm, user);
     }
@@ -162,7 +155,7 @@ public final class UserController extends AbstractJudgelsController {
         UserEditForm userEditData = userEditForm.get();
         userService.updateUser(user.getUserJid(), userEditData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update user " + user.getUserJid() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.EDIT.construct(USER, user.getUserJid(), JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid())));
 
         return redirect(routes.UserController.index());
     }
@@ -172,7 +165,7 @@ public final class UserController extends AbstractJudgelsController {
         User user = userService.findUserById(userId);
         userService.deleteUser(user.getUserJid());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Delete user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.REMOVE.construct(USER, user.getUserJid(), JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid())));
 
         return redirect(routes.UserController.index());
     }

@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.api.jophiel.JophielUser;
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
@@ -31,7 +32,6 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -42,6 +42,9 @@ import javax.inject.Singleton;
 @Singleton
 @Named
 public final class ProgrammingProblemPartnerController extends AbstractJudgelsController {
+
+    private static final String PROBLEM = "problem";
+    private static final String PARTNER = "partner";
 
     private final JophielPublicAPI jophielPublicAPI;
     private final ProblemService problemService;
@@ -64,8 +67,6 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
         Form<ProblemPartnerUsernameForm> usernameForm = Form.form(ProblemPartnerUsernameForm.class);
         Form<ProblemPartnerUpsertForm> problemForm = Form.form(ProblemPartnerUpsertForm.class);
         Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to add partner of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showAddPartner(usernameForm, problemForm, programmingForm, problem);
     }
@@ -124,7 +125,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
 
         problemService.createProblemPartner(problem.getJid(), jophielUser.getJid(), problemConfig, programmingConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + jophielUser.getJid() + " of problem " + problem.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.ADD_IN.construct(PROBLEM, problem.getJid(), problem.getSlug(), PARTNER, jophielUser.getJid(), jophielUser.getUsername()));
 
         return redirect(routes.ProblemPartnerController.viewPartners(problem.getId()));
     }
@@ -162,8 +163,6 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
         programmingData.isAllowedToManageGrading = programmingConfig.isAllowedToManageGrading();
 
         Form<ProgrammingPartnerUpsertForm> programmingForm = Form.form(ProgrammingPartnerUpsertForm.class).fill(programmingData);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditPartner(problemForm, programmingForm, problem, problemPartner);
     }
@@ -210,7 +209,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
 
         problemService.updateProblemPartner(partnerId, problemConfig, programmingConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + problemPartner.getPartnerJid() + " of problem " + problem.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.EDIT_IN.construct(PROBLEM, problem.getJid(), problem.getSlug(), PARTNER, problemPartner.getPartnerJid(), JidCacheServiceImpl.getInstance().getDisplayName(problemPartner.getPartnerJid())));
 
         return redirect(routes.ProblemPartnerController.editPartner(problem.getId(), problemPartner.getId()));
     }

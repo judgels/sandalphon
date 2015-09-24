@@ -1,5 +1,6 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
@@ -21,7 +22,6 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -33,6 +33,9 @@ import java.util.List;
 @Singleton
 @Named
 public final class ProblemClientController extends AbstractJudgelsController {
+
+    private static final String PROBLEM = "problem";
+    private static final String CLIENT = "client";
 
     private final ClientService clientService;
     private final ProblemService problemService;
@@ -55,8 +58,6 @@ public final class ProblemClientController extends AbstractJudgelsController {
         Form<ClientProblemUpsertForm> clientProblemUpsertForm = Form.form(ClientProblemUpsertForm.class);
         List<ClientProblem> clientProblems = clientService.getClientProblemsByProblemJid(problem.getJid());
         List<Client> clients = clientService.getClients();
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update client on problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditClientProblems(clientProblemUpsertForm, problem, clients, clientProblems);
     }
@@ -89,7 +90,7 @@ public final class ProblemClientController extends AbstractJudgelsController {
 
         clientService.createClientProblem(problem.getJid(), clientProblemUpsertData.clientJid, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add client " + clientProblemUpsertData.clientJid + " to problem " + problem.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.ADD_IN.construct(PROBLEM, problem.getJid(), problem.getSlug(), CLIENT, clientProblemUpsertData.clientJid, clientService.findClientByJid(clientProblemUpsertData.clientJid).getName()));
 
         return redirect(routes.ProblemClientController.editClientProblems(problem.getId()));
     }
@@ -109,8 +110,6 @@ public final class ProblemClientController extends AbstractJudgelsController {
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.client.client"), routes.ProblemClientController.viewClientProblem(problemId, clientProblemId)));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("View client " + clientProblem.getClientName() + " to problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }

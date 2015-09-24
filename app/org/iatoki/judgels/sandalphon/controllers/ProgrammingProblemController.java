@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
@@ -10,11 +11,11 @@ import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.ProblemType;
+import org.iatoki.judgels.sandalphon.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ProgrammingProblemCreateForm;
-import org.iatoki.judgels.sandalphon.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.programming.createProgrammingProblemView;
@@ -23,7 +24,6 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -35,6 +35,8 @@ import java.io.IOException;
 @Singleton
 @Named
 public final class ProgrammingProblemController extends AbstractJudgelsController {
+
+    private static final String PROBLEM = "problem";
 
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
@@ -53,8 +55,6 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
         }
 
         Form<ProgrammingProblemCreateForm> form = Form.form(ProgrammingProblemCreateForm.class);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to create programming problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreateProgrammingProblem(form);
     }
@@ -93,20 +93,16 @@ public final class ProgrammingProblemController extends AbstractJudgelsControlle
         ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
         ProblemControllerUtils.removeJustCreatedProblem();
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Create programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.CREATE.construct(PROBLEM, problem.getJid(), problem.getSlug()));
 
         return redirect(routes.ProblemController.enterProblem(problem.getId()));
     }
 
     public Result jumpToGrading(long id) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Jump to programming problem grading " + id + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.ProgrammingProblemGradingController.editGradingConfig(id));
     }
 
     public Result jumpToSubmissions(long id) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Jump to programming problem submissions " + id + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.ProgrammingProblemSubmissionController.viewSubmissions(id));
     }
 

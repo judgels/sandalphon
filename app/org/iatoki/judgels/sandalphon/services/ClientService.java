@@ -19,7 +19,7 @@ public interface ClientService extends JudgelsAppClientService {
 
     Client findClientByJid(String clientJid);
 
-    void createClient(String name, String userJid, String userIpAddress);
+    Client createClient(String name, String userJid, String userIpAddress);
 
     void updateClient(String clientJid, String name, String userJid, String userIpAddress);
 

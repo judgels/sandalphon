@@ -1,5 +1,6 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.sandalphon.Problem;
@@ -13,7 +14,6 @@ import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.services.BundleProblemService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import play.db.jpa.Transactional;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -25,6 +25,8 @@ import java.io.IOException;
 @Singleton
 @Named
 public final class BundleProblemController extends AbstractJudgelsController {
+
+    private static final String PROBLEM = "problem";
 
     private final BundleProblemService bundleProblemService;
     private final ProblemService problemService;
@@ -60,20 +62,16 @@ public final class BundleProblemController extends AbstractJudgelsController {
         ProblemControllerUtils.setCurrentStatementLanguage(ProblemControllerUtils.getJustCreatedProblemInitLanguageCode());
         ProblemControllerUtils.removeJustCreatedProblem();
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Create bundle problem <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.CREATE.construct(PROBLEM, problem.getJid(), problem.getSlug()));
 
         return redirect(routes.ProblemController.enterProblem(problem.getId()));
     }
 
     public Result jumpToItems(long problemId) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Jump to bundle problem items " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.BundleItemController.viewItems(problemId));
     }
 
     public Result jumpToSubmissions(long problemId) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Jump to bundle problem submissions " + problemId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.BundleProblemSubmissionController.viewSubmissions(problemId));
     }
 }

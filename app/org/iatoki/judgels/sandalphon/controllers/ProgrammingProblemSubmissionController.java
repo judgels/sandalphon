@@ -2,32 +2,33 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.FileSystemProvider;
+import org.iatoki.judgels.gabriel.GradingEngineRegistry;
+import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
 import org.iatoki.judgels.gabriel.SubmissionSource;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.play.forms.ListTableSelectionForm;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
-import org.iatoki.judgels.gabriel.GradingEngineRegistry;
-import org.iatoki.judgels.gabriel.GradingLanguageRegistry;
+import org.iatoki.judgels.play.forms.ListTableSelectionForm;
+import org.iatoki.judgels.sandalphon.LanguageRestriction;
+import org.iatoki.judgels.sandalphon.LanguageRestrictionAdapter;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmission;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmissionException;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmissionNotFoundException;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmissionUtils;
+import org.iatoki.judgels.sandalphon.SandalphonActivityKeys;
 import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapterRegistry;
 import org.iatoki.judgels.sandalphon.config.SubmissionFileSystemProvider;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.LanguageRestriction;
-import org.iatoki.judgels.sandalphon.LanguageRestrictionAdapter;
-import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingSubmissionService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.problem.programming.submission.listSubmissionsView;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -49,6 +50,9 @@ import java.util.Set;
 public final class ProgrammingProblemSubmissionController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
+    private static final String SUBMISSION = "submission";
+    private static final String PROBLEM = "problem";
+    private static final String PROGRAMMING_FILES = "programming_files";
 
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
@@ -94,12 +98,12 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
             SubmissionSource submissionSource = ProgrammingSubmissionUtils.createSubmissionSourceFromNewSubmission(body);
             String submissionJid = programmingSubmissionService.submit(problem.getJid(), null, engine, gradingLanguage, allowedLanguageNames, submissionSource, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
             ProgrammingSubmissionUtils.storeSubmissionFiles(programmingSubmissionFileSystemProvider, null, submissionJid, submissionSource);
+
+            SandalphonControllerUtils.getInstance().addActivityLog(SandalphonActivityKeys.SUBMIT.construct(PROBLEM, problem.getJid(), problem.getSlug(), SUBMISSION, submissionJid, PROGRAMMING_FILES));
         } catch (ProgrammingSubmissionException e) {
             flash("submissionError", e.getMessage());
             return redirect(routes.ProgrammingProblemStatementController.viewStatement(problem.getId()));
         }
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Submit to programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProgrammingProblemSubmissionController.viewSubmissions(problem.getId()));
     }
@@ -127,8 +131,6 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.submission.list"), routes.ProgrammingProblemSubmissionController.viewSubmissions(problemId)));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Submissions");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("List submissions of programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -160,8 +162,6 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.programming.submission.view"), routes.ProgrammingProblemSubmissionController.viewSubmission(problemId, submissionId)));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - View Submission");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View submission " + submissionId + " of programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -177,7 +177,7 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
         SubmissionSource submissionSource = ProgrammingSubmissionUtils.createSubmissionSourceFromPastSubmission(programmingSubmissionFileSystemProvider, null, programmingSubmission.getJid());
         programmingSubmissionService.regrade(programmingSubmission.getJid(), submissionSource, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Regrade submission " + submissionId + " of programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog(SandalphonActivityKeys.REGRADE.construct(PROBLEM, problem.getJid(), problem.getSlug(), SUBMISSION, programmingSubmission.getJid(), programmingSubmission.getId() + ""));
 
         return redirect(routes.ProgrammingProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }
@@ -207,7 +207,7 @@ public final class ProgrammingProblemSubmissionController extends AbstractJudgel
             programmingSubmissionService.regrade(programmingSubmission.getJid(), submissionSource, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Regrade submissions of programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog(SandalphonActivityKeys.REGRADE.construct(PROBLEM, problem.getJid(), problem.getSlug(), SUBMISSION, null, ""));
 
         return redirect(routes.ProgrammingProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }

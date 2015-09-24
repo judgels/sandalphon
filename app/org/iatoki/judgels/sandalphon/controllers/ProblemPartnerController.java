@@ -15,7 +15,6 @@ import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.partner.listPartnersView;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -59,8 +58,6 @@ public class ProblemPartnerController extends AbstractJudgelsController {
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         ProblemPartnerControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.partner.list"), routes.ProblemPartnerController.viewPartners(problem.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Partners");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Open all partners <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }

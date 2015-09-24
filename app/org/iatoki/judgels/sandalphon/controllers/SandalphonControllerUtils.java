@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.jophiel.ActivityKey;
 import org.iatoki.judgels.jophiel.UserActivityMessage;
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
@@ -24,6 +25,7 @@ import org.iatoki.judgels.play.views.html.layouts.menusLayout;
 import org.iatoki.judgels.play.views.html.layouts.profileView;
 import org.iatoki.judgels.play.views.html.layouts.sidebarLayout;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
+import org.iatoki.judgels.sandalphon.services.impls.ActivityLogServiceImpl;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;
@@ -86,13 +88,15 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
         return SandalphonUtils.hasRole("admin");
     }
 
-    public void addActivityLog(String log) {
-        String newLog = log;
+    public void addActivityLog(ActivityKey activityKey) {
+        long time = System.currentTimeMillis();
+        ActivityLogServiceImpl.getInstance().addActivityLog(activityKey, SandalphonUtils.getRealUsername(), time, SandalphonUtils.getRealUserJid(), IdentityUtils.getIpAddress());
+        String log = SandalphonUtils.getRealUsername() + " " + activityKey.toString();
         try {
             if (JudgelsPlayUtils.hasViewPoint()) {
-                newLog += " view as " +  IdentityUtils.getUserJid();
+                log += " view as " +  IdentityUtils.getUsername();
             }
-            UserActivityMessageServiceImpl.getInstance().addUserActivityMessage(new UserActivityMessage(System.currentTimeMillis(), SandalphonUtils.getRealUserJid(), newLog, IdentityUtils.getIpAddress()));
+            UserActivityMessageServiceImpl.getInstance().addUserActivityMessage(new UserActivityMessage(System.currentTimeMillis(), SandalphonUtils.getRealUserJid(), log, IdentityUtils.getIpAddress()));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

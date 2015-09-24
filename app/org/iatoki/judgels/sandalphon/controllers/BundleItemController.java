@@ -25,7 +25,6 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
@@ -353,8 +352,6 @@ public final class BundleItemController extends AbstractJudgelsController {
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Items");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List items of programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -369,8 +366,6 @@ public final class BundleItemController extends AbstractJudgelsController {
               new InternalLink(Messages.get("problem.bundle.item.create"), routes.BundleItemController.createItem(problem.getId(), itemType, page, orderBy, orderDir, filterString))
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Items - Create");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to create bundle item on " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -387,8 +382,6 @@ public final class BundleItemController extends AbstractJudgelsController {
               new InternalLink(Messages.get("problem.bundle.item.update"), routes.BundleItemController.editItem(problem.getId(), bundleItem.getJid()))
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Bundle - Item - Update");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update bundle item on " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }

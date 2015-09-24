@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
@@ -17,15 +18,14 @@ import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.ClientUpsertForm;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.views.html.client.createClientView;
-import org.iatoki.judgels.sandalphon.views.html.client.listClientsView;
 import org.iatoki.judgels.sandalphon.views.html.client.editClientView;
+import org.iatoki.judgels.sandalphon.views.html.client.listClientsView;
 import org.iatoki.judgels.sandalphon.views.html.client.viewClientView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -39,6 +39,7 @@ import javax.inject.Singleton;
 public final class ClientController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
+    private static final String CLIENT = "client";
 
     private final ClientService clientService;
 
@@ -65,8 +66,6 @@ public final class ClientController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Clients - List");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List all clients <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -83,8 +82,6 @@ public final class ClientController extends AbstractJudgelsController {
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Client - View");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -92,8 +89,6 @@ public final class ClientController extends AbstractJudgelsController {
     @AddCSRFToken
     public Result createClient() {
         Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to create client <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreateClient(clientUpsertForm);
     }
@@ -108,9 +103,9 @@ public final class ClientController extends AbstractJudgelsController {
         }
 
         ClientUpsertForm clientUpsertData = clientUpsertForm.get();
-        clientService.createClient(clientUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        Client client = clientService.createClient(clientUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Create client " + clientUpsertData.name + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.CREATE.construct(CLIENT, client.getJid(), clientUpsertData.name));
 
         return redirect(routes.ClientController.index());
     }
@@ -122,8 +117,6 @@ public final class ClientController extends AbstractJudgelsController {
         ClientUpsertForm clientUpsertData = new ClientUpsertForm();
         clientUpsertData.name = client.getName();
         Form<ClientUpsertForm> clientUpsertForm = Form.form(ClientUpsertForm.class).fill(clientUpsertData);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update client " + client.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditClient(clientUpsertForm, client);
     }
@@ -141,7 +134,10 @@ public final class ClientController extends AbstractJudgelsController {
         ClientUpsertForm clientUpsertData = clientUpsertForm.get();
         clientService.updateClient(client.getJid(), clientUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update client " + client.getName() + ".");
+        if (!client.getName().equals(clientUpsertData.name)) {
+            SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.RENAME.construct(CLIENT, client.getJid(), client.getName(), clientUpsertData.name));
+        }
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.EDIT.construct(CLIENT, client.getJid(), clientUpsertData.name));
 
         return redirect(routes.ClientController.index());
     }

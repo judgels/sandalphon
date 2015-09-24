@@ -104,8 +104,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
             return notFound();
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update statement of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return showEditStatement(updateStatementForm, problem, allowedLanguages);
     }
 
@@ -150,8 +148,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
             }
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update statement of problem " + problem.getSlug() + ".");
-
         return redirect(routes.ProblemStatementController.editStatement(problem.getId()));
     }
 
@@ -164,8 +160,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
         Form<UploadFileForm> uploadFileForm = Form.form(UploadFileForm.class);
         boolean isAllowedToUploadMediaFiles = ProblemControllerUtils.isAllowedToUploadStatementResources(problemService, problem);
         List<FileInfo> mediaFiles = problemService.getStatementMediaFiles(IdentityUtils.getUserJid(), problem.getJid());
-
-        SandalphonControllerUtils.getInstance().addActivityLog("List statement media files of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showListStatementMediaFiles(uploadFileForm, problem, mediaFiles, isAllowedToUploadMediaFiles);
     }
@@ -198,8 +192,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
                 return showListStatementMediaFiles(form, problem, mediaFiles, isAllowedToUploadMediaFiles);
             }
 
-            SandalphonControllerUtils.getInstance().addActivityLog("Upload statement media file of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
             return redirect(routes.ProblemStatementController.listStatementMediaFiles(problem.getId()));
         }
 
@@ -218,8 +210,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
 
                 return showListStatementMediaFiles(form, problem, mediaFiles, isAllowedToUploadMediaFiles);
             }
-
-            SandalphonControllerUtils.getInstance().addActivityLog("Upload statement zipped media files of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemStatementController.listStatementMediaFiles(problem.getId()));
         }
@@ -253,8 +243,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
         ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.language.list"), routes.ProblemStatementController.listStatementLanguages(problem.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Statement Languages");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List statement languages of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -282,8 +270,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
             throw new IllegalStateException(e);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add statement language " + languageCode + " of problem " + problem.getSlug() + ".");
-
         return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
     }
 
@@ -307,8 +293,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
         } catch (IOException e) {
             throw new IllegalStateException("Statement language probably hasn't been added.", e);
         }
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Enable statement language " + languageCode + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
     }
@@ -338,8 +322,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
             throw new IllegalStateException("Statement language probably hasn't been added.", e);
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Disable statement language " + languageCode + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
     }
 
@@ -363,8 +345,6 @@ public class ProblemStatementController extends AbstractJudgelsController {
         } catch (IOException e) {
             throw new IllegalStateException("Statement language probably hasn't been added.", e);
         }
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Make statement language " + languageCode + " default of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.ProblemStatementController.listStatementLanguages(problem.getId()));
     }

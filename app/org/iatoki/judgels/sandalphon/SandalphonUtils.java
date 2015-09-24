@@ -77,6 +77,14 @@ public final class SandalphonUtils {
         }
     }
 
+    public static String getRealUsername() {
+        if (JudgelsPlayUtils.hasViewPoint()) {
+            return getFromSession("realUsername");
+        } else {
+            return IdentityUtils.getUsername();
+        }
+    }
+
     private static void putInSession(String key, String value) {
         Http.Context.current().session().put(key, value);
     }

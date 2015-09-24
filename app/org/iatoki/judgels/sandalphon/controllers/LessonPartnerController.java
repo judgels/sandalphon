@@ -2,6 +2,7 @@ package org.iatoki.judgels.sandalphon.controllers;
 
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.api.jophiel.JophielUser;
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
@@ -24,14 +25,13 @@ import org.iatoki.judgels.sandalphon.forms.LessonPartnerUsernameForm;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.addPartnerView;
-import org.iatoki.judgels.sandalphon.views.html.lesson.partner.listPartnersView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.partner.editPartnerView;
+import org.iatoki.judgels.sandalphon.views.html.lesson.partner.listPartnersView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -44,6 +44,8 @@ import javax.inject.Singleton;
 public class LessonPartnerController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
+    private static final String LESSON = "lesson";
+    private static final String PARTNER = "partner";
 
     private final JophielPublicAPI jophielPublicAPI;
     private final LessonService lessonService;
@@ -78,8 +80,6 @@ public class LessonPartnerController extends AbstractJudgelsController {
         appendBreadcrumbsLayout(content, lesson, new InternalLink(Messages.get("lesson.partner.list"), routes.LessonPartnerController.viewPartners(lesson.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - Partners");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Open all partners <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -94,8 +94,6 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
         Form<LessonPartnerUsernameForm> usernameForm = Form.form(LessonPartnerUsernameForm.class);
         Form<LessonPartnerUpsertForm> lessonForm = Form.form(LessonPartnerUpsertForm.class);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to add partner of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showAddPartner(usernameForm, lessonForm, lesson);
     }
@@ -147,7 +145,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
         lessonService.createLessonPartner(lesson.getJid(), jophielUser.getJid(), partnerConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Add partner " + jophielUser.getJid() + " of lesson " + lesson.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.ADD_IN.construct(LESSON, lesson.getJid(), lesson.getSlug(), PARTNER, jophielUser.getJid(), jophielUser.getUsername()));
 
         return redirect(routes.LessonPartnerController.viewPartners(lesson.getId()));
     }
@@ -177,8 +175,6 @@ public class LessonPartnerController extends AbstractJudgelsController {
         lessonData.isAllowedToManageLessonClients = lessonConfig.isAllowedToManageLessonClients();
 
         Form<LessonPartnerUpsertForm> lessonForm = Form.form(LessonPartnerUpsertForm.class).fill(lessonData);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditPartner(lessonForm, lesson, lessonPartner);
     }
@@ -216,7 +212,7 @@ public class LessonPartnerController extends AbstractJudgelsController {
 
         lessonService.updateLessonPartner(partnerId, lessonConfig, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update partner " + lessonPartner.getPartnerJid() + " of lesson " + lesson.getSlug() + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.EDIT_IN.construct(LESSON, lesson.getJid(), lesson.getSlug(), PARTNER, lessonPartner.getPartnerJid(), JidCacheServiceImpl.getInstance().getDisplayName(lessonPartner.getPartnerJid())));
 
         return redirect(routes.LessonPartnerController.editPartner(lesson.getId(), lessonPartner.getId()));
     }

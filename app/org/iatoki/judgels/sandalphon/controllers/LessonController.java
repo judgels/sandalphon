@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
@@ -21,8 +22,8 @@ import org.iatoki.judgels.sandalphon.forms.LessonCreateForm;
 import org.iatoki.judgels.sandalphon.forms.LessonEditForm;
 import org.iatoki.judgels.sandalphon.services.LessonService;
 import org.iatoki.judgels.sandalphon.views.html.lesson.createLessonView;
-import org.iatoki.judgels.sandalphon.views.html.lesson.listLessonsView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.editLessonView;
+import org.iatoki.judgels.sandalphon.views.html.lesson.listLessonsView;
 import org.iatoki.judgels.sandalphon.views.html.lesson.viewLessonView;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -30,7 +31,6 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -44,6 +44,7 @@ import java.io.IOException;
 public final class LessonController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
+    private static final String LESSON = "lesson";
 
     private final LessonService lessonService;
 
@@ -66,11 +67,9 @@ public final class LessonController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-              new InternalLink(Messages.get("lesson.lessons"), routes.LessonController.index())
+                new InternalLink(Messages.get("lesson.lessons"), routes.LessonController.index())
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lessons");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Open allowed lessons <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -79,8 +78,6 @@ public final class LessonController extends AbstractJudgelsController {
     @AddCSRFToken
     public Result createLesson() {
         Form<LessonCreateForm> lessonCreateForm = Form.form(LessonCreateForm.class);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to create lesson <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreateLesson(lessonCreateForm);
     }
@@ -111,36 +108,29 @@ public final class LessonController extends AbstractJudgelsController {
         lessonService.initRepository(IdentityUtils.getUserJid(), lesson.getJid());
 
         LessonControllerUtils.setCurrentStatementLanguage(lessonCreateData.initLanguageCode);
+
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.CREATE.construct(LESSON, lesson.getJid(), lessonCreateData.slug));
+
         return redirect(routes.LessonController.index());
     }
 
     public Result enterLesson(long lessonId) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Enter lesson " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.LessonController.jumpToStatement(lessonId));
     }
 
     public Result jumpToStatement(long lessonId) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Jump to lesson statement " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.LessonStatementController.viewStatement(lessonId));
     }
 
     public Result jumpToVersions(long lessonId) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Jump to lesson version " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.LessonVersionController.viewVersionLocalChanges(lessonId));
     }
 
     public Result jumpToPartners(long lessonId) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Jump to lesson partner " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.LessonPartnerController.viewPartners(lessonId));
     }
 
     public Result jumpToClients(long lessonId) {
-        SandalphonControllerUtils.getInstance().addActivityLog("Jump to lesson client " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.LessonClientController.editClientLessons(lessonId));
     }
 
@@ -154,13 +144,11 @@ public final class LessonController extends AbstractJudgelsController {
         content.appendLayout(c -> headingWithActionLayout.render("#" + lesson.getId() + ": " + lesson.getSlug(), new InternalLink(Messages.get("lesson.enter"), routes.LessonController.enterLesson(lesson.getId())), c));
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         SandalphonControllerUtils.getInstance().appendBreadcrumbsLayout(content,
-              LessonControllerUtils.getLessonBreadcrumbsBuilder(lesson)
-                    .add(new InternalLink(Messages.get("lesson.view"), routes.LessonController.viewLesson(lesson.getId())))
-                    .build()
+                LessonControllerUtils.getLessonBreadcrumbsBuilder(lesson)
+                        .add(new InternalLink(Messages.get("lesson.view"), routes.LessonController.viewLesson(lesson.getId())))
+                        .build()
         );
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Lesson - View");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("View lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
@@ -179,8 +167,6 @@ public final class LessonController extends AbstractJudgelsController {
         lessonEditData.additionalNote = lesson.getAdditionalNote();
 
         Form<LessonEditForm> lessonEditForm = Form.form(LessonEditForm.class).fill(lessonEditData);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update lesson " + lesson.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditLesson(lessonEditForm, lesson);
     }
@@ -207,7 +193,10 @@ public final class LessonController extends AbstractJudgelsController {
         LessonEditForm lessonEditData = lessonEditForm.get();
         lessonService.updateLesson(lesson.getJid(), lessonEditData.slug, lessonEditData.additionalNote, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update lesson " + lesson.getSlug() + ".");
+        if (!lesson.getSlug().equals(lessonEditData.slug)) {
+            SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.RENAME.construct(LESSON, lesson.getJid(), lesson.getSlug(), lessonEditData.slug));
+        }
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.EDIT.construct(LESSON, lesson.getJid(), lessonEditData.slug));
 
         return redirect(routes.LessonController.viewLesson(lesson.getId()));
     }
@@ -215,8 +204,6 @@ public final class LessonController extends AbstractJudgelsController {
     public Result switchLanguage(long lessonId) {
         String languageCode = DynamicForm.form().bindFromRequest().get("langCode");
         LessonControllerUtils.setCurrentStatementLanguage(languageCode);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Switch language to " + languageCode + " of lesson " + lessonId + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(request().getHeader("Referer"));
     }

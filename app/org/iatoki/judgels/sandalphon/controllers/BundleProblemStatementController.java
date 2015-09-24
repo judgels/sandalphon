@@ -5,9 +5,9 @@ import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
+import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.BundleItem;
 import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
@@ -21,7 +21,6 @@ import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.bundle.statement.bundleStatementView;
 import play.db.jpa.Transactional;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
@@ -119,8 +118,6 @@ public final class BundleProblemStatementController extends AbstractJudgelsContr
         SandalphonControllerUtils.getInstance().appendSidebarLayout(content);
         ProblemStatementControllerUtils.appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.statement.view"), routes.ProblemStatementController.viewStatement(problemId)));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Update Statement");
-
-        SandalphonControllerUtils.getInstance().addActivityLog("View statement of programming problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }

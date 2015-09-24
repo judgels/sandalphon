@@ -9,11 +9,12 @@ import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.SandalphonActivityKeys;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.VersionCommitForm;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.version.listVersionsView;
 import org.iatoki.judgels.sandalphon.views.html.problem.version.viewVersionLocalChangesView;
 import play.data.Form;
@@ -21,7 +22,6 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -34,6 +34,9 @@ import java.util.List;
 @Singleton
 @Named
 public final class ProblemVersionController extends AbstractJudgelsController {
+
+    private static final String COMMIT = "commit";
+    private static final String PROBLEM = "problem";
 
     private final ProblemService problemService;
 
@@ -63,8 +66,6 @@ public final class ProblemVersionController extends AbstractJudgelsController {
         appendBreadcrumbsLayout(content, problem, new InternalLink(Messages.get("problem.version.history"), routes.ProblemVersionController.listVersionHistory(problem.getId())));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Problem - Versions - History");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("List version history of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -79,7 +80,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         problemService.restore(problem.getJid(), hash, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Restore version history " + hash + " of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog(SandalphonActivityKeys.RESTORE.construct(PROBLEM, problem.getJid(), problem.getSlug(), COMMIT, null, hash));
 
         return redirect(routes.ProblemVersionController.listVersionHistory(problem.getId()));
     }
@@ -96,8 +97,6 @@ public final class ProblemVersionController extends AbstractJudgelsController {
         boolean isClean = !problemService.userCloneExists(IdentityUtils.getUserJid(), problem.getJid());
 
         Form<VersionCommitForm> versionCommitForm = Form.form(VersionCommitForm.class);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("View version changes of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showViewVersionLocalChanges(versionCommitForm, problem, isClean);
     }
@@ -133,7 +132,7 @@ public final class ProblemVersionController extends AbstractJudgelsController {
             }
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Commit version changes of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        SandalphonControllerUtils.getInstance().addActivityLog(SandalphonActivityKeys.COMMIT.construct(PROBLEM, problem.getJid(), problem.getSlug(), COMMIT, null, versionCommitData.title));
 
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
     }
@@ -152,8 +151,6 @@ public final class ProblemVersionController extends AbstractJudgelsController {
             flash("localChangesError", Messages.get("problem.version.local.cantMerge"));
         }
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update version changes of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
     }
 
@@ -167,7 +164,6 @@ public final class ProblemVersionController extends AbstractJudgelsController {
 
         try {
             problemService.discardUserClone(IdentityUtils.getUserJid(), problem.getJid());
-            SandalphonControllerUtils.getInstance().addActivityLog("Discard version changes of problem " + problem.getSlug() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
             return redirect(routes.ProblemVersionController.viewVersionLocalChanges(problem.getId()));
         } catch (IOException e) {

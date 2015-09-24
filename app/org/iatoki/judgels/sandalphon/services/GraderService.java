@@ -15,7 +15,7 @@ public interface GraderService extends JudgelsAppClientService {
 
     Page<Grader> getPageOfGraders(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    void createGrader(String name, String userJid, String userIpAddress);
+    Grader createGrader(String name, String userJid, String userIpAddress);
 
     void updateGrader(String graderJid, String name, String userJid, String userIpAddress);
 }

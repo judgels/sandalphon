@@ -1,6 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
+import org.iatoki.judgels.jophiel.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
@@ -17,15 +18,14 @@ import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.GraderUpsertForm;
 import org.iatoki.judgels.sandalphon.services.GraderService;
 import org.iatoki.judgels.sandalphon.views.html.grader.createGraderView;
-import org.iatoki.judgels.sandalphon.views.html.grader.listGradersView;
 import org.iatoki.judgels.sandalphon.views.html.grader.editGraderView;
+import org.iatoki.judgels.sandalphon.views.html.grader.listGradersView;
 import org.iatoki.judgels.sandalphon.views.html.grader.viewGraderView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -39,6 +39,7 @@ import javax.inject.Singleton;
 public final class GraderController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
+    private static final String GRADER = "grader";
 
     private final GraderService graderService;
 
@@ -65,8 +66,6 @@ public final class GraderController extends AbstractJudgelsController {
 
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Graders - List");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Open graders <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -83,8 +82,6 @@ public final class GraderController extends AbstractJudgelsController {
         ));
         SandalphonControllerUtils.getInstance().appendTemplateLayout(content, "Grader - View");
 
-        SandalphonControllerUtils.getInstance().addActivityLog("View grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
-
         return SandalphonControllerUtils.getInstance().lazyOk(content);
     }
 
@@ -92,8 +89,6 @@ public final class GraderController extends AbstractJudgelsController {
     @AddCSRFToken
     public Result createGrader() {
         Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to create grader <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreateGrader(graderUpsertForm);
     }
@@ -108,9 +103,9 @@ public final class GraderController extends AbstractJudgelsController {
         }
 
         GraderUpsertForm graderUpsertData = graderUpsertForm.get();
-        graderService.createGrader(graderUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        Grader grader = graderService.createGrader(graderUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Create grader " + graderUpsertData.name + ".");
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.CREATE.construct(GRADER, grader.getJid(), graderUpsertData.name));
 
         return redirect(routes.GraderController.index());
     }
@@ -122,8 +117,6 @@ public final class GraderController extends AbstractJudgelsController {
         GraderUpsertForm graderUpsertData = new GraderUpsertForm();
         graderUpsertData.name = grader.getName();
         Form<GraderUpsertForm> graderUpsertForm = Form.form(GraderUpsertForm.class).fill(graderUpsertData);
-
-        SandalphonControllerUtils.getInstance().addActivityLog("Try to update grader " + grader.getName() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showEditGrader(graderUpsertForm, grader);
     }
@@ -140,7 +133,10 @@ public final class GraderController extends AbstractJudgelsController {
         GraderUpsertForm graderUpsertData = graderUpsertForm.get();
         graderService.updateGrader(grader.getJid(), graderUpsertData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog("Update grader " + grader.getName() + ".");
+        if (!grader.getName().equals(graderUpsertData.name)) {
+            SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.RENAME.construct(GRADER, grader.getJid(), grader.getName(), graderUpsertData.name));
+        }
+        SandalphonControllerUtils.getInstance().addActivityLog(BasicActivityKeys.EDIT.construct(GRADER, grader.getJid(), graderUpsertData.name));
 
         return redirect(routes.GraderController.index());
     }

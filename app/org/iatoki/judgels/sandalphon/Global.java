@@ -10,9 +10,11 @@ import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.play.AbstractGlobal;
 import org.iatoki.judgels.play.services.BaseDataMigrationService;
 import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.models.daos.ActivityLogDao;
 import org.iatoki.judgels.sandalphon.models.daos.JidCacheDao;
 import org.iatoki.judgels.sandalphon.runnables.GradingResponsePoller;
 import org.iatoki.judgels.sandalphon.services.ProgrammingSubmissionService;
+import org.iatoki.judgels.sandalphon.services.impls.ActivityLogServiceImpl;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.services.impls.SandalphonDataMigrationServiceImpl;
 import play.Application;
@@ -41,6 +43,7 @@ public final class Global extends AbstractGlobal {
 
     private void buildServices(Injector injector) {
         JidCacheServiceImpl.buildInstance(injector.instanceOf(JidCacheDao.class));
+        ActivityLogServiceImpl.buildInstance(injector.instanceOf(ActivityLogDao.class));
         UserActivityMessageServiceImpl.buildInstance();
     }
 
