@@ -197,6 +197,7 @@ GET         /problems/:problemId/statements/media/:filename                     
 
 GET         /problems/programming/:problemId/render/:mediaFilename                  @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProblemStatementAPIController.renderMediaById(problemId: Long, mediaFilename)
 GET         /problems/bundle/:problemId/render/:mediaFilename                       @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProblemStatementAPIController.renderMediaById(problemId: Long, mediaFilename)
+GET         /problems/bundle/:problemId/items/render/:mediaFilename                 @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalProblemStatementAPIController.renderMediaById(problemId: Long, mediaFilename)
 
 GET         /lessons/:lessonId/statements/render/:mediaFilename                     @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalLessonStatementAPIController.renderMediaById(lessonId: Long, mediaFilename)
 GET         /lessons/:lessonId/render/:mediaFilename                                @org.iatoki.judgels.sandalphon.controllers.api.internal.InternalLessonStatementAPIController.renderMediaById(lessonId: Long, mediaFilename)
