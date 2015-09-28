@@ -175,17 +175,17 @@ public final class BundleProblemSubmissionController extends AbstractJudgelsCont
             return redirect(routes.BundleProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
         }
 
-        for (BundleSubmission submission : submissions) {
+        for (BundleSubmission bundleSubmission : submissions) {
             BundleAnswer bundleAnswer;
             try {
-                bundleAnswer = bundleSubmissionService.createBundleAnswerFromPastSubmission(bundleSubmissionFileSystemProvider, null, submission.getJid());
+                bundleAnswer = bundleSubmissionService.createBundleAnswerFromPastSubmission(bundleSubmissionFileSystemProvider, null, bundleSubmission.getJid());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            bundleSubmissionService.regrade(submission.getJid(), bundleAnswer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-        }
+            bundleSubmissionService.regrade(bundleSubmission.getJid(), bundleAnswer, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
-        SandalphonControllerUtils.getInstance().addActivityLog(SandalphonActivityKeys.REGRADE.construct(PROBLEM, problem.getJid(), problem.getSlug(), SUBMISSION, null, ""));
+            SandalphonControllerUtils.getInstance().addActivityLog(SandalphonActivityKeys.REGRADE.construct(PROBLEM, problem.getJid(), problem.getSlug(), SUBMISSION, bundleSubmission.getJid(), bundleSubmission.getId() + ""));
+        }
 
         return redirect(routes.BundleProblemSubmissionController.listSubmissions(problemId, pageIndex, orderBy, orderDir));
     }
