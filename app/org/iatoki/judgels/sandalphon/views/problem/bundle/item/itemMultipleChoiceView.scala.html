@@ -17,8 +17,18 @@
         </div>
         <hr />
         @for(choice <- itemMultipleChoiceConf.choices) {
-            <div class="radio">
-                <label><input type="radio" name="@bundleItem.getJid" value="@choice.getAlias"><span class="badge">@choice.getAlias</span> @Html(choice.getContent)</label>
+            <div class="radio" style="margin-top: -5px">
+                <label>
+                    <div class="pull-left">
+                        <input type="radio" name="@bundleItem.getJid" value="@choice.getAlias">
+                    </div>
+                    <div class="pull-left" style="margin-right: 5px;">
+                        <span class="badge">@choice.getAlias</span>
+                    </div>
+                    <div class="pull-left">
+                        @Html(choice.getContent)
+                    </div>
+                   </label>
             </div>
         }
     </div>
