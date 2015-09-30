@@ -144,7 +144,7 @@ public final class ProblemServiceImpl implements ProblemService {
     @Override
     public ProblemPartner findProblemPartnerById(long problemPartnerId) throws ProblemPartnerNotFoundException {
         ProblemPartnerModel problemPartnerModel = problemPartnerDao.findById(problemPartnerId);
-        if (problemPartnerModel != null) {
+        if (problemPartnerModel == null) {
             throw new ProblemPartnerNotFoundException("Problem partner not found.");
         }
 
