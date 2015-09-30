@@ -135,7 +135,7 @@ public final class ProgrammingProblemPartnerController extends AbstractJudgelsCo
     public Result editPartner(long problemId, long partnerId) throws ProblemNotFoundException, ProblemPartnerNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProblemControllerUtils.isAuthorOrAbove(problem)) {
+        if (!ProblemControllerUtils.isAuthorOrAbove(problem)) {
             return notFound();
         }
 
