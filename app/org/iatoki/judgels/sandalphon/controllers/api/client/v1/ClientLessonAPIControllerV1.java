@@ -1,9 +1,11 @@
 package org.iatoki.judgels.sandalphon.controllers.api.client.v1;
 
+import org.iatoki.judgels.play.apis.JudgelsAPIForbiddenException;
 import org.iatoki.judgels.play.apis.JudgelsAPIInternalServerErrorException;
-import org.iatoki.judgels.play.apis.JudgelsAPINotFoundException;
 import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
+import org.iatoki.judgels.sandalphon.ClientLesson;
 import org.iatoki.judgels.sandalphon.Lesson;
+import org.iatoki.judgels.sandalphon.controllers.api.object.v1.ClientLessonFindRequestV1;
 import org.iatoki.judgels.sandalphon.controllers.api.object.v1.LessonV1;
 import org.iatoki.judgels.sandalphon.services.ClientService;
 import org.iatoki.judgels.sandalphon.services.LessonService;
@@ -29,22 +31,36 @@ public final class ClientLessonAPIControllerV1 extends AbstractJudgelsAPIControl
     }
 
     @Transactional(readOnly = true)
-    public Result findLessonByJid(String lessonJid) {
+    public Result findClientLesson() {
         authenticateAsJudgelsAppClient(clientService);
+        ClientLessonFindRequestV1 requestBody = parseRequestBody(ClientLessonFindRequestV1.class);
 
-        if (!lessonService.lessonExistsByJid(lessonJid)) {
-            throw new JudgelsAPINotFoundException();
+        if (!clientService.clientExistsByJid(requestBody.clientJid)) {
+            throw new JudgelsAPIForbiddenException("Client not recognized");
+        }
+
+        if (!lessonService.lessonExistsByJid(requestBody.lessonJid)) {
+            throw new JudgelsAPIForbiddenException("Lesson not found");
+        }
+
+        if (!clientService.isClientAuthorizedForLesson(requestBody.lessonJid, requestBody.clientJid)) {
+            throw new JudgelsAPIForbiddenException("Client not authorized to use lesson");
+        }
+
+        ClientLesson clientLesson = clientService.findClientLessonByClientJidAndLessonJid(requestBody.clientJid, requestBody.lessonJid);
+        if (!clientLesson.getSecret().equals(requestBody.lessonSecret)) {
+            throw new JudgelsAPIForbiddenException("Wrong client lesson credentials");
         }
 
         try {
-            Lesson lesson = lessonService.findLessonByJid(lessonJid);
+            Lesson lesson = lessonService.findLessonByJid(requestBody.lessonJid);
 
             LessonV1 responseBody = new LessonV1();
 
             responseBody.jid = lesson.getJid();
             responseBody.slug = lesson.getSlug();
-            responseBody.defaultLanguage = lessonService.getDefaultLanguage(null, lessonJid);
-            responseBody.titlesByLanguage = lessonService.getTitlesByLanguage(null, lessonJid);
+            responseBody.defaultLanguage = lessonService.getDefaultLanguage(null, requestBody.lessonJid);
+            responseBody.titlesByLanguage = lessonService.getTitlesByLanguage(null, requestBody.lessonJid);
 
             return okAsJson(responseBody);
         } catch (IOException e) {
