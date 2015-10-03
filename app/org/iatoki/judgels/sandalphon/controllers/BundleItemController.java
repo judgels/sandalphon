@@ -138,6 +138,11 @@ public final class BundleItemController extends AbstractJudgelsController {
             return showListCreateItems(problem, pageOfBundleItems, orderBy, orderDir, filterString, itemCreateForm);
         }
 
+        try {
+            ProblemControllerUtils.establishStatementLanguage(problemService, problem);
+        } catch (IOException e) {
+            return notFound();
+        }
 
         BundleItemConfAdapter bundleItemConfAdapter = BundleItemConfAdapters.fromItemType(BundleItemType.valueOf(itemType));
         if (bundleItemConfAdapter == null) {
@@ -192,6 +197,12 @@ public final class BundleItemController extends AbstractJudgelsController {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+
+        try {
+            ProblemControllerUtils.establishStatementLanguage(problemService, problem);
+        } catch (IOException e) {
+            return notFound();
         }
 
         BundleItem bundleItem;
@@ -249,6 +260,12 @@ public final class BundleItemController extends AbstractJudgelsController {
             bundleItem = bundleItemService.findInProblemWithCloneByItemJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+
+        try {
+            ProblemControllerUtils.establishStatementLanguage(problemService, problem);
+        } catch (IOException e) {
+            return notFound();
         }
 
         BundleItemConfAdapter bundleItemConfAdapter = BundleItemConfAdapters.fromItemType(bundleItem.getType());
