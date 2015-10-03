@@ -40,7 +40,7 @@ import java.util.Set;
 @Named
 public final class BundleItemController extends AbstractJudgelsController {
 
-    private static final long PAGE_SIZE = 20;
+    private static final long PAGE_SIZE = 1000;
 
     private final BundleItemService bundleItemService;
     private final ProblemService problemService;
