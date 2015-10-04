@@ -37,6 +37,7 @@ import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
+import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -286,6 +287,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         return showListGradingTestDataFiles(uploadFileForm, problem, testDataFiles);
     }
 
+    @BodyParser.Of(value = BodyParser.MultipartFormData.class, maxLength = 512 * 1024 * 1024)
     @Transactional
     @RequireCSRFCheck
     public Result postUploadGradingTestDataFiles(long problemId) throws ProblemNotFoundException {
@@ -337,6 +339,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
     }
 
+    @BodyParser.Of(value = BodyParser.MultipartFormData.class, maxLength = 512 * 1024 * 1024)
     @Transactional(readOnly = true)
     @AddCSRFToken
     public Result listGradingHelperFiles(long problemId) throws ProblemNotFoundException {
