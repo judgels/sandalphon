@@ -339,7 +339,6 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         return redirect(routes.ProgrammingProblemGradingController.listGradingTestDataFiles(problem.getId()));
     }
 
-    @BodyParser.Of(value = BodyParser.MultipartFormData.class, maxLength = 512 * 1024 * 1024)
     @Transactional(readOnly = true)
     @AddCSRFToken
     public Result listGradingHelperFiles(long problemId) throws ProblemNotFoundException {
@@ -355,6 +354,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
         return showListGradingHelperFiles(uploadFileForm, problem, helperFiles);
     }
 
+    @BodyParser.Of(value = BodyParser.MultipartFormData.class, maxLength = 512 * 1024 * 1024)
     @Transactional
     @RequireCSRFCheck
     public Result postUploadGradingHelperFiles(long problemId) throws ProblemNotFoundException {
