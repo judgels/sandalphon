@@ -303,6 +303,8 @@ public final class BundleItemController extends AbstractJudgelsController {
             return notFound();
         }
 
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
         try {
             if (!bundleItemService.bundleItemExistsInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
                 return notFound();
@@ -324,6 +326,8 @@ public final class BundleItemController extends AbstractJudgelsController {
             return notFound();
         }
 
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
+
         try {
             if (!bundleItemService.bundleItemExistsInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
                 return notFound();
@@ -344,6 +348,8 @@ public final class BundleItemController extends AbstractJudgelsController {
         if (!BundleProblemControllerUtils.isAllowedToManageItems(problemService, problem)) {
             return notFound();
         }
+
+        problemService.createUserCloneIfNotExists(IdentityUtils.getUserJid(), problem.getJid());
 
         try {
             if (!bundleItemService.bundleItemExistsInProblemWithCloneByJid(problem.getJid(), IdentityUtils.getUserJid(), itemJid)) {
