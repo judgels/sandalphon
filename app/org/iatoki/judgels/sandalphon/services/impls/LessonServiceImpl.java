@@ -129,8 +129,8 @@ public final class LessonServiceImpl implements LessonService {
 
     @Override
     public Page<LessonPartner> getPageOfLessonPartners(String lessonJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
-        long totalRows = lessonPartnerDao.countByFilters("", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), ImmutableMap.of());
-        List<LessonPartnerModel> lessonPartnerModels = lessonPartnerDao.findSortedByFilters(orderBy, orderDir, "", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), ImmutableMap.of(), pageIndex, pageIndex * pageSize);
+        long totalRows = lessonPartnerDao.countByFiltersEq("", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid));
+        List<LessonPartnerModel> lessonPartnerModels = lessonPartnerDao.findSortedByFiltersEq(orderBy, orderDir, "", ImmutableMap.of(LessonPartnerModel_.lessonJid, lessonJid), pageIndex, pageIndex * pageSize);
         List<LessonPartner> lessonPartners = Lists.transform(lessonPartnerModels, m -> createLessonPartnerFromModel(m));
 
         return new Page<>(lessonPartners, totalRows, pageIndex, pageSize);
@@ -166,7 +166,7 @@ public final class LessonServiceImpl implements LessonService {
     public Page<Lesson> getPageOfLessons(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin) {
         if (isAdmin) {
             long totalRows = lessonDao.countByFilters(filterString);
-            List<LessonModel> lessonModels = lessonDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
+            List<LessonModel> lessonModels = lessonDao.findSortedByFilters(orderBy, orderDir, filterString, pageIndex * pageSize, pageSize);
 
             List<Lesson> lessons = Lists.transform(lessonModels, m -> createLessonFromModel(m));
             return new Page<>(lessons, totalRows, pageIndex, pageSize);
@@ -180,8 +180,8 @@ public final class LessonServiceImpl implements LessonService {
 
             Set<String> allowedLessonJids = allowedLessonJidsBuilder.build();
 
-            long totalRows = lessonDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of(LessonModel_.jid, allowedLessonJids));
-            List<LessonModel> lessonModels = lessonDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(LessonModel_.jid, allowedLessonJids), pageIndex * pageSize, pageSize);
+            long totalRows = lessonDao.countByFiltersIn(filterString, ImmutableMap.of(LessonModel_.jid, allowedLessonJids));
+            List<LessonModel> lessonModels = lessonDao.findSortedByFiltersIn(orderBy, orderDir, filterString, ImmutableMap.of(LessonModel_.jid, allowedLessonJids), pageIndex * pageSize, pageSize);
 
             List<Lesson> lessons = Lists.transform(lessonModels, m -> createLessonFromModel(m));
             return new Page<>(lessons, totalRows, pageIndex, pageSize);

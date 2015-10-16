@@ -134,8 +134,8 @@ public final class ProblemServiceImpl implements ProblemService {
 
     @Override
     public Page<ProblemPartner> getPageOfProblemPartners(String problemJid, long pageIndex, long pageSize, String orderBy, String orderDir) {
-        long totalRows = problemPartnerDao.countByFilters("", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), ImmutableMap.of());
-        List<ProblemPartnerModel> problemPartnerModels = problemPartnerDao.findSortedByFilters(orderBy, orderDir, "", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), ImmutableMap.of(), pageIndex, pageIndex * pageSize);
+        long totalRows = problemPartnerDao.countByFiltersEq("", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid));
+        List<ProblemPartnerModel> problemPartnerModels = problemPartnerDao.findSortedByFiltersEq(orderBy, orderDir, "", ImmutableMap.of(ProblemPartnerModel_.problemJid, problemJid), pageIndex, pageIndex * pageSize);
         List<ProblemPartner> problemPartners = Lists.transform(problemPartnerModels, m -> createProblemPartnerFromModel(m));
 
         return new Page<>(problemPartners, totalRows, pageIndex, pageSize);
@@ -171,7 +171,7 @@ public final class ProblemServiceImpl implements ProblemService {
     public Page<Problem> getPageOfProblems(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString, String userJid, boolean isAdmin) {
         if (isAdmin) {
             long totalRows = problemDao.countByFilters(filterString);
-            List<ProblemModel> problemModels = problemDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
+            List<ProblemModel> problemModels = problemDao.findSortedByFilters(orderBy, orderDir, filterString, pageIndex * pageSize, pageSize);
 
             List<Problem> problems = Lists.transform(problemModels, m -> createProblemFromModel(m));
             return new Page<>(problems, totalRows, pageIndex, pageSize);
@@ -185,8 +185,8 @@ public final class ProblemServiceImpl implements ProblemService {
 
             Set<String> allowedProblemJids = allowedProblemJidsBuilder.build();
 
-            long totalRows = problemDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of(ProblemModel_.jid, allowedProblemJids));
-            List<ProblemModel> problemModels = problemDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(ProblemModel_.jid, allowedProblemJids), pageIndex * pageSize, pageSize);
+            long totalRows = problemDao.countByFiltersIn(filterString, ImmutableMap.of(ProblemModel_.jid, allowedProblemJids));
+            List<ProblemModel> problemModels = problemDao.findSortedByFiltersIn(orderBy, orderDir, filterString, ImmutableMap.of(ProblemModel_.jid, allowedProblemJids), pageIndex * pageSize, pageSize);
 
             List<Problem> problems = Lists.transform(problemModels, m -> createProblemFromModel(m));
             return new Page<>(problems, totalRows, pageIndex, pageSize);

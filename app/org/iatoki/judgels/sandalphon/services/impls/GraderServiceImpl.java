@@ -71,7 +71,7 @@ public final class GraderServiceImpl implements GraderService {
     @Override
     public Page<Grader> getPageOfGraders(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalPages = graderDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
-        List<GraderModel> graderModels = graderDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
+        List<GraderModel> graderModels = graderDao.findSortedByFilters(orderBy, orderDir, filterString, pageIndex * pageSize, pageSize);
 
         List<Grader> graders = Lists.transform(graderModels, m -> createGraderFromModel(m));
 
