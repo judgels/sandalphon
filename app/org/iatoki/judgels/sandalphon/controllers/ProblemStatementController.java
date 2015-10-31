@@ -10,8 +10,8 @@ import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.ProblemStatementUtils;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.ProblemType;
+import org.iatoki.judgels.sandalphon.ProgrammingProblemStatementUtils;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.WorldLanguageRegistry;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
@@ -19,10 +19,10 @@ import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.forms.UpdateStatementForm;
 import org.iatoki.judgels.sandalphon.forms.UploadFileForm;
-import org.iatoki.judgels.sandalphon.ProgrammingProblemStatementUtils;
+import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.views.html.problem.statement.editStatementView;
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.listStatementLanguagesView;
 import org.iatoki.judgels.sandalphon.views.html.problem.statement.listStatementMediaFilesView;
-import org.iatoki.judgels.sandalphon.views.html.problem.statement.editStatementView;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -94,7 +94,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
 
         UpdateStatementForm updateStatementData = new UpdateStatementForm();
         updateStatementData.title = statement.getTitle();
-        updateStatementData.text = statement.getText();
+        updateStatementData.text = statement.getText().replace("≤", "&le;").replace("“", "\"").replace("≥", "&geq");
 
         Form<UpdateStatementForm> updateStatementForm = Form.form(UpdateStatementForm.class).fill(updateStatementData);
 
