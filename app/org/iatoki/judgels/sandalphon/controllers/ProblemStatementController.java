@@ -94,7 +94,7 @@ public class ProblemStatementController extends AbstractJudgelsController {
 
         UpdateStatementForm updateStatementData = new UpdateStatementForm();
         updateStatementData.title = statement.getTitle();
-        updateStatementData.text = statement.getText().replace("≤", "&le;").replace("“", "\"").replace("≥", "&geq");
+        updateStatementData.text = statement.getText();
 
         Form<UpdateStatementForm> updateStatementForm = Form.form(UpdateStatementForm.class).fill(updateStatementData);
 
