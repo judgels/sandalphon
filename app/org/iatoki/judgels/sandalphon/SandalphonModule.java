@@ -1,5 +1,7 @@
-package org.iatoki.judgels.sandalphon.config;
+package org.iatoki.judgels.sandalphon;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.iatoki.judgels.FileSystemProvider;
 import org.iatoki.judgels.GitProvider;
 import org.iatoki.judgels.LocalFileSystemProvider;
@@ -9,16 +11,41 @@ import org.iatoki.judgels.api.jophiel.JophielFactory;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.api.sealtiel.SealtielClientAPI;
 import org.iatoki.judgels.api.sealtiel.SealtielFactory;
-import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.jophiel.JophielAuthAPI;
 import org.iatoki.judgels.jophiel.services.BaseUserService;
-import org.iatoki.judgels.sandalphon.SandalphonProperties;
+import org.iatoki.judgels.play.JudgelsPlayProperties;
+import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
+import org.iatoki.judgels.play.general.GeneralName;
+import org.iatoki.judgels.play.general.GeneralVersion;
+import org.iatoki.judgels.play.migration.BaseDataMigrationService;
+import org.iatoki.judgels.sandalphon.config.GabrielClientJid;
+import org.iatoki.judgels.sandalphon.config.LessonFileSystemProvider;
+import org.iatoki.judgels.sandalphon.config.LessonGitProvider;
+import org.iatoki.judgels.sandalphon.config.ProblemFileSystemProvider;
+import org.iatoki.judgels.sandalphon.config.ProblemGitProvider;
+import org.iatoki.judgels.sandalphon.config.SubmissionFileSystemProvider;
+import org.iatoki.judgels.sandalphon.services.impls.SandalphonDataMigrationServiceImpl;
 import org.iatoki.judgels.sandalphon.services.impls.UserServiceImpl;
 
 public class SandalphonModule extends AbstractJudgelsPlayModule {
 
     @Override
     protected void manualBinding() {
+        org.iatoki.judgels.sandalphon.BuildInfo$ buildInfo = org.iatoki.judgels.sandalphon.BuildInfo$.MODULE$;
+
+        bindConstant().annotatedWith(GeneralName.class).to(buildInfo.name());
+        bindConstant().annotatedWith(GeneralVersion.class).to(buildInfo.version());
+
+        // <DEPRECATED>
+        Config config = ConfigFactory.load();
+        JudgelsPlayProperties.buildInstance(buildInfo.name(), buildInfo.version(), config);
+        SandalphonProperties.buildInstance(config);
+        bind(SandalphonSingletonsBuilder.class).asEagerSingleton();
+        bind(SandalphonThreadsScheduler.class).asEagerSingleton();
+        // </DEPRECATED>
+
+        bind(BaseDataMigrationService.class).to(SandalphonDataMigrationServiceImpl.class);
+
         bind(JophielAuthAPI.class).toInstance(jophielAuthAPI());
         bind(JophielClientAPI.class).toInstance(jophielClientAPI());
         bind(JophielPublicAPI.class).toInstance(jophielPublicAPI());

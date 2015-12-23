@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.inject.Singleton;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
@@ -11,7 +12,7 @@ import org.iatoki.judgels.GitCommit;
 import org.iatoki.judgels.GitProvider;
 import org.iatoki.judgels.LocalFileSystemProvider;
 import org.iatoki.judgels.LocalGitProvider;
-import org.iatoki.judgels.play.services.impls.AbstractBaseDataMigrationServiceImpl;
+import org.iatoki.judgels.play.migration.AbstractBaseDataMigrationServiceImpl;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import play.db.jpa.JPA;
@@ -25,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
+@Singleton
 public final class SandalphonDataMigrationServiceImpl extends AbstractBaseDataMigrationServiceImpl {
 
     @Override
