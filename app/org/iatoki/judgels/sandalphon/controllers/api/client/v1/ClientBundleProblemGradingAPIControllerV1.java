@@ -9,7 +9,7 @@ import org.iatoki.judgels.sandalphon.BundleAnswer;
 import org.iatoki.judgels.sandalphon.BundleGradingResult;
 import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.controllers.api.object.v1.BundleProblemGradeRequestV1;
-import org.iatoki.judgels.sandalphon.services.ClientService;
+import org.iatoki.judgels.sandalphon.client.ClientService;
 import org.iatoki.judgels.sandalphon.services.ProblemService;
 import org.iatoki.judgels.sandalphon.services.impls.BundleProblemGraderImpl;
 import play.db.jpa.Transactional;

@@ -164,13 +164,13 @@ POST        /lessons/:lessonId/clients                                          
 GET         /lessons/:lessonId/clients/:clientId                                    @org.iatoki.judgels.sandalphon.controllers.LessonClientController.viewClientLesson(lessonId: Long, clientId: Long)
 
 
-GET         /clients                                                                @org.iatoki.judgels.sandalphon.controllers.ClientController.index()
-GET         /clients/                                                               @org.iatoki.judgels.sandalphon.controllers.ClientController.listClients(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
-GET         /clients/new                                                            @org.iatoki.judgels.sandalphon.controllers.ClientController.createClient()
-POST        /clients                                                                @org.iatoki.judgels.sandalphon.controllers.ClientController.postCreateClient()
-GET         /clients/:clientId                                                      @org.iatoki.judgels.sandalphon.controllers.ClientController.viewClient(clientId: Long)
-GET         /clients/:clientId/edit                                                 @org.iatoki.judgels.sandalphon.controllers.ClientController.editClient(clientId: Long)
-POST        /clients/:clientId                                                      @org.iatoki.judgels.sandalphon.controllers.ClientController.postEditClient(clientId: Long)
+GET         /clients                                                                @org.iatoki.judgels.sandalphon.client.ClientController.index()
+GET         /clients/                                                               @org.iatoki.judgels.sandalphon.client.ClientController.listClients(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+GET         /clients/new                                                            @org.iatoki.judgels.sandalphon.client.ClientController.createClient()
+POST        /clients                                                                @org.iatoki.judgels.sandalphon.client.ClientController.postCreateClient()
+GET         /clients/:clientId                                                      @org.iatoki.judgels.sandalphon.client.ClientController.viewClient(clientId: Long)
+GET         /clients/:clientId/edit                                                 @org.iatoki.judgels.sandalphon.client.ClientController.editClient(clientId: Long)
+POST        /clients/:clientId                                                      @org.iatoki.judgels.sandalphon.client.ClientController.postEditClient(clientId: Long)
 
 GET         /graders                                                                @org.iatoki.judgels.sandalphon.controllers.GraderController.index()
 GET         /graders/                                                               @org.iatoki.judgels.sandalphon.controllers.GraderController.listGraders(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
