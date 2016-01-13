@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.services.impls;
+package org.iatoki.judgels.sandalphon.user;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -8,20 +8,14 @@ import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.User;
-import org.iatoki.judgels.sandalphon.UserNotFoundException;
-import org.iatoki.judgels.sandalphon.models.daos.UserDao;
-import org.iatoki.judgels.sandalphon.models.entities.UserModel;
-import org.iatoki.judgels.sandalphon.services.UserService;
+import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
 
 @Singleton
-@Named("userService")
 public final class UserServiceImpl implements UserService {
 
     private final UserDao userDao;

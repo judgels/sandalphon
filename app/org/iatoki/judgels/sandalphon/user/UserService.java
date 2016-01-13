@@ -1,13 +1,13 @@
-package org.iatoki.judgels.sandalphon.services;
+package org.iatoki.judgels.sandalphon.user;
 
+import com.google.inject.ImplementedBy;
 import org.iatoki.judgels.api.jophiel.JophielUser;
-import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.jophiel.services.BaseUserService;
-import org.iatoki.judgels.sandalphon.User;
-import org.iatoki.judgels.sandalphon.UserNotFoundException;
+import org.iatoki.judgels.play.Page;
 
 import java.util.List;
 
+@ImplementedBy(UserServiceImpl.class)
 public interface UserService extends BaseUserService {
 
     User findUserById(long userId) throws UserNotFoundException;

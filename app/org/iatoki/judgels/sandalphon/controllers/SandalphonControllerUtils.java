@@ -53,7 +53,7 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
         if (isAdmin()) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), org.iatoki.judgels.sandalphon.client.routes.ClientController.index()));
             internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("user.users"), routes.UserController.index()));
+            internalLinkBuilder.add(new InternalLink(Messages.get("user.users"), org.iatoki.judgels.sandalphon.user.routes.UserController.index()));
         }
 
         LazyHtml sidebarContent = new LazyHtml(profileView.render(

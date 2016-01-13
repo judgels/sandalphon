@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.controllers;
+package org.iatoki.judgels.sandalphon.user;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
@@ -13,20 +13,16 @@ import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.User;
-import org.iatoki.judgels.sandalphon.UserNotFoundException;
+import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.forms.UserAddForm;
-import org.iatoki.judgels.sandalphon.forms.UserEditForm;
-import org.iatoki.judgels.sandalphon.services.UserService;
 import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
-import org.iatoki.judgels.sandalphon.views.html.user.addUserView;
-import org.iatoki.judgels.sandalphon.views.html.user.editUserView;
-import org.iatoki.judgels.sandalphon.views.html.user.listUsersView;
-import org.iatoki.judgels.sandalphon.views.html.user.viewUserView;
+import org.iatoki.judgels.sandalphon.user.html.addUserView;
+import org.iatoki.judgels.sandalphon.user.html.editUserView;
+import org.iatoki.judgels.sandalphon.user.html.listUsersView;
+import org.iatoki.judgels.sandalphon.user.html.viewUserView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -35,13 +31,11 @@ import play.i18n.Messages;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = "admin")
 @Singleton
-@Named
 public final class UserController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;

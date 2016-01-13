@@ -1,11 +1,14 @@
-package org.iatoki.judgels.sandalphon.forms;
+package org.iatoki.judgels.sandalphon.user;
 
 import play.data.validation.Constraints;
 
 import java.util.Arrays;
 import java.util.List;
 
-public final class UserEditForm {
+public final class UserAddForm {
+
+    @Constraints.Required
+    public String username;
 
     @Constraints.Required
     public String roles;

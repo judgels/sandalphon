@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon;
+package org.iatoki.judgels.sandalphon.user;
 
 import org.iatoki.judgels.play.EntityNotFoundException;
 

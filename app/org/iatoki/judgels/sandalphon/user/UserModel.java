@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.models.entities;
+package org.iatoki.judgels.sandalphon.user;
 
 import org.iatoki.judgels.jophiel.models.entities.AbstractUserModel;
 
