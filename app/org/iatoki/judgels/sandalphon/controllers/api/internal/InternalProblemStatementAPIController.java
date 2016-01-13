@@ -2,21 +2,19 @@ package org.iatoki.judgels.sandalphon.controllers.api.internal;
 
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
-import org.iatoki.judgels.sandalphon.Problem;
-import org.iatoki.judgels.sandalphon.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.problem.base.Problem;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemNotFoundException;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemService;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
-@Named
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 public final class InternalProblemStatementAPIController extends AbstractJudgelsAPIController {
 

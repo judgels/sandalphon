@@ -7,21 +7,19 @@ import org.iatoki.judgels.play.apis.JudgelsAppClientAPIIdentity;
 import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.BundleAnswer;
 import org.iatoki.judgels.sandalphon.BundleGradingResult;
-import org.iatoki.judgels.sandalphon.Problem;
-import org.iatoki.judgels.sandalphon.controllers.api.object.v1.BundleProblemGradeRequestV1;
 import org.iatoki.judgels.sandalphon.client.ClientService;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
-import org.iatoki.judgels.sandalphon.services.impls.BundleProblemGraderImpl;
+import org.iatoki.judgels.sandalphon.controllers.api.object.v1.BundleProblemGradeRequestV1;
+import org.iatoki.judgels.sandalphon.problem.base.Problem;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemService;
+import org.iatoki.judgels.sandalphon.problem.bundle.BundleProblemGraderImpl;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 
 @Singleton
-@Named
 public final class ClientBundleProblemGradingAPIControllerV1 extends AbstractJudgelsAPIController {
 
     private final BundleProblemGraderImpl bundleProblemGrader;

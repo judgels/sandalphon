@@ -12,9 +12,9 @@ import org.iatoki.judgels.sandalphon.client.problem.ClientProblem;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblemDao;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblemModel;
 import org.iatoki.judgels.sandalphon.models.daos.LessonDao;
-import org.iatoki.judgels.sandalphon.models.daos.ProblemDao;
 import org.iatoki.judgels.sandalphon.models.entities.LessonModel;
-import org.iatoki.judgels.sandalphon.models.entities.ProblemModel;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemDao;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemModel;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

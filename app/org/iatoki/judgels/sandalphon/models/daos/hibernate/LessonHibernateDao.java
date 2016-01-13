@@ -5,7 +5,6 @@ import org.iatoki.judgels.play.models.daos.impls.AbstractJudgelsHibernateDao;
 import org.iatoki.judgels.sandalphon.models.daos.LessonDao;
 import org.iatoki.judgels.sandalphon.models.entities.LessonModel;
 import org.iatoki.judgels.sandalphon.models.entities.LessonModel_;
-import org.iatoki.judgels.sandalphon.models.entities.ProblemModel_;
 import play.db.jpa.JPA;
 
 import javax.inject.Named;
@@ -31,7 +30,7 @@ public final class LessonHibernateDao extends AbstractJudgelsHibernateDao<Lesson
         Root<LessonModel> root = query.from(getModelClass());
 
         query
-                .select(root.get(ProblemModel_.jid))
+                .select(root.get(LessonModel_.jid))
                 .where(cb.equal(root.get(LessonModel_.userCreate), authorJid));
 
         return JPA.em().createQuery(query).getResultList();

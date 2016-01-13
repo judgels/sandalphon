@@ -6,26 +6,25 @@ import org.iatoki.judgels.play.apis.JudgelsAPIForbiddenException;
 import org.iatoki.judgels.play.apis.JudgelsAPIInternalServerErrorException;
 import org.iatoki.judgels.play.apis.JudgelsAPINotFoundException;
 import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
-import org.iatoki.judgels.sandalphon.BundleItem;
-import org.iatoki.judgels.sandalphon.client.problem.ClientProblem;
-import org.iatoki.judgels.sandalphon.Problem;
 import org.iatoki.judgels.sandalphon.ProblemStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.adapters.BundleItemAdapter;
-import org.iatoki.judgels.sandalphon.adapters.impls.BundleItemAdapters;
+import org.iatoki.judgels.sandalphon.client.ClientService;
+import org.iatoki.judgels.sandalphon.client.problem.ClientProblem;
 import org.iatoki.judgels.sandalphon.controllers.api.object.v1.BundleProblemStatementRenderRequestV1;
 import org.iatoki.judgels.sandalphon.controllers.api.util.TOTPUtils;
-import org.iatoki.judgels.sandalphon.services.BundleItemService;
-import org.iatoki.judgels.sandalphon.client.ClientService;
-import org.iatoki.judgels.sandalphon.services.ProblemService;
+import org.iatoki.judgels.sandalphon.problem.base.Problem;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemService;
+import org.iatoki.judgels.sandalphon.problem.base.statement.html.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItem;
+import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItemAdapter;
+import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItemAdapters;
+import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItemService;
 import org.iatoki.judgels.sandalphon.views.html.problem.bundle.statement.bundleStatementView;
-import org.iatoki.judgels.sandalphon.views.html.problem.statement.statementLanguageSelectionLayout;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
@@ -34,7 +33,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Singleton
-@Named
 public final class ClientBundleProblemStatementAPIControllerV1 extends AbstractJudgelsAPIController {
 
     private final ClientService clientService;

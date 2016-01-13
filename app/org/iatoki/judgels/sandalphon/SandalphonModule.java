@@ -18,12 +18,18 @@ import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.play.general.GeneralName;
 import org.iatoki.judgels.play.general.GeneralVersion;
 import org.iatoki.judgels.play.migration.BaseDataMigrationService;
-import org.iatoki.judgels.sandalphon.config.GabrielClientJid;
 import org.iatoki.judgels.sandalphon.config.LessonFileSystemProvider;
 import org.iatoki.judgels.sandalphon.config.LessonGitProvider;
-import org.iatoki.judgels.sandalphon.config.ProblemFileSystemProvider;
-import org.iatoki.judgels.sandalphon.config.ProblemGitProvider;
-import org.iatoki.judgels.sandalphon.config.SubmissionFileSystemProvider;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemFileSystemProvider;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemGitProvider;
+import org.iatoki.judgels.sandalphon.problem.base.submission.SubmissionFileSystemProvider;
+import org.iatoki.judgels.sandalphon.problem.bundle.BundleProblemGraderImpl;
+import org.iatoki.judgels.sandalphon.problem.bundle.submission.BundleSubmissionServiceImpl;
+import org.iatoki.judgels.sandalphon.problem.programming.submission.GabrielClientJid;
+import org.iatoki.judgels.sandalphon.problem.programming.submission.ProgrammingSubmissionServiceImpl;
+import org.iatoki.judgels.sandalphon.services.BundleProblemGrader;
+import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
+import org.iatoki.judgels.sandalphon.services.ProgrammingSubmissionService;
 import org.iatoki.judgels.sandalphon.services.impls.SandalphonDataMigrationServiceImpl;
 import org.iatoki.judgels.sandalphon.services.impls.UserServiceImpl;
 
@@ -45,6 +51,10 @@ public class SandalphonModule extends AbstractJudgelsPlayModule {
         // </DEPRECATED>
 
         bind(BaseDataMigrationService.class).to(SandalphonDataMigrationServiceImpl.class);
+
+        bind(ProgrammingSubmissionService.class).to(ProgrammingSubmissionServiceImpl.class);
+        bind(BundleSubmissionService.class).to(BundleSubmissionServiceImpl.class);
+        bind(BundleProblemGrader.class).to(BundleProblemGraderImpl.class);
 
         bind(JophielAuthAPI.class).toInstance(jophielAuthAPI());
         bind(JophielClientAPI.class).toInstance(jophielClientAPI());

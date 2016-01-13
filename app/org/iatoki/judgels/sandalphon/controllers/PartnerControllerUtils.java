@@ -5,20 +5,20 @@ import com.google.common.collect.Sets;
 
 import java.util.Set;
 
-final class PartnerControllerUtils {
+public final class PartnerControllerUtils {
 
     private PartnerControllerUtils() {
         // prevent instantiation
     }
 
-    static Set<String> splitByComma(String s) {
+    public static Set<String> splitByComma(String s) {
         if (s == null || s.isEmpty()) {
             return null;
         }
         return Sets.newHashSet(s.split(","));
     }
 
-    static String combineByComma(Set<String> list) {
+    public static String combineByComma(Set<String> list) {
         if (list == null) {
             return null;
         }

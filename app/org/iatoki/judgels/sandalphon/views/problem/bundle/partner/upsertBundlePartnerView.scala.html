@@ -1,7 +1,0 @@
-@import play.i18n.Messages
-@import org.iatoki.judgels.sandalphon.forms.BundlePartnerUpsertForm
-
-@(bundlePartnerUpsertForm: Form[BundlePartnerUpsertForm])(implicit fieldConstructor: b3.B3FieldConstructor)
-
-@b3.checkbox(bundlePartnerUpsertForm("isAllowedToSubmit"), '_label -> Messages.get("problem.bundle.partner.isAllowedToSubmit"))
-@b3.checkbox(bundlePartnerUpsertForm("isAllowedToManageItems"), '_label -> Messages.get("problem.bundle.partner.isAllowedToManageItems"))

@@ -48,7 +48,7 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
 
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
 
-        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
+        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), org.iatoki.judgels.sandalphon.problem.base.routes.ProblemController.index()));
         internalLinkBuilder.add(new InternalLink(Messages.get("lesson.lessons"), routes.LessonController.index()));
         if (isAdmin()) {
             internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), org.iatoki.judgels.sandalphon.client.routes.ClientController.index()));

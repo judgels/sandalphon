@@ -10,7 +10,7 @@
 
 @(lessonId: Long, pageOfLessonPartners: Page[LessonPartner], orderBy: String, orderDir: String)
 
-@listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ProblemPartnerController.listPartners(lessonId, newPageIndex, newOrderBy, newOrderDir)}
+@listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.LessonPartnerController.listPartners(lessonId, newPageIndex, newOrderBy, newOrderDir)}
 
 @tableView() {
     @tableHeadersView(pageOfLessonPartners.getPageIndex, orderBy, orderDir, "", listFunc)(
