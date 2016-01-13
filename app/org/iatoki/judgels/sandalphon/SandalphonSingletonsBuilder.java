@@ -5,10 +5,10 @@ import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils;
 import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.jid.JidCacheDao;
+import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.models.daos.ActivityLogDao;
-import org.iatoki.judgels.sandalphon.models.daos.JidCacheDao;
 import org.iatoki.judgels.sandalphon.services.impls.ActivityLogServiceImpl;
-import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

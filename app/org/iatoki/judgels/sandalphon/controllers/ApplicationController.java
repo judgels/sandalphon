@@ -13,7 +13,7 @@ import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
 import org.iatoki.judgels.sandalphon.user.UserService;
-import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
+import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.mvc.Result;

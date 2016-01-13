@@ -8,7 +8,7 @@ import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
+import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

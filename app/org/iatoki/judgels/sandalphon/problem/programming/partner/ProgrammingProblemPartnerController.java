@@ -28,7 +28,7 @@ import org.iatoki.judgels.sandalphon.problem.base.partner.ProblemPartnerUsername
 import org.iatoki.judgels.sandalphon.problem.programming.ProgrammingProblemControllerUtils;
 import org.iatoki.judgels.sandalphon.problem.programming.partner.html.addPartnerView;
 import org.iatoki.judgels.sandalphon.problem.programming.partner.html.editPartnerView;
-import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
+import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;

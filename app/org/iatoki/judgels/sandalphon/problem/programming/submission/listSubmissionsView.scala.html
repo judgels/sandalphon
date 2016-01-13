@@ -1,3 +1,4 @@
+@import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl
 @import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersWithSelectionFormView
@@ -5,7 +6,6 @@
 @import org.iatoki.judgels.sandalphon.problem.programming.submission.routes
 @import org.iatoki.judgels.play.Page
 @import org.iatoki.judgels.play.JudgelsPlayUtils
-@import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl
 @import org.iatoki.judgels.sandalphon.ProgrammingSubmission
 
 @(pageOfProgrammingSubmissions: Page[ProgrammingSubmission], gradingLanguageToNameMap: Map[String, String], problemId: Long, pageIndex: Long, orderBy: String, orderDir: String)
