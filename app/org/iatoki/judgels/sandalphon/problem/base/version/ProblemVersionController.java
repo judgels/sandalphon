@@ -12,7 +12,7 @@ import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.forms.VersionCommitForm;
+import org.iatoki.judgels.sandalphon.resource.VersionCommitForm;
 import org.iatoki.judgels.sandalphon.problem.base.Problem;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemControllerUtils;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemNotFoundException;

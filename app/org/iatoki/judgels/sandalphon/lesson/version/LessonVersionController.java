@@ -14,7 +14,7 @@ import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.forms.VersionCommitForm;
+import org.iatoki.judgels.sandalphon.resource.VersionCommitForm;
 import org.iatoki.judgels.sandalphon.lesson.LessonControllerUtils;
 import org.iatoki.judgels.sandalphon.lesson.LessonService;
 import org.iatoki.judgels.sandalphon.lesson.version.html.listVersionsView;

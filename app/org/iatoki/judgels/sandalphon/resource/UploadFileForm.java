@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.forms;
+package org.iatoki.judgels.sandalphon.resource;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.controllers;
+package org.iatoki.judgels.sandalphon.resource;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
