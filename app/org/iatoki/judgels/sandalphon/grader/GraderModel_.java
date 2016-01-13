@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.models.entities;
+package org.iatoki.judgels.sandalphon.grader;
 
 import org.iatoki.judgels.play.models.entities.AbstractJudgelsModel_;
 

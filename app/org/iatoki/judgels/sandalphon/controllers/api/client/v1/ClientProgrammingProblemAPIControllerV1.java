@@ -6,7 +6,7 @@ import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.controllers.api.object.v1.ProgrammingProblemInfoV1;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemService;
 import org.iatoki.judgels.sandalphon.problem.programming.ProgrammingProblemService;
-import org.iatoki.judgels.sandalphon.services.GraderService;
+import org.iatoki.judgels.sandalphon.grader.GraderService;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
 

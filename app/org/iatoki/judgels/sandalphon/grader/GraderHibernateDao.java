@@ -1,18 +1,13 @@
-package org.iatoki.judgels.sandalphon.models.daos.hibernate;
+package org.iatoki.judgels.sandalphon.grader;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.play.models.daos.impls.AbstractJudgelsHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.GraderDao;
-import org.iatoki.judgels.sandalphon.models.entities.GraderModel;
-import org.iatoki.judgels.sandalphon.models.entities.GraderModel_;
+import org.iatoki.judgels.play.model.AbstractJudgelsHibernateDao;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.persistence.metamodel.SingularAttribute;
 import java.util.List;
 
 @Singleton
-@Named("graderDao")
 public final class GraderHibernateDao extends AbstractJudgelsHibernateDao<GraderModel> implements GraderDao {
 
     public GraderHibernateDao() {

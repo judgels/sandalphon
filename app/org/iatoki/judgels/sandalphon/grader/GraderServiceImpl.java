@@ -1,23 +1,16 @@
-package org.iatoki.judgels.sandalphon.services.impls;
+package org.iatoki.judgels.sandalphon.grader;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.iatoki.judgels.play.JudgelsAppClient;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.sandalphon.Grader;
-import org.iatoki.judgels.sandalphon.GraderNotFoundException;
-import org.iatoki.judgels.sandalphon.models.daos.GraderDao;
-import org.iatoki.judgels.sandalphon.models.entities.GraderModel;
-import org.iatoki.judgels.sandalphon.services.GraderService;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 
 @Singleton
-@Named("graderService")
 public final class GraderServiceImpl implements GraderService {
 
     private final GraderDao graderDao;

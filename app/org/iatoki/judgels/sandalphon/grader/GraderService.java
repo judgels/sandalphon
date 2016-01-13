@@ -1,10 +1,10 @@
-package org.iatoki.judgels.sandalphon.services;
+package org.iatoki.judgels.sandalphon.grader;
 
+import com.google.inject.ImplementedBy;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.services.JudgelsAppClientService;
-import org.iatoki.judgels.sandalphon.Grader;
-import org.iatoki.judgels.sandalphon.GraderNotFoundException;
 
+@ImplementedBy(GraderServiceImpl.class)
 public interface GraderService extends JudgelsAppClientService {
 
     boolean graderExistsByJid(String graderJid);

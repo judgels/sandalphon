@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.controllers;
+package org.iatoki.judgels.sandalphon.grader;
 
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.jophiel.BasicActivityKeys;
@@ -9,18 +9,15 @@ import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
-import org.iatoki.judgels.sandalphon.Grader;
-import org.iatoki.judgels.sandalphon.GraderNotFoundException;
+import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.forms.GraderUpsertForm;
-import org.iatoki.judgels.sandalphon.services.GraderService;
-import org.iatoki.judgels.sandalphon.views.html.grader.createGraderView;
-import org.iatoki.judgels.sandalphon.views.html.grader.editGraderView;
-import org.iatoki.judgels.sandalphon.views.html.grader.listGradersView;
-import org.iatoki.judgels.sandalphon.views.html.grader.viewGraderView;
+import org.iatoki.judgels.sandalphon.grader.html.createGraderView;
+import org.iatoki.judgels.sandalphon.grader.html.editGraderView;
+import org.iatoki.judgels.sandalphon.grader.html.listGradersView;
+import org.iatoki.judgels.sandalphon.grader.html.viewGraderView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -29,13 +26,11 @@ import play.i18n.Messages;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Authorized(value = "admin")
 @Singleton
-@Named
 public final class GraderController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;

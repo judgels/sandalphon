@@ -172,13 +172,13 @@ GET         /clients/:clientId                                                  
 GET         /clients/:clientId/edit                                                 @org.iatoki.judgels.sandalphon.client.ClientController.editClient(clientId: Long)
 POST        /clients/:clientId                                                      @org.iatoki.judgels.sandalphon.client.ClientController.postEditClient(clientId: Long)
 
-GET         /graders                                                                @org.iatoki.judgels.sandalphon.controllers.GraderController.index()
-GET         /graders/                                                               @org.iatoki.judgels.sandalphon.controllers.GraderController.listGraders(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
-GET         /graders/new                                                            @org.iatoki.judgels.sandalphon.controllers.GraderController.createGrader()
-POST        /graders                                                                @org.iatoki.judgels.sandalphon.controllers.GraderController.postCreateGrader()
-GET         /graders/:graderId                                                      @org.iatoki.judgels.sandalphon.controllers.GraderController.viewGrader(graderId: Long)
-GET         /graders/:graderId/edit                                                 @org.iatoki.judgels.sandalphon.controllers.GraderController.editGrader(graderId: Long)
-POST        /graders/:graderId                                                      @org.iatoki.judgels.sandalphon.controllers.GraderController.postEditGrader(graderId: Long)
+GET         /graders                                                                @org.iatoki.judgels.sandalphon.grader.GraderController.index()
+GET         /graders/                                                               @org.iatoki.judgels.sandalphon.grader.GraderController.listGraders(page: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+GET         /graders/new                                                            @org.iatoki.judgels.sandalphon.grader.GraderController.createGrader()
+POST        /graders                                                                @org.iatoki.judgels.sandalphon.grader.GraderController.postCreateGrader()
+GET         /graders/:graderId                                                      @org.iatoki.judgels.sandalphon.grader.GraderController.viewGrader(graderId: Long)
+GET         /graders/:graderId/edit                                                 @org.iatoki.judgels.sandalphon.grader.GraderController.editGrader(graderId: Long)
+POST        /graders/:graderId                                                      @org.iatoki.judgels.sandalphon.grader.GraderController.postEditGrader(graderId: Long)
 
 
 GET         /users                                                                  @org.iatoki.judgels.sandalphon.user.UserController.index()

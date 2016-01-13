@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon;
+package org.iatoki.judgels.sandalphon.grader;
 
 import org.iatoki.judgels.play.EntityNotFoundException;
 
