@@ -11,8 +11,8 @@ import org.iatoki.judgels.sandalphon.client.lesson.ClientLessonModel;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblem;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblemDao;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblemModel;
-import org.iatoki.judgels.sandalphon.models.daos.LessonDao;
-import org.iatoki.judgels.sandalphon.models.entities.LessonModel;
+import org.iatoki.judgels.sandalphon.lesson.LessonDao;
+import org.iatoki.judgels.sandalphon.lesson.LessonModel;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemDao;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemModel;
 
