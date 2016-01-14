@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.services;
+package org.iatoki.judgels.sandalphon.activity;
 
 import org.iatoki.judgels.jophiel.services.BaseActivityLogService;
 

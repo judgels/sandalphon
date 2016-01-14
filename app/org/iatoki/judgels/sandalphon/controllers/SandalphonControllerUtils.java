@@ -1,14 +1,14 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.jophiel.ActivityKey;
-import org.iatoki.judgels.jophiel.UserActivityMessage;
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.jophiel.ActivityKey;
+import org.iatoki.judgels.jophiel.UserActivityMessage;
 import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils;
-import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.jophiel.forms.SearchProfileForm;
 import org.iatoki.judgels.jophiel.forms.ViewpointForm;
+import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.jophiel.views.html.client.linkedClientsLayout;
 import org.iatoki.judgels.jophiel.views.html.isLoggedInLayout;
 import org.iatoki.judgels.jophiel.views.html.isLoggedOutLayout;
@@ -25,7 +25,7 @@ import org.iatoki.judgels.play.views.html.layouts.menusLayout;
 import org.iatoki.judgels.play.views.html.layouts.profileView;
 import org.iatoki.judgels.play.views.html.layouts.sidebarLayout;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.services.impls.ActivityLogServiceImpl;
+import org.iatoki.judgels.sandalphon.activity.ActivityLogServiceImpl;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;

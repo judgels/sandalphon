@@ -1,16 +1,12 @@
-package org.iatoki.judgels.sandalphon.models.daos.jedishibernate;
+package org.iatoki.judgels.sandalphon.activity;
 
 import org.iatoki.judgels.jophiel.models.daos.jedishibernate.AbstractActivityLogJedisHibernateDao;
-import org.iatoki.judgels.sandalphon.models.daos.ActivityLogDao;
-import org.iatoki.judgels.sandalphon.models.entities.ActivityLogModel;
 import redis.clients.jedis.JedisPool;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
-@Named("activityLogDao")
 public final class ActivityLogJedisHibernateDao extends AbstractActivityLogJedisHibernateDao<ActivityLogModel> implements ActivityLogDao {
 
     @Inject

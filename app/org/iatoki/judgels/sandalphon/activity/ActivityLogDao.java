@@ -1,8 +1,9 @@
-package org.iatoki.judgels.sandalphon.models.daos;
+package org.iatoki.judgels.sandalphon.activity;
 
+import com.google.inject.ImplementedBy;
 import org.iatoki.judgels.jophiel.models.daos.BaseActivityLogDao;
-import org.iatoki.judgels.sandalphon.models.entities.ActivityLogModel;
 
+@ImplementedBy(ActivityLogHibernateDao.class)
 public interface ActivityLogDao extends BaseActivityLogDao<ActivityLogModel> {
 
 }

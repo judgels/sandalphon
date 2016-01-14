@@ -1,9 +1,7 @@
-package org.iatoki.judgels.sandalphon.services.impls;
+package org.iatoki.judgels.sandalphon.activity;
 
 import org.iatoki.judgels.jophiel.models.daos.BaseActivityLogDao;
 import org.iatoki.judgels.jophiel.services.impls.AbstractBaseActivityLogServiceImpl;
-import org.iatoki.judgels.sandalphon.models.entities.ActivityLogModel;
-import org.iatoki.judgels.sandalphon.services.ActivityLogService;
 
 public final class ActivityLogServiceImpl extends AbstractBaseActivityLogServiceImpl<ActivityLogModel> implements ActivityLogService {
 
