@@ -1,14 +1,14 @@
 package org.iatoki.judgels.sandalphon.controllers;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.jophiel.ActivityKey;
-import org.iatoki.judgels.jophiel.UserActivityMessage;
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.jophiel.ActivityKey;
+import org.iatoki.judgels.jophiel.UserActivityMessage;
 import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils;
-import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.jophiel.forms.SearchProfileForm;
 import org.iatoki.judgels.jophiel.forms.ViewpointForm;
+import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.jophiel.views.html.client.linkedClientsLayout;
 import org.iatoki.judgels.jophiel.views.html.isLoggedInLayout;
 import org.iatoki.judgels.jophiel.views.html.isLoggedOutLayout;
@@ -25,7 +25,7 @@ import org.iatoki.judgels.play.views.html.layouts.menusLayout;
 import org.iatoki.judgels.play.views.html.layouts.profileView;
 import org.iatoki.judgels.play.views.html.layouts.sidebarLayout;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.services.impls.ActivityLogServiceImpl;
+import org.iatoki.judgels.sandalphon.activity.ActivityLogServiceImpl;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;
@@ -48,12 +48,12 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
 
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
 
-        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), routes.ProblemController.index()));
-        internalLinkBuilder.add(new InternalLink(Messages.get("lesson.lessons"), routes.LessonController.index()));
+        internalLinkBuilder.add(new InternalLink(Messages.get("problem.problems"), org.iatoki.judgels.sandalphon.problem.base.routes.ProblemController.index()));
+        internalLinkBuilder.add(new InternalLink(Messages.get("lesson.lessons"), org.iatoki.judgels.sandalphon.lesson.routes.LessonController.index()));
         if (isAdmin()) {
-            internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), routes.ClientController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), routes.GraderController.index()));
-            internalLinkBuilder.add(new InternalLink(Messages.get("user.users"), routes.UserController.index()));
+            internalLinkBuilder.add(new InternalLink(Messages.get("client.clients"), org.iatoki.judgels.sandalphon.client.routes.ClientController.index()));
+            internalLinkBuilder.add(new InternalLink(Messages.get("grader.graders"), org.iatoki.judgels.sandalphon.grader.routes.GraderController.index()));
+            internalLinkBuilder.add(new InternalLink(Messages.get("user.users"), org.iatoki.judgels.sandalphon.user.routes.UserController.index()));
         }
 
         LazyHtml sidebarContent = new LazyHtml(profileView.render(

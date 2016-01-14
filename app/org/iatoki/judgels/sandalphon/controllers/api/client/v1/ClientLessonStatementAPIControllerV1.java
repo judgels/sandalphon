@@ -4,22 +4,21 @@ import org.iatoki.judgels.play.apis.JudgelsAPIForbiddenException;
 import org.iatoki.judgels.play.apis.JudgelsAPIInternalServerErrorException;
 import org.iatoki.judgels.play.apis.JudgelsAPINotFoundException;
 import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
-import org.iatoki.judgels.sandalphon.ClientLesson;
-import org.iatoki.judgels.sandalphon.Lesson;
+import org.iatoki.judgels.sandalphon.lesson.Lesson;
 import org.iatoki.judgels.sandalphon.LessonStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
+import org.iatoki.judgels.sandalphon.client.ClientService;
+import org.iatoki.judgels.sandalphon.client.lesson.ClientLesson;
 import org.iatoki.judgels.sandalphon.controllers.api.object.v1.LessonStatementRenderRequestV1;
 import org.iatoki.judgels.sandalphon.controllers.api.util.TOTPUtils;
-import org.iatoki.judgels.sandalphon.services.ClientService;
-import org.iatoki.judgels.sandalphon.services.LessonService;
-import org.iatoki.judgels.sandalphon.views.html.lesson.statement.lessonStatementView;
-import org.iatoki.judgels.sandalphon.views.html.problem.statement.statementLanguageSelectionLayout;
+import org.iatoki.judgels.sandalphon.lesson.LessonService;
+import org.iatoki.judgels.sandalphon.lesson.statement.html.lessonStatementView;
+import org.iatoki.judgels.sandalphon.problem.base.statement.html.statementLanguageSelectionLayout;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Map;
@@ -27,7 +26,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Singleton
-@Named
 public final class ClientLessonStatementAPIControllerV1 extends AbstractJudgelsAPIController {
 
     private final ClientService clientService;

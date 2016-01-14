@@ -8,12 +8,12 @@ import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.jophiel.forms.ViewpointForm;
 import org.iatoki.judgels.sandalphon.SandalphonUtils;
-import org.iatoki.judgels.sandalphon.User;
+import org.iatoki.judgels.sandalphon.user.User;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
-import org.iatoki.judgels.sandalphon.services.UserService;
-import org.iatoki.judgels.sandalphon.services.impls.JidCacheServiceImpl;
+import org.iatoki.judgels.sandalphon.user.UserService;
+import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
@@ -37,12 +37,12 @@ public final class ApplicationController extends AbstractJudgelsController {
 
     public Result index() {
         if (session().containsKey("username") && session().containsKey("role")) {
-            return redirect(routes.ProblemController.index());
+            return redirect(org.iatoki.judgels.sandalphon.problem.base.routes.ProblemController.index());
         } else if (session().containsKey("username")) {
-            String returnUri = routes.ProblemController.index().absoluteURL(request(), request().secure());
+            String returnUri = org.iatoki.judgels.sandalphon.problem.base.routes.ProblemController.index().absoluteURL(request(), request().secure());
             return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
-            String returnUri = routes.ProblemController.index().absoluteURL(request(), request().secure());
+            String returnUri = org.iatoki.judgels.sandalphon.problem.base.routes.ProblemController.index().absoluteURL(request(), request().secure());
             return redirect(routes.ApplicationController.auth(returnUri));
         }
     }
