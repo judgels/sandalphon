@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.services.impls;
+package org.iatoki.judgels.sandalphon;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -13,8 +13,6 @@ import org.iatoki.judgels.GitProvider;
 import org.iatoki.judgels.LocalFileSystemProvider;
 import org.iatoki.judgels.LocalGitProvider;
 import org.iatoki.judgels.play.migration.AbstractBaseDataMigrationServiceImpl;
-import org.iatoki.judgels.sandalphon.SandalphonProperties;
-import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import play.db.jpa.JPA;
 
 import java.io.File;

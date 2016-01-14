@@ -1,6 +1,4 @@
-package org.iatoki.judgels.sandalphon.config;
-
-import org.iatoki.judgels.sandalphon.SandalphonModule;
+package org.iatoki.judgels.sandalphon;
 
 public final class SandalphonJedisModule extends SandalphonModule {
 

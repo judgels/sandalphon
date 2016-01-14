@@ -30,7 +30,6 @@ import org.iatoki.judgels.sandalphon.problem.programming.submission.ProgrammingS
 import org.iatoki.judgels.sandalphon.services.BundleProblemGrader;
 import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
 import org.iatoki.judgels.sandalphon.services.ProgrammingSubmissionService;
-import org.iatoki.judgels.sandalphon.services.impls.SandalphonDataMigrationServiceImpl;
 import org.iatoki.judgels.sandalphon.user.UserServiceImpl;
 
 public class SandalphonModule extends AbstractJudgelsPlayModule {
