@@ -2,7 +2,7 @@ package org.iatoki.judgels.sandalphon.problem.base.partner;
 
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.problem.base.Problem;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemControllerUtils;
 import play.i18n.Messages;

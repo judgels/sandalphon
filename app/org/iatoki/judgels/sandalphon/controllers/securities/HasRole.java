@@ -14,6 +14,6 @@ public class HasRole extends Security.Authenticator {
 
     @Override
     public Result onUnauthorized(Http.Context context) {
-        return redirect(org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.authRole(context.request().uri()));
+        return redirect(org.iatoki.judgels.sandalphon.routes.ApplicationController.authRole(context.request().uri()));
     }
 }

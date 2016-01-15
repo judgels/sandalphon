@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.problem.base.Problem;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemControllerUtils;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemService;

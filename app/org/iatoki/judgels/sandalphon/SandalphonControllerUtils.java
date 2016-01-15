@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.controllers;
+package org.iatoki.judgels.sandalphon;
 
 import com.google.common.collect.ImmutableList;
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
@@ -24,7 +24,6 @@ import org.iatoki.judgels.play.views.html.layouts.contentLayout;
 import org.iatoki.judgels.play.views.html.layouts.menusLayout;
 import org.iatoki.judgels.play.views.html.layouts.profileView;
 import org.iatoki.judgels.play.views.html.layouts.sidebarLayout;
-import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.activity.ActivityLogServiceImpl;
 import play.data.Form;
 import play.i18n.Messages;
@@ -69,7 +68,7 @@ public final class SandalphonControllerUtils extends AbstractJudgelsControllerUt
                 viewpointForm.username = IdentityUtils.getUsername();
                 form.fill(viewpointForm);
             }
-            sidebarContent.appendLayout(c -> viewAsLayout.render(form, jophielPublicAPI.getUserAutocompleteAPIEndpoint(), "lib/jophielcommons/javascripts/userAutoComplete.js", org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.postViewAs(), org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.resetViewAs(), c));
+            sidebarContent.appendLayout(c -> viewAsLayout.render(form, jophielPublicAPI.getUserAutocompleteAPIEndpoint(), "lib/jophielcommons/javascripts/userAutoComplete.js", routes.ApplicationController.postViewAs(), routes.ApplicationController.resetViewAs(), c));
         }
         sidebarContent.appendLayout(c -> menusLayout.render(internalLinkBuilder.build(), c));
         sidebarContent.appendLayout(c -> linkedClientsLayout.render(jophielClientAPI.getLinkedClientsAPIEndpoint(), "lib/jophielcommons/javascripts/linkedClients.js", c));

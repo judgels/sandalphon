@@ -10,7 +10,7 @@ import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.sandalphon.lesson.Lesson;
 import org.iatoki.judgels.sandalphon.lesson.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.SandalphonActivityKeys;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;

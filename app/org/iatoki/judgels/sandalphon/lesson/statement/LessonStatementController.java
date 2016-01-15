@@ -11,7 +11,7 @@ import org.iatoki.judgels.sandalphon.lesson.LessonNotFoundException;
 import org.iatoki.judgels.sandalphon.LessonStatement;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.WorldLanguageRegistry;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;

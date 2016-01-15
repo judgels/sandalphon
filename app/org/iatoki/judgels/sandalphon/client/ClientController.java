@@ -13,7 +13,7 @@ import org.iatoki.judgels.sandalphon.client.html.createClientView;
 import org.iatoki.judgels.sandalphon.client.html.editClientView;
 import org.iatoki.judgels.sandalphon.client.html.listClientsView;
 import org.iatoki.judgels.sandalphon.client.html.viewClientView;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;

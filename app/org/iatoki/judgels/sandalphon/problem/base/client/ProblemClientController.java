@@ -9,7 +9,7 @@ import org.iatoki.judgels.sandalphon.client.Client;
 import org.iatoki.judgels.sandalphon.client.ClientService;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblem;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblemUpsertForm;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;

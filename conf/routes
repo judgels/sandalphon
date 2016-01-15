@@ -1,13 +1,13 @@
 ->          /                                                                       sandalphoncommons.Routes
 ->          /                                                                       jophielcommons.Routes
 
-GET         /                                                                       @org.iatoki.judgels.sandalphon.controllers.ApplicationController.index()
-GET         /auth                                                                   @org.iatoki.judgels.sandalphon.controllers.ApplicationController.auth(returnUri ?= "")
-GET         /authRole                                                               @org.iatoki.judgels.sandalphon.controllers.ApplicationController.authRole(returnUri ?= "")
-GET         /afterLogin                                                             @org.iatoki.judgels.sandalphon.controllers.ApplicationController.afterLogin(returnUri ?= "")
-POST        /viewAs                                                                 @org.iatoki.judgels.sandalphon.controllers.ApplicationController.postViewAs()
-GET         /resetViewAs                                                            @org.iatoki.judgels.sandalphon.controllers.ApplicationController.resetViewAs()
-GET         /localLogout                                                            @org.iatoki.judgels.sandalphon.controllers.ApplicationController.logout(returnUri ?= "")
+GET         /                                                                       @org.iatoki.judgels.sandalphon.ApplicationController.index()
+GET         /auth                                                                   @org.iatoki.judgels.sandalphon.ApplicationController.auth(returnUri ?= "")
+GET         /authRole                                                               @org.iatoki.judgels.sandalphon.ApplicationController.authRole(returnUri ?= "")
+GET         /afterLogin                                                             @org.iatoki.judgels.sandalphon.ApplicationController.afterLogin(returnUri ?= "")
+POST        /viewAs                                                                 @org.iatoki.judgels.sandalphon.ApplicationController.postViewAs()
+GET         /resetViewAs                                                            @org.iatoki.judgels.sandalphon.ApplicationController.resetViewAs()
+GET         /localLogout                                                            @org.iatoki.judgels.sandalphon.ApplicationController.logout(returnUri ?= "")
 
 GET         /problems                                                               @org.iatoki.judgels.sandalphon.problem.base.ProblemController.index()
 GET         /problems/                                                              @org.iatoki.judgels.sandalphon.problem.base.ProblemController.listProblems(pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")

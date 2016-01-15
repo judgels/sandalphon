@@ -15,7 +15,7 @@ import org.iatoki.judgels.sandalphon.adapters.ConfigurableWithAutoPopulation;
 import org.iatoki.judgels.sandalphon.adapters.ConfigurableWithTokilibFormat;
 import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapter;
 import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapterRegistry;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;

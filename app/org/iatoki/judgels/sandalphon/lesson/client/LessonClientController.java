@@ -11,7 +11,7 @@ import org.iatoki.judgels.sandalphon.client.Client;
 import org.iatoki.judgels.sandalphon.client.ClientService;
 import org.iatoki.judgels.sandalphon.client.lesson.ClientLesson;
 import org.iatoki.judgels.sandalphon.client.lesson.ClientLessonUpsertForm;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;

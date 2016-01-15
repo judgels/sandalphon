@@ -4,7 +4,6 @@ import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils;
 import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.jid.JidCacheDao;
 import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.activity.ActivityLogDao;

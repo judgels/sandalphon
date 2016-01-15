@@ -5,7 +5,7 @@ import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
 import org.iatoki.judgels.sandalphon.lesson.Lesson;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.lesson.LessonControllerUtils;
 import org.iatoki.judgels.sandalphon.lesson.LessonService;
 import play.i18n.Messages;

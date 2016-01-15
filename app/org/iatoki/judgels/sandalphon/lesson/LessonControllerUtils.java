@@ -10,7 +10,7 @@ import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.play.views.html.layouts.tabLayout;
 import org.iatoki.judgels.sandalphon.lesson.partner.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.lesson.version.html.versionLocalChangesWarningLayout;
 import org.iatoki.judgels.sandalphon.problem.base.statement.html.statementLanguageSelectionLayout;
 import play.i18n.Messages;

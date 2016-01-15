@@ -9,7 +9,7 @@ import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.sandalphon.ProblemType;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.problem.base.partner.ProblemPartnerConfig;
 import org.iatoki.judgels.sandalphon.problem.base.statement.html.statementLanguageSelectionLayout;
 import org.iatoki.judgels.sandalphon.problem.base.version.html.versionLocalChangesWarningLayout;

@@ -13,7 +13,7 @@ import org.iatoki.judgels.sandalphon.BundleSubmissionNotFoundException;
 import org.iatoki.judgels.sandalphon.BundleSubmissionUtils;
 import org.iatoki.judgels.sandalphon.SandalphonActivityKeys;
 import org.iatoki.judgels.sandalphon.problem.base.submission.SubmissionFileSystemProvider;
-import org.iatoki.judgels.sandalphon.controllers.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;

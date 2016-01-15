@@ -1,4 +1,4 @@
-package org.iatoki.judgels.sandalphon.controllers;
+package org.iatoki.judgels.sandalphon;
 
 import org.iatoki.judgels.api.JudgelsAPIClientException;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
@@ -7,7 +7,6 @@ import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.jophiel.forms.ViewpointForm;
-import org.iatoki.judgels.sandalphon.SandalphonUtils;
 import org.iatoki.judgels.sandalphon.user.User;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
@@ -53,7 +52,7 @@ public final class ApplicationController extends AbstractJudgelsController {
         } else if (session().containsKey("username")) {
             return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
-            String newReturnUri = org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
+            String newReturnUri = routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
             return redirect(org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.login(newReturnUri));
         }
     }
@@ -80,7 +79,7 @@ public final class ApplicationController extends AbstractJudgelsController {
     @Transactional
     public Result afterLogin(String returnUri) {
         if (!session().containsKey("role")) {
-            String newReturnUri = org.iatoki.judgels.sandalphon.controllers.routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
+            String newReturnUri = routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
             return redirect(routes.ApplicationController.authRole(newReturnUri));
         }
 
