@@ -17,7 +17,7 @@ import org.iatoki.judgels.sandalphon.ProgrammingSubmission;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmissionException;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmissionNotFoundException;
 import org.iatoki.judgels.sandalphon.ProgrammingSubmissionUtils;
-import org.iatoki.judgels.sandalphon.SandalphonActivityKeys;
+import org.iatoki.judgels.sandalphon.activity.SandalphonActivityKeys;
 import org.iatoki.judgels.sandalphon.adapters.GradingEngineAdapterRegistry;
 import org.iatoki.judgels.sandalphon.problem.base.submission.SubmissionFileSystemProvider;
 import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
