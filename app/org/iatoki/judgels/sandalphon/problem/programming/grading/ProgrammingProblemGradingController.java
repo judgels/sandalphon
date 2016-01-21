@@ -429,7 +429,7 @@ public final class ProgrammingProblemGradingController extends AbstractJudgelsCo
     public Result postEditLanguageRestriction(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
 
-        if (ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
+        if (!ProgrammingProblemControllerUtils.isAllowedToManageGrading(problemService, problem)) {
             return notFound();
         }
 
