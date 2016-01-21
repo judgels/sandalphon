@@ -7,25 +7,21 @@ import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.forms.ListTableSelectionForm;
-import org.iatoki.judgels.sandalphon.BundleAnswer;
-import org.iatoki.judgels.sandalphon.BundleSubmission;
-import org.iatoki.judgels.sandalphon.BundleSubmissionNotFoundException;
-import org.iatoki.judgels.sandalphon.BundleSubmissionUtils;
-import org.iatoki.judgels.sandalphon.activity.SandalphonActivityKeys;
-import org.iatoki.judgels.sandalphon.problem.base.submission.SubmissionFileSystemProvider;
 import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.activity.SandalphonActivityKeys;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl;
 import org.iatoki.judgels.sandalphon.problem.base.Problem;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemControllerUtils;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemNotFoundException;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemService;
+import org.iatoki.judgels.sandalphon.problem.base.submission.SubmissionFileSystemProvider;
 import org.iatoki.judgels.sandalphon.problem.bundle.BundleProblemControllerUtils;
+import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleAnswer;
+import org.iatoki.judgels.sandalphon.problem.bundle.submission.html.bundleSubmissionView;
 import org.iatoki.judgels.sandalphon.problem.bundle.submission.html.listSubmissionsView;
-import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
-import org.iatoki.judgels.sandalphon.jid.JidCacheServiceImpl;
-import org.iatoki.judgels.sandalphon.views.html.problem.bundle.submission.bundleSubmissionView;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -33,14 +29,12 @@ import play.i18n.Messages;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
 
 @Authenticated(value = {LoggedIn.class, HasRole.class})
 @Singleton
-@Named
 public final class BundleProblemSubmissionController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;

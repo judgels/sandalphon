@@ -12,7 +12,7 @@ import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.api.sealtiel.SealtielClientAPI;
 import org.iatoki.judgels.api.sealtiel.SealtielFactory;
 import org.iatoki.judgels.jophiel.JophielAuthAPI;
-import org.iatoki.judgels.jophiel.services.BaseUserService;
+import org.iatoki.judgels.jophiel.user.BaseUserService;
 import org.iatoki.judgels.play.JudgelsPlayProperties;
 import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.play.general.GeneralName;
@@ -27,9 +27,9 @@ import org.iatoki.judgels.sandalphon.problem.bundle.BundleProblemGraderImpl;
 import org.iatoki.judgels.sandalphon.problem.bundle.submission.BundleSubmissionServiceImpl;
 import org.iatoki.judgels.sandalphon.problem.programming.submission.GabrielClientJid;
 import org.iatoki.judgels.sandalphon.problem.programming.submission.ProgrammingSubmissionServiceImpl;
-import org.iatoki.judgels.sandalphon.services.BundleProblemGrader;
-import org.iatoki.judgels.sandalphon.services.BundleSubmissionService;
-import org.iatoki.judgels.sandalphon.services.ProgrammingSubmissionService;
+import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleProblemGrader;
+import org.iatoki.judgels.sandalphon.problem.bundle.submission.BundleSubmissionService;
+import org.iatoki.judgels.sandalphon.problem.programming.submission.ProgrammingSubmissionService;
 import org.iatoki.judgels.sandalphon.user.UserServiceImpl;
 
 public class SandalphonModule extends AbstractJudgelsPlayModule {

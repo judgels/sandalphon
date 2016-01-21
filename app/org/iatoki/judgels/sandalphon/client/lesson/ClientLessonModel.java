@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.client.lesson;
 
-import org.iatoki.judgels.play.models.entities.AbstractModel;
+import org.iatoki.judgels.play.model.AbstractModel;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

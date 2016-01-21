@@ -1,6 +1,5 @@
 package org.iatoki.judgels.sandalphon.problem.bundle.submission;
 
-import org.iatoki.judgels.sandalphon.models.daos.jedishibernate.AbstractBundleSubmissionJedisHibernateDao;
 import redis.clients.jedis.JedisPool;
 
 import javax.inject.Inject;

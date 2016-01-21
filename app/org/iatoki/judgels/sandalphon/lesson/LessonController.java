@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.lesson;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.jophiel.BasicActivityKeys;
+import org.iatoki.judgels.jophiel.activity.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
@@ -10,7 +10,7 @@ import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.play.views.html.layouts.subtabLayout;
-import org.iatoki.judgels.sandalphon.LessonStatement;
+import org.iatoki.judgels.sandalphon.lesson.statement.LessonStatement;
 import org.iatoki.judgels.sandalphon.lesson.statement.LessonStatementUtils;
 import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;

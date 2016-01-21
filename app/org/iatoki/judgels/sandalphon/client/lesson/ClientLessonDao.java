@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.client.lesson;
 
 import com.google.inject.ImplementedBy;
-import org.iatoki.judgels.play.models.daos.Dao;
+import org.iatoki.judgels.play.model.Dao;
 
 import java.util.List;
 

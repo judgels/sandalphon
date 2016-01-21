@@ -1,7 +1,5 @@
 package org.iatoki.judgels.sandalphon.problem.programming.submission;
 
-import org.iatoki.judgels.sandalphon.models.entities.AbstractProgrammingSubmissionModel;
-
 import javax.persistence.Entity;
 import javax.persistence.Table;
 

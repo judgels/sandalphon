@@ -1,7 +1,5 @@
 package org.iatoki.judgels.sandalphon.problem.base;
 
-import org.iatoki.judgels.sandalphon.ProblemType;
-
 import java.util.Date;
 
 public final class Problem {

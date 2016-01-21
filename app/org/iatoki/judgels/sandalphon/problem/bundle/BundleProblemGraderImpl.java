@@ -1,9 +1,9 @@
 package org.iatoki.judgels.sandalphon.problem.bundle;
 
 import com.google.common.collect.ImmutableMap;
-import org.iatoki.judgels.sandalphon.BundleAnswer;
-import org.iatoki.judgels.sandalphon.BundleDetailResult;
-import org.iatoki.judgels.sandalphon.BundleGradingResult;
+import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleAnswer;
+import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleDetailResult;
+import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleGradingResult;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemService;
 import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItem;
 import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItemAdapter;
@@ -12,7 +12,7 @@ import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItemConfAdapter;
 import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItemConfAdapters;
 import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItemHasScore;
 import org.iatoki.judgels.sandalphon.problem.bundle.item.BundleItemService;
-import org.iatoki.judgels.sandalphon.services.BundleProblemGrader;
+import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleProblemGrader;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

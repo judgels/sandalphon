@@ -1,7 +1,7 @@
 package org.iatoki.judgels.sandalphon.controllers.api.client.v1;
 
-import org.iatoki.judgels.play.apis.JudgelsAPIForbiddenException;
-import org.iatoki.judgels.play.apis.JudgelsAPIInternalServerErrorException;
+import org.iatoki.judgels.play.api.JudgelsAPIForbiddenException;
+import org.iatoki.judgels.play.api.JudgelsAPIInternalServerErrorException;
 import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
 import org.iatoki.judgels.sandalphon.client.ClientService;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblem;

@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.iatoki.judgels.FileSystemProvider;
-import org.iatoki.judgels.play.JidService;
+import org.iatoki.judgels.play.jid.JidService;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemFileSystemProvider;
 import org.iatoki.judgels.sandalphon.problem.bundle.BundleProblemServiceImplUtils;

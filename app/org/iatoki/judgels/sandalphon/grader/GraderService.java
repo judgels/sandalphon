@@ -2,7 +2,7 @@ package org.iatoki.judgels.sandalphon.grader;
 
 import com.google.inject.ImplementedBy;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.services.JudgelsAppClientService;
+import org.iatoki.judgels.play.api.JudgelsAppClientService;
 
 @ImplementedBy(GraderServiceImpl.class)
 public interface GraderService extends JudgelsAppClientService {

@@ -1,6 +1,5 @@
 package org.iatoki.judgels.sandalphon.problem.bundle.grading;
 
-import org.iatoki.judgels.sandalphon.models.daos.jedishibernate.AbstractBundleGradingJedisHibernateDao;
 import redis.clients.jedis.JedisPool;
 
 import javax.inject.Inject;

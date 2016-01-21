@@ -6,7 +6,7 @@ import org.iatoki.judgels.api.jophiel.JophielUser;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
-import org.iatoki.judgels.jophiel.forms.ViewpointForm;
+import org.iatoki.judgels.jophiel.viewpoint.ViewpointForm;
 import org.iatoki.judgels.sandalphon.user.User;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
@@ -18,11 +18,9 @@ import play.db.jpa.Transactional;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
-@Named
 public final class ApplicationController extends AbstractJudgelsController {
 
     private final JophielPublicAPI jophielPublicAPI;
@@ -53,7 +51,7 @@ public final class ApplicationController extends AbstractJudgelsController {
             return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
             String newReturnUri = routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
-            return redirect(org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.login(newReturnUri));
+            return redirect(org.iatoki.judgels.jophiel.routes.JophielClientController.login(newReturnUri));
         }
     }
 

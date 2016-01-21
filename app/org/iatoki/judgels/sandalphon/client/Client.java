@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.client;
 
-import org.iatoki.judgels.play.JudgelsAppClient;
+import org.iatoki.judgels.play.api.JudgelsAppClient;
 
 public final class Client implements JudgelsAppClient {
 

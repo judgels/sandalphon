@@ -1,7 +1,5 @@
 package org.iatoki.judgels.sandalphon.problem.programming.submission;
 
-import org.iatoki.judgels.sandalphon.models.daos.hibernate.AbstractProgrammingSubmissionHibernateDao;
-
 import javax.inject.Singleton;
 
 @Singleton

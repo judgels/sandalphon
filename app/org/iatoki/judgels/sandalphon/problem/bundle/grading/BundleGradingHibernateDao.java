@@ -1,7 +1,5 @@
 package org.iatoki.judgels.sandalphon.problem.bundle.grading;
 
-import org.iatoki.judgels.sandalphon.models.daos.hibernate.AbstractBundleGradingHibernateDao;
-
 import javax.inject.Singleton;
 
 @Singleton

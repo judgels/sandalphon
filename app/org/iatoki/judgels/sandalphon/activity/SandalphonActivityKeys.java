@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.activity;
 
-import org.iatoki.judgels.jophiel.TwoEntityActivityKey;
+import org.iatoki.judgels.jophiel.activity.TwoEntityActivityKey;
 
 public final class SandalphonActivityKeys {
 

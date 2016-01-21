@@ -13,7 +13,7 @@ import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.sandalphon.lesson.partner.LessonPartner;
 import org.iatoki.judgels.sandalphon.lesson.partner.LessonPartnerConfig;
 import org.iatoki.judgels.sandalphon.lesson.partner.LessonPartnerNotFoundException;
-import org.iatoki.judgels.sandalphon.LessonStatement;
+import org.iatoki.judgels.sandalphon.lesson.statement.LessonStatement;
 import org.iatoki.judgels.sandalphon.SandalphonProperties;
 import org.iatoki.judgels.sandalphon.StatementLanguageStatus;
 import org.iatoki.judgels.sandalphon.lesson.partner.LessonPartnerDao;

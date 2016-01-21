@@ -1,14 +1,14 @@
 package org.iatoki.judgels.sandalphon.problem.programming;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.jophiel.BasicActivityKeys;
+import org.iatoki.judgels.jophiel.activity.BasicActivityKeys;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
-import org.iatoki.judgels.sandalphon.ProblemStatement;
-import org.iatoki.judgels.sandalphon.ProblemType;
+import org.iatoki.judgels.sandalphon.problem.base.statement.ProblemStatement;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemType;
 import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;

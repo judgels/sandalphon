@@ -2,7 +2,7 @@ package org.iatoki.judgels.sandalphon.grader;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.iatoki.judgels.play.JudgelsAppClient;
+import org.iatoki.judgels.play.api.JudgelsAppClient;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
 

@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.client.lesson;
 
-import org.iatoki.judgels.play.models.daos.impls.AbstractHibernateDao;
+import org.iatoki.judgels.play.model.AbstractHibernateDao;
 import play.db.jpa.JPA;
 
 import javax.inject.Named;

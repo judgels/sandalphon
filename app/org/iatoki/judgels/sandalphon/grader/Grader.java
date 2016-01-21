@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.grader;
 
-import org.iatoki.judgels.play.JudgelsAppClient;
+import org.iatoki.judgels.play.api.JudgelsAppClient;
 
 public final class Grader implements JudgelsAppClient {
 

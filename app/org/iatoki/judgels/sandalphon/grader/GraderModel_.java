@@ -1,6 +1,6 @@
 package org.iatoki.judgels.sandalphon.grader;
 
-import org.iatoki.judgels.play.models.entities.AbstractJudgelsModel_;
+import org.iatoki.judgels.play.model.AbstractJudgelsModel_;
 
 import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;

@@ -2,7 +2,7 @@ package org.iatoki.judgels.sandalphon.client;
 
 import com.google.inject.ImplementedBy;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.services.JudgelsAppClientService;
+import org.iatoki.judgels.play.api.JudgelsAppClientService;
 import org.iatoki.judgels.sandalphon.client.lesson.ClientLesson;
 import org.iatoki.judgels.sandalphon.client.problem.ClientProblem;
 

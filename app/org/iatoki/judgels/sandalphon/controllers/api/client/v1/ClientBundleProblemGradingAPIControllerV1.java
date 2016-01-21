@@ -1,12 +1,12 @@
 package org.iatoki.judgels.sandalphon.controllers.api.client.v1;
 
-import org.iatoki.judgels.play.apis.JudgelsAPIForbiddenException;
-import org.iatoki.judgels.play.apis.JudgelsAPIInternalServerErrorException;
-import org.iatoki.judgels.play.apis.JudgelsAPINotFoundException;
-import org.iatoki.judgels.play.apis.JudgelsAppClientAPIIdentity;
+import org.iatoki.judgels.play.api.JudgelsAPIForbiddenException;
+import org.iatoki.judgels.play.api.JudgelsAPIInternalServerErrorException;
+import org.iatoki.judgels.play.api.JudgelsAPINotFoundException;
+import org.iatoki.judgels.play.api.JudgelsAppClientAPIIdentity;
 import org.iatoki.judgels.play.controllers.apis.AbstractJudgelsAPIController;
-import org.iatoki.judgels.sandalphon.BundleAnswer;
-import org.iatoki.judgels.sandalphon.BundleGradingResult;
+import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleAnswer;
+import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleGradingResult;
 import org.iatoki.judgels.sandalphon.client.ClientService;
 import org.iatoki.judgels.sandalphon.controllers.api.object.v1.BundleProblemGradeRequestV1;
 import org.iatoki.judgels.sandalphon.problem.base.Problem;
