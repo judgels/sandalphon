@@ -17,7 +17,7 @@ import org.iatoki.judgels.play.JudgelsPlayProperties;
 import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.play.general.GeneralName;
 import org.iatoki.judgels.play.general.GeneralVersion;
-import org.iatoki.judgels.play.migration.BaseDataMigrationService;
+import org.iatoki.judgels.play.migration.JudgelsDataMigrator;
 import org.iatoki.judgels.sandalphon.lesson.LessonFileSystemProvider;
 import org.iatoki.judgels.sandalphon.lesson.LessonGitProvider;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemFileSystemProvider;
@@ -46,10 +46,9 @@ public class SandalphonModule extends AbstractJudgelsPlayModule {
         JudgelsPlayProperties.buildInstance(buildInfo.name(), buildInfo.version(), config);
         SandalphonProperties.buildInstance(config);
         bind(SandalphonSingletonsBuilder.class).asEagerSingleton();
-        bind(SandalphonThreadsScheduler.class).asEagerSingleton();
         // </DEPRECATED>
 
-        bind(BaseDataMigrationService.class).to(SandalphonDataMigrationServiceImpl.class);
+        bind(JudgelsDataMigrator.class).to(SandalphonDataMigrator.class);
 
         bind(ProgrammingSubmissionService.class).to(ProgrammingSubmissionServiceImpl.class);
         bind(BundleSubmissionService.class).to(BundleSubmissionServiceImpl.class);

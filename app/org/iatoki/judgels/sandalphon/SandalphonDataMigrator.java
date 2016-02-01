@@ -12,9 +12,12 @@ import org.iatoki.judgels.GitCommit;
 import org.iatoki.judgels.GitProvider;
 import org.iatoki.judgels.LocalFileSystemProvider;
 import org.iatoki.judgels.LocalGitProvider;
-import org.iatoki.judgels.play.migration.AbstractBaseDataMigrationServiceImpl;
-import play.db.jpa.JPA;
+import org.iatoki.judgels.play.migration.AbstractJudgelsDataMigrator;
+import org.iatoki.judgels.play.migration.DataMigrationEntityManager;
+import org.iatoki.judgels.play.migration.DataVersionDao;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -25,22 +28,30 @@ import java.sql.Statement;
 import java.util.Map;
 
 @Singleton
-public final class SandalphonDataMigrationServiceImpl extends AbstractBaseDataMigrationServiceImpl {
+public final class SandalphonDataMigrator extends AbstractJudgelsDataMigrator {
+
+    private EntityManager entityManager;
+
+    @Inject
+    public SandalphonDataMigrator(DataVersionDao dataVersionDao) {
+        super(dataVersionDao);
+        this.entityManager = DataMigrationEntityManager.createEntityManager();
+    }
 
     @Override
-    public long getCodeDataVersion() {
+    public long getLatestDataVersion() {
         return 4;
     }
 
     @Override
-    protected void onUpgrade(long databaseVersion, long codeDatabaseVersion) throws SQLException {
-        if (databaseVersion < 2) {
+    protected void migrate(long currentDataVersion) throws SQLException {
+        if (currentDataVersion < 2) {
             migrateV1toV2();
         }
-        if (databaseVersion < 3) {
+        if (currentDataVersion < 3) {
             migrateV2toV3();
         }
-        if (databaseVersion < 4) {
+        if (currentDataVersion < 4) {
             migrateV3toV4();
         }
     }
@@ -56,7 +67,7 @@ public final class SandalphonDataMigrationServiceImpl extends AbstractBaseDataMi
         };
         String[] tableNames = new String[]{"problem", "lesson"};
 
-        SessionImpl session = (SessionImpl) JPA.em().unwrap(Session.class);
+        SessionImpl session = (SessionImpl) entityManager.unwrap(Session.class);
         Connection connection = session.getJdbcConnectionAccess().obtainConnection();
 
         Statement statement = connection.createStatement();
@@ -160,7 +171,7 @@ public final class SandalphonDataMigrationServiceImpl extends AbstractBaseDataMi
     }
 
     private void migrateV2toV3() throws SQLException {
-        SessionImpl session = (SessionImpl) JPA.em().unwrap(Session.class);
+        SessionImpl session = (SessionImpl) entityManager.unwrap(Session.class);
         Connection connection = session.getJdbcConnectionAccess().obtainConnection();
 
         String jidCacheTable = "sandalphon_jid_cache";
@@ -186,7 +197,7 @@ public final class SandalphonDataMigrationServiceImpl extends AbstractBaseDataMi
     }
 
     private void migrateV1toV2() throws SQLException {
-        SessionImpl session = (SessionImpl) JPA.em().unwrap(Session.class);
+        SessionImpl session = (SessionImpl) entityManager.unwrap(Session.class);
         Connection connection = session.getJdbcConnectionAccess().obtainConnection();
 
         String programmingSubmissionTable = "sandalphon_submission_programming";
