@@ -1,5 +1,6 @@
 package org.iatoki.judgels.sandalphon;
 
+import com.google.inject.AbstractModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.iatoki.judgels.FileSystemProvider;
@@ -14,7 +15,6 @@ import org.iatoki.judgels.api.sealtiel.SealtielFactory;
 import org.iatoki.judgels.jophiel.JophielAuthAPI;
 import org.iatoki.judgels.jophiel.user.BaseUserService;
 import org.iatoki.judgels.play.JudgelsPlayProperties;
-import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.play.general.GeneralName;
 import org.iatoki.judgels.play.general.GeneralVersion;
 import org.iatoki.judgels.play.migration.JudgelsDataMigrator;
@@ -24,18 +24,18 @@ import org.iatoki.judgels.sandalphon.problem.base.ProblemFileSystemProvider;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemGitProvider;
 import org.iatoki.judgels.sandalphon.problem.base.submission.SubmissionFileSystemProvider;
 import org.iatoki.judgels.sandalphon.problem.bundle.BundleProblemGraderImpl;
-import org.iatoki.judgels.sandalphon.problem.bundle.submission.BundleSubmissionServiceImpl;
-import org.iatoki.judgels.sandalphon.problem.programming.submission.GabrielClientJid;
-import org.iatoki.judgels.sandalphon.problem.programming.submission.ProgrammingSubmissionServiceImpl;
 import org.iatoki.judgels.sandalphon.problem.bundle.grading.BundleProblemGrader;
 import org.iatoki.judgels.sandalphon.problem.bundle.submission.BundleSubmissionService;
+import org.iatoki.judgels.sandalphon.problem.bundle.submission.BundleSubmissionServiceImpl;
+import org.iatoki.judgels.sandalphon.problem.programming.submission.GabrielClientJid;
 import org.iatoki.judgels.sandalphon.problem.programming.submission.ProgrammingSubmissionService;
+import org.iatoki.judgels.sandalphon.problem.programming.submission.ProgrammingSubmissionServiceImpl;
 import org.iatoki.judgels.sandalphon.user.UserServiceImpl;
 
-public class SandalphonModule extends AbstractJudgelsPlayModule {
+public final class SandalphonModule extends AbstractModule {
 
     @Override
-    protected void manualBinding() {
+    public void configure() {
         org.iatoki.judgels.sandalphon.BuildInfo$ buildInfo = org.iatoki.judgels.sandalphon.BuildInfo$.MODULE$;
 
         bindConstant().annotatedWith(GeneralName.class).to(buildInfo.name());
@@ -65,16 +65,6 @@ public class SandalphonModule extends AbstractJudgelsPlayModule {
         bind(GitProvider.class).annotatedWith(LessonGitProvider.class).toInstance(lessonGitProvider());
         bindConstant().annotatedWith(GabrielClientJid.class).to(gabrielClientJid());
         bind(BaseUserService.class).to(UserServiceImpl.class);
-    }
-
-    @Override
-    protected String getDaosImplPackage() {
-        return "org.iatoki.judgels.sandalphon.models.daos.hibernate";
-    }
-
-    @Override
-    protected String getServicesImplPackage() {
-        return "org.iatoki.judgels.sandalphon.services.impls";
     }
 
     private SandalphonProperties sandalphonProperties() {
