@@ -49,7 +49,7 @@ public final class ClientController extends AbstractJudgelsController {
         this.problemService = problemService;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Result index() {
         String[] slugs = {
         };
