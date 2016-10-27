@@ -136,7 +136,6 @@ public final class ClientServiceImpl implements ClientService {
     public ClientProblem createClientProblem(String problemJid, String clientJid, String userJid, String userIpAddress) {
         ClientProblemModel clientProblemModel = new ClientProblemModel();
 
-        ClientModel clientModel = clientDao.findByJid(clientProblemModel.clientJid);
         clientProblemModel.problemJid = problemJid;
         clientProblemModel.clientJid = clientJid;
         clientProblemModel.secret = JudgelsPlayUtils.generateNewSecret();
@@ -148,6 +147,8 @@ public final class ClientServiceImpl implements ClientService {
         ProblemModel problemModel = problemDao.findByJid(problemJid);
 
         problemDao.edit(problemModel, userJid, userIpAddress);
+
+        ClientModel clientModel = clientDao.findByJid(clientProblemModel.clientJid);
         return new ClientProblem(clientProblemModel.id, clientProblemModel.clientJid, clientModel.name, clientProblemModel.problemJid, clientProblemModel.secret);
     }
 
