@@ -48,6 +48,18 @@ public final class ProblemJedisHibernateDao extends AbstractJudgelsJedisHibernat
     }
 
     @Override
+    public ProblemModel findBySlug(String slug) {
+        CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
+        CriteriaQuery<ProblemModel> query = cb.createQuery(ProblemModel.class);
+        Root<ProblemModel> root = query.from(getModelClass());
+
+        query
+                .where(cb.equal(root.get(ProblemModel_.slug), slug));
+
+        return JPA.em().createQuery(query).getSingleResult();
+    }
+
+    @Override
     protected List<SingularAttribute<ProblemModel, String>> getColumnsFilterableByString() {
         return ImmutableList.of(ProblemModel_.slug, ProblemModel_.additionalNote);
     }
