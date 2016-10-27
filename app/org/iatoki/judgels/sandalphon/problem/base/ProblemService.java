@@ -27,6 +27,8 @@ public interface ProblemService {
 
     Problem findProblemById(long problemId) throws ProblemNotFoundException;
 
+    Problem findProblemBySlug(String slug);
+
     Problem findProblemByJid(String problemJid);
 
     boolean isUserPartnerForProblem(String problemJid, String userJid);

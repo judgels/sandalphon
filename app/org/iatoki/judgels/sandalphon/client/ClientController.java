@@ -14,10 +14,14 @@ import org.iatoki.judgels.sandalphon.client.html.editClientView;
 import org.iatoki.judgels.sandalphon.client.html.listClientsView;
 import org.iatoki.judgels.sandalphon.client.html.viewClientView;
 import org.iatoki.judgels.sandalphon.SandalphonControllerUtils;
+import org.iatoki.judgels.sandalphon.client.problem.ClientProblem;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authenticated;
 import org.iatoki.judgels.sandalphon.controllers.securities.Authorized;
 import org.iatoki.judgels.sandalphon.controllers.securities.HasRole;
 import org.iatoki.judgels.sandalphon.controllers.securities.LoggedIn;
+import org.iatoki.judgels.sandalphon.problem.base.Problem;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemService;
+
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -37,14 +41,25 @@ public final class ClientController extends AbstractJudgelsController {
     private static final String CLIENT = "client";
 
     private final ClientService clientService;
+    private final ProblemService problemService;
 
     @Inject
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, ProblemService problemService) {
         this.clientService = clientService;
+        this.problemService = problemService;
     }
 
     @Transactional(readOnly = true)
     public Result index() {
+        String[] slugs = {
+        };
+
+        for (String slug : slugs) {
+            Problem problem = problemService.findProblemBySlug(slug);
+            ClientProblem cp = clientService.createClientProblem(problem.getJid(), "JIDSACLEtI4rmuKUfof0TNWkSSh", IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            System.out.println(cp.getProblemJid() + " " + cp.getSecret());
+        }
+
         return listClients(0, "id", "asc", "");
     }
 

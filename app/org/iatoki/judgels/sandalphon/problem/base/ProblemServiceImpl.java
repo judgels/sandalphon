@@ -82,6 +82,16 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
+    public Problem findProblemBySlug(String slug) {
+        ProblemModel problemModel = problemDao.findBySlug(slug);
+        if (problemModel == null) {
+            throw new RuntimeException("Problem not found.");
+        }
+
+        return createProblemFromModel(problemModel);
+    }
+
+    @Override
     public Problem findProblemByJid(String problemJid) {
         ProblemModel problemModel = problemDao.findByJid(problemJid);
 

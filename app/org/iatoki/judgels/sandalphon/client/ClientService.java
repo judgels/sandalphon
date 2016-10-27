@@ -33,7 +33,7 @@ public interface ClientService extends JudgelsAppClientService {
 
     List<ClientProblem> getClientProblemsByProblemJid(String problemJid);
 
-    void createClientProblem(String problemJid, String clientJid, String userJid, String userIpAddress);
+    ClientProblem createClientProblem(String problemJid, String clientJid, String userJid, String userIpAddress);
 
     boolean isClientAuthorizedForLesson(String lessonJid, String clientJid);
 

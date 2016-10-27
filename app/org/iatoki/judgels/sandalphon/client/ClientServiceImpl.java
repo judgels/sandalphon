@@ -133,17 +133,22 @@ public final class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void createClientProblem(String problemJid, String clientJid, String userJid, String userIpAddress) {
+    public ClientProblem createClientProblem(String problemJid, String clientJid, String userJid, String userIpAddress) {
         ClientProblemModel clientProblemModel = new ClientProblemModel();
+
+        ClientModel clientModel = clientDao.findByJid(clientProblemModel.clientJid);
         clientProblemModel.problemJid = problemJid;
         clientProblemModel.clientJid = clientJid;
         clientProblemModel.secret = JudgelsPlayUtils.generateNewSecret();
+
+
 
         clientProblemDao.persist(clientProblemModel, userJid, userIpAddress);
 
         ProblemModel problemModel = problemDao.findByJid(problemJid);
 
         problemDao.edit(problemModel, userJid, userIpAddress);
+        return new ClientProblem(clientProblemModel.id, clientProblemModel.clientJid, clientModel.name, clientProblemModel.problemJid, clientProblemModel.secret);
     }
 
     @Override
