@@ -120,6 +120,9 @@ public final class ProblemController extends AbstractJudgelsController {
     @Transactional(readOnly = true)
     public Result viewProblem(long problemId) throws ProblemNotFoundException {
         Problem problem = problemService.findProblemById(problemId);
+        if (!ProblemControllerUtils.isAllowedToViewStatement(problemService, problem)) {
+            return notFound();
+        }
 
         LazyHtml content = new LazyHtml(viewProblemView.render(problem));
         appendSubtabs(content, problem);
