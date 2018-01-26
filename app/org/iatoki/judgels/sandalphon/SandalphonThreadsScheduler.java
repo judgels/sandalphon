@@ -4,8 +4,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Scheduler;
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.sealtiel.SealtielClientAPI;
-import org.iatoki.judgels.jophiel.activity.UserActivityMessagePusher;
-import org.iatoki.judgels.jophiel.activity.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.sandalphon.problem.programming.grading.GradingResponsePoller;
 import org.iatoki.judgels.sandalphon.problem.programming.submission.ProgrammingSubmissionService;
 import play.db.jpa.JPAApi;
@@ -29,9 +27,7 @@ public final class SandalphonThreadsScheduler {
         ExecutionContextExecutor context = actorSystem.dispatcher();
 
         GradingResponsePoller poller = new GradingResponsePoller(scheduler, context, programmingSubmissionService, sealtielClientAPI, TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS));
-        UserActivityMessagePusher userActivityMessagePusher = new UserActivityMessagePusher(jpaApi, jophielClientAPI, UserActivityMessageServiceImpl.getInstance());
 
         scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(3, TimeUnit.SECONDS), poller, context);
-        scheduler.schedule(Duration.create(1, TimeUnit.SECONDS), Duration.create(1, TimeUnit.MINUTES), userActivityMessagePusher, context);
     }
 }

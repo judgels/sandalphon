@@ -72,7 +72,7 @@ public final class SandalphonModule extends AbstractModule {
     }
 
     private JophielAuthAPI jophielAuthAPI() {
-        return new JophielAuthAPI(sandalphonProperties().getJophielBaseUrl(), sandalphonProperties().getJophielClientJid(), sandalphonProperties().getJophielClientSecret());
+        return new JophielAuthAPI(sandalphonProperties().getRaphaelBaseUrl(), sandalphonProperties().getJophielBaseUrl(), sandalphonProperties().getJophielClientJid(), sandalphonProperties().getJophielClientSecret());
     }
 
     private JophielClientAPI jophielClientAPI() {

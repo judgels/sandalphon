@@ -24,6 +24,8 @@ public final class SandalphonProperties {
     private String sealtielClientSecret;
     private String sealtielGabrielClientJid;
 
+    private String raphaelBaseUrl;
+
     private SandalphonProperties(Config config) {
         this.config = config;
     }
@@ -72,6 +74,10 @@ public final class SandalphonProperties {
         return sealtielGabrielClientJid;
     }
 
+    public String getRaphaelBaseUrl() {
+        return raphaelBaseUrl;
+    }
+
     public File getSubmissionLocalDir() {
         return submissionLocalDir;
     }
@@ -118,6 +124,8 @@ public final class SandalphonProperties {
         sealtielClientJid = requireStringValue("sealtiel.clientJid");
         sealtielClientSecret = requireStringValue("sealtiel.clientSecret");
         sealtielGabrielClientJid = requireStringValue("sealtiel.gabrielClientJid");
+
+        raphaelBaseUrl = requireStringValue("raphael.baseUrl");
     }
 
     private String getStringValue(String key) {
