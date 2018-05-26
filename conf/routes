@@ -222,3 +222,14 @@ POST        /api/v1/problems/bundle/:problemJid/grade                           
 POST        /api/v1/lessons/client                                                  org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientLessonAPIControllerV1.findClientLesson()
 GET         /api/v1/lessons/:lessonJid/statements/media/:filename                   org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientLessonStatementAPIControllerV1.renderMediaByJid(lessonJid, filename)
 POST        /api/v1/lessons/:lessonJid/statements                                   org.iatoki.judgels.sandalphon.controllers.api.client.v1.ClientLessonStatementAPIControllerV1.renderStatement(lessonJid)
+
+# Client API v2
+
+GET         /api/v2/client/problems/:problemJid                                     org.iatoki.judgels.sandalphon.controllers.api.client.v2.ClientProblemAPIControllerV2.getProblem(problemJid)
+GET         /api/v2/client/problems/:problemJid/submission-config                   org.iatoki.judgels.sandalphon.controllers.api.client.v2.ClientProblemAPIControllerV2.getProblemSubmissionConfig(problemJid)
+GET         /api/v2/client/problems/:problemJid/worksheet                           org.iatoki.judgels.sandalphon.controllers.api.client.v2.ClientProblemAPIControllerV2.getProblemWorksheet(problemJid)
+POST        /api/v2/client/problems/jids                                            org.iatoki.judgels.sandalphon.controllers.api.client.v2.ClientProblemAPIControllerV2.findProblemsByJids()
+
+# Public API v2
+
+GET         /api/v2/problems/:problemJid/render/:mediaFilename                      org.iatoki.judgels.sandalphon.controllers.api.pub.v2.PublicProblemAPIControllerV2.renderMedia(problemJid, mediaFilename)
