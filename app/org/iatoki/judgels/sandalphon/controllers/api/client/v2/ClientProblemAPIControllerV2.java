@@ -129,7 +129,7 @@ public final class ClientProblemAPIControllerV2 extends AbstractJudgelsAPIContro
                     .collect(Collectors.toMap(e -> simplifyLanguageCode(e.getKey()), e -> e.getKey()));
 
             if (!simplifiedLanguages.containsKey(language) || availableLanguages.get(simplifiedLanguages.get(language)) == StatementLanguageStatus.DISABLED) {
-                language = problemService.getDefaultLanguage(null, problemJid);
+                language = simplifyLanguageCode(problemService.getDefaultLanguage(null, problemJid));
             }
 
             ProblemStatement statement = problemService.getStatement(null, problemJid, simplifiedLanguages.get(language));
