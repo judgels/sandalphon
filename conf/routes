@@ -229,6 +229,7 @@ GET         /api/v2/client/problems/:problemJid                                 
 GET         /api/v2/client/problems/:problemJid/submission-config                   org.iatoki.judgels.sandalphon.controllers.api.client.v2.ClientProblemAPIControllerV2.getProblemSubmissionConfig(problemJid)
 GET         /api/v2/client/problems/:problemJid/worksheet                           org.iatoki.judgels.sandalphon.controllers.api.client.v2.ClientProblemAPIControllerV2.getProblemWorksheet(problemJid)
 POST        /api/v2/client/problems/jids                                            org.iatoki.judgels.sandalphon.controllers.api.client.v2.ClientProblemAPIControllerV2.findProblemsByJids()
+POST        /api/v2/client/problems/allowed-slug-to-jid                             org.iatoki.judgels.sandalphon.controllers.api.client.v2.ClientProblemAPIControllerV2.translateAllowedSlugToJids()
 
 # Public API v2
 

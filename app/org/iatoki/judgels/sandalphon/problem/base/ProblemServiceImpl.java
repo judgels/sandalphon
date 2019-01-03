@@ -89,6 +89,13 @@ public final class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
+    public Problem findProblemBySlug(String slug) {
+        ProblemModel problemModel = problemDao.findBySlug(slug);
+
+        return createProblemFromModel(problemModel);
+    }
+
+    @Override
     public boolean isUserPartnerForProblem(String problemJid, String userJid) {
         return problemPartnerDao.existsByProblemJidAndPartnerJid(problemJid, userJid);
     }

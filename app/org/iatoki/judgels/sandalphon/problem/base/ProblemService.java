@@ -29,6 +29,8 @@ public interface ProblemService {
 
     Problem findProblemByJid(String problemJid);
 
+    Problem findProblemBySlug(String slug);
+
     boolean isUserPartnerForProblem(String problemJid, String userJid);
 
     void createProblemPartner(String problemJid, String userJid, ProblemPartnerConfig baseConfig, ProblemPartnerChildConfig childConfig, String createUserJid, String createUserIpAddress);

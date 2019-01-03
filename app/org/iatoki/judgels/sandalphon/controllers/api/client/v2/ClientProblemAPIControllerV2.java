@@ -14,9 +14,11 @@ import org.iatoki.judgels.sandalphon.controllers.api.object.v2.ProblemSubmission
 import org.iatoki.judgels.sandalphon.controllers.api.object.v2.ProblemWorksheetV2;
 import org.iatoki.judgels.sandalphon.problem.base.Problem;
 import org.iatoki.judgels.sandalphon.problem.base.ProblemService;
+import org.iatoki.judgels.sandalphon.problem.base.ProblemType;
 import org.iatoki.judgels.sandalphon.problem.base.statement.ProblemStatement;
 import org.iatoki.judgels.sandalphon.problem.programming.ProgrammingProblemService;
 import org.iatoki.judgels.sandalphon.problem.programming.grading.LanguageRestriction;
+import org.iatoki.judgels.sandalphon.user.UserService;
 import play.data.DynamicForm;
 import play.db.jpa.Transactional;
 import play.mvc.Result;
@@ -31,12 +33,14 @@ import java.util.stream.Collectors;
 @Singleton
 public final class ClientProblemAPIControllerV2 extends AbstractJudgelsAPIController {
     private final ClientService clientService;
+    private final UserService userService;
     private final ProblemService problemService;
     private final ProgrammingProblemService programmingProblemService;
 
     @Inject
-    public ClientProblemAPIControllerV2(ClientService clientService, ProblemService problemService, ProgrammingProblemService programmingProblemService) {
+    public ClientProblemAPIControllerV2(ClientService clientService, UserService userService, ProblemService problemService, ProgrammingProblemService programmingProblemService) {
         this.clientService = clientService;
+        this.userService = userService;
         this.problemService = problemService;
         this.programmingProblemService = programmingProblemService;
     }
@@ -162,7 +166,28 @@ public final class ClientProblemAPIControllerV2 extends AbstractJudgelsAPIContro
         return okAsJson(result);
     }
 
+    @Transactional(readOnly = true)
+    public Result translateAllowedSlugToJids() {
+        authenticateAsJudgelsAppClient(clientService);
 
+        String userJid = DynamicForm.form().bindFromRequest().get("userJid");
+
+        Map<String, String> result = new HashMap<>();
+
+        JsonNode slugs = request().body().asJson();
+        for (JsonNode slugNode : slugs) {
+            String slug = slugNode.asText();
+            if (!problemService.problemExistsBySlug(slug)) {
+                continue;
+            }
+            Problem problem = problemService.findProblemBySlug(slug);
+            if (problem.getType() == ProblemType.PROGRAMMING && isPartnerOrAbove(userJid, problem)) {
+                result.put(slug, problem.getJid());
+            }
+        }
+
+        return okAsJson(result);
+    }
 
     private ProblemInfoV2 getProblemInfo(String problemJid) {
         try {
@@ -179,6 +204,12 @@ public final class ClientProblemAPIControllerV2 extends AbstractJudgelsAPIContro
         } catch (IOException e) {
             throw new JudgelsAPIInternalServerErrorException(e);
         }
+    }
+
+    private boolean isPartnerOrAbove(String userJid, Problem problem) {
+        return problem.getAuthorJid().equals(userJid)
+            || problemService.isUserPartnerForProblem(problem.getJid(), userJid)
+            || userService.findUserByJid(userJid).getRoles().contains("admin");
     }
 
     private static String simplifyLanguageCode(String code) {
