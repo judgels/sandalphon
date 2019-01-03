@@ -161,7 +161,9 @@ public final class ClientProblemAPIControllerV2 extends AbstractJudgelsAPIContro
 
         for (JsonNode problemJidNode : problemJids) {
             String problemJid = problemJidNode.asText();
-            result.put(problemJid, getProblemInfo(problemJid));
+            if (problemService.problemExistsByJid(problemJid)) {
+                result.put(problemJid, getProblemInfo(problemJid));
+            }
         }
         return okAsJson(result);
     }
